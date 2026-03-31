@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DOP-C02 Certification Journey</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;0,9..144,900;1,9..144,400&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:        #0A0E1A;
+  --bg2:       #0F1525;
+  --bg3:       #141C30;
+  --surface:   #1A2340;
+  --surface2:  #1F2A4A;
+  --border:    rgba(99,179,237,0.1);
+  --border2:   rgba(255,255,255,0.05);
+
+  --amp:       #FF9900;
+  --amp-l:     rgba(255,153,0,0.08);
+  --amp-m:     rgba(255,153,0,0.15);
+  --amp-b:     rgba(255,153,0,0.3);
+
+  --cyan:      #38BDF8;
+  --cyan-l:    rgba(56,189,248,0.07);
+  --cyan-b:    rgba(56,189,248,0.3);
+
+  --violet:    #A78BFA;
+  --violet-l:  rgba(167,139,250,0.07);
+  --violet-b:  rgba(167,139,250,0.3);
+
+  --emerald:   #34D399;
+  --emerald-l: rgba(52,211,153,0.07);
+  --emerald-b: rgba(52,211,153,0.3);
+
+  --rose:      #FB7185;
+  --rose-l:    rgba(251,113,133,0.07);
+  --rose-b:    rgba(251,113,133,0.3);
+
+  --amber:     #FCD34D;
+  --amber-l:   rgba(252,211,77,0.07);
+  --amber-b:   rgba(252,211,77,0.3);
+
+  --text:      #E2E8F0;
+  --text2:     #94A3B8;
+  --text3:     #475569;
+  --text4:     #334155;
+
+  --r:         12px;
+  --r-sm:      8px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 15px;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* ── HERO ── */
+.hero {
+  position: relative;
+  min-height: 380px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 0 60px 56px;
+  overflow: hidden;
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 50% at 80% 20%, rgba(255,153,0,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 40% at 20% 80%, rgba(56,189,248,0.08) 0%, transparent 60%),
+    linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%);
+}
+
+.hero-mesh {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,153,0,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,153,0,0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse 70% 70% at 80% 30%, black 20%, transparent 80%);
+}
+
+.hero-inner { position: relative; max-width: 1060px; margin: 0 auto; width: 100%; }
+
+.hero-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--amp);
+  background: var(--amp-m);
+  border: 1px solid var(--amp-b);
+  padding: 6px 14px;
+  border-radius: 100px;
+  margin-bottom: 28px;
+  animation: riseUp 0.6s ease both;
+}
+
+.hero-kicker::before {
+  content: '';
+  width: 6px; height: 6px;
+  background: var(--amp);
+  border-radius: 50%;
+  animation: throb 2s ease-in-out infinite;
+}
+
+@keyframes throb {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(0.6); opacity: 0.4; }
+}
+
+.hero h1 {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(36px, 5.5vw, 68px);
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin-bottom: 18px;
+  animation: riseUp 0.6s 0.1s ease both;
+}
+
+.hero h1 em {
+  font-style: italic;
+  font-weight: 300;
+  color: var(--amp);
+}
+
+.hero-tagline {
+  font-size: 16px;
+  color: var(--text2);
+  max-width: 580px;
+  font-weight: 300;
+  line-height: 1.6;
+  animation: riseUp 0.6s 0.2s ease both;
+}
+
+@keyframes riseUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── MAIN WRAP ── */
+.wrap {
+  max-width: 1060px;
+  margin: 0 auto;
+  padding: 56px 60px 100px;
+}
+
+/* ── DOMAINS GRID ── */
+.domains-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+/* ── DOMAIN CARD ── */
+.domain-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  overflow: hidden;
+  animation: riseUp 0.5s calc(0.3s + var(--i) * 0.07s) ease both;
+}
+
+.domain-card.active {
+  cursor: pointer;
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.domain-card.active:hover {
+  transform: translateY(-2px);
+  border-color: var(--amp-b);
+  box-shadow: 0 8px 32px rgba(255,153,0,0.08);
+}
+
+.domain-card.disabled {
+  opacity: 0.4;
+  pointer-events: none;
+  filter: grayscale(0.3);
+  border-color: rgba(255,255,255,0.03);
+}
+
+.domain-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 22px 24px;
+}
+
+.domain-num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 26px;
+  font-weight: 500;
+  color: var(--amp);
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.domain-card.disabled .domain-num {
+  color: var(--text3);
+}
+
+.domain-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.domain-info h2 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+.domain-card.disabled .domain-info h2 {
+  color: var(--text3);
+}
+
+.domain-weight {
+  display: inline-block;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--amp);
+  background: var(--amp-l);
+  border: 1px solid var(--amp-b);
+  border-radius: 100px;
+  padding: 2px 10px;
+  margin-top: 6px;
+  letter-spacing: 0.04em;
+}
+
+.domain-card.disabled .domain-weight {
+  color: var(--text3);
+  background: rgba(255,255,255,0.03);
+  border-color: rgba(255,255,255,0.05);
+}
+
+.domain-chevron {
+  font-size: 14px;
+  color: var(--text3);
+  transition: transform 0.3s ease;
+  flex-shrink: 0;
+}
+
+.domain-card.open .domain-chevron {
+  transform: rotate(180deg);
+}
+
+.badge-soon {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text3);
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 100px;
+  padding: 4px 12px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ── DOMAIN BODY (expandable) ── */
+.domain-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.45s cubic-bezier(0.4, 0, 0.2, 1), padding 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 0 24px;
+}
+
+.domain-card.open .domain-body {
+  padding: 0 24px 24px;
+}
+
+.domain-divider {
+  border: none;
+  height: 1px;
+  background: var(--border2);
+  margin-bottom: 20px;
+}
+
+/* ── SERVICE BUTTONS (with icons) ── */
+.service-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.svc-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 12px 16px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  text-decoration: none;
+  color: var(--text2);
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.svc-btn:hover {
+  background: var(--surface2);
+  border-color: var(--amp-b);
+  color: var(--text);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(255,153,0,0.06);
+}
+
+.svc-btn svg {
+  width: 36px;
+  height: 36px;
+  color: var(--text3);
+  transition: color 0.2s ease;
+}
+
+.svc-btn:hover svg {
+  color: var(--amp);
+}
+
+.svc-label {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  line-height: 1.3;
+}
+
+/* ── TOPIC BUTTONS (text only) ── */
+.topic-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.topic-btn {
+  display: flex;
+  align-items: center;
+  padding: 14px 16px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--amp);
+  border-radius: var(--r-sm);
+  text-decoration: none;
+  color: var(--text2);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  transition: all 0.2s ease;
+  line-height: 1.3;
+}
+
+.topic-btn:hover {
+  background: var(--surface2);
+  border-color: var(--amp-b);
+  border-left-color: var(--amp);
+  color: var(--text);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(255,153,0,0.06);
+}
+
+/* ── FOOTER ── */
+.footer {
+  text-align: center;
+  padding-top: 56px;
+  color: var(--text4);
+  font-size: 12px;
+  font-family: 'IBM Plex Mono', monospace;
+  letter-spacing: 0.04em;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 1024px) {
+  .hero { padding-left: 40px; padding-right: 40px; }
+  .wrap { padding-left: 40px; padding-right: 40px; }
+  .service-grid { grid-template-columns: repeat(2, 1fr); }
+  .topic-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 768px) {
+  .hero { padding: 0 24px 40px; min-height: 300px; }
+  .wrap { padding: 40px 24px 80px; }
+  .domains-grid { grid-template-columns: 1fr; }
+  .service-grid { grid-template-columns: repeat(2, 1fr); }
+  .topic-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 480px) {
+  .hero h1 { font-size: 32px; }
+  .service-grid { grid-template-columns: 1fr; }
+  .domain-header { padding: 18px 16px; gap: 12px; }
+  .domain-body { padding-left: 16px; padding-right: 16px; }
+  .domain-card.open .domain-body { padding: 0 16px 16px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── HERO ── -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-mesh"></div>
+  <div class="hero-inner">
+    <span class="hero-kicker">AWS DevOps Professional</span>
+    <h1>DOP-C02 Certification<br><em>Journey</em></h1>
+    <p class="hero-tagline">Interactive study guides organized by exam domain. Master each area with focused, hands-on learning resources.</p>
+  </div>
+</section>
+
+<!-- ── DOMAINS ── -->
+<main class="wrap">
+  <div class="domains-grid">
+
+    <!-- Domain 1: SDLC Automation — ACTIVE -->
+    <div class="domain-card active" style="--i:0; grid-column: 1 / -1;" onclick="toggleDomain(this)">
+      <div class="domain-header">
+        <span class="domain-num">01</span>
+        <div class="domain-info">
+          <h2>SDLC Automation</h2>
+          <span class="domain-weight">22% of exam</span>
+        </div>
+        <span class="domain-chevron">&#9662;</span>
+      </div>
+      <div class="domain-body">
+        <hr class="domain-divider">
+        <div class="service-grid">
+
+          <a href="domain_one/Amplify_DOP-C02.html" class="svc-btn" onclick="event.stopPropagation()">
+            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 4L4 32h28L18 4z"/>
+              <path d="M18 4v14"/>
+              <path d="M18 18l-8 14"/>
+              <path d="M18 18l8 14"/>
+              <circle cx="18" cy="18" r="2.5" fill="currentColor" stroke="none"/>
+            </svg>
+            <span class="svc-label">Amplify</span>
+          </a>
+
+          <a href="domain_one/CodeArtifact_DOP-C02.html" class="svc-btn" onclick="event.stopPropagation()">
+            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="6" y="8" width="24" height="20" rx="2"/>
+              <path d="M6 14h24"/>
+              <path d="M14 14v14"/>
+              <circle cx="10" cy="11" r="1" fill="currentColor" stroke="none"/>
+              <path d="M20 21l3 3-3 3"/>
+              <path d="M26 21l-3 3 3 3"/>
+            </svg>
+            <span class="svc-label">CodeArtifact</span>
+          </a>
+
+          <a href="domain_one/CodeBuild_DOP-C02.html" class="svc-btn" onclick="event.stopPropagation()">
+            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="18" cy="18" r="12"/>
+              <path d="M18 10v8l5 3"/>
+              <path d="M12 6l-2-3"/>
+              <path d="M24 6l2-3"/>
+              <path d="M14 28l3 2 3-2"/>
+            </svg>
+            <span class="svc-label">CodeBuild</span>
+          </a>
+
+          <a href="domain_one/CodeDeploy_DOP-C02.html" class="svc-btn" onclick="event.stopPropagation()">
+            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 4v20"/>
+              <path d="M12 18l6 6 6-6"/>
+              <path d="M6 28h24"/>
+              <path d="M8 32h20"/>
+              <circle cx="18" cy="7" r="3"/>
+            </svg>
+            <span class="svc-label">CodeDeploy</span>
+          </a>
+
+          <a href="domain_one/CodeGuru_DOP-C02.html" class="svc-btn" onclick="event.stopPropagation()">
+            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="15" cy="15" r="10"/>
+              <path d="M22 22l10 10"/>
+              <path d="M11 13l3 4 5-7"/>
+            </svg>
+            <span class="svc-label">CodeGuru</span>
+          </a>
+
+          <a href="domain_one/EC2ImageBuilder_DOP-C02.html" class="svc-btn" onclick="event.stopPropagation()">
+            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="6" y="6" width="24" height="8" rx="2"/>
+              <rect x="6" y="16" width="24" height="8" rx="2"/>
+              <rect x="6" y="26" width="24" height="6" rx="2"/>
+              <circle cx="11" cy="10" r="1.5" fill="currentColor" stroke="none"/>
+              <circle cx="11" cy="20" r="1.5" fill="currentColor" stroke="none"/>
+              <circle cx="11" cy="29" r="1.5" fill="currentColor" stroke="none"/>
+            </svg>
+            <span class="svc-label">EC2 Image Builder</span>
+          </a>
+
+        </div>
+
+        <div class="topic-grid">
+          <a href="domain_one/MultiAccount_CrossRegion_Pipelines.html" class="topic-btn" onclick="event.stopPropagation()">Multi-Account &amp; Cross-Region</a>
+          <a href="domain_one/Pipeline_Failures_Lab.html" class="topic-btn" onclick="event.stopPropagation()">Pipeline Failures</a>
+          <a href="domain_one/Testing_Strategies_CICD_DOP-C02.html" class="topic-btn" onclick="event.stopPropagation()">Testing Strategies</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Domain 2: Configuration Management & IaC — DISABLED -->
+    <div class="domain-card disabled" style="--i:1">
+      <div class="domain-header">
+        <span class="domain-num">02</span>
+        <div class="domain-info">
+          <h2>Configuration Management &amp; IaC</h2>
+          <span class="domain-weight">17% of exam</span>
+        </div>
+        <span class="badge-soon">Coming Soon</span>
+      </div>
+    </div>
+
+    <!-- Domain 3: Resilient Cloud Solutions — DISABLED -->
+    <div class="domain-card disabled" style="--i:2">
+      <div class="domain-header">
+        <span class="domain-num">03</span>
+        <div class="domain-info">
+          <h2>Resilient Cloud Solutions</h2>
+          <span class="domain-weight">15% of exam</span>
+        </div>
+        <span class="badge-soon">Coming Soon</span>
+      </div>
+    </div>
+
+    <!-- Domain 4: Monitoring & Logging — DISABLED -->
+    <div class="domain-card disabled" style="--i:3">
+      <div class="domain-header">
+        <span class="domain-num">04</span>
+        <div class="domain-info">
+          <h2>Monitoring &amp; Logging</h2>
+          <span class="domain-weight">15% of exam</span>
+        </div>
+        <span class="badge-soon">Coming Soon</span>
+      </div>
+    </div>
+
+    <!-- Domain 5: Incident & Event Response — DISABLED -->
+    <div class="domain-card disabled" style="--i:4">
+      <div class="domain-header">
+        <span class="domain-num">05</span>
+        <div class="domain-info">
+          <h2>Incident &amp; Event Response</h2>
+          <span class="domain-weight">18% of exam</span>
+        </div>
+        <span class="badge-soon">Coming Soon</span>
+      </div>
+    </div>
+
+    <!-- Domain 6: Security & Compliance — DISABLED -->
+    <div class="domain-card disabled" style="--i:5">
+      <div class="domain-header">
+        <span class="domain-num">06</span>
+        <div class="domain-info">
+          <h2>Security &amp; Compliance</h2>
+          <span class="domain-weight">13% of exam</span>
+        </div>
+        <span class="badge-soon">Coming Soon</span>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer">DOP-C02 &middot; AWS Certified DevOps Engineer — Professional</div>
+</main>
+
+<script>
+function toggleDomain(card) {
+  var body = card.querySelector('.domain-body');
+  if (!body) return;
+  var isOpen = card.classList.contains('open');
+  if (isOpen) {
+    body.style.maxHeight = '0';
+    card.classList.remove('open');
+  } else {
+    body.style.maxHeight = body.scrollHeight + 'px';
+    card.classList.add('open');
+  }
+}
+</script>
+</body>
+</html>

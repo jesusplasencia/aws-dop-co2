@@ -1,0 +1,1695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS Amplify — DOP-C02 Study Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;0,9..144,900;1,9..144,400&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:        #0A0E1A;
+  --bg2:       #0F1525;
+  --bg3:       #141C30;
+  --surface:   #1A2340;
+  --surface2:  #1F2A4A;
+  --border:    rgba(99,179,237,0.1);
+  --border2:   rgba(255,255,255,0.05);
+
+  --amp:       #FF9900;
+  --amp-l:     rgba(255,153,0,0.08);
+  --amp-m:     rgba(255,153,0,0.15);
+  --amp-b:     rgba(255,153,0,0.3);
+
+  --cyan:      #38BDF8;
+  --cyan-l:    rgba(56,189,248,0.07);
+  --cyan-m:    rgba(56,189,248,0.15);
+  --cyan-b:    rgba(56,189,248,0.3);
+
+  --violet:    #A78BFA;
+  --violet-l:  rgba(167,139,250,0.07);
+  --violet-m:  rgba(167,139,250,0.15);
+  --violet-b:  rgba(167,139,250,0.3);
+
+  --emerald:   #34D399;
+  --emerald-l: rgba(52,211,153,0.07);
+  --emerald-m: rgba(52,211,153,0.15);
+  --emerald-b: rgba(52,211,153,0.3);
+
+  --rose:      #FB7185;
+  --rose-l:    rgba(251,113,133,0.07);
+  --rose-m:    rgba(251,113,133,0.15);
+  --rose-b:    rgba(251,113,133,0.3);
+
+  --amber:     #FCD34D;
+  --amber-l:   rgba(252,211,77,0.07);
+  --amber-m:   rgba(252,211,77,0.12);
+  --amber-b:   rgba(252,211,77,0.3);
+
+  --text:      #E2E8F0;
+  --text2:     #94A3B8;
+  --text3:     #475569;
+  --text4:     #334155;
+
+  --code-bg:   #060912;
+  --code-blue: #79C0FF;
+  --code-grn:  #56D364;
+  --code-org:  #FFA657;
+  --code-red:  #FF7B72;
+  --code-grey: #3D4A5C;
+  --code-yel:  #E3B341;
+
+  --r:         12px;
+  --r-sm:      8px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 15px;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+/* grain overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* ── HERO ── */
+.hero {
+  position: relative;
+  min-height: 480px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 0 60px 60px;
+  overflow: hidden;
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 50% at 80% 20%, rgba(255,153,0,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 40% at 20% 80%, rgba(56,189,248,0.08) 0%, transparent 60%),
+    linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%);
+}
+
+.hero-mesh {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,153,0,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,153,0,0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse 70% 70% at 80% 30%, black 20%, transparent 80%);
+}
+
+.hero-inner { position: relative; max-width: 1060px; margin: 0 auto; width: 100%; }
+
+.hero-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--amp);
+  background: var(--amp-m);
+  border: 1px solid var(--amp-b);
+  padding: 6px 14px;
+  border-radius: 100px;
+  margin-bottom: 28px;
+  animation: riseUp 0.6s ease both;
+}
+
+.hero-kicker::before {
+  content: '';
+  width: 6px; height: 6px;
+  background: var(--amp);
+  border-radius: 50%;
+  animation: throb 2s ease-in-out infinite;
+}
+
+@keyframes throb {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(0.6); opacity: 0.4; }
+}
+
+.hero h1 {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(40px, 6.5vw, 76px);
+  font-weight: 900;
+  line-height: 1.0;
+  letter-spacing: -0.02em;
+  margin-bottom: 18px;
+  animation: riseUp 0.6s 0.1s ease both;
+}
+
+.hero h1 em {
+  font-style: italic;
+  font-weight: 300;
+  color: var(--amp);
+}
+
+.hero-tagline {
+  font-size: 16px;
+  color: var(--text2);
+  max-width: 560px;
+  font-weight: 300;
+  margin-bottom: 36px;
+  animation: riseUp 0.6s 0.2s ease both;
+  line-height: 1.6;
+}
+
+.hero-chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  animation: riseUp 0.6s 0.3s ease both;
+}
+
+.chip {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 5px 12px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  letter-spacing: 0.04em;
+}
+
+.chip-amp    { background: var(--amp-l);    border-color: var(--amp-b);    color: var(--amp); }
+.chip-cyan   { background: var(--cyan-l);   border-color: var(--cyan-b);   color: var(--cyan); }
+.chip-violet { background: var(--violet-l); border-color: var(--violet-b); color: var(--violet); }
+.chip-em     { background: var(--emerald-l);border-color: var(--emerald-b);color: var(--emerald); }
+.chip-rose   { background: var(--rose-l);   border-color: var(--rose-b);   color: var(--rose); }
+
+@keyframes riseUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── NAV BAR ── */
+.nav-bar {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 0 60px;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.nav-bar::-webkit-scrollbar { display: none; }
+
+.nav-item {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text3);
+  padding: 14px 20px;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+  text-decoration: none;
+  display: block;
+}
+
+.nav-item:hover { color: var(--amp); border-bottom-color: var(--amp-b); }
+
+/* ── MAIN ── */
+.container {
+  max-width: 1060px;
+  margin: 0 auto;
+  padding: 60px 60px 100px;
+}
+
+/* ── SECTION HEADERS ── */
+.sec-head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.sec-icon {
+  width: 40px; height: 40px;
+  border-radius: var(--r-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.sec-head h2 {
+  font-family: 'Fraunces', serif;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.sec-rule { flex: 1; height: 1px; background: linear-gradient(90deg, var(--border), transparent); }
+
+.sec-block { margin-bottom: 72px; }
+
+/* ── TWO PIECES ── */
+.two-pieces {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.piece-card {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.25s;
+}
+
+.piece-card:hover {
+  border-color: var(--amp-b);
+  transform: translateY(-2px);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.4);
+}
+
+.piece-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+}
+
+.piece-hosting::before { background: linear-gradient(90deg, var(--amp), var(--amber)); }
+.piece-studio::before  { background: linear-gradient(90deg, var(--cyan), var(--violet)); }
+
+.piece-tag {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.piece-hosting .piece-tag { color: var(--amp); }
+.piece-studio  .piece-tag { color: var(--cyan); }
+
+.piece-card h3 { font-size: 18px; font-weight: 700; margin-bottom: 10px; }
+
+.piece-card p { font-size: 13.5px; color: var(--text2); line-height: 1.6; margin-bottom: 12px; }
+.piece-card p:last-child { margin-bottom: 0; }
+
+.piece-badge {
+  display: inline-block;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 4px;
+  letter-spacing: 0.06em;
+}
+
+.pb-high { background: var(--amp-m); color: var(--amp); border: 1px solid var(--amp-b); }
+.pb-med  { background: var(--cyan-m); color: var(--cyan); border: 1px solid var(--cyan-b); }
+
+/* ── UNDER THE HOOD ── */
+.hood-flow {
+  background: var(--code-bg);
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.hood-steps {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  position: relative;
+}
+
+.hood-steps::before {
+  content: '';
+  position: absolute;
+  top: 50%; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--amp-b), var(--cyan-b), transparent);
+  z-index: 0;
+}
+
+.hood-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 28px 16px;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+  border-right: 1px solid var(--border2);
+  transition: background 0.2s;
+}
+
+.hood-step:last-child { border-right: none; }
+.hood-step:hover { background: rgba(255,255,255,0.02); }
+
+.hood-step-icon {
+  width: 44px; height: 44px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+}
+
+.hood-step-name {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: 0.02em;
+}
+
+.hood-step-sub {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9.5px;
+  color: var(--text3);
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+}
+
+/* ── BRANCH DEPLOYMENTS ── */
+.branch-visual {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  padding: 28px;
+  margin-bottom: 20px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12.5px;
+  line-height: 2;
+}
+
+.bv-repo { color: var(--text3); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px; }
+
+.bv-branch {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 6px 0;
+}
+
+.bv-tree { color: var(--text4); min-width: 28px; }
+.bv-name { font-weight: 500; min-width: 200px; }
+.bv-arrow { color: var(--text4); margin: 0 12px; }
+.bv-url { color: var(--text3); margin-right: 16px; flex: 1; }
+.bv-env-badge {
+  font-size: 9.5px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+.bv-main    .bv-name { color: var(--amp); }
+.bv-staging .bv-name { color: var(--cyan); }
+.bv-feat    .bv-name { color: var(--emerald); }
+
+.env-prod    { background: var(--amp-m);     color: var(--amp);     border: 1px solid var(--amp-b); }
+.env-staging { background: var(--cyan-m);    color: var(--cyan);    border: 1px solid var(--cyan-b); }
+.env-dev     { background: var(--emerald-m); color: var(--emerald); border: 1px solid var(--emerald-b); }
+
+.bv-note {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border2);
+  font-size: 11px;
+  color: var(--text3);
+  line-height: 1.7;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+/* ── PR PREVIEWS ── */
+.pr-flow {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-bottom: 20px;
+}
+
+.pr-step {
+  display: flex;
+  gap: 0;
+  align-items: flex-start;
+  position: relative;
+}
+
+.pr-step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 19px;
+  top: 42px;
+  bottom: 0;
+  width: 2px;
+  background: var(--border2);
+}
+
+.pr-left {
+  display: flex;
+  align-items: flex-start;
+  padding-right: 20px;
+  flex-shrink: 0;
+}
+
+.pr-bubble {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Fraunces', serif;
+  font-size: 16px;
+  font-weight: 900;
+  color: #000;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.pr-right {
+  padding-bottom: 28px;
+  padding-top: 8px;
+  flex: 1;
+}
+
+.pr-right h4 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+.pr-right p  { font-size: 13px; color: var(--text2); line-height: 1.6; }
+
+/* ── CODE BLOCKS ── */
+.code-wrap {
+  background: var(--code-bg);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: var(--r);
+  overflow: hidden;
+  margin: 16px 0;
+}
+
+.code-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: rgba(255,255,255,0.02);
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+
+.code-dots { display: flex; gap: 6px; }
+.code-dots span { width: 10px; height: 10px; border-radius: 50%; }
+.cd-r { background: #FF5F57; } .cd-y { background: #FFBD2E; } .cd-g { background: #28C840; }
+
+.code-fn { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--text3); }
+.code-tag {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.ct-amp    { background: var(--amp-l);    color: var(--amp);    border: 1px solid var(--amp-b); }
+.ct-bash   { background: rgba(255,255,255,0.04); color: var(--text3); border: 1px solid var(--border2); }
+.ct-json   { background: var(--cyan-l);   color: var(--cyan);   border: 1px solid var(--cyan-b); }
+.ct-yaml   { background: var(--violet-l); color: var(--violet); border: 1px solid var(--violet-b); }
+
+pre {
+  padding: 20px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  line-height: 1.8;
+  color: var(--code-blue);
+  overflow-x: auto;
+}
+
+.ck  { color: var(--code-red); }
+.cs  { color: #A5D6FF; }
+.cv  { color: var(--code-blue); }
+.cc  { color: var(--code-grey); font-style: italic; }
+.cg  { color: var(--code-grn); }
+.co  { color: var(--code-org); }
+.cy  { color: var(--code-yel); }
+.cp  { color: #D2A8FF; }
+.cw  { color: #fff; }
+
+/* ── CALLOUTS ── */
+.callout {
+  border-radius: var(--r);
+  padding: 16px 20px;
+  margin: 16px 0;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.callout.warn   { background: var(--rose-l);    border: 1px solid var(--rose-b); }
+.callout.tip    { background: var(--emerald-l); border: 1px solid var(--emerald-b); }
+.callout.info   { background: var(--cyan-l);    border: 1px solid var(--cyan-b); }
+.callout.caution{ background: var(--amber-l);   border: 1px solid var(--amber-b); }
+
+.callout .ci { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+.callout .cb { flex: 1; }
+.callout .cl {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+  display: block;
+}
+
+.callout.warn    .cl { color: var(--rose); }
+.callout.tip     .cl { color: var(--emerald); }
+.callout.info    .cl { color: var(--cyan); }
+.callout.caution .cl { color: var(--amber); }
+
+.callout p { font-size: 13.5px; color: var(--text2); line-height: 1.6; }
+.callout strong { color: var(--text); }
+.callout code {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  background: rgba(255,255,255,0.06);
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
+/* ── BACKEND TABLE ── */
+.backend-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.backend-card {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  padding: 18px;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.backend-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+}
+
+.bc-icon { font-size: 24px; margin-bottom: 10px; display: block; }
+.bc-name { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+.bc-service {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  display: inline-block;
+}
+
+.bc-desc { font-size: 12px; color: var(--text2); line-height: 1.5; }
+
+.bc-auth    .bc-service { background: var(--cyan-l);    color: var(--cyan);    border: 1px solid var(--cyan-b); }
+.bc-graphql .bc-service { background: var(--violet-l);  color: var(--violet);  border: 1px solid var(--violet-b); }
+.bc-rest    .bc-service { background: var(--amp-l);     color: var(--amp);     border: 1px solid var(--amp-b); }
+.bc-storage .bc-service { background: var(--amber-l);   color: var(--amber);   border: 1px solid var(--amber-b); }
+.bc-fn      .bc-service { background: var(--emerald-l); color: var(--emerald); border: 1px solid var(--emerald-b); }
+.bc-analytics .bc-service { background: var(--rose-l);  color: var(--rose);    border: 1px solid var(--rose-b); }
+.bc-ai      .bc-service { background: var(--violet-l);  color: var(--violet);  border: 1px solid var(--violet-b); }
+.bc-pubsub  .bc-service { background: var(--cyan-l);    color: var(--cyan);    border: 1px solid var(--cyan-b); }
+.bc-monitor .bc-service { background: var(--amp-l);     color: var(--amp);     border: 1px solid var(--amp-b); }
+
+/* ── COMPARISON TABLE ── */
+.cmp-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-bottom: 20px;
+}
+
+.cmp-table th {
+  padding: 12px 16px;
+  text-align: left;
+  background: var(--surface2);
+  font-size: 11px;
+  font-weight: 600;
+  font-family: 'IBM Plex Mono', monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text3);
+  border-bottom: 1px solid var(--border2);
+}
+
+.cmp-table th:first-child { border-radius: var(--r-sm) 0 0 0; }
+.cmp-table th:last-child  { border-radius: 0 var(--r-sm) 0 0; }
+
+.cmp-table td {
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--border2);
+  vertical-align: top;
+  color: var(--text2);
+  line-height: 1.5;
+}
+
+.cmp-table tr:last-child td { border-bottom: none; }
+.cmp-table tr:hover td { background: rgba(255,255,255,0.015); }
+
+.cmp-table td:first-child {
+  font-weight: 700;
+  color: var(--text);
+  font-size: 12px;
+}
+
+.tick { color: var(--emerald); font-size: 14px; }
+.cross { color: var(--rose); font-size: 14px; }
+
+/* ── EXAM PATTERNS ── */
+.patterns-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.pattern-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--r-sm);
+  padding: 14px 18px;
+  transition: all 0.2s;
+}
+
+.pattern-row:hover {
+  border-color: var(--amp-b);
+  background: var(--surface2);
+}
+
+.pattern-q {
+  font-size: 13px;
+  font-style: italic;
+  color: var(--text2);
+  flex: 1;
+  line-height: 1.5;
+  font-family: 'Fraunces', serif;
+  font-weight: 400;
+}
+
+.pattern-arrow { color: var(--amp); font-size: 14px; flex-shrink: 0; margin-top: 2px; }
+
+.pattern-a {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  flex: 1;
+  line-height: 1.5;
+}
+
+/* ── QUICK REF ── */
+.qr-section {
+  background: linear-gradient(135deg, var(--surface) 0%, var(--surface2) 100%);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 32px;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.qr-section::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--amp), var(--cyan), var(--violet));
+}
+
+.qr-title {
+  font-family: 'Fraunces', serif;
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.qr-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.qr-item {
+  background: rgba(0,0,0,0.2);
+  border: 1px solid var(--border2);
+  border-radius: var(--r-sm);
+  padding: 11px 14px;
+  display: flex;
+  gap: 10px;
+  transition: border-color 0.2s;
+}
+
+.qr-item:hover { border-color: var(--amp-b); }
+
+.qr-k {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10.5px;
+  font-weight: 500;
+  color: var(--amp);
+  min-width: 160px;
+  flex-shrink: 0;
+  letter-spacing: 0.02em;
+}
+
+.qr-v { font-size: 12.5px; color: var(--text2); line-height: 1.5; }
+
+/* ── REWRITE TABLE ── */
+.status-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin: 16px 0;
+}
+
+.status-table th {
+  padding: 10px 16px;
+  background: var(--surface2);
+  text-align: left;
+  font-size: 11px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text3);
+  border-bottom: 1px solid var(--border2);
+}
+
+.status-table td {
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--border2);
+  color: var(--text2);
+  vertical-align: middle;
+}
+
+.status-table tr:last-child td { border-bottom: none; }
+
+.status-code {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.s200 { color: var(--emerald); }
+.s301 { color: var(--cyan); }
+.s302 { color: var(--violet); }
+.s404 { color: var(--rose); }
+
+/* ── DIVIDER ── */
+.div-line {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin: 56px 0;
+}
+
+.div-line span { flex: 1; height: 1px; background: var(--border2); }
+.div-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text4);
+  font-weight: 500;
+}
+
+/* ── FOOTER ── */
+footer {
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+  padding: 28px 60px;
+  text-align: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--text3);
+  letter-spacing: 0.06em;
+}
+
+footer span { color: var(--amp); }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 3px; }
+
+@media (max-width: 1024px) {
+  .hero, .container, footer { padding-left: 40px; padding-right: 40px; }
+  .nav-bar { padding: 0 40px; }
+  .hood-steps { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 768px) {
+  .hero, .container, footer { padding-left: 24px; padding-right: 24px; }
+  .nav-bar { padding: 0 24px; }
+  .two-pieces, .backend-grid, .qr-grid { grid-template-columns: 1fr; }
+  .backend-grid { grid-template-columns: 1fr 1fr; }
+  .hood-steps { grid-template-columns: repeat(3, 1fr); }
+}
+/* ── BACK BUTTON ── */
+.back-home{position:fixed;top:20px;left:20px;z-index:9998;display:inline-flex;align-items:center;gap:6px;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:var(--amp);background:var(--bg2);border:1px solid var(--amp-b);padding:8px 14px;border-radius:100px;text-decoration:none;transition:all 0.2s ease;backdrop-filter:blur(8px)}
+.back-home:hover{background:var(--amp-m);transform:translateY(-1px);box-shadow:0 4px 12px rgba(255,153,0,0.15)}
+.back-home svg{width:14px;height:14px}
+</style>
+</head>
+<body>
+
+<a href="../index.html" class="back-home"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 12L6 8l4-4"/></svg>Home</a>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-mesh"></div>
+  <div class="hero-inner">
+    <div class="hero-kicker">DOP-C02 · Domain 1 · SDLC Automation</div>
+    <h1>AWS <em>Amplify</em></h1>
+    <p class="hero-tagline">AWS's answer to Vercel and Netlify — full-stack web and mobile deployment with zero infrastructure management. When the question says React, Next.js, Vue, or Angular with no ops overhead — Amplify is the answer. Every time.</p>
+    <div class="hero-chips">
+      <span class="chip chip-amp">Amplify Hosting</span>
+      <span class="chip chip-cyan">Branch Deployments</span>
+      <span class="chip chip-violet">PR Previews</span>
+      <span class="chip chip-em">Backend Capabilities</span>
+      <span class="chip chip-rose">Rewrites & Redirects</span>
+    </div>
+  </div>
+</header>
+
+<!-- NAV -->
+<nav class="nav-bar">
+  <a class="nav-item" href="#two-pieces">Two Pieces</a>
+  <a class="nav-item" href="#under-hood">Under the Hood</a>
+  <a class="nav-item" href="#branches">Branch Deployments</a>
+  <a class="nav-item" href="#pr-previews">PR Previews</a>
+  <a class="nav-item" href="#amplify-yml">amplify.yml</a>
+  <a class="nav-item" href="#rewrites">Rewrites</a>
+  <a class="nav-item" href="#domains">Domains</a>
+  <a class="nav-item" href="#backend">Backend</a>
+  <a class="nav-item" href="#comparison">vs Others</a>
+  <a class="nav-item" href="#patterns">Exam Patterns</a>
+  <a class="nav-item" href="#quickref">Quick Ref</a>
+</nav>
+
+<div class="container">
+
+<!-- ══ TWO PIECES ══════════════════════════════════════════════════════════ -->
+<section class="sec-block" id="two-pieces">
+  <div class="sec-head">
+    <div class="sec-icon" style="background:var(--amp-l)">✂️</div>
+    <h2>The Two Distinct Pieces</h2>
+    <div class="sec-rule"></div>
+  </div>
+
+  <p style="color:var(--text2);font-size:14px;margin-bottom:20px;line-height:1.7">The exam tests these as separate concepts. Most DOP-C02 questions focus on Amplify Hosting — the deployment and CI/CD mechanics.</p>
+
+  <div class="two-pieces">
+    <div class="piece-card piece-hosting">
+      <div class="piece-tag">Primary Exam Focus</div>
+      <h3>Amplify Hosting</h3>
+      <p>The CI/CD and hosting layer. Deploys your frontend, manages branch deployments, custom domains, pull request previews, rewrites and redirects.</p>
+      <p>Every branch is an environment. Every PR gets a preview URL. Custom domains are fully automated. This is what most DOP-C02 questions are about.</p>
+      <span class="piece-badge pb-high">HIGH exam focus</span>
+    </div>
+    <div class="piece-card piece-studio">
+      <div class="piece-tag">Secondary Exam Focus</div>
+      <h3>Amplify Studio / Libraries</h3>
+      <p>The backend configuration layer. Visual interface to configure Auth, APIs, Storage, and Functions. Generates frontend code that integrates with AWS services automatically.</p>
+      <p>Know what underlying AWS service each capability maps to — when something breaks, the question asks about the real AWS service, not Amplify.</p>
+      <span class="piece-badge pb-med">MEDIUM exam focus</span>
+    </div>
+  </div>
+</section>
+
+<div class="div-line"><span></span><div class="div-label">Under the Hood</div><span></span></div>
+
+<!-- ══ UNDER THE HOOD ══════════════════════════════════════════════════════ -->
+<section class="sec-block" id="under-hood">
+  <div class="sec-head">
+    <div class="sec-icon" style="background:var(--cyan-l)">🔧</div>
+    <h2>What Amplify Hosting Creates Under the Hood</h2>
+    <div class="sec-rule"></div>
+  </div>
+
+  <p style="color:var(--text2);font-size:14px;margin-bottom:20px;line-height:1.7">You never touch these services directly. Amplify manages them all. <strong style="color:var(--text)">Amplify Hosting IS this stack, abstracted.</strong></p>
+
+  <div class="hood-flow">
+    <div class="hood-steps">
+      <div class="hood-step">
+        <div class="hood-step-icon">📦</div>
+        <div class="hood-step-name">Your Code</div>
+        <div class="hood-step-sub">GitHub / CodeCommit / Bitbucket / GitLab</div>
+      </div>
+      <div class="hood-step">
+        <div class="hood-step-icon" style="border-color:var(--amp-b)">🔨</div>
+        <div class="hood-step-name">Amplify Build</div>
+        <div class="hood-step-sub">Managed CodeBuild — runs amplify.yml</div>
+      </div>
+      <div class="hood-step">
+        <div class="hood-step-icon" style="border-color:var(--amber-b)">🗄️</div>
+        <div class="hood-step-name">Amazon S3</div>
+        <div class="hood-step-sub">Stores static assets — managed bucket</div>
+      </div>
+      <div class="hood-step">
+        <div class="hood-step-icon" style="border-color:var(--cyan-b)">🌐</div>
+        <div class="hood-step-name">CloudFront</div>
+        <div class="hood-step-sub">CDN — serves globally with low latency</div>
+      </div>
+      <div class="hood-step">
+        <div class="hood-step-icon" style="border-color:var(--emerald-b)">🔒</div>
+        <div class="hood-step-name">Route 53 + ACM</div>
+        <div class="hood-step-sub">Custom domain + auto HTTPS certificate</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="div-line"><span></span><div class="div-label">Branch Deployments</div><span></span></div>
+
+<!-- ══ BRANCH DEPLOYMENTS ══════════════════════════════════════════════════ -->
+<section class="sec-block" id="branches">
+  <div class="sec-head">
+    <div class="sec-icon" style="background:var(--amp-l)">🌿</div>
+    <h2>Branch-Based Deployments — The Core Feature</h2>
+    <div class="sec-rule"></div>
+  </div>
+
+  <p style="color:var(--text2);font-size:14px;margin-bottom:20px;line-height:1.7">Every Git branch maps to a deployed environment automatically. This is the most tested Amplify concept in DOP-C02.</p>
+
+  <div class="branch-visual">
+    <div class="bv-repo">GitHub Repository</div>
+    <div class="bv-branch bv-main">
+      <span class="bv-tree">├──</span>
+      <span class="bv-name">main</span>
+      <span class="bv-arrow">→</span>
+      <span class="bv-url">myapp.amplifyapp.com</span>
+      <span class="bv-env-badge env-prod">production</span>
+    </div>
+    <div class="bv-branch bv-staging">
+      <span class="bv-tree">├──</span>
+      <span class="bv-name">staging</span>
+      <span class="bv-arrow">→</span>
+      <span class="bv-url">staging.myapp.amplifyapp.com</span>
+      <span class="bv-env-badge env-staging">staging</span>
+    </div>
+    <div class="bv-branch bv-feat">
+      <span class="bv-tree">├──</span>
+      <span class="bv-name">feature/auth</span>
+      <span class="bv-arrow">→</span>
+      <span class="bv-url">feature-auth.myapp.amplifyapp.com</span>
+      <span class="bv-env-badge env-dev">dev</span>
+    </div>
+    <div class="bv-branch bv-feat">
+      <span class="bv-tree">└──</span>
+      <span class="bv-name">feature/ui</span>
+      <span class="bv-arrow">→</span>
+      <span class="bv-url">feature-ui.myapp.amplifyapp.com</span>
+      <span class="bv-env-badge env-dev">dev</span>
+    </div>
+    <div class="bv-note">
+      Each branch gets: own URL · own build environment · own environment variables · own backend · independent deployments.<br>
+      Pushing to feature/auth does NOT affect main.
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+    <div style="background:var(--surface);border:1px solid var(--border2);border-radius:var(--r);padding:20px">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--amp);letter-spacing:0.1em;text-transform:uppercase;font-weight:600;margin-bottom:12px">main branch env vars</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:2;color:var(--text2)">
+        REACT_APP_API = <span style="color:var(--amp)">https://api.myapp.com</span><br>
+        REACT_APP_ENV = <span style="color:var(--amp)">production</span>
+      </div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border2);border-radius:var(--r);padding:20px">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--cyan);letter-spacing:0.1em;text-transform:uppercase;font-weight:600;margin-bottom:12px">staging branch env vars</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:2;color:var(--text2)">
+        REACT_APP_API = <span style="color:var(--cyan)">https://staging-api.myapp.com</span><br>
+        REACT_APP_ENV = <span style="color:var(--cyan)">staging</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout tip">
+    <span class="ci">🎯</span>
+    <div class="cb">
+      <span class="cl">Exam Pattern</span>
+      <p>"Team needs the same codebase deployed to three environments with different API endpoints." Answer: <strong>Amplify branch deployments with per-branch environment variables</strong> — not three separate CodePipeline pipelines.</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-line"><span></span><div class="div-label">PR Previews</div><span></span></div>
+
+<!-- ══ PR PREVIEWS ═════════════════════════════════════════════════════════ -->
+<section class="sec-block" id="pr-previews">
+  <div class="sec-head">
+    <div class="sec-icon" style="background:var(--violet-l)">👁️</div>
+    <h2>Pull Request Previews</h2>
+    <div class="sec-rule"></div>
+  </div>
+
+  <p style="color:var(--text2);font-size:14px;margin-bottom:24px;line-height:1.7">Amplify auto-deploys a preview environment for every pull request. The <strong style="color:var(--text)">critical exam detail</strong>: PR previews are configured on the <strong style="color:var(--rose)">target branch (main)</strong>, NOT the source feature branch. This single distinction is used in trap answers.</p>
+
+  <div class="pr-flow">
+    <div class="pr-step">
+      <div class="pr-left">
+        <div class="pr-bubble" style="background:var(--amp)">1</div>
+      </div>
+      <div class="pr-right">
+        <h4>Developer opens PR: feature/checkout → main</h4>
+        <p>Amplify detects the PR via webhook configured on the <strong style="color:var(--amp)">main branch</strong> — the target branch, not the feature branch.</p>
+      </div>
+    </div>
+    <div class="pr-step">
+      <div class="pr-left">
+        <div class="pr-bubble" style="background:var(--cyan)">2</div>
+      </div>
+      <div class="pr-right">
+        <h4>Amplify builds the PR branch automatically</h4>
+        <p>Uses the same amplify.yml and build settings as the target branch. No manual trigger required.</p>
+      </div>
+    </div>
+    <div class="pr-step">
+      <div class="pr-left">
+        <div class="pr-bubble" style="background:var(--violet)">3</div>
+      </div>
+      <div class="pr-right">
+        <h4>Deploys to unique preview URL</h4>
+        <p><code style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--violet)">pr-42.myapp.amplifyapp.com</code> — completely isolated from all other environments.</p>
+      </div>
+    </div>
+    <div class="pr-step">
+      <div class="pr-left">
+        <div class="pr-bubble" style="background:var(--emerald)">4</div>
+      </div>
+      <div class="pr-right">
+        <h4>Preview URL posted as PR comment on GitHub</h4>
+        <p>Reviewers click the link directly from the PR — no manual sharing or communication needed.</p>
+      </div>
+    </div>
+    <div class="pr-step">
+      <div class="pr-left">
+        <div class="pr-bubble" style="background:var(--rose)">5</div>
+      </div>
+      <div class="pr-right">
+        <h4>PR merged → preview environment destroyed automatically</h4>
+        <p>Zero cleanup required. Amplify tears down the preview on merge or close. The environment lifecycle is fully managed.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout warn">
+    <span class="ci">⚠️</span>
+    <div class="cb">
+      <span class="cl">Critical Trap — One Word Changes Everything</span>
+      <p>Configuring PR previews on the <strong>staging</strong> branch instead of <strong>main</strong> means PRs targeting main never get previewed. This single word swap is used in DOP-C02 trap answers. <strong>Always configure PR previews on the destination branch (main).</strong></p>
+    </div>
+  </div>
+</section>
+
+<div class="div-line"><span></span><div class="div-label">amplify.yml</div><span></span></div>
+
+<!-- ══ AMPLIFY.YML ══════════════════════════════════════════════════════════ -->
+<section class="sec-block" id="amplify-yml">
+  <div class="sec-head">
+    <div class="sec-icon" style="background:var(--amp-l)">📄</div>
+    <h2>amplify.yml — The Build Specification</h2>
+    <div class="sec-rule"></div>
+  </div>
+
+  <p style="color:var(--text2);font-size:14px;margin-bottom:20px;line-height:1.7">The equivalent of buildspec.yml for Amplify. Must be at the root of your repo. If absent, Amplify auto-detects the framework and uses sensible defaults.</p>
+
+  <div class="code-wrap">
+    <div class="code-bar">
+      <div class="code-dots"><span class="cd-r"></span><span class="cd-y"></span><span class="cd-g"></span></div>
+      <span class="code-fn">amplify.yml</span>
+      <span class="code-tag ct-amp">Amplify Build Spec</span>
+    </div>
+    <pre><span class="cy">version</span>: <span class="cs">1</span>
+
+<span class="cy">applications</span>:
+  - <span class="cy">frontend</span>:
+      <span class="cy">phases</span>:
+        <span class="cy">preBuild</span>:                         <span class="cc"># dependency installation</span>
+          <span class="cy">commands</span>:
+            - npm ci
+        <span class="cy">build</span>:                            <span class="cc"># production bundle creation</span>
+          <span class="cy">commands</span>:
+            - npm run build
+      <span class="cy">artifacts</span>:
+        <span class="cy">baseDirectory</span>: <span class="cs">build</span>             <span class="cc"># React=build, Vue=dist, Next.js=.next</span>
+        <span class="cy">files</span>:
+          - <span class="cs">'**/*'</span>
+      <span class="cy">cache</span>:
+        <span class="cy">paths</span>:
+          - <span class="cs">node_modules/**/*</span>             <span class="cc"># cache deps between builds</span>
+
+    <span class="cy">backend</span>:
+      <span class="cy">phases</span>:
+        <span class="cy">build</span>:
+          <span class="cy">commands</span>:
+            - amplifyPush --simple         <span class="cc"># deploy backend (Cognito, AppSync, etc.)</span>
+
+  <span class="cc"># Monorepo support — second app in same repository</span>
+  - <span class="cy">appRoot</span>: <span class="cs">packages/admin</span>            <span class="cc"># path to sub-app root</span>
+    <span class="cy">frontend</span>:
+      <span class="cy">phases</span>:
+        <span class="cy">preBuild</span>:
+          <span class="cy">commands</span>:
+            - npm ci
+        <span class="cy">build</span>:
+          <span class="cy">commands</span>:
+            - npm run build
+      <span class="cy">artifacts</span>:
+        <span class="cy">baseDirectory</span>: <span class="cs">dist</span>
+        <span class="cy">files</span>:
+          - <span class="cs">'**/*'</span></pre>
+  </div>
+
+  <div style="background:var(--surface);border:1px solid var(--border2);border-radius:var(--r);overflow:hidden;margin-bottom:20px">
+    <div style="background:var(--surface2);padding:12px 20px;border-bottom:1px solid var(--border2)">
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3)">artifacts.baseDirectory per framework</span>
+    </div>
+    <table style="width:100%;border-collapse:collapse;font-size:13px">
+      <tr style="border-bottom:1px solid var(--border2)">
+        <td style="padding:10px 20px;font-weight:600;color:var(--text)">React (CRA)</td>
+        <td style="padding:10px 20px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--amp)">build</td>
+        <td style="padding:10px 20px;color:var(--text2)">Most common — exam default</td>
+      </tr>
+      <tr style="border-bottom:1px solid var(--border2);background:rgba(255,255,255,0.01)">
+        <td style="padding:10px 20px;font-weight:600;color:var(--text)">Vue / Vite / Nuxt (static)</td>
+        <td style="padding:10px 20px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--cyan)">dist</td>
+        <td style="padding:10px 20px;color:var(--text2)">Standard Vite output</td>
+      </tr>
+      <tr style="border-bottom:1px solid var(--border2)">
+        <td style="padding:10px 20px;font-weight:600;color:var(--text)">Next.js (SSR)</td>
+        <td style="padding:10px 20px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--violet)">.next</td>
+        <td style="padding:10px 20px;color:var(--text2)">Server-side rendering output</td>
+      </tr>
+      <tr style="border-bottom:1px solid var(--border2);background:rgba(255,255,255,0.01)">
+        <td style="padding:10px 20px;font-weight:600;color:var(--text)">Next.js (static export)</td>
+        <td style="padding:10px 20px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--emerald)">out</td>
+        <td style="padding:10px 20px;color:var(--text2)">Static HTML export mode</td>
+      </tr>
+      <tr style="border-bottom:1px solid var(--border2)">
+        <td style="padding:10px 20px;font-weight:600;color:var(--text)">Angular</td>
+        <td style="padding:10px 20px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--rose)">dist/project-name</td>
+        <td style="padding:10px 20px;color:var(--text2)">Project name from angular.json</td>
+      </tr>
+      <tr>
+        <td style="padding:10px 20px;font-weight:600;color:var(--text)">Gatsby / Hugo</td>
+        <td style="padding:10px 20px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--amber)">public</td>
+        <td style="padding:10px 20px;color:var(--text2)">Static site generator output</td>
+      </tr>
+    </table>
+  </div>
+</section>
+
+<div class="div-line"><span></span><div class="div-label">Rewrites & Access Control</div><span></span></div>
+
+<!-- ══ REWRITES ════════════════════════════════════════════════════════════ -->
+<section class="sec-block" id="rewrites">
+  <div class="sec-head">
+    <div class="sec-icon" style="background:var(--rose-l)">🔀</div>
+    <h2>Rewrites, Redirects & Access Control</h2>
+    <div class="sec-rule"></div>
+  </div>
+
+  <p style="color:var(--text2);font-size:14px;margin-bottom:16px;line-height:1.7">Single-page applications break without a rewrite rule. CloudFront looks for a file called <code style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--rose)">/dashboard</code> in S3 when a user navigates directly to <code style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--rose)">myapp.com/dashboard</code>. It doesn't exist. Result: 403 or 404.</p>
+
+  <div class="code-wrap">
+    <div class="code-bar">
+      <div class="code-dots"><span class="cd-r"></span><span class="cd-y"></span><span class="cd-g"></span></div>
+      <span class="code-fn">Amplify Console → Rewrites and Redirects</span>
+      <span class="code-tag ct-json">JSON Rule</span>
+    </div>
+    <pre><span class="cc">// SPA rewrite rule — fixes all deep link 404s</span>
+[
+  {
+    <span class="ck">"source"</span>: <span class="cs">"&lt;/^[^.]+$|\\.(?!(css|gif|ico|jpg|js|png|txt|svg|woff|ttf|map|json)$)([^.]+$)/&gt;"</span>,
+    <span class="ck">"target"</span>: <span class="cs">"/index.html"</span>,
+    <span class="ck">"status"</span>: <span class="cs">"200"</span>,
+    <span class="ck">"condition"</span>: <span class="cg">null</span>
+  }
+]
+<span class="cc">// Plain English: any request that doesn't look like a known file extension</span>
+<span class="cc">// → serve index.html with status 200</span>
+<span class="cc">// → React Router / Vue Router handles routing client-side</span></pre>
+  </div>
+
+  <table class="status-table">
+    <thead>
+      <tr>
+        <th>Status</th>
+        <th>Type</th>
+        <th>Behavior</th>
+        <th>Use Case</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="status-code s200">200</span></td>
+        <td style="color:var(--text)">Rewrite</td>
+        <td>URL in browser stays unchanged</td>
+        <td>SPA routing — serve index.html, keep the URL</td>
+      </tr>
+      <tr>
+        <td><span class="status-code s301">301</span></td>
+        <td style="color:var(--text)">Permanent Redirect</td>
+        <td>Browser updates URL permanently</td>
+        <td>Old URL moved — SEO-safe redirect</td>
+      </tr>
+      <tr>
+        <td><span class="status-code s302">302</span></td>
+        <td style="color:var(--text)">Temporary Redirect</td>
+        <td>Browser redirects, URL changes</td>
+        <td>Maintenance pages, A/B testing</td>
+      </tr>
+      <tr>
+        <td><span class="status-code s404">404</span></td>
+        <td style="color:var(--text)">Custom Error Page</td>
+        <td>Serves your branded error page</td>
+        <td>Friendly error handling</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout warn">
+    <span class="ci">⚠️</span>
+    <div class="cb">
+      <span class="cl">Exam Pattern — SPA 404 Fix</span>
+      <p>"Users get 404 errors when navigating directly to deep URLs in a React SPA deployed on Amplify." Answer: <strong>Rewrite rule → /index.html with status 200.</strong> Not CloudFront configuration. Not S3 settings. Not Route 53. The rewrite rule in Amplify is the correct and only answer.</p>
+    </div>
+  </div>
+
+  <div style="margin-top:24px">
+    <h3 style="font-size:16px;font-weight:700;margin-bottom:12px">Branch Access Control — Protecting Non-Production</h3>
+    <p style="font-size:14px;color:var(--text2);margin-bottom:16px;line-height:1.7">Amplify provides native HTTP authentication per branch. No CloudFront, no Cognito, no infrastructure changes.</p>
+
+    <div class="code-wrap">
+      <div class="code-bar">
+        <div class="code-dots"><span class="cd-r"></span><span class="cd-y"></span><span class="cd-g"></span></div>
+        <span class="code-fn">Branch Access Control Configuration</span>
+        <span class="code-tag ct-bash">Config</span>
+      </div>
+      <pre>Branch: <span class="cg">main</span>        → <span class="cg">PUBLIC</span>       (production — no restriction)
+Branch: <span class="cy">staging</span>     → <span class="cy">PROTECTED</span>
+                     Username: <span class="cs">qa-reviewer</span>
+                     Password: <span class="cs">SecurePass2024!</span>
+Branch: <span class="cp">feature/*</span>   → <span class="cp">PROTECTED</span>
+                     Username: <span class="cs">developer</span>
+                     Password: <span class="cs">DevPreview2024!</span>
+
+<span class="cc"># Result: browser shows native HTTP auth dialog before serving branch</span>
+<span class="cc"># No AWS infrastructure changes — configured in Amplify Console</span></pre>
+    </div>
+
+    <div class="callout info">
+      <span class="ci">🎯</span>
+      <div class="cb">
+        <span class="cl">Exam Pattern</span>
+        <p>"Stakeholders need to preview staging but it must not be publicly accessible." Answer: <strong>Amplify basic access control on the staging branch.</strong> NOT CloudFront signed URLs (overkill). NOT Cognito User Pool (wrong layer for this use case).</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="div-line"><span></span><div class="div-label">Custom Domains</div><span></span></div>
+
+<!-- ══ DOMAINS ═════════════════════════════════════════════════════════════ -->
+<section class="sec-block" id="domains">
+  <div class="sec-head">
+    <div class="sec-icon" style="background:var(--emerald-l)">🌐</div>
+    <h2>Custom Domains — Automated Everything</h2>
+    <div class="sec-rule"></div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+    <div style="background:var(--surface);border:1px solid var(--border2);border-radius:var(--r);padding:24px">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--emerald);letter-spacing:0.1em;text-transform:uppercase;font-weight:600;margin-bottom:12px">Route 53 Domain</div>
+      <h3 style="font-size:15px;font-weight:700;margin-bottom:10px">Fully Automated</h3>
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:8px">
+        <li style="font-size:13px;color:var(--text2);display:flex;align-items:center;gap:8px"><span style="color:var(--emerald)">✓</span> Route 53 records created automatically</li>
+        <li style="font-size:13px;color:var(--text2);display:flex;align-items:center;gap:8px"><span style="color:var(--emerald)">✓</span> ACM certificate provisioned automatically</li>
+        <li style="font-size:13px;color:var(--text2);display:flex;align-items:center;gap:8px"><span style="color:var(--emerald)">✓</span> HTTPS enforced automatically</li>
+        <li style="font-size:13px;color:var(--text2);display:flex;align-items:center;gap:8px"><span style="color:var(--emerald)">✓</span> Certificate renewed automatically</li>
+        <li style="font-size:13px;color:var(--text2);display:flex;align-items:center;gap:8px"><span style="color:var(--emerald)">✓</span> Zero manual steps required</li>
+      </ul>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border2);border-radius:var(--r);padding:24px">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--amber);letter-spacing:0.1em;text-transform:uppercase;font-weight:600;margin-bottom:12px">Third-Party Domain (GoDaddy, Namecheap)</div>
+      <h3 style="font-size:15px;font-weight:700;margin-bottom:10px">Manual CNAME Records</h3>
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:8px">
+        <li style="font-size:13px;color:var(--text2);display:flex;align-items:center;gap:8px"><span style="color:var(--amber)">→</span> Amplify provides CNAME validation values</li>
+        <li style="font-size:13px;color:var(--text2);display:flex;align-items:center;gap:8px"><span style="color:var(--amber)">→</span> You add CNAME records at your registrar</li>
+        <li style="font-size:13px;color:var(--text2);display:flex;align-items:center;gap:8px"><span style="color:var(--amber)">→</span> ACM certificate validated via DNS</li>
+        <li style="font-size:13px;color:var(--text2);display:flex;align-items:center;gap:8px"><span style="color:var(--amber)">→</span> One-time manual step at registrar</li>
+        <li style="font-size:13px;color:var(--text2);display:flex;align-items:center;gap:8px"><span style="color:var(--emerald)">✓</span> HTTPS still managed by Amplify after</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-bar">
+      <div class="code-dots"><span class="cd-r"></span><span class="cd-y"></span><span class="cd-g"></span></div>
+      <span class="code-fn">Domain Configuration</span>
+      <span class="code-tag ct-bash">Config</span>
+    </div>
+    <pre>myapp.com              → <span class="cg">main</span> branch         (root domain → production)
+www.myapp.com          → <span class="cg">main</span> branch         (www redirect)
+staging.myapp.com      → <span class="cy">staging</span> branch      (staging environment)
+*.myapp.com            → wildcard             (all feature branches get subdomains)</pre>
+  </div>
+</section>
+
+<div class="div-line"><span></span><div class="div-label">Backend Capabilities</div><span></span></div>
+
+<!-- ══ BACKEND ═════════════════════════════════════════════════════════════ -->
+<section class="sec-block" id="backend">
+  <div class="sec-head">
+    <div class="sec-icon" style="background:var(--violet-l)">⚙️</div>
+    <h2>Backend Capabilities — The Real AWS Services</h2>
+    <div class="sec-rule"></div>
+  </div>
+
+  <p style="color:var(--text2);font-size:14px;margin-bottom:20px;line-height:1.7">Amplify doesn't invent new services — it configures existing AWS services on your behalf. <strong style="color:var(--text)">When something breaks in an Amplify app, the exam asks about the underlying AWS service, not Amplify itself.</strong></p>
+
+  <div class="backend-grid">
+    <div class="backend-card bc-auth">
+      <span class="bc-icon">🔐</span>
+      <div class="bc-name">Authentication</div>
+      <div class="bc-service">Amazon Cognito</div>
+      <div class="bc-desc">User Pools (sign-in, MFA, social) + Identity Pools (AWS resource access). Auth failures → diagnose Cognito, not Amplify.</div>
+    </div>
+    <div class="backend-card bc-graphql">
+      <span class="bc-icon">🔷</span>
+      <div class="bc-name">GraphQL API</div>
+      <div class="bc-service">AWS AppSync + DynamoDB</div>
+      <div class="bc-desc">AppSync manages the GraphQL endpoint and real-time subscriptions. DynamoDB backs the data model. Amplify GraphQL IS AppSync.</div>
+    </div>
+    <div class="backend-card bc-rest">
+      <span class="bc-icon">🔌</span>
+      <div class="bc-name">REST API</div>
+      <div class="bc-service">API Gateway + Lambda</div>
+      <div class="bc-desc">Standard REST endpoints. Amplify generates the Lambda scaffold — you implement business logic.</div>
+    </div>
+    <div class="backend-card bc-storage">
+      <span class="bc-icon">📦</span>
+      <div class="bc-name">Storage</div>
+      <div class="bc-service">Amazon S3</div>
+      <div class="bc-desc">Amplify configures bucket policies and Cognito Identity Pool access. Per-user vs shared storage paths handled automatically.</div>
+    </div>
+    <div class="backend-card bc-fn">
+      <span class="bc-icon">⚡</span>
+      <div class="bc-name">Functions</div>
+      <div class="bc-service">AWS Lambda</div>
+      <div class="bc-desc">Amplify provisions, deploys, and wires Lambda functions to API Gateway. Version management handled automatically.</div>
+    </div>
+    <div class="backend-card bc-analytics">
+      <span class="bc-icon">📊</span>
+      <div class="bc-name">Analytics</div>
+      <div class="bc-service">Amazon Pinpoint</div>
+      <div class="bc-desc">Tracks user sessions, events, demographics, and revenue. Amplify adds the Pinpoint client with minimal configuration.</div>
+    </div>
+    <div class="backend-card bc-ai">
+      <span class="bc-icon">🤖</span>
+      <div class="bc-name">AI/ML Predictions</div>
+      <div class="bc-service">SageMaker · Rekognition · Polly</div>
+      <div class="bc-desc">Also Translate and Comprehend. Amplify exposes these as high-level Predictions API calls from your frontend.</div>
+    </div>
+    <div class="backend-card bc-pubsub">
+      <span class="bc-icon">📡</span>
+      <div class="bc-name">PubSub</div>
+      <div class="bc-service">AWS IoT Core or AppSync</div>
+      <div class="bc-desc">IoT Core for MQTT-based real-time messaging, or AppSync subscriptions for GraphQL-based real-time updates.</div>
+    </div>
+    <div class="backend-card bc-monitor">
+      <span class="bc-icon">📈</span>
+      <div class="bc-name">Monitoring</div>
+      <div class="bc-service">Amazon CloudWatch</div>
+      <div class="bc-desc">Build metrics, error rates, and custom application metrics. Set alarms on build failures or runtime errors.</div>
+    </div>
+  </div>
+</section>
+
+<div class="div-line"><span></span><div class="div-label">Amplify vs Alternatives</div><span></span></div>
+
+<!-- ══ COMPARISON ══════════════════════════════════════════════════════════ -->
+<section class="sec-block" id="comparison">
+  <div class="sec-head">
+    <div class="sec-icon" style="background:var(--amber-l)">⚖️</div>
+    <h2>Amplify vs Elastic Beanstalk vs S3+CloudFront</h2>
+    <div class="sec-rule"></div>
+  </div>
+
+  <p style="color:var(--text2);font-size:14px;margin-bottom:20px;line-height:1.7">The exam presents these as alternatives in scenario questions. Use the decision factors below to eliminate wrong answers instantly.</p>
+
+  <table class="cmp-table">
+    <thead>
+      <tr>
+        <th>Factor</th>
+        <th style="color:var(--amp)">Amplify Hosting</th>
+        <th style="color:var(--cyan)">Elastic Beanstalk</th>
+        <th style="color:var(--emerald)">S3 + CloudFront</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>App type</td>
+        <td>Frontend / Full-stack web + mobile</td>
+        <td>Backend services, APIs, full server apps</td>
+        <td>Static sites only — no server-side</td>
+      </tr>
+      <tr>
+        <td>CI/CD built-in</td>
+        <td><span class="tick">✓</span> Yes — native, branch-aware</td>
+        <td><span class="cross">✗</span> No — need CodePipeline</td>
+        <td><span class="cross">✗</span> No — need CodePipeline</td>
+      </tr>
+      <tr>
+        <td>Branch deployments</td>
+        <td><span class="tick">✓</span> Yes — automatic per branch</td>
+        <td><span class="cross">✗</span> No</td>
+        <td><span class="cross">✗</span> No</td>
+      </tr>
+      <tr>
+        <td>PR previews</td>
+        <td><span class="tick">✓</span> Yes — auto on PR open</td>
+        <td><span class="cross">✗</span> No</td>
+        <td><span class="cross">✗</span> No</td>
+      </tr>
+      <tr>
+        <td>SSR support</td>
+        <td><span class="tick">✓</span> Yes — Next.js, Nuxt</td>
+        <td><span class="tick">✓</span> Yes — any framework</td>
+        <td><span class="cross">✗</span> No</td>
+      </tr>
+      <tr>
+        <td>Infra management</td>
+        <td>Nobody — fully managed</td>
+        <td>You manage EC2 fleet + platform</td>
+        <td>You manage S3 + CloudFront distro</td>
+      </tr>
+      <tr>
+        <td>Operational overhead</td>
+        <td style="color:var(--emerald)">Zero</td>
+        <td style="color:var(--amber)">Low–Medium</td>
+        <td style="color:var(--rose)">Medium</td>
+      </tr>
+      <tr>
+        <td>Exam trigger phrase</td>
+        <td style="color:var(--amp)">"zero infrastructure management"</td>
+        <td style="color:var(--cyan)">"custom runtime", "server control"</td>
+        <td style="color:var(--emerald)">"static only", "lowest cost"</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<div class="div-line"><span></span><div class="div-label">Exam Patterns</div><span></span></div>
+
+<!-- ══ EXAM PATTERNS ═══════════════════════════════════════════════════════ -->
+<section class="sec-block" id="patterns">
+  <div class="sec-head">
+    <div class="sec-icon" style="background:var(--rose-l)">🎯</div>
+    <h2>DOP-C02 Exam Pattern Recognition</h2>
+    <div class="sec-rule"></div>
+  </div>
+
+  <div class="callout caution">
+    <span class="ci">⚡</span>
+    <div class="cb">
+      <span class="cl">The Requirement Traceability Technique</span>
+      <p>DOP-C02 Amplify questions present 4 options that all sound plausible. Each wrong option violates exactly one requirement — usually with one subtle word change. <strong>Run requirements as filters, not confirmations.</strong> Ask: does this option VIOLATE any requirement? — not: does this option sound right?</p>
+    </div>
+  </div>
+
+  <div class="patterns-list" style="margin-top:20px">
+    <div class="pattern-row">
+      <span class="pattern-q">"Deploy React/Vue/Angular/Next.js with zero infrastructure management"</span>
+      <span class="pattern-arrow">→</span>
+      <span class="pattern-a">Amplify Hosting</span>
+    </div>
+    <div class="pattern-row">
+      <span class="pattern-q">"Preview every feature branch at a unique URL"</span>
+      <span class="pattern-arrow">→</span>
+      <span class="pattern-a">Branch deployments — auto per branch</span>
+    </div>
+    <div class="pattern-row">
+      <span class="pattern-q">"Preview open PRs before merging to main"</span>
+      <span class="pattern-arrow">→</span>
+      <span class="pattern-a">PR Previews enabled on TARGET branch (main) — NOT staging</span>
+    </div>
+    <div class="pattern-row">
+      <span class="pattern-q">"Different API endpoints per environment"</span>
+      <span class="pattern-arrow">→</span>
+      <span class="pattern-a">Per-branch environment variables</span>
+    </div>
+    <div class="pattern-row">
+      <span class="pattern-q">"Staging must not be publicly accessible"</span>
+      <span class="pattern-arrow">→</span>
+      <span class="pattern-a">Basic access control on staging branch — NOT CloudFront signed URLs</span>
+    </div>
+    <div class="pattern-row">
+      <span class="pattern-q">"SPA shows 404 on direct URL navigation"</span>
+      <span class="pattern-arrow">→</span>
+      <span class="pattern-a">Rewrite rule → /index.html with status 200</span>
+    </div>
+    <div class="pattern-row">
+      <span class="pattern-q">"Amplify authentication sign-in is failing"</span>
+      <span class="pattern-arrow">→</span>
+      <span class="pattern-a">Diagnose Amazon Cognito User Pool — not Amplify itself</span>
+    </div>
+    <div class="pattern-row">
+      <span class="pattern-q">"Amplify GraphQL API issues"</span>
+      <span class="pattern-arrow">→</span>
+      <span class="pattern-a">Diagnose AWS AppSync — not API Gateway</span>
+    </div>
+    <div class="pattern-row">
+      <span class="pattern-q">"Multiple apps in a single repository"</span>
+      <span class="pattern-arrow">→</span>
+      <span class="pattern-a">Amplify monorepo with appRoot config in amplify.yml</span>
+    </div>
+    <div class="pattern-row">
+      <span class="pattern-q">"Custom domain + HTTPS automatically managed"</span>
+      <span class="pattern-arrow">→</span>
+      <span class="pattern-a">Amplify + Route 53 — fully automated cert, records, HTTPS</span>
+    </div>
+    <div class="pattern-row">
+      <span class="pattern-q">"Vercel or Netlify equivalent on AWS"</span>
+      <span class="pattern-arrow">→</span>
+      <span class="pattern-a">Amplify Hosting — not Elastic Beanstalk</span>
+    </div>
+  </div>
+</section>
+
+<div class="div-line"><span></span><div class="div-label">Quick Reference</div><span></span></div>
+
+<!-- ══ QUICK REF ═══════════════════════════════════════════════════════════ -->
+<section id="quickref">
+  <div class="qr-section">
+    <div class="qr-title">Quick Reference Card</div>
+    <div class="qr-grid">
+      <div class="qr-item">
+        <span class="qr-k">Amplify Hosting underneath</span>
+        <span class="qr-v">S3 + CloudFront + managed CodeBuild + Route 53 + ACM</span>
+      </div>
+      <div class="qr-item">
+        <span class="qr-k">Branch = environment</span>
+        <span class="qr-v">Every branch → own URL, own build, own env vars, independent deploys</span>
+      </div>
+      <div class="qr-item">
+        <span class="qr-k">PR Previews target</span>
+        <span class="qr-v">Configure on TARGET branch (main) — NOT the feature branch</span>
+      </div>
+      <div class="qr-item">
+        <span class="qr-k">PR Preview lifecycle</span>
+        <span class="qr-v">Auto-deploy on PR open → destroyed automatically on PR merge/close</span>
+      </div>
+      <div class="qr-item">
+        <span class="qr-k">amplify.yml phases</span>
+        <span class="qr-v">preBuild → build → artifacts.baseDirectory → cache.paths</span>
+      </div>
+      <div class="qr-item">
+        <span class="qr-k">SPA 404 fix</span>
+        <span class="qr-v">Rewrite: all non-file requests → /index.html with status 200</span>
+      </div>
+      <div class="qr-item">
+        <span class="qr-k">Branch access control</span>
+        <span class="qr-v">Native HTTP auth per branch — NOT CloudFront signed URLs</span>
+      </div>
+      <div class="qr-item">
+        <span class="qr-k">Route 53 domain</span>
+        <span class="qr-v">Fully automated — cert, DNS records, HTTPS, all managed by Amplify</span>
+      </div>
+      <div class="qr-item">
+        <span class="qr-k">Auth underlying service</span>
+        <span class="qr-v">Amazon Cognito User Pools + Identity Pools</span>
+      </div>
+      <div class="qr-item">
+        <span class="qr-k">GraphQL underlying service</span>
+        <span class="qr-v">AWS AppSync + Amazon DynamoDB</span>
+      </div>
+      <div class="qr-item">
+        <span class="qr-k">REST API underlying service</span>
+        <span class="qr-v">Amazon API Gateway + AWS Lambda</span>
+      </div>
+      <div class="qr-item">
+        <span class="qr-k">Storage underlying service</span>
+        <span class="qr-v">Amazon S3 with Cognito-managed access policies</span>
+      </div>
+      <div class="qr-item">
+        <span class="qr-k">PubSub underlying service</span>
+        <span class="qr-v">AWS IoT Core (MQTT) or AppSync subscriptions</span>
+      </div>
+      <div class="qr-item">
+        <span class="qr-k">Monorepo support</span>
+        <span class="qr-v">Multiple appRoot entries in amplify.yml — one app per sub-app</span>
+      </div>
+      <div class="qr-item">
+        <span class="qr-k">vs Elastic Beanstalk</span>
+        <span class="qr-v">Amplify = frontend/fullstack zero-infra. EB = backend needing OS control</span>
+      </div>
+      <div class="qr-item">
+        <span class="qr-k">vs S3 + CloudFront</span>
+        <span class="qr-v">Amplify = full CI/CD + branch deploys. S3+CF = manual, static only</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  <span>AWS Amplify</span> · Full-Stack Web &amp; Mobile Deployment Platform ·
+  AWS Certified DevOps Engineer Professional (DOP-C02) · Domain 1: SDLC Automation
+</footer>
+
+</body>
+</html>

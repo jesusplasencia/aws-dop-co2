@@ -1,0 +1,1604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Multi-Account & Cross-Region Pipeline Patterns — DOP-C02</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #070B12;
+    --bg2: #0D1421;
+    --bg3: #111827;
+    --surface: #141E2E;
+    --surface2: #1A2540;
+    --border: rgba(255,153,0,0.12);
+    --border2: rgba(255,255,255,0.06);
+    --orange: #FF9900;
+    --orange-d: #CC7A00;
+    --orange-l: rgba(255,153,0,0.08);
+    --orange-m: rgba(255,153,0,0.15);
+    --blue: #3B82F6;
+    --blue-l: rgba(59,130,246,0.08);
+    --blue-m: rgba(59,130,246,0.15);
+    --green: #10B981;
+    --green-l: rgba(16,185,129,0.08);
+    --green-m: rgba(16,185,129,0.15);
+    --red: #EF4444;
+    --red-l: rgba(239,68,68,0.08);
+    --red-m: rgba(239,68,68,0.15);
+    --purple: #8B5CF6;
+    --purple-l: rgba(139,92,246,0.08);
+    --purple-m: rgba(139,92,246,0.15);
+    --teal: #14B8A6;
+    --teal-l: rgba(20,184,166,0.08);
+    --text: #E8EDF5;
+    --text-2: #94A3B8;
+    --text-3: #64748B;
+    --code-bg: #060A10;
+    --code-fg: #79C0FF;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE OVERLAY ──────────────────────────────────── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  /* ── HERO ───────────────────────────────────────────── */
+  .hero {
+    position: relative;
+    padding: 90px 40px 70px;
+    text-align: center;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -120px; left: 50%;
+    transform: translateX(-50%);
+    width: 700px; height: 400px;
+    background: radial-gradient(ellipse, rgba(255,153,0,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--orange), transparent);
+  }
+
+  .domain-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--orange-m);
+    border: 1px solid rgba(255,153,0,0.3);
+    color: var(--orange);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 100px;
+    margin-bottom: 28px;
+    animation: fadeDown 0.6s ease both;
+  }
+
+  .domain-badge::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--orange);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(32px, 5vw, 56px);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 16px;
+    animation: fadeDown 0.6s 0.1s ease both;
+  }
+
+  .hero h1 span {
+    color: var(--orange);
+  }
+
+  .hero-sub {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-size: 18px;
+    color: var(--text-2);
+    margin-bottom: 40px;
+    animation: fadeDown 0.6s 0.2s ease both;
+  }
+
+  .three-problems {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    animation: fadeDown 0.6s 0.3s ease both;
+  }
+
+  .prob-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    padding: 8px 16px;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+
+  .prob-chip:hover {
+    border-color: var(--orange);
+    transform: translateY(-2px);
+  }
+
+  .prob-chip .num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    background: var(--orange);
+    color: #000;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+  }
+
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── LAYOUT ─────────────────────────────────────────── */
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 40px 100px;
+  }
+
+  /* ── SECTION HEADERS ────────────────────────────────── */
+  .section {
+    margin-bottom: 64px;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .section-label .icon {
+    width: 36px; height: 36px;
+    border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .section-label h2 {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+
+  .section-label .accent-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--border), transparent);
+  }
+
+  /* ── THE FOUNDATION BLOCK ───────────────────────────── */
+  .foundation-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .account-card {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .account-card:hover { border-color: rgba(255,153,0,0.3); }
+
+  .account-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+
+  .account-card.tooling::before { background: var(--orange); }
+  .account-card.target::before { background: var(--blue); }
+  .account-card.staging-c::before { background: var(--green); }
+  .account-card.prod::before { background: var(--red); }
+
+  .account-card .card-title {
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    font-weight: 500;
+  }
+
+  .account-card.tooling .card-title { color: var(--orange); }
+  .account-card.target .card-title { color: var(--blue); }
+  .account-card.staging-c .card-title { color: var(--green); }
+  .account-card.prod .card-title { color: var(--red); }
+
+  .account-card ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .account-card ul li {
+    font-size: 13px;
+    color: var(--text-2);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .account-card ul li::before {
+    content: '›';
+    color: var(--orange);
+    font-weight: 700;
+  }
+
+  /* ── THREE PROBLEMS VISUAL ──────────────────────────── */
+  .problems-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .problem-card {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.25s;
+  }
+
+  .problem-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+  }
+
+  .problem-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 1px;
+  }
+
+  .problem-card.p1::after { background: var(--orange); }
+  .problem-card.p2::after { background: var(--purple); }
+  .problem-card.p3::after { background: var(--teal); }
+
+  .problem-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 48px;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 12px;
+    opacity: 0.15;
+    position: absolute;
+    top: 16px; right: 20px;
+  }
+
+  .p1 .problem-num { color: var(--orange); }
+  .p2 .problem-num { color: var(--purple); }
+  .p3 .problem-num { color: var(--teal); }
+
+  .problem-tag {
+    font-size: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 4px;
+    margin-bottom: 12px;
+    display: inline-block;
+  }
+
+  .p1 .problem-tag { background: var(--orange-m); color: var(--orange); }
+  .p2 .problem-tag { background: var(--purple-m); color: var(--purple); }
+  .p3 .problem-tag { background: var(--teal-l); color: var(--teal); }
+
+  .problem-card h3 {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    letter-spacing: -0.01em;
+  }
+
+  .problem-card p {
+    font-size: 13px;
+    color: var(--text-2);
+    line-height: 1.6;
+    margin-bottom: 14px;
+  }
+
+  .problem-solution {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    font-weight: 500;
+  }
+
+  .p1 .problem-solution { background: var(--orange-l); color: var(--orange); }
+  .p2 .problem-solution { background: var(--purple-l); color: var(--purple); }
+  .p3 .problem-solution { background: var(--teal-l); color: var(--teal); }
+
+  /* ── CODE BLOCKS ────────────────────────────────────── */
+  .code-wrapper {
+    background: var(--code-bg);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin: 16px 0;
+  }
+
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    background: rgba(255,255,255,0.03);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .code-header .dots {
+    display: flex;
+    gap: 6px;
+  }
+
+  .code-header .dots span {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+  }
+
+  .dot-r { background: #FF5F57; }
+  .dot-y { background: #FFBD2E; }
+  .dot-g { background: #28C840; }
+
+  .code-header .file-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-3);
+    letter-spacing: 0.05em;
+  }
+
+  .code-header .lang-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-3);
+    background: rgba(255,255,255,0.05);
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+
+  pre {
+    padding: 20px;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    line-height: 1.7;
+    color: var(--code-fg);
+  }
+
+  .c-comment { color: #5C6E8A; font-style: italic; }
+  .c-key     { color: #FF7B72; }
+  .c-str     { color: #A5D6FF; }
+  .c-val     { color: #79C0FF; }
+  .c-orange  { color: #FF9900; }
+  .c-green   { color: #56D364; }
+  .c-purple  { color: #C084FC; }
+  .c-yellow  { color: #E3B341; }
+
+  /* ── ROLE CHAIN DIAGRAM ─────────────────────────────── */
+  .role-chain {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    padding: 32px;
+    margin: 24px 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .role-chain::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; bottom: 0;
+    width: 3px;
+    background: linear-gradient(180deg, var(--orange), var(--blue));
+  }
+
+  .chain-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border2);
+  }
+
+  .chain-row:last-child { border-bottom: none; }
+
+  .chain-box {
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-sm);
+    padding: 10px 16px;
+    min-width: 200px;
+    flex-shrink: 0;
+  }
+
+  .chain-box .box-label {
+    font-size: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+
+  .chain-box .box-name {
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .chain-arrow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    flex-shrink: 0;
+  }
+
+  .chain-arrow .arrow-label {
+    font-size: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--orange);
+    font-weight: 500;
+    letter-spacing: 0.05em;
+  }
+
+  .chain-arrow .arrow-line {
+    font-size: 16px;
+    color: var(--orange);
+  }
+
+  .chain-desc {
+    font-size: 12.5px;
+    color: var(--text-2);
+    line-height: 1.5;
+  }
+
+  /* ── THREE FIX RULE ─────────────────────────────────── */
+  .three-fix {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin: 24px 0;
+  }
+
+  .fix-card {
+    border-radius: var(--radius);
+    padding: 24px;
+    position: relative;
+    text-align: center;
+    border: 1px solid transparent;
+    transition: all 0.25s;
+  }
+
+  .fix-card:hover { transform: translateY(-3px); }
+
+  .fix-card.iam  { background: var(--orange-l); border-color: rgba(255,153,0,0.2); }
+  .fix-card.kms  { background: var(--purple-l); border-color: rgba(139,92,246,0.2); }
+  .fix-card.s3   { background: var(--blue-l);   border-color: rgba(59,130,246,0.2); }
+
+  .fix-number {
+    font-size: 40px;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .fix-card.iam .fix-number { color: var(--orange); }
+  .fix-card.kms .fix-number { color: var(--purple); }
+  .fix-card.s3  .fix-number { color: var(--blue); }
+
+  .fix-card h3 { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+
+  .fix-card p { font-size: 12px; color: var(--text-2); line-height: 1.5; }
+
+  .fix-connector {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 12px 0;
+    color: var(--text-3);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    gap: 12px;
+  }
+
+  .fix-connector::before, .fix-connector::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border2);
+  }
+
+  /* ── TABLES ─────────────────────────────────────────── */
+  .styled-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 16px 0;
+  }
+
+  .styled-table th {
+    background: var(--surface2);
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-2);
+    border-bottom: 1px solid var(--border2);
+  }
+
+  .styled-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border2);
+    color: var(--text-2);
+    vertical-align: top;
+    line-height: 1.5;
+  }
+
+  .styled-table tr:last-child td { border-bottom: none; }
+
+  .styled-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .styled-table td:first-child {
+    font-weight: 600;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+
+  .badge-orange { background: var(--orange-m); color: var(--orange); }
+  .badge-red    { background: var(--red-m);    color: var(--red); }
+  .badge-green  { background: var(--green-m);  color: var(--green); }
+  .badge-blue   { background: var(--blue-m);   color: var(--blue); }
+  .badge-purple { background: var(--purple-m); color: var(--purple); }
+
+  /* ── SCENARIO CARDS ─────────────────────────────────── */
+  .scenarios-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .scenario-card {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    padding: 24px;
+    transition: all 0.25s;
+  }
+
+  .scenario-card:hover {
+    border-color: rgba(255,153,0,0.25);
+    transform: translateY(-2px);
+  }
+
+  .scenario-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .scenario-num::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border2);
+  }
+
+  .scenario-card h3 {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    line-height: 1.4;
+  }
+
+  .scenario-card .question {
+    font-size: 12.5px;
+    color: var(--text-2);
+    line-height: 1.6;
+    margin-bottom: 14px;
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    border-left: 2px solid var(--border2);
+    padding-left: 12px;
+  }
+
+  .answer-block {
+    background: var(--green-l);
+    border: 1px solid rgba(16,185,129,0.2);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .answer-block .answer-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--green);
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .answer-block p { color: var(--text-2); }
+
+  /* ── ARCHITECTURE DIAGRAM ───────────────────────────── */
+  .arch-diagram {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    padding: 32px;
+    margin: 24px 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .arch-accounts {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
+    align-items: center;
+    gap: 0;
+  }
+
+  .arch-account {
+    background: var(--bg3);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    text-align: center;
+  }
+
+  .arch-account .acc-label {
+    font-size: 9px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+
+  .arch-account .acc-name {
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .arch-account .acc-services {
+    font-size: 10px;
+    color: var(--text-3);
+    line-height: 1.6;
+  }
+
+  .acc-tooling .acc-label { color: var(--orange); }
+  .acc-dev .acc-label     { color: var(--blue); }
+  .acc-staging .acc-label { color: var(--green); }
+  .acc-prod .acc-label    { color: var(--red); }
+
+  .arch-arrow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 8px;
+    color: var(--text-3);
+    font-size: 18px;
+  }
+
+  .arch-arrow span {
+    font-size: 9px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--orange);
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+    margin-top: 4px;
+  }
+
+  /* ── QUICK REF ──────────────────────────────────────── */
+  .qr-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .qr-item {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    transition: border-color 0.2s;
+  }
+
+  .qr-item:hover { border-color: rgba(255,153,0,0.2); }
+
+  .qr-item .qr-key {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--orange);
+    letter-spacing: 0.03em;
+  }
+
+  .qr-item .qr-val {
+    font-size: 12.5px;
+    color: var(--text-2);
+    line-height: 1.5;
+  }
+
+  /* ── CALLOUT ────────────────────────────────────────── */
+  .callout {
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    margin: 16px 0;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+
+  .callout.warn {
+    background: rgba(239,68,68,0.06);
+    border: 1px solid rgba(239,68,68,0.2);
+  }
+
+  .callout.tip {
+    background: var(--green-l);
+    border: 1px solid rgba(16,185,129,0.2);
+  }
+
+  .callout.info {
+    background: var(--blue-l);
+    border: 1px solid rgba(59,130,246,0.2);
+  }
+
+  .callout .callout-icon {
+    font-size: 18px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .callout .callout-content {
+    flex: 1;
+  }
+
+  .callout .callout-title {
+    font-size: 12px;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .callout.warn .callout-title  { color: var(--red); }
+  .callout.tip  .callout-title  { color: var(--green); }
+  .callout.info .callout-title  { color: var(--blue); }
+
+  .callout p {
+    font-size: 13px;
+    color: var(--text-2);
+    line-height: 1.6;
+  }
+
+  .callout strong { color: var(--text); }
+
+  /* ── STEP ROWS ──────────────────────────────────────── */
+  .step-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .step-item {
+    display: flex;
+    gap: 0;
+    position: relative;
+  }
+
+  .step-item:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: 19px;
+    top: 44px;
+    bottom: 0;
+    width: 2px;
+    background: var(--border2);
+  }
+
+  .step-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-right: 20px;
+    flex-shrink: 0;
+  }
+
+  .step-circle {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 800;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  .step-right {
+    padding-bottom: 28px;
+    padding-top: 8px;
+    flex: 1;
+  }
+
+  .step-right h3 {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    line-height: 1.4;
+  }
+
+  .step-right p {
+    font-size: 13px;
+    color: var(--text-2);
+    line-height: 1.6;
+  }
+
+  /* ── FOOTER ─────────────────────────────────────────── */
+  footer {
+    text-align: center;
+    padding: 32px 40px;
+    border-top: 1px solid var(--border2);
+    font-size: 12px;
+    color: var(--text-3);
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.05em;
+  }
+
+  footer span { color: var(--orange); }
+
+  /* ── SCROLLBAR ──────────────────────────────────────── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 3px; }
+
+  /* ── RESPONSIVE ─────────────────────────────────────── */
+  @media (max-width: 900px) {
+    .problems-grid, .three-fix, .foundation-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 768px) {
+    .problems-grid, .three-fix, .scenarios-grid,
+    .qr-grid, .foundation-grid { grid-template-columns: 1fr; }
+    .arch-accounts { grid-template-columns: 1fr; }
+    .arch-arrow { transform: rotate(90deg); }
+    .container { padding: 0 20px 60px; }
+    .hero { padding: 60px 20px 50px; }
+  }
+/* ── BACK BUTTON ── */
+.back-home{position:fixed;top:20px;left:20px;z-index:9998;display:inline-flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:var(--orange);background:var(--bg2);border:1px solid rgba(255,153,0,0.3);padding:8px 14px;border-radius:100px;text-decoration:none;transition:all 0.2s ease;backdrop-filter:blur(8px)}
+.back-home:hover{background:var(--orange-m);transform:translateY(-1px);box-shadow:0 4px 12px rgba(255,153,0,0.15)}
+.back-home svg{width:14px;height:14px}
+</style>
+</head>
+<body>
+
+<a href="../index.html" class="back-home"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 12L6 8l4-4"/></svg>Home</a>
+
+<!-- ── HERO ──────────────────────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="domain-badge">DOP-C02 · Domain 1 · SDLC Automation</div>
+  <h1>Multi-Account &<br><span>Cross-Region</span> Pipelines</h1>
+  <p class="hero-sub">Three problems. Three solutions. Every exam question is a variation.</p>
+  <div class="three-problems">
+    <div class="prob-chip"><span class="num">1</span> Identity — Cross-Account IAM Roles</div>
+    <div class="prob-chip"><span class="num">2</span> Encryption — KMS Customer Managed Key</div>
+    <div class="prob-chip"><span class="num">3</span> Geography — Regional Artifact Buckets</div>
+  </div>
+</section>
+
+<div class="container">
+
+<!-- ── SECTION: FOUNDATION ────────────────────────────────────────────────── -->
+<section class="section">
+  <div class="section-label">
+    <div class="icon" style="background:var(--orange-l)">🏗️</div>
+    <h2>Why This Architecture Exists</h2>
+    <div class="accent-line"></div>
+  </div>
+
+  <p style="color:var(--text-2);margin-bottom:20px;font-size:14px;line-height:1.7">
+    In mature organizations, AWS accounts are separated by purpose for security, blast radius reduction, and cost tracking.
+    The pipeline lives in a central <strong style="color:var(--text)">Tooling Account</strong> and must deploy into isolated target accounts
+    — without any account having standing access to another.
+  </p>
+
+  <div class="foundation-grid">
+    <div class="account-card tooling">
+      <div class="card-title">Tooling Account (Shared Services)</div>
+      <ul>
+        <li>CodePipeline lives here</li>
+        <li>CodeBuild lives here</li>
+        <li>Artifact S3 bucket lives here</li>
+        <li>KMS Customer Managed Key lives here</li>
+      </ul>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="account-card target">
+        <div class="card-title">Dev Account</div>
+        <ul><li>Deploy targets: EC2, ECS, Lambda</li></ul>
+      </div>
+      <div class="account-card staging-c">
+        <div class="card-title">Staging Account</div>
+        <ul><li>Deploy targets: EC2, ECS, Lambda</li></ul>
+      </div>
+      <div class="account-card prod">
+        <div class="card-title">Production Account</div>
+        <ul><li>Deploy targets: EC2, ECS, Lambda</li></ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── SECTION: THREE PROBLEMS ─────────────────────────────────────────────── -->
+<section class="section">
+  <div class="section-label">
+    <div class="icon" style="background:var(--orange-l)">⚡</div>
+    <h2>The Three Problems</h2>
+    <div class="accent-line"></div>
+  </div>
+
+  <div class="problems-grid">
+    <div class="problem-card p1">
+      <div class="problem-num">1</div>
+      <div class="problem-tag">Identity</div>
+      <h3>Cross-Account Access</h3>
+      <p>CodePipeline in Account A needs to DO things in Account B. How does it prove it's allowed?</p>
+      <div class="problem-solution">→ Cross-account IAM Role chain</div>
+    </div>
+    <div class="problem-card p2">
+      <div class="problem-num">2</div>
+      <div class="problem-tag">Encryption</div>
+      <h3>KMS Key Access</h3>
+      <p>Artifacts flow through S3 encrypted with a KMS key. Account B can't read artifacts encrypted with Account A's key.</p>
+      <div class="problem-solution">→ CMK with cross-account key policy</div>
+    </div>
+    <div class="problem-card p3">
+      <div class="problem-num">3</div>
+      <div class="problem-tag">Geography</div>
+      <h3>Cross-Region Artifacts</h3>
+      <p>CodePipeline is in us-east-1. You need to deploy to eu-west-1. Artifacts can't travel across regions without a bucket.</p>
+      <div class="problem-solution">→ Regional artifact S3 buckets per region</div>
+    </div>
+  </div>
+
+  <div class="callout info">
+    <div class="callout-icon">💡</div>
+    <div class="callout-content">
+      <div class="callout-title">The Exam Pattern</div>
+      <p>Every multi-account and cross-region question is a variation of one or more of these three problems.
+      <strong>Identify which problem the scenario describes — you already know the answer.</strong></p>
+    </div>
+  </div>
+</section>
+
+<!-- ── SECTION: PROBLEM 1 — IAM ────────────────────────────────────────────── -->
+<section class="section">
+  <div class="section-label">
+    <div class="icon" style="background:var(--orange-l)">🔑</div>
+    <h2>Problem 1 — Identity: The IAM Role Chain</h2>
+    <div class="accent-line"></div>
+  </div>
+
+  <p style="color:var(--text-2);margin-bottom:20px;font-size:14px;line-height:1.7">
+    Every cross-account action in CodePipeline works through role assumption.
+    <strong style="color:var(--text)">Two roles. Always two roles.</strong> One in the tooling account. One in each target account.
+  </p>
+
+  <div class="role-chain">
+    <div class="chain-row">
+      <div class="chain-box" style="border-color:rgba(255,153,0,0.3)">
+        <div class="box-label" style="color:var(--orange)">Tooling Account</div>
+        <div class="box-name">CodePipeline Service Role</div>
+      </div>
+      <div class="chain-arrow">
+        <div class="arrow-label">sts:AssumeRole</div>
+        <div class="arrow-line">→</div>
+      </div>
+      <div class="chain-desc">Has permission to assume the cross-account role in target accounts. Must list each target role ARN explicitly.</div>
+    </div>
+    <div class="chain-row">
+      <div class="chain-box" style="border-color:rgba(59,130,246,0.3)">
+        <div class="box-label" style="color:var(--blue)">Target Account (Prod/Staging/Dev)</div>
+        <div class="box-name">CrossAccountDeployRole</div>
+      </div>
+      <div class="chain-arrow">
+        <div class="arrow-label">Trust Policy</div>
+        <div class="arrow-line">←</div>
+      </div>
+      <div class="chain-desc">Trusts the tooling account pipeline role ARN. Has permissions to run CodeDeploy, ECS, Lambda actions in the target account.</div>
+    </div>
+    <div class="chain-row">
+      <div class="chain-box" style="border-color:rgba(16,185,129,0.3)">
+        <div class="box-label" style="color:var(--green)">Result</div>
+        <div class="box-name">Actions in Target Account</div>
+      </div>
+      <div class="chain-arrow">
+        <div class="arrow-label">executes</div>
+        <div class="arrow-line">→</div>
+      </div>
+      <div class="chain-desc">CodeDeploy, ECS update service, Lambda update function — all executed in the target account via the assumed role.</div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px">
+    <div>
+      <p style="font-size:12px;color:var(--orange);font-family:'JetBrains Mono',monospace;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:10px">Role 1 — Pipeline Service Role (Tooling)</p>
+      <div class="code-wrapper">
+        <div class="code-header">
+          <div class="dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
+          <span class="file-name">pipeline-service-role-policy.json</span>
+          <span class="lang-tag">JSON</span>
+        </div>
+        <pre><span class="c-comment">// Key permissions needed</span>
+{
+  <span class="c-key">"Action"</span>: <span class="c-str">"sts:AssumeRole"</span>,
+  <span class="c-key">"Resource"</span>: [
+    <span class="c-str">"arn:aws:iam::PROD:role/CrossAccountDeployRole"</span>,
+    <span class="c-str">"arn:aws:iam::STAGING:role/CrossAccountDeployRole"</span>
+  ]
+},
+{
+  <span class="c-key">"Action"</span>: [
+    <span class="c-str">"s3:GetObject"</span>, <span class="c-str">"s3:PutObject"</span>
+  ],
+  <span class="c-key">"Resource"</span>: <span class="c-str">"arn:aws:s3:::artifact-bucket/*"</span>
+},
+{
+  <span class="c-key">"Action"</span>: [
+    <span class="c-str">"kms:GenerateDataKey"</span>,
+    <span class="c-str">"kms:Decrypt"</span>
+  ],
+  <span class="c-key">"Resource"</span>: <span class="c-str">"arn:aws:kms:::key/CMK_ID"</span>
+}</pre>
+      </div>
+    </div>
+    <div>
+      <p style="font-size:12px;color:var(--blue);font-family:'JetBrains Mono',monospace;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:10px">Role 2 — Cross-Account Role (Target)</p>
+      <div class="code-wrapper">
+        <div class="code-header">
+          <div class="dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
+          <span class="file-name">cross-account-role-trust.json</span>
+          <span class="lang-tag">JSON</span>
+        </div>
+        <pre><span class="c-comment">// Trust policy — who can assume this role</span>
+{
+  <span class="c-key">"Statement"</span>: [{
+    <span class="c-key">"Effect"</span>: <span class="c-str">"Allow"</span>,
+    <span class="c-key">"Principal"</span>: {
+      <span class="c-key">"AWS"</span>: <span class="c-str">"arn:aws:iam::TOOLING:role/CodePipelineServiceRole"</span>
+    },
+    <span class="c-key">"Action"</span>: <span class="c-str">"sts:AssumeRole"</span>
+  }]
+}
+
+<span class="c-comment">// Permission policy — what it can DO</span>
+{
+  <span class="c-key">"Action"</span>: [
+    <span class="c-str">"codedeploy:CreateDeployment"</span>,
+    <span class="c-str">"s3:GetObject"</span>,
+    <span class="c-str">"kms:Decrypt"</span>
+  ]
+}</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── SECTION: PROBLEM 2 — KMS ────────────────────────────────────────────── -->
+<section class="section">
+  <div class="section-label">
+    <div class="icon" style="background:var(--purple-l)">🔐</div>
+    <h2>Problem 2 — Encryption: KMS & S3 Policies</h2>
+    <div class="accent-line"></div>
+  </div>
+
+  <div class="callout warn">
+    <div class="callout-icon">⚠️</div>
+    <div class="callout-content">
+      <div class="callout-title">Critical — AWS-Managed Keys Cannot Be Used Cross-Account</div>
+      <p>This is a hard AWS restriction. You <strong>must</strong> use a <strong>Customer Managed Key (CMK)</strong>
+      for all cross-account pipelines. If the scenario says "the S3 and IAM configs look correct but it still fails"
+      — the answer is always the AWS-managed key limitation.</p>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px">
+    <div>
+      <p style="font-size:12px;color:var(--purple);font-family:'JetBrains Mono',monospace;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:10px">KMS CMK Key Policy</p>
+      <div class="code-wrapper">
+        <div class="code-header">
+          <div class="dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
+          <span class="file-name">cmk-key-policy.json</span>
+          <span class="lang-tag">JSON</span>
+        </div>
+        <pre><span class="c-comment">// Tooling account — full access</span>
+{
+  <span class="c-key">"Sid"</span>: <span class="c-str">"ToolingFullAccess"</span>,
+  <span class="c-key">"Principal"</span>: {
+    <span class="c-key">"AWS"</span>: <span class="c-str">"arn:aws:iam::TOOLING:root"</span>
+  },
+  <span class="c-key">"Action"</span>: <span class="c-str">"kms:*"</span>
+},
+<span class="c-comment">// Target accounts — decrypt only</span>
+{
+  <span class="c-key">"Sid"</span>: <span class="c-str">"CrossAccountDecrypt"</span>,
+  <span class="c-key">"Principal"</span>: {
+    <span class="c-key">"AWS"</span>: [
+      <span class="c-str">"arn:aws:iam::PROD:role/CrossAccountDeployRole"</span>,
+      <span class="c-str">"arn:aws:iam::STAGING:role/CrossAccountDeployRole"</span>
+    ]
+  },
+  <span class="c-key">"Action"</span>: [
+    <span class="c-str">"kms:Decrypt"</span>,
+    <span class="c-str">"kms:DescribeKey"</span>
+  ]
+}</pre>
+      </div>
+    </div>
+    <div>
+      <p style="font-size:12px;color:var(--blue);font-family:'JetBrains Mono',monospace;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:10px">S3 Bucket Policy</p>
+      <div class="code-wrapper">
+        <div class="code-header">
+          <div class="dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
+          <span class="file-name">artifact-bucket-policy.json</span>
+          <span class="lang-tag">JSON</span>
+        </div>
+        <pre><span class="c-comment">// Allow target accounts to read artifacts</span>
+{
+  <span class="c-key">"Sid"</span>: <span class="c-str">"CrossAccountRead"</span>,
+  <span class="c-key">"Effect"</span>: <span class="c-str">"Allow"</span>,
+  <span class="c-key">"Principal"</span>: {
+    <span class="c-key">"AWS"</span>: [
+      <span class="c-str">"arn:aws:iam::PROD:role/CrossAccountDeployRole"</span>,
+      <span class="c-str">"arn:aws:iam::STAGING:role/CrossAccountDeployRole"</span>
+    ]
+  },
+  <span class="c-key">"Action"</span>: [
+    <span class="c-str">"s3:GetObject"</span>,
+    <span class="c-str">"s3:GetObjectVersion"</span>,
+    <span class="c-str">"s3:GetBucketVersioning"</span>,
+    <span class="c-str">"s3:ListBucket"</span>
+  ],
+  <span class="c-key">"Resource"</span>: [
+    <span class="c-str">"arn:aws:s3:::artifact-bucket"</span>,
+    <span class="c-str">"arn:aws:s3:::artifact-bucket/*"</span>
+  ]
+}</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout warn" style="margin-top:16px">
+    <div class="callout-icon">⚠️</div>
+    <div class="callout-content">
+      <div class="callout-title">Dual Permission Requirement — The Most Tested Concept</div>
+      <p>KMS key policies are <strong>resource-based policies</strong> — separate from IAM. Even if the IAM role has
+      <code style="background:rgba(255,255,255,0.08);padding:1px 6px;border-radius:3px;font-family:'JetBrains Mono',monospace;font-size:11px">kms:Decrypt</code> in its permission policy,
+      the KMS key must <strong>also</strong> grant access in its own key policy.
+      Both must allow the action. This is the most common cross-account failure on the exam.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── SECTION: THREE FIX RULE ─────────────────────────────────────────────── -->
+<section class="section">
+  <div class="section-label">
+    <div class="icon" style="background:var(--red-l)">🔧</div>
+    <h2>The Three-Fix Rule — Memorize This</h2>
+    <div class="accent-line"></div>
+  </div>
+
+  <p style="color:var(--text-2);margin-bottom:20px;font-size:14px;line-height:1.7">
+    When a cross-account deployment fails, the complete fix always touches all three layers simultaneously.
+    Fix one or two — still broken. Fix all three — works.
+  </p>
+
+  <div class="three-fix">
+    <div class="fix-card iam">
+      <div class="fix-number">1</div>
+      <h3>IAM Role Chain</h3>
+      <p>Tooling pipeline role: <code style="font-family:'JetBrains Mono',monospace;font-size:11px">sts:AssumeRole</code> to target.<br>Target role: trust policy + deploy actions.</p>
+    </div>
+    <div class="fix-card kms">
+      <div class="fix-number">2</div>
+      <h3>KMS Key Policy</h3>
+      <p>CMK (not AWS-managed). Key policy grants target role <code style="font-family:'JetBrains Mono',monospace;font-size:11px">kms:Decrypt</code> + <code style="font-family:'JetBrains Mono',monospace;font-size:11px">kms:DescribeKey</code>.</p>
+    </div>
+    <div class="fix-card s3">
+      <div class="fix-number">3</div>
+      <h3>S3 Bucket Policy</h3>
+      <p>Bucket policy grants target role <code style="font-family:'JetBrains Mono',monospace;font-size:11px">s3:GetObject</code> + <code style="font-family:'JetBrains Mono',monospace;font-size:11px">s3:GetObjectVersion</code>.</p>
+    </div>
+  </div>
+
+  <div class="fix-connector">Fix 1 of 3 → still broken · Fix 2 of 3 → still broken · Fix all 3 → works</div>
+</section>
+
+<!-- ── SECTION: PROBLEM 3 — CROSS-REGION ──────────────────────────────────── -->
+<section class="section">
+  <div class="section-label">
+    <div class="icon" style="background:var(--teal-l)">🌍</div>
+    <h2>Problem 3 — Geography: Cross-Region Pipelines</h2>
+    <div class="accent-line"></div>
+  </div>
+
+  <p style="color:var(--text-2);margin-bottom:20px;font-size:14px;line-height:1.7">
+    CodePipeline is a regional service. When you need to deploy to a different region,
+    artifacts in us-east-1 S3 cannot be read by CodeDeploy in eu-west-1 — the bucket is in a different region.
+    <strong style="color:var(--text)">For every region you deploy to: dedicated S3 bucket + dedicated CMK in that region.</strong>
+  </p>
+
+  <div class="code-wrapper">
+    <div class="code-header">
+      <div class="dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
+      <span class="file-name">cross-region-pipeline-action.json</span>
+      <span class="lang-tag">JSON</span>
+    </div>
+    <pre><span class="c-comment">// Cross-region deploy action — "region" field is the key</span>
+{
+  <span class="c-key">"name"</span>: <span class="c-str">"Deploy-EU"</span>,
+  <span class="c-key">"actions"</span>: [{
+    <span class="c-key">"name"</span>: <span class="c-str">"DeployToEU"</span>,
+    <span class="c-key">"actionTypeId"</span>: {
+      <span class="c-key">"category"</span>: <span class="c-str">"Deploy"</span>,
+      <span class="c-key">"owner"</span>: <span class="c-str">"AWS"</span>,
+      <span class="c-key">"provider"</span>: <span class="c-str">"CodeDeploy"</span>,
+      <span class="c-key">"version"</span>: <span class="c-str">"1"</span>
+    },
+    <span class="c-key">"region"</span>: <span class="c-str">"eu-west-1"</span>,          <span class="c-comment">// ← tells CodePipeline to use eu-west-1 artifact bucket</span>
+    <span class="c-key">"inputArtifacts"</span>: [{ <span class="c-key">"name"</span>: <span class="c-str">"BuildArtifact"</span> }],
+    <span class="c-key">"configuration"</span>: {
+      <span class="c-key">"ApplicationName"</span>: <span class="c-str">"MyApp-EU"</span>,
+      <span class="c-key">"DeploymentGroupName"</span>: <span class="c-str">"MyApp-EU-Production"</span>
+    }
+  }]
+}</pre>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px">
+    <div style="background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:20px">
+      <div style="font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--orange);font-weight:600;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px">us-east-1 (primary)</div>
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:8px">
+        <li style="font-size:13px;color:var(--text-2);display:flex;align-items:center;gap:8px"><span style="color:var(--green)">✓</span> S3: codepipeline-us-east-1-artifacts</li>
+        <li style="font-size:13px;color:var(--text-2);display:flex;align-items:center;gap:8px"><span style="color:var(--green)">✓</span> KMS CMK in us-east-1</li>
+        <li style="font-size:13px;color:var(--text-2);display:flex;align-items:center;gap:8px"><span style="color:var(--green)">✓</span> CodePipeline + CodeBuild here</li>
+      </ul>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:20px">
+      <div style="font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--teal);font-weight:600;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px">eu-west-1 (secondary)</div>
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:8px">
+        <li style="font-size:13px;color:var(--text-2);display:flex;align-items:center;gap:8px"><span style="color:var(--red)">→</span> S3: codepipeline-eu-west-1-artifacts <span style="color:var(--red);font-size:11px">(must pre-exist)</span></li>
+        <li style="font-size:13px;color:var(--text-2);display:flex;align-items:center;gap:8px"><span style="color:var(--red)">→</span> KMS CMK in eu-west-1 <span style="color:var(--red);font-size:11px">(must pre-exist)</span></li>
+        <li style="font-size:13px;color:var(--text-2);display:flex;align-items:center;gap:8px"><span style="color:var(--teal)">✓</span> CodeDeploy target here</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="callout warn" style="margin-top:16px">
+    <div class="callout-icon">⚠️</div>
+    <div class="callout-content">
+      <div class="callout-title">Exam Trap — Missing Regional Resources</div>
+      <p>Cross-region deploy action is configured correctly but the pipeline fails. The cause is a
+      <strong>missing S3 bucket or KMS CMK in the target region</strong>.
+      The regional bucket and key must be pre-created — CodePipeline does not create them automatically.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── SECTION: ORGANIZATIONS ─────────────────────────────────────────────── -->
+<section class="section">
+  <div class="section-label">
+    <div class="icon" style="background:var(--green-l)">🏢</div>
+    <h2>AWS Organizations — Scale Without Manual Work</h2>
+    <div class="accent-line"></div>
+  </div>
+
+  <p style="color:var(--text-2);margin-bottom:20px;font-size:14px;line-height:1.7">
+    When you have dozens of accounts, managing cross-account roles one by one doesn't scale.
+    Two Organization features solve this at scale.
+  </p>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <div style="background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:24px">
+      <div style="font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--green);font-weight:600;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px">CloudFormation StackSets</div>
+      <h3 style="font-size:14px;font-weight:700;margin-bottom:10px">Deploy cross-account role to all accounts in an OU automatically</h3>
+      <p style="font-size:13px;color:var(--text-2);line-height:1.6;margin-bottom:14px">
+        Define the CrossAccountDeployRole once as a CloudFormation template.
+        Deploy via StackSet targeting the entire Organization or specific OUs.
+        New accounts added to the OU automatically get the role.
+      </p>
+      <div class="badge badge-green">Exam Answer for 50+ accounts</div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:24px">
+      <div style="font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--red);font-weight:600;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px">Service Control Policies (SCPs)</div>
+      <h3 style="font-size:14px;font-weight:700;margin-bottom:10px">Prevent production accounts from creating their own pipelines</h3>
+      <p style="font-size:13px;color:var(--text-2);line-height:1.6;margin-bottom:14px">
+        SCP on the Production OU denies <code style="font-family:'JetBrains Mono',monospace;font-size:11px">codepipeline:*</code> and <code style="font-family:'JetBrains Mono',monospace;font-size:11px">codebuild:*</code>.
+        Production accounts can only receive deployments — they cannot create their own pipelines.
+        <strong style="color:var(--red)">SCPs override IAM — even correctly configured roles are blocked.</strong>
+      </p>
+      <div class="badge badge-red">Exam Trap — SCP blocks correct IAM</div>
+    </div>
+  </div>
+
+  <div class="code-wrapper" style="margin-top:16px">
+    <div class="code-header">
+      <div class="dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
+      <span class="file-name">cross-account-role-stackset.yaml</span>
+      <span class="lang-tag">CloudFormation StackSet</span>
+    </div>
+    <pre><span class="c-comment"># Deployed to all target accounts via StackSet — one template, all accounts</span>
+<span class="c-key">Resources</span>:
+  <span class="c-val">CrossAccountDeployRole</span>:
+    <span class="c-key">Type</span>: <span class="c-str">AWS::IAM::Role</span>
+    <span class="c-key">Properties</span>:
+      <span class="c-key">RoleName</span>: <span class="c-str">CrossAccountDeployRole</span>
+      <span class="c-key">AssumeRolePolicyDocument</span>:
+        <span class="c-key">Statement</span>:
+          - <span class="c-key">Effect</span>: <span class="c-str">Allow</span>
+            <span class="c-key">Principal</span>:
+              <span class="c-key">AWS</span>: <span class="c-purple">!Sub</span> <span class="c-str">"arn:aws:iam::${ToolingAccountId}:role/CodePipelineServiceRole"</span>
+            <span class="c-key">Action</span>: <span class="c-str">sts:AssumeRole</span>
+      <span class="c-key">Policies</span>:
+        - <span class="c-key">PolicyName</span>: <span class="c-str">DeployPolicy</span>
+          <span class="c-key">PolicyDocument</span>:
+            <span class="c-key">Statement</span>:
+              - <span class="c-key">Effect</span>: <span class="c-str">Allow</span>
+                <span class="c-key">Action</span>:
+                  - <span class="c-str">codedeploy:*</span>
+                  - <span class="c-str">s3:GetObject*</span>
+                  - <span class="c-str">kms:Decrypt</span>
+                  - <span class="c-str">kms:DescribeKey</span>
+                <span class="c-key">Resource</span>: <span class="c-str">"*"</span></pre>
+  </div>
+</section>
+
+<!-- ── SECTION: EXAM SCENARIOS ─────────────────────────────────────────────── -->
+<section class="section">
+  <div class="section-label">
+    <div class="icon" style="background:var(--red-l)">🎯</div>
+    <h2>DOP-C02 Exam Scenarios</h2>
+    <div class="accent-line"></div>
+  </div>
+
+  <div class="scenarios-grid">
+    <div class="scenario-card">
+      <div class="scenario-num">Scenario 01</div>
+      <h3>Classic Cross-Account Failure</h3>
+      <div class="question">"CodePipeline in the tooling account fails deploying to production. The cross-account IAM role exists and has CodeDeploy permissions. What is missing?"</div>
+      <div class="answer-block">
+        <div class="answer-label">Answer</div>
+        <p><strong>KMS key policy or S3 bucket policy</strong> (or both). The IAM role existing is not enough — resource-based policies on KMS and S3 must also grant access. The question tells you the role is fine — so the gap is always KMS or S3.</p>
+      </div>
+    </div>
+    <div class="scenario-card">
+      <div class="scenario-num">Scenario 02</div>
+      <h3>Cross-Region Artifact Failure</h3>
+      <div class="question">"CodePipeline deploys to us-east-1 successfully but fails deploying the same artifact to eu-west-1. The cross-region action is configured. What is the most likely cause?"</div>
+      <div class="answer-block">
+        <div class="answer-label">Answer</div>
+        <p><strong>Missing S3 artifact bucket or KMS CMK in eu-west-1.</strong> Cross-region actions require regional buckets and regional CMKs pre-created. The pipeline cannot replicate artifacts to a region with no artifact bucket.</p>
+      </div>
+    </div>
+    <div class="scenario-card">
+      <div class="scenario-num">Scenario 03</div>
+      <h3>AWS-Managed Key Failure</h3>
+      <div class="question">"A team sets up cross-account CodePipeline. S3 bucket policy and IAM roles are correctly configured but the target account cannot read build artifacts. What is the issue?"</div>
+      <div class="answer-block">
+        <div class="answer-label">Answer</div>
+        <p><strong>The pipeline uses an AWS-managed KMS key</strong>, which cannot be used cross-account. Fix: create a Customer Managed Key, update the pipeline to use it, and grant the target role decrypt permissions in the CMK key policy.</p>
+      </div>
+    </div>
+    <div class="scenario-card">
+      <div class="scenario-num">Scenario 04</div>
+      <h3>Organization-Scale Role Deployment</h3>
+      <div class="question">"A company has 50 AWS accounts in an Organization. They want all accounts to have a cross-account deploy role consistently without visiting each account manually."</div>
+      <div class="answer-block">
+        <div class="answer-label">Answer</div>
+        <p><strong>CloudFormation StackSets</strong> targeting the Organization or OU. Not Lambda SDK loops. Not manual IAM visits. Not AWS Config rules.</p>
+      </div>
+    </div>
+    <div class="scenario-card">
+      <div class="scenario-num">Scenario 05</div>
+      <h3>SCP Blocking Deployments</h3>
+      <div class="question">"A pipeline deployed to production for months. After moving the production account to a new OU, deployments started failing. No pipeline config changed. What happened?"</div>
+      <div class="answer-block">
+        <div class="answer-label">Answer</div>
+        <p><strong>A Service Control Policy on the new OU</strong> is denying the actions the cross-account role needs. SCPs override even correctly configured IAM roles — SCP deny beats IAM allow, always.</p>
+      </div>
+    </div>
+    <div class="scenario-card">
+      <div class="scenario-num">Scenario 06</div>
+      <h3>Cross-Account AND Cross-Region</h3>
+      <div class="question">"Pipeline in tooling account (us-east-1) must deploy to production account in eu-west-1. Deployment fails. Everything else is correctly configured except one thing."</div>
+      <div class="answer-block">
+        <div class="answer-label">Answer</div>
+        <p>Check all <strong>6 requirements</strong>: IAM roles (both), KMS policy (us-east-1), S3 policy (us-east-1), S3 bucket in eu-west-1, KMS CMK in eu-west-1, cross-account role access to eu-west-1 resources.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── SECTION: QUICK REF ───────────────────────────────────────────────────── -->
+<section class="section">
+  <div class="section-label">
+    <div class="icon" style="background:var(--orange-l)">📋</div>
+    <h2>Quick Reference Card</h2>
+    <div class="accent-line"></div>
+  </div>
+
+  <div class="qr-grid">
+    <div class="qr-item">
+      <span class="qr-key">Role chain</span>
+      <span class="qr-val">Pipeline role (tooling) assumes cross-account role (target) — always 2 roles</span>
+    </div>
+    <div class="qr-item">
+      <span class="qr-key">Trust policy</span>
+      <span class="qr-val">Target role trusts the tooling account pipeline role ARN explicitly</span>
+    </div>
+    <div class="qr-item">
+      <span class="qr-key">AWS-managed key</span>
+      <span class="qr-val">CANNOT be used cross-account — must use Customer Managed Key (CMK)</span>
+    </div>
+    <div class="qr-item">
+      <span class="qr-key">KMS key policy</span>
+      <span class="qr-val">Resource-based — must grant target role decrypt separately from IAM policy</span>
+    </div>
+    <div class="qr-item">
+      <span class="qr-key">S3 bucket policy</span>
+      <span class="qr-val">Must grant target role read access — separate from IAM, both required</span>
+    </div>
+    <div class="qr-item">
+      <span class="qr-key">Three-fix rule</span>
+      <span class="qr-val">IAM + KMS key policy + S3 bucket policy — all three required together</span>
+    </div>
+    <div class="qr-item">
+      <span class="qr-key">Cross-region artifacts</span>
+      <span class="qr-val">Regional S3 bucket + regional CMK required per target region — pre-created</span>
+    </div>
+    <div class="qr-item">
+      <span class="qr-key">Cross-region config</span>
+      <span class="qr-val">"region" field on pipeline action + pre-created regional artifact buckets</span>
+    </div>
+    <div class="qr-item">
+      <span class="qr-key">StackSets for scale</span>
+      <span class="qr-val">Deploy cross-account role to all OU accounts automatically — scales to any size</span>
+    </div>
+    <div class="qr-item">
+      <span class="qr-key">SCP blocking deploys</span>
+      <span class="qr-val">SCPs override IAM — check OU-level SCPs when permissions look correct but fail</span>
+    </div>
+    <div class="qr-item">
+      <span class="qr-key">AWS-managed key symptom</span>
+      <span class="qr-val">S3 and IAM look correct but decrypt still fails cross-account</span>
+    </div>
+    <div class="qr-item">
+      <span class="qr-key">Combined scenario</span>
+      <span class="qr-val">Cross-account AND cross-region = 6 requirements to check simultaneously</span>
+    </div>
+  </div>
+</section>
+
+</div><!-- /container -->
+
+<footer>
+  <span>AWS Certified DevOps Engineer Professional</span> · DOP-C02 · Domain 1: SDLC Automation ·
+  Multi-Account & Cross-Region Pipeline Patterns · Study Reference
+</footer>
+
+</body>
+</html>

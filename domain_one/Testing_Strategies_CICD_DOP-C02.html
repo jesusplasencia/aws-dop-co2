@@ -1,0 +1,1638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Testing Strategies in CI/CD — DOP-C02</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #F7F4EF;
+  --bg2:      #EDE9E2;
+  --bg3:      #E3DED6;
+  --ink:      #1A1612;
+  --ink2:     #4A443C;
+  --ink3:     #8A837A;
+  --ink4:     #B8B0A6;
+  --paper:    #FDFAF6;
+  --paper2:   #F5F1EB;
+
+  --unit:     #1A6B4A;
+  --unit-l:   #E8F4EE;
+  --unit-m:   rgba(26,107,74,0.12);
+  --unit-b:   rgba(26,107,74,0.25);
+
+  --integ:    #1E4D8C;
+  --integ-l:  #EAF0FA;
+  --integ-m:  rgba(30,77,140,0.12);
+  --integ-b:  rgba(30,77,140,0.25);
+
+  --e2e:      #7B2D8B;
+  --e2e-l:    #F5EDF8;
+  --e2e-m:    rgba(123,45,139,0.12);
+  --e2e-b:    rgba(123,45,139,0.25);
+
+  --smoke:    #C4520A;
+  --smoke-l:  #FDF0E8;
+  --smoke-m:  rgba(196,82,10,0.12);
+  --smoke-b:  rgba(196,82,10,0.25);
+
+  --red:      #C42B2B;
+  --red-l:    #FDEAEA;
+  --green:    #1A6B4A;
+  --amber:    #B87800;
+  --amber-l:  #FDF5E0;
+
+  --border:   rgba(26,22,18,0.1);
+  --border2:  rgba(26,22,18,0.06);
+  --code-bg:  #1C1916;
+  --code-fg:  #C8D0C0;
+
+  --r:        10px;
+  --r-sm:     6px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Outfit', sans-serif;
+  font-size: 15px;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+/* ── HEADER ── */
+.hero {
+  background: var(--ink);
+  padding: 72px 56px 60px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-pattern {
+  position: absolute;
+  inset: 0;
+  opacity: 0.04;
+  background-image: repeating-linear-gradient(
+    45deg,
+    #fff 0px, #fff 1px,
+    transparent 1px, transparent 50%
+  );
+  background-size: 24px 24px;
+}
+
+.hero-inner {
+  position: relative;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.hero-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  animation: fadeUp 0.5s ease both;
+}
+
+.eyebrow-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--bg3);
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.12);
+  padding: 4px 12px;
+  border-radius: 100px;
+}
+
+.eyebrow-line {
+  flex: 1;
+  height: 1px;
+  background: rgba(255,255,255,0.08);
+}
+
+.hero h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(36px, 6vw, 68px);
+  font-weight: 900;
+  line-height: 1.05;
+  color: var(--paper);
+  letter-spacing: -0.01em;
+  margin-bottom: 20px;
+  animation: fadeUp 0.5s 0.1s ease both;
+}
+
+.hero h1 span {
+  font-style: italic;
+  color: var(--bg3);
+}
+
+.hero-sub {
+  font-size: 16px;
+  color: var(--ink4);
+  max-width: 580px;
+  margin-bottom: 36px;
+  font-weight: 300;
+  animation: fadeUp 0.5s 0.2s ease both;
+}
+
+.test-types-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  animation: fadeUp 0.5s 0.3s ease both;
+}
+
+.type-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 7px 14px;
+  border-radius: 100px;
+  border: 1px solid transparent;
+  cursor: default;
+  transition: all 0.2s;
+}
+
+.type-chip:hover { transform: translateY(-2px); }
+
+.tc-unit  { background: var(--unit-m);  border-color: var(--unit-b);  color: #4DC990; }
+.tc-integ { background: var(--integ-m); border-color: var(--integ-b); color: #7EB3FF; }
+.tc-e2e   { background: var(--e2e-m);   border-color: var(--e2e-b);   color: #D490E8; }
+.tc-smoke { background: var(--smoke-m); border-color: var(--smoke-b); color: #FF9955; }
+
+.type-chip .tc-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+}
+
+.tc-unit  .tc-dot { background: #4DC990; }
+.tc-integ .tc-dot { background: #7EB3FF; }
+.tc-e2e   .tc-dot { background: #D490E8; }
+.tc-smoke .tc-dot { background: #FF9955; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── PIPELINE VISUAL ── */
+.pipeline-section {
+  background: var(--paper);
+  border-bottom: 1px solid var(--border);
+  padding: 40px 56px;
+}
+
+.pipeline-inner {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.pipeline-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-bottom: 20px;
+}
+
+.pipeline-flow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr) auto repeat(4, 1fr);
+  align-items: center;
+  gap: 0;
+  overflow-x: auto;
+}
+
+.pf-stage {
+  border-radius: var(--r-sm);
+  padding: 14px 12px;
+  text-align: center;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+}
+
+.pf-stage:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+
+.pf-unit  { background: var(--unit-l);  border-color: var(--unit-b); }
+.pf-integ { background: var(--integ-l); border-color: var(--integ-b); }
+.pf-e2e   { background: var(--e2e-l);   border-color: var(--e2e-b); }
+.pf-smoke { background: var(--smoke-l); border-color: var(--smoke-b); }
+.pf-other { background: var(--paper2);  border-color: var(--border); }
+
+.pf-icon { font-size: 20px; margin-bottom: 6px; }
+.pf-name { font-size: 11px; font-weight: 700; margin-bottom: 3px; }
+.pf-where { font-size: 10px; font-family: 'JetBrains Mono', monospace; color: var(--ink3); }
+
+.pf-unit  .pf-name { color: var(--unit); }
+.pf-integ .pf-name { color: var(--integ); }
+.pf-e2e   .pf-name { color: var(--e2e); }
+.pf-smoke .pf-name { color: var(--smoke); }
+.pf-other .pf-name { color: var(--ink2); }
+
+.pf-arrow {
+  text-align: center;
+  font-size: 18px;
+  color: var(--ink4);
+  padding: 0 4px;
+}
+
+/* ── MAIN CONTENT ── */
+.main {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 56px 56px 100px;
+}
+
+/* ── TEST SECTION CARDS ── */
+.test-section {
+  margin-bottom: 72px;
+}
+
+.ts-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid var(--border2);
+  position: relative;
+}
+
+.ts-header::after {
+  content: '';
+  position: absolute;
+  bottom: -2px; left: 0;
+  width: 80px; height: 2px;
+}
+
+.ts-unit  .ts-header::after { background: var(--unit); }
+.ts-integ .ts-header::after { background: var(--integ); }
+.ts-e2e   .ts-header::after { background: var(--e2e); }
+.ts-smoke .ts-header::after { background: var(--smoke); }
+
+.ts-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 64px;
+  font-weight: 900;
+  line-height: 1;
+  flex-shrink: 0;
+  width: 60px;
+  opacity: 0.15;
+}
+
+.ts-unit  .ts-num { color: var(--unit); }
+.ts-integ .ts-num { color: var(--integ); }
+.ts-e2e   .ts-num { color: var(--e2e); }
+.ts-smoke .ts-num { color: var(--smoke); }
+
+.ts-title-block { flex: 1; padding-top: 8px; }
+
+.ts-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ts-unit  .ts-tag { color: var(--unit); }
+.ts-integ .ts-tag { color: var(--integ); }
+.ts-e2e   .ts-tag { color: var(--e2e); }
+.ts-smoke .ts-tag { color: var(--smoke); }
+
+.ts-tag::after {
+  content: '';
+  flex: 0 0 40px; height: 1px;
+}
+
+.ts-unit  .ts-tag::after { background: var(--unit); }
+.ts-integ .ts-tag::after { background: var(--integ); }
+.ts-e2e   .ts-tag::after { background: var(--e2e); }
+.ts-smoke .ts-tag::after { background: var(--smoke); }
+
+.ts-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--ink);
+}
+
+.ts-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.ts-desc {
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 24px;
+}
+
+.ts-desc p {
+  font-size: 14px;
+  color: var(--ink2);
+  line-height: 1.7;
+  margin-bottom: 16px;
+}
+
+.ts-desc p:last-child { margin-bottom: 0; }
+
+.ts-meta {
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 24px;
+}
+
+.ts-meta-title {
+  font-size: 11px;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-bottom: 14px;
+}
+
+.meta-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border2);
+  font-size: 13px;
+}
+
+.meta-row:last-child { border-bottom: none; }
+
+.meta-key {
+  font-weight: 600;
+  color: var(--ink);
+  min-width: 90px;
+  flex-shrink: 0;
+  font-size: 12px;
+}
+
+.meta-val {
+  color: var(--ink2);
+  line-height: 1.5;
+}
+
+/* ── CODE BLOCKS ── */
+.code-wrap {
+  border-radius: var(--r);
+  overflow: hidden;
+  border: 1px solid rgba(0,0,0,0.2);
+  margin: 0 0 20px;
+}
+
+.code-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: rgba(255,255,255,0.04);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.code-dots { display: flex; gap: 6px; }
+.code-dots span { width: 10px; height: 10px; border-radius: 50%; }
+.cd-r { background: #FF5F57; } .cd-y { background: #FFBD2E; } .cd-g { background: #28C840; }
+
+.code-fn {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: #6B7280;
+  letter-spacing: 0.04em;
+}
+
+.code-type {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.ct-unit  { background: var(--unit-m);  color: var(--unit); border: 1px solid var(--unit-b); }
+.ct-integ { background: var(--integ-m); color: var(--integ); border: 1px solid var(--integ-b); }
+.ct-e2e   { background: var(--e2e-m);   color: var(--e2e); border: 1px solid var(--e2e-b); }
+.ct-smoke { background: var(--smoke-m); color: var(--smoke); border: 1px solid var(--smoke-b); }
+.ct-bash  { background: rgba(0,0,0,0.3); color: #9CA3AF; border: 1px solid rgba(255,255,255,0.08); }
+
+pre {
+  background: var(--code-bg);
+  padding: 20px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  line-height: 1.8;
+  color: var(--code-fg);
+  overflow-x: auto;
+}
+
+.ck  { color: #FF7B72; }
+.cs  { color: #A5D6FF; }
+.cv  { color: #79C0FF; }
+.cc  { color: #484F58; font-style: italic; }
+.cg  { color: #56D364; }
+.co  { color: #FFA657; }
+.cy  { color: #E3B341; }
+.cp  { color: #D2A8FF; }
+
+/* ── EXAM CALLOUTS ── */
+.exam-callout {
+  border-radius: var(--r);
+  padding: 18px 22px;
+  margin: 16px 0;
+  display: flex;
+  gap: 14px;
+  border-left: 3px solid transparent;
+}
+
+.exam-callout.warn   { background: var(--red-l);   border-left-color: var(--red);   }
+.exam-callout.tip    { background: var(--unit-l);  border-left-color: var(--unit);  }
+.exam-callout.info   { background: var(--integ-l); border-left-color: var(--integ); }
+.exam-callout.note   { background: var(--amber-l); border-left-color: var(--amber); }
+.exam-callout.purple { background: var(--e2e-l);   border-left-color: var(--e2e);  }
+.exam-callout.orange { background: var(--smoke-l); border-left-color: var(--smoke); }
+
+.ec-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+.ec-body { flex: 1; }
+
+.ec-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+  display: block;
+}
+
+.exam-callout.warn   .ec-label { color: var(--red); }
+.exam-callout.tip    .ec-label { color: var(--unit); }
+.exam-callout.info   .ec-label { color: var(--integ); }
+.exam-callout.note   .ec-label { color: var(--amber); }
+.exam-callout.purple .ec-label { color: var(--e2e); }
+.exam-callout.orange .ec-label { color: var(--smoke); }
+
+.ec-body p { font-size: 13.5px; color: var(--ink2); line-height: 1.6; }
+.ec-body strong { color: var(--ink); }
+.ec-body code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  background: rgba(0,0,0,0.06);
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
+/* ── SECTION DIVIDER ── */
+.section-div {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin: 56px 0;
+}
+
+.section-div .sd-line { flex: 1; height: 1px; background: var(--border); }
+.section-div .sd-text {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink4);
+  font-weight: 500;
+}
+
+/* ── PYRAMID ── */
+.pyramid-section {
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 32px;
+  margin-bottom: 40px;
+}
+
+.pyramid-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.pyramid-sub {
+  font-size: 13px;
+  color: var(--ink3);
+  margin-bottom: 24px;
+  font-style: italic;
+}
+
+.pyramid-visual {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 24px;
+}
+
+.pyr-row {
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  transition: all 0.2s;
+  cursor: default;
+}
+
+.pyr-row:hover { filter: brightness(0.96); transform: scaleX(1.01); }
+
+.pyr-e2e   { background: var(--e2e-l);   border: 1px solid var(--e2e-b);   width: 40%; }
+.pyr-integ { background: var(--integ-l); border: 1px solid var(--integ-b); width: 65%; }
+.pyr-unit  { background: var(--unit-l);  border: 1px solid var(--unit-b);  width: 100%; }
+
+.pyr-label { font-size: 13px; font-weight: 700; }
+.pyr-e2e   .pyr-label { color: var(--e2e); }
+.pyr-integ .pyr-label { color: var(--integ); }
+.pyr-unit  .pyr-label { color: var(--unit); }
+
+.pyr-desc { font-size: 12px; color: var(--ink3); font-style: italic; }
+
+.pyramid-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.pyr-card {
+  border-radius: var(--r-sm);
+  padding: 14px 16px;
+  border: 1px solid transparent;
+}
+
+.pyr-card.few   { background: var(--e2e-l);   border-color: var(--e2e-b); }
+.pyr-card.some  { background: var(--integ-l); border-color: var(--integ-b); }
+.pyr-card.many  { background: var(--unit-l);  border-color: var(--unit-b); }
+
+.pyr-card-title {
+  font-size: 11px;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.pyr-card.few   .pyr-card-title { color: var(--e2e); }
+.pyr-card.some  .pyr-card-title { color: var(--integ); }
+.pyr-card.many  .pyr-card-title { color: var(--unit); }
+
+.pyr-card p { font-size: 12.5px; color: var(--ink2); line-height: 1.5; }
+
+/* ── SAST DAST TABLE ── */
+.comparison-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.comp-card {
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  overflow: hidden;
+}
+
+.comp-card-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.comp-card-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.comp-sast .comp-card-tag { color: var(--integ); }
+.comp-dast .comp-card-tag { color: var(--e2e); }
+
+.comp-card-title { font-size: 16px; font-weight: 700; }
+
+.comp-card-body {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.comp-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.comp-row-key {
+  font-weight: 600;
+  min-width: 80px;
+  flex-shrink: 0;
+  font-size: 11px;
+  color: var(--ink3);
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding-top: 1px;
+}
+
+.comp-row-val { color: var(--ink2); line-height: 1.5; }
+
+/* ── QUALITY GATE ── */
+.qgate {
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 28px;
+  margin-bottom: 20px;
+}
+
+.qgate-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.qgate-sub { font-size: 13px; color: var(--ink3); margin-bottom: 20px; font-style: italic; }
+
+.qgate-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.qg-item {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 16px;
+  text-align: center;
+}
+
+.qg-value {
+  font-family: 'Playfair Display', serif;
+  font-size: 32px;
+  font-weight: 900;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.qg-pass .qg-value { color: var(--unit); }
+.qg-cov  .qg-value { color: var(--integ); }
+.qg-fail .qg-value { color: var(--red); }
+
+.qg-label { font-size: 12px; color: var(--ink3); font-weight: 500; }
+
+/* ── EXAM PATTERNS TABLE ── */
+.exam-table-wrap {
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+
+.exam-table-header {
+  background: var(--ink);
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.exam-table-header h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--paper);
+}
+
+.et-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.et-table th {
+  padding: 11px 20px;
+  text-align: left;
+  font-size: 10px;
+  font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+}
+
+.et-table td {
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border2);
+  font-size: 13px;
+  vertical-align: top;
+  line-height: 1.5;
+}
+
+.et-table tr:last-child td { border-bottom: none; }
+.et-table tr:hover td { background: rgba(0,0,0,0.02); }
+
+.et-table td:first-child { color: var(--ink); font-style: italic; }
+.et-table td:last-child  { color: var(--ink2); font-weight: 500; }
+
+/* ── QUICK REF ── */
+.qr-wrap {
+  background: var(--ink);
+  border-radius: var(--r);
+  padding: 32px;
+  margin-bottom: 40px;
+}
+
+.qr-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--paper);
+  margin-bottom: 20px;
+}
+
+.qr-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.qr-item {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: var(--r-sm);
+  padding: 12px 16px;
+  display: flex;
+  gap: 12px;
+  transition: border-color 0.2s;
+}
+
+.qr-item:hover { border-color: rgba(255,255,255,0.15); }
+
+.qr-key {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--bg3);
+  min-width: 130px;
+  flex-shrink: 0;
+  letter-spacing: 0.03em;
+}
+
+.qr-val { font-size: 12.5px; color: rgba(255,255,255,0.5); line-height: 1.5; }
+
+/* ── FOOTER ── */
+footer {
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+  padding: 28px 56px;
+  text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--ink3);
+  letter-spacing: 0.06em;
+}
+
+footer strong { color: var(--ink); }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--bg2); }
+::-webkit-scrollbar-thumb { background: var(--bg3); border-radius: 3px; }
+
+@media (max-width: 1024px) {
+  .hero, .pipeline-section, .main, footer { padding-left: 36px; padding-right: 36px; }
+}
+@media (max-width: 768px) {
+  .hero, .pipeline-section, .main, footer { padding-left: 24px; padding-right: 24px; }
+  .ts-body, .comparison-grid, .qgate-grid, .qr-grid, .pyramid-grid { grid-template-columns: 1fr; }
+  .pipeline-flow { grid-template-columns: repeat(4, 120px); }
+  .ts-header { flex-direction: column; }
+}
+/* ── BACK BUTTON ── */
+.back-home{position:fixed;top:20px;left:20px;z-index:9998;display:inline-flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:var(--unit);background:var(--paper);border:1px solid var(--unit-b);padding:8px 14px;border-radius:100px;text-decoration:none;transition:all 0.2s ease;box-shadow:0 2px 8px rgba(0,0,0,0.08)}
+.back-home:hover{background:var(--unit-l);transform:translateY(-1px);box-shadow:0 4px 12px rgba(26,107,74,0.15)}
+.back-home svg{width:14px;height:14px}
+</style>
+</head>
+<body>
+
+<a href="../index.html" class="back-home"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 12L6 8l4-4"/></svg>Home</a>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-pattern"></div>
+  <div class="hero-inner">
+    <div class="hero-eyebrow">
+      <span class="eyebrow-tag">DOP-C02 · Domain 1 · SDLC Automation</span>
+      <div class="eyebrow-line"></div>
+    </div>
+    <h1>Testing <span>Strategies</span><br>in CI/CD Pipelines</h1>
+    <p class="hero-sub">Not what each test type is — but where it belongs in the pipeline, what triggers it to stop, and which AWS service runs it.</p>
+    <div class="test-types-row">
+      <div class="type-chip tc-unit"><span class="tc-dot"></span>Unit Tests</div>
+      <div class="type-chip tc-integ"><span class="tc-dot"></span>Integration Tests</div>
+      <div class="type-chip tc-e2e"><span class="tc-dot"></span>End-to-End Tests</div>
+      <div class="type-chip tc-smoke"><span class="tc-dot"></span>Smoke Tests</div>
+    </div>
+  </div>
+</header>
+
+<!-- PIPELINE VISUAL -->
+<div class="pipeline-section">
+  <div class="pipeline-inner">
+    <div class="pipeline-label">Pipeline Position — Where Each Test Lives</div>
+    <div class="pipeline-flow">
+      <div class="pf-stage pf-other">
+        <div class="pf-icon">📥</div>
+        <div class="pf-name">Source</div>
+        <div class="pf-where">CodeCommit/GitHub</div>
+      </div>
+      <div class="pf-arrow">→</div>
+      <div class="pf-stage pf-unit">
+        <div class="pf-icon">⚡</div>
+        <div class="pf-name">Unit Tests</div>
+        <div class="pf-where">CodeBuild · build phase</div>
+      </div>
+      <div class="pf-arrow">→</div>
+      <div class="pf-stage pf-integ">
+        <div class="pf-icon">🔗</div>
+        <div class="pf-name">Integration Tests</div>
+        <div class="pf-where">CodeBuild · VPC</div>
+      </div>
+      <div class="pf-arrow">→</div>
+      <div class="pf-stage pf-other">
+        <div class="pf-icon">🚀</div>
+        <div class="pf-name">Deploy Staging</div>
+        <div class="pf-where">CodeDeploy</div>
+      </div>
+      <div class="pf-arrow">→</div>
+      <div class="pf-stage pf-e2e">
+        <div class="pf-icon">🌐</div>
+        <div class="pf-name">E2E Tests</div>
+        <div class="pf-where">CodeBuild · post-staging</div>
+      </div>
+      <div class="pf-arrow">→</div>
+      <div class="pf-stage pf-other">
+        <div class="pf-icon">✋</div>
+        <div class="pf-name">Approval</div>
+        <div class="pf-where">Manual Gate</div>
+      </div>
+      <div class="pf-arrow">→</div>
+      <div class="pf-stage pf-smoke">
+        <div class="pf-icon">💨</div>
+        <div class="pf-name">Smoke Tests</div>
+        <div class="pf-where">ValidateService Hook</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<main class="main">
+
+<!-- ══ UNIT TESTS ══════════════════════════════════════════════════════════ -->
+<section class="test-section ts-unit">
+  <div class="ts-header">
+    <div class="ts-num">01</div>
+    <div class="ts-title-block">
+      <div class="ts-tag">Fastest · Cheapest · Shift-Left</div>
+      <div class="ts-title">Unit Tests</div>
+    </div>
+  </div>
+
+  <div class="ts-body">
+    <div class="ts-desc">
+      <p>Run inside CodeBuild's build phase. Test one function or method in complete isolation — all external dependencies are mocked. No database, no network, no other services involved.</p>
+      <p>Unit tests are the first gate. If they fail, no artifact is produced and nothing moves downstream. This is the <strong>shift-left</strong> principle — catch bugs as early and as cheaply as possible.</p>
+      <p><strong>Shift-left defined:</strong> Moving testing earlier in the pipeline rather than waiting until staging or production. Every step to the left on the timeline is cheaper and faster to fix.</p>
+    </div>
+    <div class="ts-meta">
+      <div class="ts-meta-title">Characteristics</div>
+      <div class="meta-row">
+        <span class="meta-key">Runs in</span>
+        <span class="meta-val">CodeBuild — pre_build or build phase</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-key">Speed</span>
+        <span class="meta-val">Milliseconds to seconds — fastest of all test types</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-key">Dependencies</span>
+        <span class="meta-val">All mocked — no external connections required</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-key">VPC needed</span>
+        <span class="meta-val">No — no private resources accessed</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-key">On failure</span>
+        <span class="meta-val">No artifact produced — pipeline stops immediately</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-key">Run on</span>
+        <span class="meta-val">Every commit, every branch</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-bar">
+      <div class="code-dots"><span class="cd-r"></span><span class="cd-y"></span><span class="cd-g"></span></div>
+      <span class="code-fn">buildspec-unit.yml</span>
+      <span class="code-type ct-unit">Unit Tests</span>
+    </div>
+    <pre><span class="cy">version</span>: <span class="cs">0.2</span>
+
+<span class="cy">phases</span>:
+  <span class="cy">install</span>:
+    <span class="cy">runtime-versions</span>:
+      <span class="cy">nodejs</span>: <span class="cs">18</span>
+    <span class="cy">commands</span>:
+      - npm ci                              <span class="cc"># install dependencies</span>
+
+  <span class="cy">pre_build</span>:
+    <span class="cy">commands</span>:
+      - npm run lint                        <span class="cc"># syntax + style — fail fast</span>
+      - npm audit --audit-level high        <span class="cc"># dependency vulnerability check</span>
+
+  <span class="cy">build</span>:
+    <span class="cy">commands</span>:
+      - npm test -- --ci                    <span class="cc"># Jest unit tests</span>
+      <span class="cc"># Python alternative:</span>
+      <span class="cc"># pytest tests/unit/ --junitxml=results/unit-results.xml</span>
+
+<span class="cy">reports</span>:
+  <span class="cv">UnitTestResults</span>:
+    <span class="cy">files</span>:
+      - <span class="cs">"jest-results.xml"</span>
+    <span class="cy">file-format</span>: <span class="cs">JUNITXML</span>
+  <span class="cv">CoverageReport</span>:
+    <span class="cy">files</span>:
+      - <span class="cs">"coverage/lcov.info"</span>
+    <span class="cy">file-format</span>: <span class="cs">CLOVERXML</span>
+    <span class="cy">coverage-enabled</span>: <span class="cg">yes</span>    <span class="cc"># fail if coverage drops below threshold</span>
+
+<span class="cy">artifacts</span>:
+  <span class="cy">files</span>:
+    - <span class="cs">'**/*'</span>
+  <span class="cy">base-directory</span>: <span class="cs">build</span>
+
+<span class="cy">cache</span>:
+  <span class="cy">paths</span>:
+    - <span class="cs">/root/.npm/**/*</span></pre>
+  </div>
+
+  <div class="exam-callout tip">
+    <span class="ec-icon">🎯</span>
+    <div class="ec-body">
+      <span class="ec-label">Exam Pattern — Quality Gate</span>
+      <p>"Team wants to prevent deployments when code coverage drops below 80%." Answer: <strong>CodeBuild test reports with coverage threshold configured in the build project settings</strong> — not a separate Lambda checking coverage, not a manual code review step.</p>
+    </div>
+  </div>
+</section>
+
+<div class="section-div">
+  <div class="sd-line"></div>
+  <div class="sd-text">Integration Tests</div>
+  <div class="sd-line"></div>
+</div>
+
+<!-- ══ INTEGRATION TESTS ═══════════════════════════════════════════════════ -->
+<section class="test-section ts-integ">
+  <div class="ts-header">
+    <div class="ts-num">02</div>
+    <div class="ts-title-block">
+      <div class="ts-tag">Real Dependencies · VPC Required · Medium Speed</div>
+      <div class="ts-title">Integration Tests</div>
+    </div>
+  </div>
+
+  <div class="ts-body">
+    <div class="ts-desc">
+      <p>Also run inside CodeBuild — but against real infrastructure. Components are tested working together with actual databases, APIs, and queues rather than mocks.</p>
+      <p>This is where VPC configuration becomes critical. If your tests need to hit a real RDS database or ElastiCache cluster, <strong>CodeBuild must be configured to run inside your VPC</strong> with access to those private resources.</p>
+      <p>The VPC + NAT Gateway pattern from cross-region pipelines applies here: CodeBuild in a private subnet needs a NAT Gateway to still reach public package registries while also accessing private resources.</p>
+    </div>
+    <div class="ts-meta">
+      <div class="ts-meta-title">Characteristics</div>
+      <div class="meta-row">
+        <span class="meta-key">Runs in</span>
+        <span class="meta-val">CodeBuild — build or post_build phase</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-key">Speed</span>
+        <span class="meta-val">Seconds to minutes — slower than unit</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-key">Dependencies</span>
+        <span class="meta-val">Real — RDS, ElastiCache, internal APIs, queues</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-key">VPC needed</span>
+        <span class="meta-val">Yes — if hitting private resources</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-key">On failure</span>
+        <span class="meta-val">Artifact not promoted — pipeline stops</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-key">Run on</span>
+        <span class="meta-val">PRs to main + main branch — not every feature commit</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-bar">
+      <div class="code-dots"><span class="cd-r"></span><span class="cd-y"></span><span class="cd-g"></span></div>
+      <span class="code-fn">buildspec-integration.yml</span>
+      <span class="code-type ct-integ">Integration Tests</span>
+    </div>
+    <pre><span class="cy">version</span>: <span class="cs">0.2</span>
+
+<span class="cc"># CodeBuild project must be configured with VPC settings:</span>
+<span class="cc"># vpcId, subnetIds (private), securityGroupIds</span>
+<span class="cc"># Private subnet must have NAT Gateway for internet access</span>
+
+<span class="cy">env</span>:
+  <span class="cy">parameter-store</span>:
+    <span class="cv">DB_HOST</span>: <span class="cs">/myapp/test/db_host</span>         <span class="cc"># RDS endpoint in VPC</span>
+    <span class="cv">DB_PASSWORD</span>: <span class="cs">/myapp/test/db_password</span>
+    <span class="cv">REDIS_HOST</span>: <span class="cs">/myapp/test/redis_host</span>
+
+<span class="cy">phases</span>:
+  <span class="cy">install</span>:
+    <span class="cy">runtime-versions</span>:
+      <span class="cy">nodejs</span>: <span class="cs">18</span>
+    <span class="cy">commands</span>:
+      - npm ci
+
+  <span class="cy">pre_build</span>:
+    <span class="cy">commands</span>:
+      - echo "Running DB migration for test schema..."
+      - npm run db:migrate:test               <span class="cc"># set up test data</span>
+
+  <span class="cy">build</span>:
+    <span class="cy">commands</span>:
+      - npm run test:integration              <span class="cc"># hits real RDS + ElastiCache</span>
+
+  <span class="cy">post_build</span>:
+    <span class="cy">finally</span>:                               <span class="cc"># always runs — even on failure</span>
+      - npm run db:teardown:test             <span class="cc"># clean up test data</span>
+
+<span class="cy">reports</span>:
+  <span class="cv">IntegrationTestResults</span>:
+    <span class="cy">files</span>:
+      - <span class="cs">"test-results/integration-*.xml"</span>
+    <span class="cy">file-format</span>: <span class="cs">JUNITXML</span></pre>
+  </div>
+
+  <div class="exam-callout info">
+    <span class="ec-icon">🎯</span>
+    <div class="ec-body">
+      <span class="ec-label">Exam Pattern — The VPC Trigger</span>
+      <p>"Tests need to access RDS during the CodeBuild build." This phrase triggers the VPC answer: <strong>CodeBuild configured with VPC settings (private subnet) + NAT Gateway for internet access</strong>. Not an internet gateway. Not a public subnet. This is the most common integration test scenario on DOP-C02.</p>
+    </div>
+  </div>
+
+  <div class="exam-callout warn">
+    <span class="ec-icon">⚠️</span>
+    <div class="ec-body">
+      <span class="ec-label">Always Use finally for Cleanup</span>
+      <p>Integration tests that create test data or spin up resources <strong>must clean up in a <code>finally</code> block</strong> — not in a regular <code>commands</code> block. Regular commands stop executing if a test fails. <code>finally</code> always runs regardless of failure. Without this, test environments accumulate stale data.</p>
+    </div>
+  </div>
+</section>
+
+<div class="section-div">
+  <div class="sd-line"></div>
+  <div class="sd-text">End-to-End Tests</div>
+  <div class="sd-line"></div>
+</div>
+
+<!-- ══ E2E TESTS ═══════════════════════════════════════════════════════════ -->
+<section class="test-section ts-e2e">
+  <div class="ts-header">
+    <div class="ts-num">03</div>
+    <div class="ts-title-block">
+      <div class="ts-tag">Post-Staging · Full User Flows · Slowest</div>
+      <div class="ts-title">End-to-End Tests</div>
+    </div>
+  </div>
+
+  <div class="ts-body">
+    <div class="ts-desc">
+      <p>E2E tests run <strong>after a deployment to staging</strong> — not inside CodeBuild build phases. They simulate real user behavior using browser automation (Cypress, Playwright, Selenium) or full API chains against a live deployed environment.</p>
+      <p>The E2E test stage is implemented as a separate CodeBuild project in the pipeline — it runs a different buildspec that launches the test framework against the staging URL passed as an environment variable.</p>
+      <p>If any E2E test fails — the pipeline stops. Production is never touched. The team investigates staging before the next deployment attempt.</p>
+    </div>
+    <div class="ts-meta">
+      <div class="ts-meta-title">Characteristics</div>
+      <div class="meta-row">
+        <span class="meta-key">Runs in</span>
+        <span class="meta-val">Separate CodeBuild stage — after staging deploy</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-key">Speed</span>
+        <span class="meta-val">Minutes to hours — slowest of all test types</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-key">Target</span>
+        <span class="meta-val">Staging environment — live deployed application</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-key">VPC needed</span>
+        <span class="meta-val">Only if staging is in a private network</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-key">On failure</span>
+        <span class="meta-val">Pipeline stops — production never receives deployment</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-key">Run on</span>
+        <span class="meta-val">PRs to main and main branch only — not every commit</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-bar">
+      <div class="code-dots"><span class="cd-r"></span><span class="cd-y"></span><span class="cd-g"></span></div>
+      <span class="code-fn">buildspec-e2e.yml</span>
+      <span class="code-type ct-e2e">E2E Tests</span>
+    </div>
+    <pre><span class="cy">version</span>: <span class="cs">0.2</span>
+
+<span class="cc"># This buildspec runs AFTER deploy to staging</span>
+<span class="cc"># STAGING_URL is injected as environment variable from the pipeline</span>
+
+<span class="cy">env</span>:
+  <span class="cy">variables</span>:
+    <span class="cv">STAGING_URL</span>: <span class="cs">"https://staging.myapp.com"</span>  <span class="cc"># override per pipeline stage</span>
+
+<span class="cy">phases</span>:
+  <span class="cy">install</span>:
+    <span class="cy">runtime-versions</span>:
+      <span class="cy">nodejs</span>: <span class="cs">18</span>
+    <span class="cy">commands</span>:
+      - npm ci
+      - npx cypress verify                  <span class="cc"># verify Cypress is installed correctly</span>
+
+  <span class="cy">pre_build</span>:
+    <span class="cy">commands</span>:
+      - echo "Running E2E against $STAGING_URL"
+      - curl -f $STAGING_URL/health         <span class="cc"># confirm staging is up before tests</span>
+
+  <span class="cy">build</span>:
+    <span class="cy">commands</span>:
+      - npx cypress run
+          --config baseUrl=$STAGING_URL
+          --reporter junit
+          --reporter-options <span class="cs">"mochaFile=results/e2e-[hash].xml"</span>
+      <span class="cc"># Alternative — Playwright:</span>
+      <span class="cc"># npx playwright test --reporter=junit</span>
+
+  <span class="cy">post_build</span>:
+    <span class="cy">finally</span>:
+      - echo "E2E tests complete — check reports"
+
+<span class="cy">reports</span>:
+  <span class="cv">E2ETestResults</span>:
+    <span class="cy">files</span>:
+      - <span class="cs">"results/e2e-*.xml"</span>
+    <span class="cy">file-format</span>: <span class="cs">JUNITXML</span>
+
+<span class="cy">artifacts</span>:
+  <span class="cy">files</span>:
+    - <span class="cs">"cypress/screenshots/**/*"</span>    <span class="cc"># capture failure screenshots</span>
+    - <span class="cs">"cypress/videos/**/*"</span>          <span class="cc"># capture failure videos</span></pre>
+  </div>
+
+  <div class="exam-callout purple">
+    <span class="ec-icon">🎯</span>
+    <div class="ec-body">
+      <span class="ec-label">Exam Pattern — When to Run E2E</span>
+      <p>E2E tests are expensive and slow — <strong>they should NOT run on every feature branch commit</strong>. The correct pattern is: unit tests on every commit to every branch, E2E tests only on PRs targeting main or on a nightly schedule. Running E2E on every commit is the anti-pattern the exam identifies as the cause of slow pipelines.</p>
+    </div>
+  </div>
+</section>
+
+<div class="section-div">
+  <div class="sd-line"></div>
+  <div class="sd-text">Smoke Tests</div>
+  <div class="sd-line"></div>
+</div>
+
+<!-- ══ SMOKE TESTS ═════════════════════════════════════════════════════════ -->
+<section class="test-section ts-smoke">
+  <div class="ts-header">
+    <div class="ts-num">04</div>
+    <div class="ts-title-block">
+      <div class="ts-tag">Post-Production Deploy · ValidateService Hook · Auto Rollback</div>
+      <div class="ts-title">Smoke Tests</div>
+    </div>
+  </div>
+
+  <div class="ts-body">
+    <div class="ts-desc">
+      <p>Run immediately after a production deployment via the <strong>ValidateService hook in CodeDeploy's appspec.yml</strong>. They're minimal — just enough to confirm the deployment didn't break the critical path.</p>
+      <p>Smoke tests are not comprehensive — they don't test every feature. They answer one question: <em>is the application alive and are the most critical paths working?</em></p>
+      <p>If a smoke test script exits with a non-zero code, CodeDeploy automatically triggers a rollback to the previous working version. <strong>No human intervention required.</strong></p>
+    </div>
+    <div class="ts-meta">
+      <div class="ts-meta-title">Characteristics</div>
+      <div class="meta-row">
+        <span class="meta-key">Runs in</span>
+        <span class="meta-val">ValidateService hook in appspec.yml (CodeDeploy)</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-key">Speed</span>
+        <span class="meta-val">Seconds — fastest possible health check</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-key">Target</span>
+        <span class="meta-val">Production — the newly deployed version</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-key">On failure</span>
+        <span class="meta-val">CodeDeploy automatic rollback — exit code 1 triggers it</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-key">Run on</span>
+        <span class="meta-val">Every production deployment — always</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-key">Scope</span>
+        <span class="meta-val">Critical path only — health endpoint + core business flow</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+    <div class="code-wrap" style="margin:0">
+      <div class="code-bar">
+        <div class="code-dots"><span class="cd-r"></span><span class="cd-y"></span><span class="cd-g"></span></div>
+        <span class="code-fn">appspec.yml</span>
+        <span class="code-type ct-smoke">CodeDeploy</span>
+      </div>
+      <pre><span class="cc"># appspec.yml — EC2 deployment</span>
+<span class="cy">version</span>: <span class="cs">0.0</span>
+<span class="cy">os</span>: <span class="cs">linux</span>
+
+<span class="cy">files</span>:
+  - <span class="cy">source</span>: <span class="cs">/</span>
+    <span class="cy">destination</span>: <span class="cs">/opt/myapp</span>
+
+<span class="cy">hooks</span>:
+  <span class="cv">ApplicationStart</span>:
+    - <span class="cy">location</span>: <span class="cs">scripts/start.sh</span>
+      <span class="cy">timeout</span>: <span class="cs">60</span>
+
+  <span class="cv">ValidateService</span>:           <span class="cc"># smoke tests run here</span>
+    - <span class="cy">location</span>: <span class="cs">scripts/smoke-test.sh</span>
+      <span class="cy">timeout</span>: <span class="cs">120</span>
+      <span class="cy">runas</span>: <span class="cs">ec2-user</span>
+
+<span class="cc"># For Lambda deployments:</span>
+<span class="cc"># hooks:</span>
+<span class="cc">#   AfterAllowTraffic: SmokeTestLambdaFn</span></pre>
+    </div>
+    <div class="code-wrap" style="margin:0">
+      <div class="code-bar">
+        <div class="code-dots"><span class="cd-r"></span><span class="cd-y"></span><span class="cd-g"></span></div>
+        <span class="code-fn">scripts/smoke-test.sh</span>
+        <span class="code-type ct-bash">Bash</span>
+      </div>
+      <pre><span class="cc">#!/bin/bash</span>
+<span class="co">set -e</span>
+
+BASE_URL=<span class="cs">"https://api.myapp.com"</span>
+
+<span class="cc"># Check 1 — health endpoint</span>
+<span class="cv">STATUS</span>=$(curl -s -o /dev/null -w <span class="cs">"%{http_code}"</span> \
+  $BASE_URL/health)
+
+if [ <span class="cs">"$STATUS"</span> != <span class="cs">"200"</span> ]; then
+  echo <span class="cs">"Health check FAILED — HTTP $STATUS"</span>
+  <span class="co">exit 1</span>                <span class="cc"># triggers rollback</span>
+fi
+
+<span class="cc"># Check 2 — critical business path</span>
+<span class="cv">STATUS</span>=$(curl -s -o /dev/null -w <span class="cs">"%{http_code}"</span> \
+  $BASE_URL/api/products)
+
+if [ <span class="cs">"$STATUS"</span> != <span class="cs">"200"</span> ]; then
+  echo <span class="cs">"Products endpoint FAILED — HTTP $STATUS"</span>
+  <span class="co">exit 1</span>                <span class="cc"># triggers rollback</span>
+fi
+
+echo <span class="cs">"All smoke tests PASSED"</span>
+<span class="co">exit 0</span>                  <span class="cc"># deployment succeeds</span></pre>
+    </div>
+  </div>
+
+  <div class="exam-callout orange">
+    <span class="ec-icon">🎯</span>
+    <div class="ec-body">
+      <span class="ec-label">Exam Pattern — Auto Rollback on Bad Deploy</span>
+      <p>"How do you automatically rollback if a production deployment is unhealthy?" Answer: <strong>Smoke tests in the ValidateService hook — exit code 1 triggers CodeDeploy automatic rollback</strong>. Not CloudWatch alarms alone (reactive, not proactive). Not manual intervention. The ValidateService hook is the correct answer specifically because it runs before the deployment is marked successful.</p>
+    </div>
+  </div>
+</section>
+
+<div class="section-div">
+  <div class="sd-line"></div>
+  <div class="sd-text">The Testing Pyramid</div>
+  <div class="sd-line"></div>
+</div>
+
+<!-- ══ PYRAMID ════════════════════════════════════════════════════════════ -->
+<section>
+  <div class="pyramid-section">
+    <div class="pyramid-title">The Testing Pyramid</div>
+    <div class="pyramid-sub">The correct distribution of test types — and the most common anti-pattern the exam tests.</div>
+
+    <div class="pyramid-visual">
+      <div class="pyr-row pyr-e2e">
+        <span class="pyr-label">E2E Tests</span>
+        <span class="pyr-desc">Few — expensive, slow, brittle</span>
+      </div>
+      <div class="pyr-row pyr-integ">
+        <span class="pyr-label">Integration Tests</span>
+        <span class="pyr-desc">Some — medium cost, medium speed</span>
+      </div>
+      <div class="pyr-row pyr-unit">
+        <span class="pyr-label">Unit Tests</span>
+        <span class="pyr-desc">Many — cheap, fast, reliable</span>
+      </div>
+    </div>
+
+    <div class="pyramid-grid">
+      <div class="pyr-card many">
+        <div class="pyr-card-title">Many Unit Tests</div>
+        <p>Hundreds or thousands. Milliseconds each. Run on every single commit. The backbone of fast, reliable CI. Catch 80% of bugs before anything else runs.</p>
+      </div>
+      <div class="pyr-card some">
+        <div class="pyr-card-title">Some Integration Tests</div>
+        <p>Dozens to hundreds. Seconds to minutes each. Run on PRs to main. Validate service boundaries and real infrastructure interactions.</p>
+      </div>
+      <div class="pyr-card few">
+        <div class="pyr-card-title">Few E2E Tests</div>
+        <p>Critical user flows only — login, checkout, core business path. Slow and expensive. Run on scheduled basis or pre-production only.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="exam-callout warn">
+    <span class="ec-icon">⚠️</span>
+    <div class="ec-body">
+      <span class="ec-label">The Inverted Pyramid Anti-Pattern</span>
+      <p>"A pipeline takes 45 minutes. The team has 500 E2E tests and 50 unit tests." This is the inverted pyramid — the most common pipeline performance anti-pattern on the exam. Answer: <strong>Invest in unit tests and reduce E2E tests to critical flows only.</strong> Not adding more CodeBuild instances. Not parallel test execution. The root cause is the wrong test distribution.</p>
+    </div>
+  </div>
+</section>
+
+<div class="section-div">
+  <div class="sd-line"></div>
+  <div class="sd-text">Static & Dynamic Analysis</div>
+  <div class="sd-line"></div>
+</div>
+
+<!-- ══ SAST / DAST ═════════════════════════════════════════════════════════ -->
+<section style="margin-bottom:48px">
+  <h2 style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;margin-bottom:6px">SAST vs DAST — Security Testing</h2>
+  <p style="font-size:14px;color:var(--ink3);margin-bottom:24px;font-style:italic">Two security testing approaches — the exam tests the distinction constantly.</p>
+
+  <div class="comparison-grid">
+    <div class="comp-card comp-sast">
+      <div class="comp-card-header">
+        <div class="comp-card-tag">Static Application Security Testing</div>
+        <div class="comp-card-title">SAST</div>
+      </div>
+      <div class="comp-card-body">
+        <div class="comp-row">
+          <span class="comp-row-key">When</span>
+          <span class="comp-row-val">Before deployment — on source code</span>
+        </div>
+        <div class="comp-row">
+          <span class="comp-row-key">What</span>
+          <span class="comp-row-val">Analyzes code without executing it — finds SQL injection, XSS, hardcoded secrets</span>
+        </div>
+        <div class="comp-row">
+          <span class="comp-row-key">Tools</span>
+          <span class="comp-row-val">CodeGuru Reviewer, SonarQube, Checkmarx, Semgrep</span>
+        </div>
+        <div class="comp-row">
+          <span class="comp-row-key">Pipeline stage</span>
+          <span class="comp-row-val">pre_build phase in CodeBuild — before compilation</span>
+        </div>
+        <div class="comp-row">
+          <span class="comp-row-key">Speed</span>
+          <span class="comp-row-val">Fast — no deployment needed</span>
+        </div>
+      </div>
+    </div>
+    <div class="comp-card comp-dast">
+      <div class="comp-card-header">
+        <div class="comp-card-tag">Dynamic Application Security Testing</div>
+        <div class="comp-card-title">DAST</div>
+      </div>
+      <div class="comp-card-body">
+        <div class="comp-row">
+          <span class="comp-row-key">When</span>
+          <span class="comp-row-val">After deployment — against running app on staging</span>
+        </div>
+        <div class="comp-row">
+          <span class="comp-row-key">What</span>
+          <span class="comp-row-val">Sends attack payloads to live app — finds runtime vulnerabilities SAST misses</span>
+        </div>
+        <div class="comp-row">
+          <span class="comp-row-key">Tools</span>
+          <span class="comp-row-val">OWASP ZAP, Burp Suite, AWS Security Hub integrations</span>
+        </div>
+        <div class="comp-row">
+          <span class="comp-row-key">Pipeline stage</span>
+          <span class="comp-row-val">Post-staging deploy — separate CodeBuild stage</span>
+        </div>
+        <div class="comp-row">
+          <span class="comp-row-key">Speed</span>
+          <span class="comp-row-val">Slower — requires live running environment</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="exam-callout note">
+    <span class="ec-icon">🎯</span>
+    <div class="ec-body">
+      <span class="ec-label">The Three Differentiators the Exam Tests</span>
+      <p><strong>SAST vs GuardDuty:</strong> SAST = source code analysis. GuardDuty = runtime AWS API behavior monitoring.<br>
+      <strong>SAST vs Inspector:</strong> SAST = source code. Inspector = EC2 instance and container image vulnerabilities.<br>
+      <strong>SAST vs Macie:</strong> SAST = source code. Macie = sensitive data in S3 buckets.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══ QUALITY GATE ════════════════════════════════════════════════════════ -->
+<section style="margin-bottom:48px">
+  <div class="qgate">
+    <div class="qgate-title">Quality Gates — Stopping the Pipeline Automatically</div>
+    <div class="qgate-sub">CodeBuild test reports support thresholds that automatically fail the build if not met — no Lambda, no custom scripts.</div>
+    <div class="qgate-grid">
+      <div class="qg-item qg-pass">
+        <div class="qg-value">80%</div>
+        <div class="qg-label">Minimum test pass rate — fail below this</div>
+      </div>
+      <div class="qg-item qg-cov">
+        <div class="qg-value">70%</div>
+        <div class="qg-label">Minimum code coverage — fail below this</div>
+      </div>
+      <div class="qg-item qg-fail">
+        <div class="qg-value">0</div>
+        <div class="qg-label">Critical security findings allowed — fail on any</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="exam-callout tip">
+    <span class="ec-icon">💡</span>
+    <div class="ec-body">
+      <span class="ec-label">Manual Approval Gate — 7 Day Timeout</span>
+      <p>CodePipeline's native Manual Approval action pauses the pipeline until a reviewer approves or rejects. <strong>Default timeout: 7 days.</strong> If no action is taken within 7 days, the pipeline expires. This timeout detail appears in exam questions about compliance pipelines "timing out" after long weekends or holidays.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══ EXAM PATTERNS ═══════════════════════════════════════════════════════ -->
+<section style="margin-bottom:48px">
+  <div class="exam-table-wrap">
+    <div class="exam-table-header">
+      <h3>DOP-C02 Exam Pattern Recognition</h3>
+    </div>
+    <table class="et-table">
+      <thead>
+        <tr>
+          <th>Question Trigger</th>
+          <th>Correct Answer</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>"Catch bugs earliest and cheapest"</td><td>Unit tests — shift-left principle</td></tr>
+        <tr><td>"Tests need to access RDS during build"</td><td>CodeBuild in VPC + NAT Gateway for internet access</td></tr>
+        <tr><td>"Prevent deploy if coverage drops below 80%"</td><td>CodeBuild test reports with coverage threshold in project settings</td></tr>
+        <tr><td>"Pipeline takes 45 min — too slow"</td><td>Inverted pyramid — too many E2E, invest in unit tests</td></tr>
+        <tr><td>"Catch security vulnerabilities in source code"</td><td>SAST — CodeGuru Reviewer or SonarQube in pre_build</td></tr>
+        <tr><td>"Catch vulnerabilities in running application"</td><td>DAST — OWASP ZAP against staging after deploy</td></tr>
+        <tr><td>"Validate under load before production"</td><td>Load testing stage against staging — AWS Distributed Load Testing</td></tr>
+        <tr><td>"Auto rollback on bad production deploy"</td><td>Smoke tests in ValidateService hook — exit 1 triggers rollback</td></tr>
+        <tr><td>"Business sign-off before production"</td><td>Manual Approval action in CodePipeline with SNS notification</td></tr>
+        <tr><td>"Manual approval not happening — pipeline stuck"</td><td>7-day timeout — pipeline expires if no action taken</td></tr>
+        <tr><td>"SAST vs GuardDuty"</td><td>SAST = source code. GuardDuty = runtime AWS API behavior</td></tr>
+        <tr><td>"SAST vs Inspector"</td><td>SAST = source code. Inspector = EC2 / container vulnerabilities</td></tr>
+        <tr><td>"SAST vs Macie"</td><td>SAST = source code. Macie = sensitive data in S3</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ══ QUICK REF ═══════════════════════════════════════════════════════════ -->
+<div class="qr-wrap">
+  <div class="qr-title">Quick Reference Card</div>
+  <div class="qr-grid">
+    <div class="qr-item">
+      <span class="qr-key">Unit tests</span>
+      <span class="qr-val">CodeBuild build phase — mocked deps — every commit</span>
+    </div>
+    <div class="qr-item">
+      <span class="qr-key">Integration tests</span>
+      <span class="qr-val">CodeBuild build phase — real deps — VPC if private resources</span>
+    </div>
+    <div class="qr-item">
+      <span class="qr-key">E2E tests</span>
+      <span class="qr-val">Post-staging deploy — separate CodeBuild stage — PRs to main only</span>
+    </div>
+    <div class="qr-item">
+      <span class="qr-key">Smoke tests</span>
+      <span class="qr-val">ValidateService hook — exit 1 = automatic CodeDeploy rollback</span>
+    </div>
+    <div class="qr-item">
+      <span class="qr-key">Shift-left</span>
+      <span class="qr-val">Move testing earlier — catch bugs cheaper — unit tests first</span>
+    </div>
+    <div class="qr-item">
+      <span class="qr-key">Testing pyramid</span>
+      <span class="qr-val">Many unit → some integration → few E2E — never inverted</span>
+    </div>
+    <div class="qr-item">
+      <span class="qr-key">Quality gate</span>
+      <span class="qr-val">CodeBuild test reports — pass rate + coverage thresholds</span>
+    </div>
+    <div class="qr-item">
+      <span class="qr-key">SAST</span>
+      <span class="qr-val">Source code — before deploy — CodeGuru Reviewer / SonarQube</span>
+    </div>
+    <div class="qr-item">
+      <span class="qr-key">DAST</span>
+      <span class="qr-val">Running app — after staging deploy — OWASP ZAP</span>
+    </div>
+    <div class="qr-item">
+      <span class="qr-key">Load testing</span>
+      <span class="qr-val">Against staging only — AWS Distributed Load Testing on Fargate</span>
+    </div>
+    <div class="qr-item">
+      <span class="qr-key">Manual approval</span>
+      <span class="qr-val">Native CodePipeline action — SNS notification — 7 day timeout</span>
+    </div>
+    <div class="qr-item">
+      <span class="qr-key">finally blocks</span>
+      <span class="qr-val">Always run on failure — use for test environment cleanup</span>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<footer>
+  <strong>AWS CodeBuild · CodeDeploy · CodePipeline</strong> · Testing Strategies in CI/CD ·
+  AWS Certified DevOps Engineer Professional (DOP-C02) · Domain 1: SDLC Automation Complete
+</footer>
+
+</body>
+</html>

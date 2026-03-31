@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS CodeBuild — DOP-C02</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:     #0B0F0B;
+  --bg2:    #101510;
+  --bg3:    #161C16;
+  --surf:   #1C241C;
+  --surf2:  #222C22;
+  --g:      #3DD68C;
+  --g2:     #27AE6E;
+  --g-l:    rgba(61,214,140,0.08);
+  --g-m:    rgba(61,214,140,0.15);
+  --g-b:    rgba(61,214,140,0.3);
+  --y:      #F0D060;
+  --y-l:    rgba(240,208,96,0.08);
+  --y-b:    rgba(240,208,96,0.3);
+  --r:      #F06060;
+  --r-l:    rgba(240,96,96,0.08);
+  --r-b:    rgba(240,96,96,0.3);
+  --b:      #60A8F0;
+  --b-l:    rgba(96,168,240,0.08);
+  --b-b:    rgba(96,168,240,0.3);
+  --tx:     #D8E8D0;
+  --tx2:    #88A880;
+  --tx3:    #485848;
+  --cbg:    #060906;
+  --cfg:    #A8D8A0;
+  --border: rgba(61,214,140,0.1);
+  --bord2:  rgba(255,255,255,0.04);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--tx);font-family:'Archivo',sans-serif;font-size:15px;line-height:1.7;overflow-x:hidden}
+
+/* hero */
+.hero{min-height:400px;display:flex;flex-direction:column;justify-content:flex-end;padding:56px 60px 52px;position:relative;overflow:hidden}
+.hero-scanlines{position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(61,214,140,0.015) 0px,transparent 1px,transparent 3px);pointer-events:none}
+.hero-glow{position:absolute;top:-80px;left:-80px;width:500px;height:500px;background:radial-gradient(circle,rgba(61,214,140,0.08) 0%,transparent 70%);pointer-events:none}
+.hero-inner{position:relative;z-index:1;max-width:1020px;margin:0 auto;width:100%}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;font-family:'Courier Prime',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--g);background:var(--g-m);border:1px solid var(--g-b);padding:5px 14px;border-radius:4px;margin-bottom:20px;animation:up 0.5s ease both}
+.hero-badge::before{content:'>';color:var(--g);margin-right:2px}
+.hero h1{font-family:'Archivo Black',sans-serif;font-size:clamp(40px,7vw,80px);line-height:0.95;letter-spacing:-0.03em;color:var(--tx);margin-bottom:16px;animation:up 0.5s 0.1s ease both}
+.hero h1 span{color:var(--g)}
+.hero-sub{font-size:14px;color:var(--tx2);max-width:560px;margin-bottom:28px;font-style:italic;animation:up 0.5s 0.2s ease both;line-height:1.65}
+.hero-chips{display:flex;gap:8px;flex-wrap:wrap;animation:up 0.5s 0.3s ease both}
+.hc{font-family:'Courier Prime',monospace;font-size:10.5px;padding:4px 12px;border-radius:3px;border:1px solid transparent;letter-spacing:0.04em}
+.hc-g{background:var(--g-l);border-color:var(--g-b);color:var(--g)}
+.hc-y{background:var(--y-l);border-color:var(--y-b);color:var(--y)}
+.hc-r{background:var(--r-l);border-color:var(--r-b);color:var(--r)}
+.hc-b{background:var(--b-l);border-color:var(--b-b);color:var(--b)}
+@keyframes up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+/* layout */
+.wrap{max-width:1020px;margin:0 auto;padding:60px 60px 100px}
+
+/* section head */
+.sh{display:flex;align-items:center;gap:12px;margin-bottom:24px}
+.sh-tag{font-family:'Courier Prime',monospace;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--g);background:var(--g-l);border:1px solid var(--g-b);padding:3px 10px;border-radius:3px}
+.sh h2{font-family:'Archivo Black',sans-serif;font-size:18px;letter-spacing:-0.02em;color:var(--tx)}
+.sh-line{flex:1;height:1px;background:var(--bord2)}
+.sec{margin-bottom:64px}
+
+/* the 5 critical cards */
+.five-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:2px;background:var(--border);border-radius:8px;overflow:hidden;margin-bottom:20px}
+.five-card{background:var(--surf);padding:20px 16px;text-align:center;transition:all 0.2s;cursor:default;position:relative}
+.five-card:hover{background:var(--surf2);transform:translateY(-2px)}
+.five-num{font-family:'Archivo Black',sans-serif;font-size:32px;line-height:1;color:var(--g);margin-bottom:8px}
+.five-title{font-family:'Courier Prime',monospace;font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--tx);margin-bottom:8px}
+.five-desc{font-size:12px;color:var(--tx2);line-height:1.5;font-style:italic}
+
+/* phase table */
+.phase-table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:20px}
+.phase-table th{padding:10px 16px;background:var(--surf2);text-align:left;font-family:'Courier Prime',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--tx3);border-bottom:1px solid var(--bord2)}
+.phase-table td{padding:11px 16px;border-bottom:1px solid var(--bord2);vertical-align:top;color:var(--tx2);line-height:1.5}
+.phase-table tr:last-child td{border-bottom:none}
+.phase-table tr:hover td{background:var(--g-l)}
+.phase-table td:first-child{font-family:'Courier Prime',monospace;font-size:12px;font-weight:700;color:var(--g)}
+.badge-always{background:var(--r-l);color:var(--r);border:1px solid var(--r-b);padding:2px 8px;border-radius:3px;font-family:'Courier Prime',monospace;font-size:9px;font-weight:700;letter-spacing:0.06em}
+.badge-never{background:var(--bord2);color:var(--tx3);border:1px solid var(--bord2);padding:2px 8px;border-radius:3px;font-family:'Courier Prime',monospace;font-size:9px;letter-spacing:0.06em}
+
+/* code */
+.cw{background:var(--cbg);border:1px solid rgba(255,255,255,0.05);border-radius:8px;overflow:hidden;margin:14px 0}
+.cb{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;background:rgba(255,255,255,0.02);border-bottom:1px solid rgba(255,255,255,0.04)}
+.dots{display:flex;gap:5px}.dots span{width:9px;height:9px;border-radius:50%}
+.dr{background:#FF5F57}.dy{background:#FFBD2E}.dg{background:#28C840}
+.cfn{font-family:'Courier Prime',monospace;font-size:11px;color:var(--tx3)}
+.clang{font-family:'Courier Prime',monospace;font-size:10px;padding:2px 8px;border-radius:3px;background:var(--g-l);color:var(--g);border:1px solid var(--g-b)}
+pre{padding:18px;font-family:'Courier Prime',monospace;font-size:12px;line-height:1.8;color:var(--cfg);overflow-x:auto}
+.ck{color:#F07070}.cs{color:#A0D8A0}.cv{color:#80C0E8}.cc{color:#384838;font-style:italic}.cy{color:#D8C070}.cg{color:#70D870}
+
+/* callout */
+.callout{border-radius:8px;padding:14px 18px;margin:14px 0;display:flex;gap:12px;align-items:flex-start}
+.callout.warn{background:var(--r-l);border:1px solid var(--r-b)}
+.callout.tip{background:var(--g-l);border:1px solid var(--g-b)}
+.callout.info{background:var(--b-l);border:1px solid var(--b-b)}
+.callout.note{background:var(--y-l);border:1px solid var(--y-b)}
+.ci{font-size:16px;flex-shrink:0;margin-top:2px}
+.cb2{flex:1}
+.cl{font-family:'Courier Prime',monospace;font-size:9.5px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:4px;display:block}
+.callout.warn .cl{color:var(--r)}.callout.tip .cl{color:var(--g)}.callout.info .cl{color:var(--b)}.callout.note .cl{color:var(--y)}
+.callout p{font-size:13px;color:var(--tx2);line-height:1.6}
+.callout strong{color:var(--tx)}
+.callout code{font-family:'Courier Prime',monospace;font-size:11px;background:rgba(255,255,255,0.06);padding:1px 5px;border-radius:3px}
+
+/* grid 2col */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+
+/* vpc diagram */
+.vpc-box{background:var(--surf);border:1px solid var(--border);border-radius:8px;padding:24px;margin-bottom:20px;font-family:'Courier Prime',monospace;font-size:12px;line-height:2;color:var(--cfg)}
+.vpc-comment{color:var(--tx3);font-style:italic}
+.vpc-g{color:var(--g)}.vpc-y{color:var(--y)}.vpc-r{color:var(--r)}.vpc-b{color:var(--b)}
+
+/* pattern rows */
+.pat-list{display:flex;flex-direction:column;gap:6px;margin-bottom:20px}
+.pat{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;background:var(--surf);border:1px solid var(--bord2);border-radius:6px;padding:11px 16px;transition:all 0.18s}
+.pat:hover{border-color:var(--g-b);background:var(--surf2)}
+.pat-q{font-size:13px;font-style:italic;color:var(--tx2);line-height:1.4}
+.pat-sep{color:var(--g);font-size:14px;flex-shrink:0}
+.pat-a{font-family:'Courier Prime',monospace;font-size:12px;font-weight:700;color:var(--g);line-height:1.4}
+
+/* qr */
+.qr{background:var(--surf);border:1px solid var(--border);border-radius:8px;padding:28px;margin-bottom:20px}
+.qr-title{font-family:'Archivo Black',sans-serif;font-size:16px;letter-spacing:-0.02em;color:var(--g);margin-bottom:16px}
+.qr-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.qr-item{background:var(--bg3);border:1px solid var(--bord2);border-radius:5px;padding:10px 14px;display:flex;gap:10px;transition:border-color 0.18s}
+.qr-item:hover{border-color:var(--g-b)}
+.qk{font-family:'Courier Prime',monospace;font-size:10.5px;color:var(--g);min-width:160px;flex-shrink:0}
+.qv{font-size:12px;color:var(--tx2);line-height:1.5}
+
+footer{background:var(--bg2);border-top:1px solid var(--bord2);padding:24px 60px;text-align:center;font-family:'Courier Prime',monospace;font-size:11px;color:var(--tx3);letter-spacing:0.06em}
+footer strong{color:var(--g)}
+
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--surf2);border-radius:2px}
+
+@media(max-width:1024px){.hero,.wrap,footer{padding-left:40px;padding-right:40px}.five-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:768px){.hero,.wrap,footer{padding-left:24px;padding-right:24px}.five-grid{grid-template-columns:1fr}.g2,.qr-grid{grid-template-columns:1fr}.pat{grid-template-columns:1fr}}
+/* ── BACK BUTTON ── */
+.back-home{position:fixed;top:20px;left:20px;z-index:9998;display:inline-flex;align-items:center;gap:6px;font-family:'Courier Prime',monospace;font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--g);background:var(--bg2);border:1px solid var(--g-b);padding:8px 14px;border-radius:4px;text-decoration:none;transition:all 0.2s ease;backdrop-filter:blur(8px)}
+.back-home:hover{background:var(--g-m);transform:translateY(-1px);box-shadow:0 4px 12px rgba(61,214,140,0.15)}
+.back-home svg{width:14px;height:14px}
+</style>
+</head>
+<body>
+
+<a href="../index.html" class="back-home"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 12L6 8l4-4"/></svg>Home</a>
+
+<header class="hero">
+  <div class="hero-scanlines"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-inner">
+    <div class="hero-badge">DOP-C02 · Domain 1 · SDLC Automation</div>
+    <h1>AWS <span>Code</span>Build</h1>
+    <p class="hero-sub">Fully managed continuous integration — compiles source, runs tests, produces artifacts. No build servers to provision, patch, or scale. Pay per build minute.</p>
+    <div class="hero-chips">
+      <span class="hc hc-g">buildspec.yml</span>
+      <span class="hc hc-y">VPC + NAT Gateway</span>
+      <span class="hc hc-r">post_build always runs</span>
+      <span class="hc hc-b">Privileged Mode</span>
+      <span class="hc hc-g">Local Debugging</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+<!-- THE 5 THINGS -->
+<section class="sec">
+  <div class="sh"><span class="sh-tag">01</span><h2>The 5 Things to Know Cold</h2><div class="sh-line"></div></div>
+  <div class="five-grid">
+    <div class="five-card"><div class="five-num">1</div><div class="five-title">post_build always runs</div><div class="five-desc">Even when the build phase fails. Gate destructive actions with CODEBUILD_BUILD_SUCCEEDING.</div></div>
+    <div class="five-card"><div class="five-num">2</div><div class="five-title">VPC = NAT not IGW</div><div class="five-desc">Private subnet needs NAT Gateway for internet access. IGW doesn't reach private subnets.</div></div>
+    <div class="five-card"><div class="five-num">3</div><div class="five-title">Secrets via SSM/SM</div><div class="five-desc">Never hardcode. parameter-store and secrets-manager blocks in the env section.</div></div>
+    <div class="five-card"><div class="five-num">4</div><div class="five-title">Privileged Mode</div><div class="five-desc">Required for docker build commands. Explicit flag on the build project environment settings.</div></div>
+    <div class="five-card"><div class="five-num">5</div><div class="five-title">EventBridge trigger</div><div class="five-desc">CodeCommit push → EventBridge → CodeBuild. Add Lambda in middle for custom logic.</div></div>
+  </div>
+</section>
+
+<!-- BUILDSPEC -->
+<section class="sec">
+  <div class="sh"><span class="sh-tag">02</span><h2>buildspec.yml — Complete Reference</h2><div class="sh-line"></div></div>
+  <p style="color:var(--tx2);font-size:14px;margin-bottom:16px;font-style:italic">Must live at the root of your source directory. For monorepos, override the path in the CodeBuild project configuration.</p>
+
+  <div class="cw">
+    <div class="cb"><div class="dots"><span class="dr"></span><span class="dy"></span><span class="dg"></span></div><span class="cfn">buildspec.yml</span><span class="clang">YAML</span></div>
+    <pre><span class="cy">version</span>: <span class="cs">0.2</span>
+
+<span class="cy">env</span>:
+  <span class="cy">shell</span>: <span class="cs">bash</span>
+  <span class="cy">variables</span>:
+    <span class="cv">ENVIRONMENT</span>: <span class="cs">"staging"</span>
+  <span class="cy">parameter-store</span>:                 <span class="cc"># pulled from SSM Parameter Store</span>
+    <span class="cv">DB_HOST</span>: <span class="cs">/myapp/prod/db_host</span>
+    <span class="cv">LOGIN_PWD</span>: <span class="cs">/CodeBuild/dockerLoginPassword</span>
+  <span class="cy">secrets-manager</span>:                 <span class="cc"># SecretName:JSONKey format</span>
+    <span class="cv">API_KEY</span>: <span class="cs">MySecret:api_key</span>
+  <span class="cy">exported-variables</span>:              <span class="cc"># share with downstream pipeline stages</span>
+    - <span class="cv">ARTIFACT_VERSION</span>
+    - <span class="cv">BUILD_TIMESTAMP</span>
+
+<span class="cy">phases</span>:
+  <span class="cy">install</span>:
+    <span class="cy">runtime-versions</span>:
+      <span class="cy">java</span>: <span class="cs">corretto17</span>               <span class="cc"># pin runtime — reproducible builds</span>
+      <span class="cy">python</span>: <span class="cs">3.11</span>
+    <span class="cy">commands</span>:
+      - apt-get update -y
+      - apt-get install -y maven
+    <span class="cy">finally</span>:                         <span class="cc"># always runs even on failure</span>
+      - echo "Install done"
+
+  <span class="cy">pre_build</span>:
+    <span class="cy">commands</span>:
+      - docker login -u User -p $LOGIN_PWD
+      - mvn validate
+
+  <span class="cy">build</span>:
+    <span class="cy">commands</span>:
+      - mvn package -DskipTests
+      - export ARTIFACT_VERSION=$(mvn help:evaluate \
+          -Dexpression=project.version -q -DforceStdout)
+    <span class="cy">finally</span>:
+      - echo "Build done"
+
+  <span class="cy">post_build</span>:                       <span class="cc"># ALWAYS RUNS — even when build fails</span>
+    <span class="cy">commands</span>:
+      - |
+        if [ "$CODEBUILD_BUILD_SUCCEEDING" = "1" ]; then
+          docker push $ECR_REGISTRY/myapp:$ARTIFACT_VERSION
+        fi
+    <span class="cy">finally</span>:
+      - echo "Cleanup"
+
+<span class="cy">reports</span>:
+  <span class="cv">UnitTestResults</span>:
+    <span class="cy">files</span>: [<span class="cs">"jest-results.xml"</span>]
+    <span class="cy">file-format</span>: <span class="cs">JUNITXML</span>
+  <span class="cv">CoverageReport</span>:
+    <span class="cy">files</span>: [<span class="cs">"coverage/lcov.info"</span>]
+    <span class="cy">file-format</span>: <span class="cs">CLOVERXML</span>
+    <span class="cy">coverage-enabled</span>: <span class="cg">yes</span>
+
+<span class="cy">artifacts</span>:
+  <span class="cy">files</span>: [<span class="cs">"target/*.jar"</span>, <span class="cs">"appspec.yml"</span>, <span class="cs">"scripts/**/*"</span>]
+  <span class="cy">name</span>: <span class="cs">MyApp-$(date +%Y-%m-%d)</span>      <span class="cc"># dynamic naming</span>
+
+<span class="cy">cache</span>:
+  <span class="cy">paths</span>:
+    - <span class="cs">"/root/.m2/**/*"</span>              <span class="cc"># Maven cache</span>
+    - <span class="cs">"/root/.npm/**/*"</span></pre>
+  </div>
+
+  <div class="callout warn">
+    <span class="ci">⚠️</span>
+    <div class="cb2"><span class="cl">Critical Trap</span>
+    <p><strong>post_build runs even when the build phase fails.</strong> If post_build pushes a Docker image without checking build status, a broken image goes to production. Always gate with: <code>if [ "$CODEBUILD_BUILD_SUCCEEDING" = "1" ]; then ... fi</code></p></div>
+  </div>
+</section>
+
+<!-- PHASES -->
+<section class="sec">
+  <div class="sh"><span class="sh-tag">03</span><h2>Phases — Purpose & Failure Behavior</h2><div class="sh-line"></div></div>
+  <table class="phase-table">
+    <thead><tr><th>Phase</th><th>Purpose</th><th>Runs if prev fails?</th><th>Exam Point</th></tr></thead>
+    <tbody>
+      <tr><td>install</td><td>Install runtimes, OS packages</td><td><span class="badge-never">stops pipeline</span></td><td>Pin runtime-versions here for reproducibility</td></tr>
+      <tr><td>pre_build</td><td>Auth, validation, pre-checks</td><td><span class="badge-never">stops pipeline</span></td><td>docker login, SSM parameter fetch</td></tr>
+      <tr><td>build</td><td>Compile, test, package</td><td><span class="badge-never">stops pipeline</span></td><td>Core build logic lives here</td></tr>
+      <tr><td>post_build</td><td>Push images, export vars, notify</td><td><span class="badge-always">ALWAYS RUNS</span></td><td>Check CODEBUILD_BUILD_SUCCEEDING before destructive actions</td></tr>
+      <tr><td>finally (any phase)</td><td>Guaranteed cleanup</td><td><span class="badge-always">ALWAYS RUNS</span></td><td>Temp file cleanup, test teardown, docker-compose down</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- VPC -->
+<section class="sec">
+  <div class="sh"><span class="sh-tag">04</span><h2>VPC Access — The Critical Trap</h2><div class="sh-line"></div></div>
+  <p style="color:var(--tx2);font-size:14px;margin-bottom:16px;font-style:italic">By default CodeBuild runs outside your VPC — it has internet but cannot reach private resources (RDS, ElastiCache). When you move it inside the VPC, it loses internet access.</p>
+
+  <div class="vpc-box">
+    <div><span class="vpc-comment"># Default (no VPC config)</span></div>
+    <div><span class="vpc-g">✓</span> Public internet (npm, Maven, DockerHub)</div>
+    <div><span class="vpc-r">✗</span> Private resources (RDS, ElastiCache, internal APIs)</div>
+    <div>&nbsp;</div>
+    <div><span class="vpc-comment"># With VPC config — private subnet</span></div>
+    <div><span class="vpc-g">✓</span> Private resources (RDS, ElastiCache, internal APIs)</div>
+    <div><span class="vpc-r">✗</span> Public internet — LOST by default</div>
+    <div>&nbsp;</div>
+    <div><span class="vpc-comment"># Correct solution: VPC + NAT Gateway in public subnet</span></div>
+    <div><span class="vpc-b">CodeBuild (private subnet)</span> <span class="vpc-g">→</span> <span class="vpc-y">NAT Gateway (public subnet)</span> <span class="vpc-g">→</span> Internet</div>
+    <div><span class="vpc-b">CodeBuild (private subnet)</span> <span class="vpc-g">→</span> <span class="vpc-g">RDS / ElastiCache (direct, same VPC)</span></div>
+  </div>
+
+  <div class="callout warn">
+    <span class="ci">⚠️</span>
+    <div class="cb2"><span class="cl">IGW Does Not Work</span>
+    <p>An Internet Gateway only serves resources in <strong>public subnets</strong>. CodeBuild runs in a <strong>private subnet</strong> — private subnets have no route to the IGW. The answer is always <strong>NAT Gateway</strong>. Not IGW. Not VPC endpoint alone.</p></div>
+  </div>
+
+  <div style="margin-top:16px">
+  <table class="phase-table">
+    <thead><tr><th>Scenario</th><th>Solution</th></tr></thead>
+    <tbody>
+      <tr><td>Private resources only</td><td>VPC config only — no NAT needed</td></tr>
+      <tr><td>Public internet only</td><td>Default config — no VPC needed</td></tr>
+      <tr><td>Both private + public internet</td><td>VPC + NAT Gateway in public subnet</td></tr>
+      <tr><td>AWS services (S3, ECR) without internet</td><td>VPC + VPC Endpoints for those services</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<!-- CACHING -->
+<section class="sec">
+  <div class="sh"><span class="sh-tag">05</span><h2>Build Caching & Local Debugging</h2><div class="sh-line"></div></div>
+  <div class="g2">
+    <div>
+      <p style="font-family:'Courier Prime',monospace;font-size:10px;color:var(--g);letter-spacing:0.1em;text-transform:uppercase;font-weight:700;margin-bottom:10px">Cache Strategies</p>
+      <table class="phase-table">
+        <thead><tr><th>Type</th><th>Best For</th></tr></thead>
+        <tbody>
+          <tr><td>S3 Cache</td><td>Persist cache across all build environments — shared across projects</td></tr>
+          <tr><td>LOCAL_SOURCE_CACHE</td><td>Reduce source checkout time on repeat builds</td></tr>
+          <tr><td>LOCAL_DOCKER_LAYER_CACHE</td><td>Slow Docker builds — eliminates base image re-downloads</td></tr>
+          <tr><td>LOCAL_CUSTOM_CACHE</td><td>Maven .m2, npm node_modules, Gradle caches</td></tr>
+        </tbody>
+      </table>
+      <div class="callout tip" style="margin-top:12px">
+        <span class="ci">🎯</span>
+        <div class="cb2"><span class="cl">Exam Pattern</span>
+        <p>"Docker builds re-downloading base images every build." Answer: <strong>LOCAL_DOCKER_LAYER_CACHE</strong> — not a larger instance, not S3 cache.</p></div>
+      </div>
+    </div>
+    <div>
+      <p style="font-family:'Courier Prime',monospace;font-size:10px;color:var(--y);letter-spacing:0.1em;text-transform:uppercase;font-weight:700;margin-bottom:10px">Local Build Debugging</p>
+      <div class="cw">
+        <div class="cb"><div class="dots"><span class="dr"></span><span class="dy"></span><span class="dg"></span></div><span class="cfn">local-debug.sh</span><span class="clang">Bash</span></div>
+        <pre><span class="cc"># Pull CodeBuild local agent</span>
+docker pull \
+  public.ecr.aws/codebuild/local-builds:latest
+
+<span class="cc"># Run build locally</span>
+./codebuild_build.sh \
+  -i public.ecr.aws/codebuild/standard:7.0 \
+  -a /tmp/artifacts \
+  -s /path/to/your/source
+
+<span class="cc"># Same environment as AWS CodeBuild</span>
+<span class="cc"># Debug without paying per build minute</span></pre>
+      </div>
+      <div class="callout tip">
+        <span class="ci">🎯</span>
+        <div class="cb2"><span class="cl">Exam Pattern</span>
+        <p>"Developer spends too much time waiting to debug builds." Answer: <strong>CodeBuild local builds</strong> — not a new project, not a different CI tool.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EXAM PATTERNS -->
+<section class="sec">
+  <div class="sh"><span class="sh-tag">06</span><h2>DOP-C02 Exam Patterns</h2><div class="sh-line"></div></div>
+  <div class="pat-list">
+    <div class="pat"><span class="pat-q">"Tests need to access RDS during build"</span><span class="pat-sep">→</span><span class="pat-a">CodeBuild in VPC + NAT Gateway</span></div>
+    <div class="pat"><span class="pat-q">"Docker builds failing — no docker build permission"</span><span class="pat-sep">→</span><span class="pat-a">Privileged Mode not enabled on project</span></div>
+    <div class="pat"><span class="pat-q">"Prevent deploy when coverage drops below 80%"</span><span class="pat-sep">→</span><span class="pat-a">CodeBuild test reports with coverage threshold</span></div>
+    <div class="pat"><span class="pat-q">"Broken Docker image pushed despite failed build"</span><span class="pat-sep">→</span><span class="pat-a">post_build ran — missing CODEBUILD_BUILD_SUCCEEDING check</span></div>
+    <div class="pat"><span class="pat-q">"Debug failing build without AWS build costs"</span><span class="pat-sep">→</span><span class="pat-a">CodeBuild local agent — Docker image</span></div>
+    <div class="pat"><span class="pat-q">"Run unit + integration + E2E tests simultaneously"</span><span class="pat-sep">→</span><span class="pat-a">CodeBuild batch builds with build-matrix</span></div>
+    <div class="pat"><span class="pat-q">"Inject database password into build securely"</span><span class="pat-sep">→</span><span class="pat-a">parameter-store or secrets-manager env block</span></div>
+    <div class="pat"><span class="pat-q">"Alert team within 5 minutes when build fails"</span><span class="pat-sep">→</span><span class="pat-a">EventBridge on build state FAILED → SNS</span></div>
+  </div>
+</section>
+
+<!-- QR -->
+<div class="qr">
+  <div class="qr-title">// Quick Reference</div>
+  <div class="qr-grid">
+    <div class="qr-item"><span class="qk">buildspec.yml location</span><span class="qv">Root of source directory — non-negotiable</span></div>
+    <div class="qr-item"><span class="qk">post_build on failure</span><span class="qv">ALWAYS runs — check CODEBUILD_BUILD_SUCCEEDING</span></div>
+    <div class="qr-item"><span class="qk">VPC + internet</span><span class="qv">NAT Gateway — not Internet Gateway</span></div>
+    <div class="qr-item"><span class="qk">Secrets</span><span class="qv">parameter-store or secrets-manager — never hardcode</span></div>
+    <div class="qr-item"><span class="qk">Privileged mode</span><span class="qv">Required for docker build/push commands</span></div>
+    <div class="qr-item"><span class="qk">finally blocks</span><span class="qv">Always run — guaranteed cleanup on any failure</span></div>
+    <div class="qr-item"><span class="qk">Docker layer cache</span><span class="qv">LOCAL_DOCKER_LAYER_CACHE — fastest for slow Docker builds</span></div>
+    <div class="qr-item"><span class="qk">Local debugging</span><span class="qv">CodeBuild local agent Docker image</span></div>
+    <div class="qr-item"><span class="qk">exported-variables</span><span class="qv">Share values from CodeBuild to downstream pipeline stages</span></div>
+    <div class="qr-item"><span class="qk">Batch builds</span><span class="qv">Parallel matrix — multiple buildspecs or env combinations</span></div>
+    <div class="qr-item"><span class="qk">Test report formats</span><span class="qv">JUNITXML · CUCUMBERJSON · CLOVERXML · COBERTURAXML</span></div>
+    <div class="qr-item"><span class="qk">Trigger chain</span><span class="qv">CodeCommit push → EventBridge → CodeBuild</span></div>
+  </div>
+</div>
+
+</div>
+<footer><strong>AWS CodeBuild</strong> · Complete Build Automation · DOP-C02 · Domain 1: SDLC Automation</footer>
+</body>
+</html>

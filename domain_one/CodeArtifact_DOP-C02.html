@@ -1,0 +1,1671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS CodeArtifact — DOP-C02</title>
+<link href="https://fonts.googleapis.com/css2?family=Lexend+Exa:wght@300;400;500;700;900&family=Lora:ital,wght@0,400;0,600;1,400;1,600&family=Roboto+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:        #F2F0EB;
+  --bg2:       #E8E5DE;
+  --bg3:       #DEDAD2;
+  --paper:     #FAFAF7;
+  --ink:       #18140E;
+  --ink2:      #3D3830;
+  --ink3:      #7A7268;
+  --ink4:      #B0A89C;
+
+  --teal:      #0D6E6E;
+  --teal-l:    #E0F0F0;
+  --teal-m:    rgba(13,110,110,0.12);
+  --teal-b:    rgba(13,110,110,0.3);
+
+  --rust:      #C4421A;
+  --rust-l:    #FAEAE4;
+  --rust-m:    rgba(196,66,26,0.1);
+  --rust-b:    rgba(196,66,26,0.25);
+
+  --gold:      #9B7E2A;
+  --gold-l:    #F7F0DC;
+  --gold-m:    rgba(155,126,42,0.1);
+  --gold-b:    rgba(155,126,42,0.25);
+
+  --slate:     #2D4A6B;
+  --slate-l:   #E4EBF3;
+  --slate-m:   rgba(45,74,107,0.1);
+  --slate-b:   rgba(45,74,107,0.25);
+
+  --sage:      #3D6B4F;
+  --sage-l:    #E4EFE8;
+  --sage-m:    rgba(61,107,79,0.1);
+  --sage-b:    rgba(61,107,79,0.25);
+
+  --plum:      #6B3D6B;
+  --plum-l:    #EFE4EF;
+  --plum-m:    rgba(107,61,107,0.1);
+  --plum-b:    rgba(107,61,107,0.25);
+
+  --border:    rgba(24,20,14,0.1);
+  --border2:   rgba(24,20,14,0.06);
+
+  --code-bg:   #18140E;
+  --code-fg:   #C8D4B8;
+  --code-key:  #E8956A;
+  --code-str:  #A8D4A8;
+  --code-val:  #80C4D4;
+  --code-cmt:  #5A5448;
+  --code-yel:  #D4B870;
+
+  --r:         10px;
+  --r-sm:      6px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Lora', serif;
+  font-size: 15px;
+  line-height: 1.75;
+  overflow-x: hidden;
+}
+
+/* ── HERO ── */
+.hero {
+  background: var(--ink);
+  min-height: 420px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 60px 64px 56px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* halftone dots */
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px);
+  background-size: 28px 28px;
+  pointer-events: none;
+}
+
+/* diagonal accent */
+.hero::after {
+  content: '';
+  position: absolute;
+  bottom: 0; right: 0;
+  width: 400px; height: 400px;
+  background: conic-gradient(from 45deg, rgba(13,110,110,0.15), rgba(155,126,42,0.08), transparent 60%);
+  border-radius: 50%;
+  transform: translate(30%, 30%);
+  pointer-events: none;
+}
+
+.hero-inner { position: relative; z-index: 1; max-width: 1040px; margin: 0 auto; width: 100%; }
+
+.hero-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 22px;
+  animation: drop 0.5s ease both;
+}
+
+.eyebrow-pill {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--bg3);
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.12);
+  padding: 5px 14px;
+  border-radius: 100px;
+}
+
+.eyebrow-dot {
+  width: 6px; height: 6px;
+  background: var(--teal);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--teal);
+  animation: glow 2s ease-in-out infinite;
+}
+
+@keyframes glow {
+  0%,100% { box-shadow: 0 0 8px var(--teal); }
+  50% { box-shadow: 0 0 16px var(--teal), 0 0 4px var(--teal); }
+}
+
+.hero h1 {
+  font-family: 'Lexend Exa', sans-serif;
+  font-size: clamp(36px, 6vw, 72px);
+  font-weight: 900;
+  line-height: 1.0;
+  letter-spacing: -0.03em;
+  color: var(--bg);
+  margin-bottom: 16px;
+  animation: drop 0.5s 0.1s ease both;
+}
+
+.hero h1 strong {
+  color: var(--teal);
+  font-weight: 900;
+}
+
+.hero-sub {
+  font-size: 15px;
+  color: var(--ink4);
+  max-width: 600px;
+  font-style: italic;
+  margin-bottom: 32px;
+  line-height: 1.65;
+  animation: drop 0.5s 0.2s ease both;
+}
+
+.hero-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  animation: drop 0.5s 0.3s ease both;
+}
+
+.htag {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 10.5px;
+  font-weight: 500;
+  padding: 5px 12px;
+  border-radius: var(--r-sm);
+  border: 1px solid transparent;
+  letter-spacing: 0.04em;
+}
+
+.ht-teal  { background: rgba(13,110,110,0.2);   border-color: rgba(13,110,110,0.4);   color: #5BC8C8; }
+.ht-rust  { background: rgba(196,66,26,0.2);    border-color: rgba(196,66,26,0.4);    color: #E8906A; }
+.ht-gold  { background: rgba(155,126,42,0.2);   border-color: rgba(155,126,42,0.4);   color: #D4B048; }
+.ht-slate { background: rgba(45,74,107,0.2);    border-color: rgba(45,74,107,0.4);    color: #80A8D8; }
+.ht-sage  { background: rgba(61,107,79,0.2);    border-color: rgba(61,107,79,0.4);    color: #7AC89A; }
+
+@keyframes drop {
+  from { opacity: 0; transform: translateY(-14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── STRIPE BAR ── */
+.stripe-bar {
+  height: 4px;
+  background: linear-gradient(90deg,
+    var(--teal) 0%, var(--teal) 40%,
+    var(--gold) 40%, var(--gold) 70%,
+    var(--rust) 70%, var(--rust) 100%
+  );
+}
+
+/* ── MAIN ── */
+.wrap {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 64px 64px 100px;
+}
+
+/* ── SECTION HEADERS ── */
+.sh {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+.sh-num {
+  font-family: 'Lexend Exa', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--ink4);
+  min-width: 28px;
+}
+
+.sh h2 {
+  font-family: 'Lexend Exa', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+.sh-rule { flex: 1; height: 1px; background: var(--border); }
+
+.sh-accent {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.sec { margin-bottom: 72px; }
+
+/* ── THREE BUILDING BLOCKS ── */
+.blocks-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  margin-bottom: 24px;
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  overflow: hidden;
+  background: var(--border);
+}
+
+.block-card {
+  background: var(--paper);
+  padding: 28px 24px;
+  position: relative;
+  transition: all 0.2s;
+}
+
+.block-card:hover { background: var(--bg); }
+
+.block-num {
+  font-family: 'Lexend Exa', sans-serif;
+  font-size: 48px;
+  font-weight: 900;
+  line-height: 1;
+  opacity: 0.07;
+  position: absolute;
+  top: 16px; right: 16px;
+  color: var(--ink);
+}
+
+.block-icon { font-size: 28px; margin-bottom: 14px; display: block; }
+
+.block-title {
+  font-family: 'Lexend Exa', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin-bottom: 8px;
+}
+
+.block-subtitle {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.bc-teal  { background: var(--teal-l);  color: var(--teal);  border: 1px solid var(--teal-b); }
+.bc-gold  { background: var(--gold-l);  color: var(--gold);  border: 1px solid var(--gold-b); }
+.bc-slate { background: var(--slate-l); color: var(--slate); border: 1px solid var(--slate-b); }
+
+.block-desc { font-size: 13px; color: var(--ink3); line-height: 1.6; font-style: italic; }
+
+.block-analogy {
+  margin-top: 12px;
+  padding: 8px 12px;
+  background: var(--bg2);
+  border-radius: var(--r-sm);
+  font-size: 12px;
+  color: var(--ink3);
+  font-family: 'Roboto Mono', monospace;
+  line-height: 1.5;
+}
+
+.block-analogy::before {
+  content: 'analogy → ';
+  color: var(--ink4);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+}
+
+/* ── FORMATS TABLE ── */
+.formats-row {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.fmt-card {
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 14px 10px;
+  text-align: center;
+  transition: all 0.2s;
+  cursor: default;
+}
+
+.fmt-card:hover {
+  border-color: var(--teal-b);
+  background: var(--teal-l);
+  transform: translateY(-2px);
+}
+
+.fmt-name {
+  font-family: 'Lexend Exa', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 5px;
+  color: var(--ink);
+}
+
+.fmt-reg {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 9.5px;
+  color: var(--ink4);
+  line-height: 1.4;
+}
+
+.fmt-use {
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--ink3);
+  font-style: italic;
+}
+
+/* ── WHY CENTRALIZE ── */
+.why-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.why-card {
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 22px;
+  display: flex;
+  gap: 16px;
+  transition: all 0.2s;
+}
+
+.why-card:hover {
+  transform: translateX(4px);
+  border-color: var(--teal-b);
+}
+
+.why-icon { font-size: 24px; flex-shrink: 0; }
+
+.why-body { flex: 1; }
+
+.why-title {
+  font-family: 'Lexend Exa', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin-bottom: 5px;
+  color: var(--ink);
+}
+
+.why-desc { font-size: 13px; color: var(--ink3); line-height: 1.6; font-style: italic; }
+
+/* ── UPSTREAM FLOW ── */
+.upstream-visual {
+  background: var(--ink);
+  border-radius: var(--r);
+  padding: 28px;
+  margin-bottom: 20px;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 12.5px;
+  line-height: 2.0;
+  color: var(--code-fg);
+}
+
+.uv-comment { color: var(--code-cmt); font-style: italic; }
+.uv-step    { color: var(--code-val); }
+.uv-result  { color: var(--code-str); }
+.uv-arrow   { color: var(--code-key); }
+.uv-node    { color: var(--code-yel); }
+.uv-found   { color: #90EE90; }
+.uv-notfound{ color: var(--rust); }
+
+/* ── UPSTREAM RULES ── */
+.rules-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.rule-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 14px 18px;
+  transition: all 0.2s;
+}
+
+.rule-row:hover { border-color: var(--gold-b); background: var(--gold-l); }
+
+.rule-num {
+  font-family: 'Lexend Exa', sans-serif;
+  font-size: 11px;
+  font-weight: 900;
+  color: var(--gold);
+  min-width: 24px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.rule-title {
+  font-family: 'Lexend Exa', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 3px;
+  letter-spacing: -0.01em;
+}
+
+.rule-desc { font-size: 13px; color: var(--ink3); line-height: 1.55; font-style: italic; }
+
+/* ── ARCHITECTURE DIAGRAM ── */
+.arch-wrap {
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 28px;
+  margin-bottom: 20px;
+}
+
+.arch-title {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink4);
+  margin-bottom: 20px;
+}
+
+.arch-flow {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
+  align-items: center;
+  gap: 0;
+}
+
+.arch-node {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 14px 10px;
+  text-align: center;
+  transition: all 0.2s;
+}
+
+.arch-node:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+.an-icon { font-size: 20px; margin-bottom: 6px; display: block; }
+.an-name {
+  font-family: 'Lexend Exa', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin-bottom: 4px;
+  color: var(--ink);
+}
+
+.an-sub {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 9px;
+  color: var(--ink4);
+  line-height: 1.4;
+}
+
+.an-badge {
+  margin-top: 6px;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 9px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 3px;
+  display: inline-block;
+  letter-spacing: 0.04em;
+}
+
+.anb-teal  { background: var(--teal-l);  color: var(--teal);  border: 1px solid var(--teal-b); }
+.anb-gold  { background: var(--gold-l);  color: var(--gold);  border: 1px solid var(--gold-b); }
+.anb-slate { background: var(--slate-l); color: var(--slate); border: 1px solid var(--slate-b); }
+.anb-rust  { background: var(--rust-l);  color: var(--rust);  border: 1px solid var(--rust-b); }
+
+.arch-arr {
+  text-align: center;
+  padding: 0 6px;
+  color: var(--ink4);
+  font-size: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.arch-arr-label {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 8.5px;
+  color: var(--teal);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+/* ── CODE BLOCKS ── */
+.code-wrap {
+  background: var(--code-bg);
+  border-radius: var(--r);
+  overflow: hidden;
+  margin: 16px 0;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+.code-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: rgba(255,255,255,0.03);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.code-dots { display: flex; gap: 6px; }
+.code-dots span { width: 10px; height: 10px; border-radius: 50%; }
+.cd-r { background: #FF5F57; } .cd-y { background: #FFBD2E; } .cd-g { background: #28C840; }
+
+.code-fn { font-family: 'Roboto Mono', monospace; font-size: 11px; color: #5A5448; }
+
+.code-lang {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.cl-yaml  { background: rgba(13,110,110,0.2);  color: #5BC8C8; border: 1px solid rgba(13,110,110,0.3); }
+.cl-bash  { background: rgba(155,126,42,0.2);  color: #D4B048; border: 1px solid rgba(155,126,42,0.3); }
+.cl-json  { background: rgba(45,74,107,0.2);   color: #80A8D8; border: 1px solid rgba(45,74,107,0.3); }
+
+pre {
+  padding: 20px;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 12px;
+  line-height: 1.8;
+  color: var(--code-fg);
+  overflow-x: auto;
+}
+
+.ck  { color: var(--code-key); }
+.cs  { color: var(--code-str); }
+.cv  { color: var(--code-val); }
+.cc  { color: var(--code-cmt); font-style: italic; }
+.cy  { color: var(--code-yel); }
+.cg  { color: #90EE90; }
+.cr  { color: #E88080; }
+
+/* ── CALLOUTS ── */
+.callout {
+  border-radius: var(--r);
+  padding: 16px 20px;
+  margin: 16px 0;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  border-left: 3px solid transparent;
+}
+
+.callout.warn   { background: var(--rust-l);  border-left-color: var(--rust);  border: 1px solid var(--rust-b); }
+.callout.tip    { background: var(--sage-l);  border-left-color: var(--sage);  border: 1px solid var(--sage-b); }
+.callout.info   { background: var(--slate-l); border-left-color: var(--slate); border: 1px solid var(--slate-b); }
+.callout.gold   { background: var(--gold-l);  border-left-color: var(--gold);  border: 1px solid var(--gold-b); }
+.callout.teal   { background: var(--teal-l);  border-left-color: var(--teal);  border: 1px solid var(--teal-b); }
+
+.ci { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+.cb { flex: 1; }
+
+.cl-label {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+  display: block;
+}
+
+.callout.warn  .cl-label { color: var(--rust); }
+.callout.tip   .cl-label { color: var(--sage); }
+.callout.info  .cl-label { color: var(--slate); }
+.callout.gold  .cl-label { color: var(--gold); }
+.callout.teal  .cl-label { color: var(--teal); }
+
+.callout p { font-size: 13.5px; color: var(--ink2); line-height: 1.65; }
+.callout strong { color: var(--ink); font-weight: 600; }
+.callout code {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 11px;
+  background: rgba(0,0,0,0.07);
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
+/* ── SECURITY TABLE ── */
+.sec-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-bottom: 20px;
+  background: var(--paper);
+  border-radius: var(--r);
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.sec-table th {
+  padding: 12px 18px;
+  background: var(--ink);
+  color: var(--bg3);
+  text-align: left;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.sec-table td {
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--border2);
+  color: var(--ink3);
+  vertical-align: top;
+  line-height: 1.55;
+}
+
+.sec-table tr:last-child td { border-bottom: none; }
+.sec-table tr:hover td { background: var(--teal-l); }
+
+.sec-table td:first-child {
+  font-family: 'Lexend Exa', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+/* ── DECISION TABLE ── */
+.decision-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  background: var(--border);
+  gap: 1px;
+  border-radius: var(--r);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  margin-bottom: 20px;
+}
+
+.dg-header {
+  background: var(--ink);
+  padding: 12px 18px;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--bg3);
+}
+
+.dg-cell {
+  background: var(--paper);
+  padding: 12px 18px;
+  font-size: 13px;
+  color: var(--ink2);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.15s;
+}
+
+.dg-cell:hover { background: var(--bg); }
+
+.dg-cell.center { justify-content: center; }
+
+.yes-badge {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--sage-l);
+  color: var(--sage);
+  border: 1px solid var(--sage-b);
+  padding: 2px 10px;
+  border-radius: 100px;
+}
+
+.no-badge {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--bg2);
+  color: var(--ink4);
+  border: 1px solid var(--border);
+  padding: 2px 10px;
+  border-radius: 100px;
+}
+
+/* ── EXAM PATTERNS ── */
+.pattern-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+
+.pat-row {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 12px;
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 12px 18px;
+  transition: all 0.18s;
+}
+
+.pat-row:hover {
+  border-color: var(--teal-b);
+  background: var(--teal-l);
+  transform: translateX(4px);
+}
+
+.pat-q {
+  font-size: 13px;
+  font-style: italic;
+  color: var(--ink3);
+  line-height: 1.5;
+}
+
+.pat-sep {
+  color: var(--teal);
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.pat-a {
+  font-family: 'Lexend Exa', sans-serif;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+  line-height: 1.4;
+}
+
+/* ── QUICK REF ── */
+.qr-dark {
+  background: var(--ink);
+  border-radius: var(--r);
+  padding: 32px;
+  margin-bottom: 20px;
+}
+
+.qr-dark-title {
+  font-family: 'Lexend Exa', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--bg);
+  letter-spacing: -0.02em;
+  margin-bottom: 20px;
+}
+
+.qr-dark-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.qr-dark-item {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: var(--r-sm);
+  padding: 11px 14px;
+  display: flex;
+  gap: 12px;
+  transition: all 0.18s;
+}
+
+.qr-dark-item:hover { background: rgba(13,110,110,0.15); border-color: rgba(13,110,110,0.3); }
+
+.qr-k {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 10.5px;
+  font-weight: 500;
+  color: #5BC8C8;
+  min-width: 170px;
+  flex-shrink: 0;
+  letter-spacing: 0.02em;
+  padding-top: 1px;
+}
+
+.qr-v { font-size: 12.5px; color: rgba(255,255,255,0.45); line-height: 1.5; }
+
+/* ── DIVIDER ── */
+.hr {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin: 56px 0;
+}
+
+.hr span { flex: 1; height: 1px; background: var(--border); }
+.hr-label {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink4);
+}
+
+/* ── FOOTER ── */
+footer {
+  background: var(--ink);
+  padding: 28px 64px;
+  text-align: center;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 11px;
+  color: #5A5448;
+  letter-spacing: 0.06em;
+}
+
+footer strong { color: #5BC8C8; }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg2); }
+::-webkit-scrollbar-thumb { background: var(--bg3); border-radius: 3px; }
+
+@media (max-width: 1024px) {
+  .hero, .wrap, footer { padding-left: 40px; padding-right: 40px; }
+  .formats-row { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 768px) {
+  .hero, .wrap, footer { padding-left: 24px; padding-right: 24px; }
+  .blocks-grid, .formats-row, .arch-flow { grid-template-columns: 1fr; }
+  .why-grid, .qr-dark-grid, .decision-grid { grid-template-columns: 1fr; }
+  .pat-row { grid-template-columns: 1fr; }
+  .formats-row { grid-template-columns: repeat(3, 1fr); }
+}
+/* ── BACK BUTTON ── */
+.back-home{position:fixed;top:20px;left:20px;z-index:9998;display:inline-flex;align-items:center;gap:6px;font-family:'Roboto Mono',monospace;font-size:11px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:var(--teal);background:var(--paper);border:1px solid var(--teal-b);padding:8px 14px;border-radius:100px;text-decoration:none;transition:all 0.2s ease;box-shadow:0 2px 8px rgba(0,0,0,0.08)}
+.back-home:hover{background:var(--teal-l);transform:translateY(-1px);box-shadow:0 4px 12px rgba(13,110,110,0.15)}
+.back-home svg{width:14px;height:14px}
+</style>
+</head>
+<body>
+
+<a href="../index.html" class="back-home"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 12L6 8l4-4"/></svg>Home</a>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">
+      <div class="eyebrow-dot"></div>
+      <span class="eyebrow-pill">DOP-C02 · Domain 1 · SDLC Automation</span>
+    </div>
+    <h1>AWS <strong>Code</strong>Artifact</h1>
+    <p class="hero-sub">Centralizing and managing dependencies for multi-team projects. The governed gateway between your build environment and the public internet — every package request audited, every dependency cached, every vulnerability controlled.</p>
+    <div class="hero-tags">
+      <span class="htag ht-teal">Domain · Repository · Upstream</span>
+      <span class="htag ht-rust">npm · Maven · NuGet · pip</span>
+      <span class="htag ht-gold">Asset Caching</span>
+      <span class="htag ht-slate">VPC Endpoints</span>
+      <span class="htag ht-sage">CloudTrail Audit</span>
+    </div>
+  </div>
+</header>
+<div class="stripe-bar"></div>
+
+<div class="wrap">
+
+<!-- ══ CORE CONCEPTS ══════════════════════════════════════════════════════ -->
+<section class="sec" id="concepts">
+  <div class="sh">
+    <span class="sh-num">01</span>
+    <div class="sh-accent" style="background:var(--teal)"></div>
+    <h2>The Three Building Blocks</h2>
+    <div class="sh-rule"></div>
+  </div>
+
+  <p style="color:var(--ink3);font-size:14px;margin-bottom:20px;font-style:italic;line-height:1.7">Every CodeArtifact architecture is assembled from three independent concepts. Understanding them individually makes the overall design obvious.</p>
+
+  <div class="blocks-grid">
+    <div class="block-card">
+      <div class="block-num">1</div>
+      <span class="block-icon">🏢</span>
+      <div class="block-title">Domain</div>
+      <div class="block-subtitle bc-teal">Top-Level Container</div>
+      <div class="block-desc">One per organization. Provides a single endpoint for cross-repo package sharing, centralized KMS encryption, and a unified access control boundary. All repositories within a domain share the same KMS key and can share packages with each other.</div>
+      <div class="block-analogy">your company's private registry namespace</div>
+    </div>
+    <div class="block-card">
+      <div class="block-num">2</div>
+      <span class="block-icon">📦</span>
+      <div class="block-title">Repository</div>
+      <div class="block-subtitle bc-gold">Package Store</div>
+      <div class="block-desc">Lives inside a domain. Scoped to a team, project, or package type. This is what your build tool (npm, Maven, pip) points to directly. Each repository has its own packages, its own upstream chain, and its own access policies.</div>
+      <div class="block-analogy">a specific warehouse shelf for one team</div>
+    </div>
+    <div class="block-card">
+      <div class="block-num">3</div>
+      <span class="block-icon">🔗</span>
+      <div class="block-title">Upstream</div>
+      <div class="block-subtitle bc-slate">Fallback Chain</div>
+      <div class="block-desc">If a package is not found locally, CodeArtifact automatically looks upstream — another internal repo or a public registry. Every layer caches what it fetches. The second request for any package is served instantly from local cache.</div>
+      <div class="block-analogy">a supplier your warehouse calls when out of stock</div>
+    </div>
+  </div>
+
+  <div class="sh" style="margin-top:40px">
+    <span class="sh-num">—</span>
+    <h2 style="font-size:16px">Supported Package Formats</h2>
+    <div class="sh-rule"></div>
+  </div>
+
+  <div class="formats-row">
+    <div class="fmt-card">
+      <div class="fmt-name">npm</div>
+      <div class="fmt-reg">npmjs.com</div>
+      <div class="fmt-use">Node.js · JavaScript</div>
+    </div>
+    <div class="fmt-card">
+      <div class="fmt-name">Maven</div>
+      <div class="fmt-reg">Maven Central<br>Google Android</div>
+      <div class="fmt-use">Java · Kotlin</div>
+    </div>
+    <div class="fmt-card">
+      <div class="fmt-name">NuGet</div>
+      <div class="fmt-reg">nuget.org</div>
+      <div class="fmt-use">.NET · C#</div>
+    </div>
+    <div class="fmt-card">
+      <div class="fmt-name">pip</div>
+      <div class="fmt-reg">PyPI</div>
+      <div class="fmt-use">Python</div>
+    </div>
+    <div class="fmt-card">
+      <div class="fmt-name">Gradle</div>
+      <div class="fmt-reg">Maven Central</div>
+      <div class="fmt-use">Android · Java</div>
+    </div>
+    <div class="fmt-card">
+      <div class="fmt-name">Swift</div>
+      <div class="fmt-reg">swift.org</div>
+      <div class="fmt-use">iOS · macOS</div>
+    </div>
+  </div>
+</section>
+
+<div class="hr"><span></span><div class="hr-label">Why Centralize</div><span></span></div>
+
+<!-- ══ WHY CENTRALIZE ══════════════════════════════════════════════════════ -->
+<section class="sec" id="why">
+  <div class="sh">
+    <span class="sh-num">02</span>
+    <div class="sh-accent" style="background:var(--rust)"></div>
+    <h2>Why Centralize Dependencies</h2>
+    <div class="sh-rule"></div>
+  </div>
+
+  <p style="color:var(--ink3);font-size:14px;margin-bottom:20px;font-style:italic;line-height:1.7">Without a central artifact repository, teams independently pull from public registries — creating a fragile, ungoverned, unaudited dependency chain. CodeArtifact resolves each problem systematically.</p>
+
+  <div class="why-grid">
+    <div class="why-card">
+      <div class="why-icon">🔒</div>
+      <div class="why-body">
+        <div class="why-title">Security & Governance</div>
+        <div class="why-desc">Security teams cannot control which packages enter the build environment. A malicious package can be installed by any developer at any time. CodeArtifact acts as a gate — only packages that exist in your repositories are accessible.</div>
+      </div>
+    </div>
+    <div class="why-card">
+      <div class="why-icon">📡</div>
+      <div class="why-body">
+        <div class="why-title">Availability & Reliability</div>
+        <div class="why-desc">Public packages can disappear (the left-pad incident). CodeArtifact caches every package it fetches — once cached, it is always available regardless of what happens upstream. Your builds never break because of a deleted public package.</div>
+      </div>
+    </div>
+    <div class="why-card">
+      <div class="why-icon">🔍</div>
+      <div class="why-body">
+        <div class="why-title">Audit & Compliance</div>
+        <div class="why-desc">Every package request is logged to AWS CloudTrail automatically. You know exactly which package version was pulled, by which build, at what time — critical for compliance audits and security incident response.</div>
+      </div>
+    </div>
+    <div class="why-card">
+      <div class="why-icon">🚀</div>
+      <div class="why-body">
+        <div class="why-title">Performance & Cost</div>
+        <div class="why-desc">Each package is fetched from the public registry only once. Subsequent requests are served from CodeArtifact's cache — faster builds, lower egress costs, and no rate limiting from public registries under heavy CI load.</div>
+      </div>
+    </div>
+    <div class="why-card">
+      <div class="why-icon">🤝</div>
+      <div class="why-body">
+        <div class="why-title">Internal Package Sharing</div>
+        <div class="why-desc">Teams publish private packages (shared libraries, internal SDKs) to CodeArtifact and consume them exactly like public packages — same tooling, same workflow, no custom infrastructure required.</div>
+      </div>
+    </div>
+    <div class="why-card">
+      <div class="why-icon">🛡️</div>
+      <div class="why-body">
+        <div class="why-title">Vulnerability Blocking</div>
+        <div class="why-desc">When a vulnerable package version is discovered, remove it from the approved repo. All downstream repositories can no longer access it — without touching a single developer machine or build script.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="hr"><span></span><div class="hr-label">Upstream Repositories</div><span></span></div>
+
+<!-- ══ UPSTREAM ════════════════════════════════════════════════════════════ -->
+<section class="sec" id="upstream">
+  <div class="sh">
+    <span class="sh-num">03</span>
+    <div class="sh-accent" style="background:var(--gold)"></div>
+    <h2>Upstream Repositories — The Fallback Chain</h2>
+    <div class="sh-rule"></div>
+  </div>
+
+  <p style="color:var(--ink3);font-size:14px;margin-bottom:20px;font-style:italic;line-height:1.7">When a package is requested and not found locally, CodeArtifact automatically looks upstream — and caches every package it finds at every layer it traverses.</p>
+
+  <div class="upstream-visual">
+    <div><span class="cc"># Developer runs: npm install lodash</span></div>
+    <div>&nbsp;</div>
+    <div><span class="uv-node">team-frontend-npm</span> <span class="uv-arrow">→</span> <span class="uv-step">check local cache</span> <span class="uv-notfound">NOT FOUND</span></div>
+    <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="uv-arrow">↓ check upstream 1</span></div>
+    <div><span class="uv-node">internal-libs</span> <span class="uv-arrow">→</span> <span class="uv-step">check local cache</span> <span class="uv-notfound">NOT FOUND</span></div>
+    <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="uv-arrow">↓ check upstream 2</span></div>
+    <div><span class="uv-node">approved-npm</span> <span class="uv-arrow">→</span> <span class="uv-step">check local cache</span> <span class="uv-notfound">NOT FOUND</span></div>
+    <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="uv-arrow">↓ external connection</span></div>
+    <div><span class="uv-node">npmjs.com</span> <span class="uv-arrow">→</span> <span class="uv-found">FOUND — fetching lodash@4.17.21</span></div>
+    <div>&nbsp;</div>
+    <div><span class="cc"># Cache propagates back up every layer:</span></div>
+    <div><span class="uv-node">approved-npm</span> <span class="uv-arrow">←</span> <span class="cg">cached lodash@4.17.21</span></div>
+    <div><span class="uv-node">team-frontend-npm</span> <span class="uv-arrow">←</span> <span class="cg">cached lodash@4.17.21 → returned to developer</span></div>
+    <div>&nbsp;</div>
+    <div><span class="cc"># Second request — instant response from team-frontend-npm local cache</span></div>
+    <div><span class="cc"># No external call made. No upstream traversal. Zero latency.</span></div>
+  </div>
+
+  <div class="sh" style="margin-top:32px">
+    <span class="sh-num">—</span>
+    <h2 style="font-size:16px">The Five Rules</h2>
+    <div class="sh-rule"></div>
+  </div>
+
+  <div class="rules-list">
+    <div class="rule-row">
+      <div class="rule-num">R1</div>
+      <div>
+        <div class="rule-title">1 external connection per repository</div>
+        <div class="rule-desc">A repository can connect to only one public registry (e.g. npmjs.com). Need two public registries? Chain two repos as upstreams — each with its own external connection.</div>
+      </div>
+    </div>
+    <div class="rule-row">
+      <div class="rule-num">R2</div>
+      <div>
+        <div class="rule-title">Cached assets survive upstream removal</div>
+        <div class="rule-desc">If you remove an upstream, packages already cached in your repo remain available permanently. You never lose what you already pulled — removing the upstream only stops future fetches.</div>
+      </div>
+    </div>
+    <div class="rule-row">
+      <div class="rule-num">R3</div>
+      <div>
+        <div class="rule-title">Priority order is explicit and deliberate</div>
+        <div class="rule-desc">When a package exists in multiple upstreams, CodeArtifact returns it from the first upstream in the configured list. Order matters — security-vetted repos should be listed before open upstreams.</div>
+      </div>
+    </div>
+    <div class="rule-row">
+      <div class="rule-num">R4</div>
+      <div>
+        <div class="rule-title">No cross-domain upstreams</div>
+        <div class="rule-desc">Upstream chaining only works within the same domain. You cannot configure a repo in domain A to use a repo in domain B as an upstream. Cross-account sharing requires resource policies, not upstream configuration.</div>
+      </div>
+    </div>
+    <div class="rule-row">
+      <div class="rule-num">R5</div>
+      <div>
+        <div class="rule-title">Asset caching is automatic at every layer</div>
+        <div class="rule-desc">Every package fetched from an upstream is automatically cached locally at each layer it traverses. No configuration required — it happens transparently during every upstream fetch.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="hr"><span></span><div class="hr-label">Reference Architecture</div><span></span></div>
+
+<!-- ══ ARCHITECTURE ════════════════════════════════════════════════════════ -->
+<section class="sec" id="arch">
+  <div class="sh">
+    <span class="sh-num">04</span>
+    <div class="sh-accent" style="background:var(--slate)"></div>
+    <h2>Multi-Team Reference Architecture</h2>
+    <div class="sh-rule"></div>
+  </div>
+
+  <div class="arch-wrap">
+    <div class="arch-title">Domain: mycompany — single domain, multiple repository layers</div>
+    <div class="arch-flow">
+      <div class="arch-node">
+        <span class="an-icon">👨‍💻</span>
+        <div class="an-name">Developer</div>
+        <div class="an-sub">npm install<br>mvn package</div>
+      </div>
+      <div class="arch-arr">
+        →
+        <div class="arch-arr-label">points to</div>
+      </div>
+      <div class="arch-node">
+        <span class="an-icon">📁</span>
+        <div class="an-name">Team Repo</div>
+        <div class="an-sub">team-frontend-npm<br>team-backend-maven</div>
+        <div class="an-badge anb-teal">Team Layer</div>
+      </div>
+      <div class="arch-arr">
+        →
+        <div class="arch-arr-label">upstream</div>
+      </div>
+      <div class="arch-node">
+        <span class="an-icon">🏛️</span>
+        <div class="an-name">Internal Libs</div>
+        <div class="an-sub">private SDKs<br>shared libraries</div>
+        <div class="an-badge anb-gold">Internal Layer</div>
+      </div>
+      <div class="arch-arr">
+        →
+        <div class="arch-arr-label">upstream</div>
+      </div>
+      <div class="arch-node">
+        <span class="an-icon">🔐</span>
+        <div class="an-name">Approved Repo</div>
+        <div class="an-sub">security-vetted<br>public packages</div>
+        <div class="an-badge anb-slate">Gateway Layer</div>
+      </div>
+      <div class="arch-arr">
+        →
+        <div class="arch-arr-label">external conn.</div>
+      </div>
+      <div class="arch-node">
+        <span class="an-icon">🌐</span>
+        <div class="an-name">Public Registry</div>
+        <div class="an-sub">npmjs.com<br>Maven Central</div>
+        <div class="an-badge anb-rust">External</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout teal">
+    <span class="ci">💡</span>
+    <div class="cb">
+      <span class="cl-label">The Security Value</span>
+      <p>Developers only configure <strong>team-frontend-npm</strong> as their registry. The security team controls what flows through <strong>approved-npm</strong>. To block a vulnerable package, remove it from approved-npm — developers cannot access it without touching a single machine or build script.</p>
+    </div>
+  </div>
+</section>
+
+<div class="hr"><span></span><div class="hr-label">CodeBuild Integration</div><span></span></div>
+
+<!-- ══ CODEBUILD INTEGRATION ═══════════════════════════════════════════════ -->
+<section class="sec" id="codebuild">
+  <div class="sh">
+    <span class="sh-num">05</span>
+    <div class="sh-accent" style="background:var(--sage)"></div>
+    <h2>Integration with CodeBuild Pipelines</h2>
+    <div class="sh-rule"></div>
+  </div>
+
+  <p style="color:var(--ink3);font-size:14px;margin-bottom:20px;font-style:italic;line-height:1.7">The pattern is consistent across all package managers: authenticate to CodeArtifact at the start of the build, then use your package manager normally — it transparently routes through CodeArtifact.</p>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+    <div>
+      <p style="font-family:'Roboto Mono',monospace;font-size:10px;color:var(--teal);letter-spacing:0.1em;text-transform:uppercase;font-weight:600;margin-bottom:10px">npm — buildspec.yml</p>
+      <div class="code-wrap">
+        <div class="code-bar">
+          <div class="code-dots"><span class="cd-r"></span><span class="cd-y"></span><span class="cd-g"></span></div>
+          <span class="code-fn">buildspec-npm.yml</span>
+          <span class="code-lang cl-yaml">YAML</span>
+        </div>
+        <pre><span class="cy">version</span>: <span class="cs">0.2</span>
+
+<span class="cy">phases</span>:
+  <span class="cy">pre_build</span>:
+    <span class="cy">commands</span>:
+      <span class="cc"># Authenticate — token valid 12 hours</span>
+      - aws codeartifact login
+          --tool npm
+          --domain mycompany
+          --domain-owner 123456789012
+          --repository team-frontend-npm
+          --region us-east-1
+      <span class="cc"># .npmrc now points to CodeArtifact</span>
+
+  <span class="cy">build</span>:
+    <span class="cy">commands</span>:
+      <span class="cc"># npm install pulls from CodeArtifact</span>
+      - npm install
+      - npm run build
+      - npm test
+
+<span class="cy">artifacts</span>:
+  <span class="cy">files</span>:
+    - <span class="cs">'**/*'</span></pre>
+      </div>
+    </div>
+    <div>
+      <p style="font-family:'Roboto Mono',monospace;font-size:10px;color:var(--gold);letter-spacing:0.1em;text-transform:uppercase;font-weight:600;margin-bottom:10px">Maven — buildspec.yml</p>
+      <div class="code-wrap">
+        <div class="code-bar">
+          <div class="code-dots"><span class="cd-r"></span><span class="cd-y"></span><span class="cd-g"></span></div>
+          <span class="code-fn">buildspec-maven.yml</span>
+          <span class="code-lang cl-yaml">YAML</span>
+        </div>
+        <pre><span class="cy">version</span>: <span class="cs">0.2</span>
+
+<span class="cy">phases</span>:
+  <span class="cy">pre_build</span>:
+    <span class="cy">commands</span>:
+      <span class="cc"># Get auth token</span>
+      - export CODEARTIFACT_TOKEN=$(
+          aws codeartifact get-authorization-token
+          --domain mycompany
+          --domain-owner 123456789012
+          --query authorizationToken
+          --output text)
+      <span class="cc"># Get repository endpoint</span>
+      - export REPO_URL=$(
+          aws codeartifact get-repository-endpoint
+          --domain mycompany
+          --repository team-backend-maven
+          --format maven
+          --query repositoryEndpoint
+          --output text)
+
+  <span class="cy">build</span>:
+    <span class="cy">commands</span>:
+      - mvn -s settings.xml clean package
+      - mvn -s settings.xml test</pre>
+      </div>
+    </div>
+  </div>
+
+  <p style="font-family:'Roboto Mono',monospace;font-size:10px;color:var(--rust);letter-spacing:0.1em;text-transform:uppercase;font-weight:600;margin-bottom:10px">Required IAM Permissions — CodeBuild Service Role</p>
+
+  <div class="code-wrap">
+    <div class="code-bar">
+      <div class="code-dots"><span class="cd-r"></span><span class="cd-y"></span><span class="cd-g"></span></div>
+      <span class="code-fn">codebuild-service-role-policy.json</span>
+      <span class="code-lang cl-json">JSON</span>
+    </div>
+    <pre>{
+  <span class="ck">"Version"</span>: <span class="cs">"2012-10-17"</span>,
+  <span class="ck">"Statement"</span>: [
+    {
+      <span class="ck">"Effect"</span>: <span class="cs">"Allow"</span>,
+      <span class="ck">"Action"</span>: [
+        <span class="cs">"codeartifact:GetAuthorizationToken"</span>,
+        <span class="cs">"codeartifact:GetRepositoryEndpoint"</span>,
+        <span class="cs">"codeartifact:ReadFromRepository"</span>
+      ],
+      <span class="ck">"Resource"</span>: <span class="cs">"*"</span>
+    },
+    {
+      <span class="ck">"Effect"</span>: <span class="cs">"Allow"</span>,
+      <span class="ck">"Action"</span>: <span class="cs">"sts:GetServiceBearerToken"</span>,    <span class="cc">// CRITICAL — commonly missed</span>
+      <span class="ck">"Resource"</span>: <span class="cs">"*"</span>,
+      <span class="ck">"Condition"</span>: {
+        <span class="ck">"StringEquals"</span>: {
+          <span class="ck">"sts:AWSServiceName"</span>: <span class="cs">"codeartifact.amazonaws.com"</span>
+        }
+      }
+    }
+  ]
+}</pre>
+  </div>
+
+  <div class="callout warn">
+    <span class="ci">⚠️</span>
+    <div class="cb">
+      <span class="cl-label">The Most Common Misconfiguration</span>
+      <p><strong><code>sts:GetServiceBearerToken</code> is NOT optional.</strong> The <code>codeartifact:GetAuthorizationToken</code> API internally calls STS to generate a bearer token. Without this permission, authentication fails even when all <code>codeartifact:*</code> permissions are correctly set. This is the single most common CodeArtifact misconfiguration — and a frequent exam trap.</p>
+    </div>
+  </div>
+
+  <div class="callout info" style="margin-top:12px">
+    <span class="ci">⏱️</span>
+    <div class="cb">
+      <span class="cl-label">Auth Token Expiry</span>
+      <p>Authorization tokens are valid for <strong>12 hours by default</strong>, configurable up to 12 hours. For long-running builds, refresh the token in a mid-build step. The <code>aws codeartifact login</code> command handles token refresh automatically when called again.</p>
+    </div>
+  </div>
+</section>
+
+<div class="hr"><span></span><div class="hr-label">Publishing Internal Packages</div><span></span></div>
+
+<!-- ══ PUBLISHING ══════════════════════════════════════════════════════════ -->
+<section class="sec" id="publish">
+  <div class="sh">
+    <span class="sh-num">06</span>
+    <div class="sh-accent" style="background:var(--plum)"></div>
+    <h2>Publishing Internal Packages</h2>
+    <div class="sh-rule"></div>
+  </div>
+
+  <p style="color:var(--ink3);font-size:14px;margin-bottom:20px;font-style:italic;line-height:1.7">CodeArtifact is not just a proxy — it's the distribution channel for your own internally built packages. Publish once; every team consumes like any public package.</p>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <div>
+      <p style="font-family:'Roboto Mono',monospace;font-size:10px;color:var(--teal);letter-spacing:0.1em;text-transform:uppercase;font-weight:600;margin-bottom:10px">Publishing npm</p>
+      <div class="code-wrap">
+        <div class="code-bar">
+          <div class="code-dots"><span class="cd-r"></span><span class="cd-y"></span><span class="cd-g"></span></div>
+          <span class="code-fn">publish-npm.sh</span>
+          <span class="code-lang cl-bash">Bash</span>
+        </div>
+        <pre><span class="cc"># 1. Authenticate to internal repo</span>
+aws codeartifact login \
+  --tool npm \
+  --domain mycompany \
+  --domain-owner 123456789012 \
+  --repository internal-libs
+
+<span class="cc"># 2. Publish — same as npmjs.com</span>
+npm publish
+
+<span class="cc"># Package now available to any repo</span>
+<span class="cc"># that has internal-libs as an upstream</span></pre>
+      </div>
+    </div>
+    <div>
+      <p style="font-family:'Roboto Mono',monospace;font-size:10px;color:var(--gold);letter-spacing:0.1em;text-transform:uppercase;font-weight:600;margin-bottom:10px">Publishing Maven</p>
+      <div class="code-wrap">
+        <div class="code-bar">
+          <div class="code-dots"><span class="cd-r"></span><span class="cd-y"></span><span class="cd-g"></span></div>
+          <span class="code-fn">pom.xml + deploy</span>
+          <span class="code-lang cl-bash">Bash</span>
+        </div>
+        <pre><span class="cc"># Option 1 — CLI deploy</span>
+mvn deploy \
+  -DaltDeploymentRepository=\
+    codeartifact::default::${REPO_URL} \
+  -s settings.xml
+
+<span class="cc"># Option 2 — pom.xml configuration</span>
+<span class="cc"># &lt;distributionManagement&gt;</span>
+<span class="cc">#   &lt;repository&gt;</span>
+<span class="cc">#     &lt;id&gt;codeartifact&lt;/id&gt;</span>
+<span class="cc">#     &lt;url&gt;${REPO_URL}&lt;/url&gt;</span>
+<span class="cc">#   &lt;/repository&gt;</span>
+<span class="cc"># &lt;/distributionManagement&gt;</span></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="hr"><span></span><div class="hr-label">Security & Governance</div><span></span></div>
+
+<!-- ══ SECURITY ════════════════════════════════════════════════════════════ -->
+<section class="sec" id="security">
+  <div class="sh">
+    <span class="sh-num">07</span>
+    <div class="sh-accent" style="background:var(--rust)"></div>
+    <h2>Security & Governance Model</h2>
+    <div class="sh-rule"></div>
+  </div>
+
+  <table class="sec-table">
+    <thead>
+      <tr>
+        <th>Layer</th>
+        <th>Mechanism</th>
+        <th>What It Controls</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Domain level</td>
+        <td>Resource-based policy on domain</td>
+        <td>Which AWS accounts can access any repo in the domain — cross-account sharing</td>
+      </tr>
+      <tr>
+        <td>Repository level</td>
+        <td>Resource-based policy on repo</td>
+        <td>Which principals can read, write, or administer a specific repository</td>
+      </tr>
+      <tr>
+        <td>Identity level</td>
+        <td>IAM policies on users/roles</td>
+        <td>Standard AWS IAM — which principals can call which CodeArtifact APIs</td>
+      </tr>
+      <tr>
+        <td>Network level</td>
+        <td>VPC Endpoint + endpoint policy</td>
+        <td>Restrict CodeArtifact access to within your VPC — traffic never leaves AWS network</td>
+      </tr>
+      <tr>
+        <td>Encryption</td>
+        <td>AWS KMS (customer managed key)</td>
+        <td>All packages encrypted at rest with your key — configured at domain level</td>
+      </tr>
+      <tr>
+        <td>Audit</td>
+        <td>AWS CloudTrail (automatic)</td>
+        <td>Every package request logged — who requested what, when, from which build</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout gold">
+    <span class="ci">🔌</span>
+    <div class="cb">
+      <span class="cl-label">VPC Endpoints — Two Required</span>
+      <p>CodeArtifact itself is NOT inside your VPC. To keep traffic private, create two VPC Interface Endpoints: <strong><code>com.amazonaws.region.codeartifact.api</code></strong> for management API calls (get-authorization-token), and <strong><code>com.amazonaws.region.codeartifact.repositories</code></strong> for package upload/download traffic. Creating only one is the most common misconfiguration — authentication works but package downloads fail.</p>
+    </div>
+  </div>
+</section>
+
+<div class="hr"><span></span><div class="hr-label">Decision Guide</div><span></span></div>
+
+<!-- ══ DECISION ════════════════════════════════════════════════════════════ -->
+<section class="sec" id="decision">
+  <div class="sh">
+    <span class="sh-num">08</span>
+    <div class="sh-accent" style="background:var(--sage)"></div>
+    <h2>When to Use CodeArtifact</h2>
+    <div class="sh-rule"></div>
+  </div>
+
+  <div class="decision-grid">
+    <div class="dg-header">Scenario</div>
+    <div class="dg-header" style="text-align:center">Use CodeArtifact?</div>
+    <div class="dg-header">Reason</div>
+
+    <div class="dg-cell">Security team needs to audit all package downloads</div>
+    <div class="dg-cell center"><span class="yes-badge">YES</span></div>
+    <div class="dg-cell">Every request logged to CloudTrail automatically</div>
+
+    <div class="dg-cell">Build environment has no internet access (VPC, no NAT)</div>
+    <div class="dg-cell center"><span class="yes-badge">YES</span></div>
+    <div class="dg-cell">CodeArtifact via VPC endpoint — packages served privately</div>
+
+    <div class="dg-cell">A public package disappeared and broke builds</div>
+    <div class="dg-cell center"><span class="yes-badge">YES</span></div>
+    <div class="dg-cell">Cached packages remain permanently after first fetch</div>
+
+    <div class="dg-cell">Multiple teams need the same internal shared library</div>
+    <div class="dg-cell center"><span class="yes-badge">YES</span></div>
+    <div class="dg-cell">Publish once, all teams consume via upstream chain</div>
+
+    <div class="dg-cell">Block a specific vulnerable package version immediately</div>
+    <div class="dg-cell center"><span class="yes-badge">YES</span></div>
+    <div class="dg-cell">Remove from approved repo — downstream instantly blocked</div>
+
+    <div class="dg-cell">Share packages across AWS accounts</div>
+    <div class="dg-cell center"><span class="yes-badge">YES</span></div>
+    <div class="dg-cell">Domain resource policies support cross-account access</div>
+
+    <div class="dg-cell">Single developer, single project, no governance needs</div>
+    <div class="dg-cell center"><span class="no-badge">NO</span></div>
+    <div class="dg-cell">Direct public registry access is simpler at this scale</div>
+  </div>
+</section>
+
+<div class="hr"><span></span><div class="hr-label">Exam Patterns</div><span></span></div>
+
+<!-- ══ EXAM PATTERNS ═══════════════════════════════════════════════════════ -->
+<section class="sec" id="patterns">
+  <div class="sh">
+    <span class="sh-num">09</span>
+    <div class="sh-accent" style="background:var(--rust)"></div>
+    <h2>DOP-C02 Exam Pattern Recognition</h2>
+    <div class="sh-rule"></div>
+  </div>
+
+  <div class="callout gold">
+    <span class="ci">🎯</span>
+    <div class="cb">
+      <span class="cl-label">The Governance Scenario Template</span>
+      <p>DOP-C02 CodeArtifact questions almost always appear inside a larger pipeline or security scenario. The tell is the word <strong>"governance"</strong>, <strong>"audit"</strong>, or <strong>"no direct internet access"</strong> from a build environment. Those three phrases point to CodeArtifact as part of the answer.</p>
+    </div>
+  </div>
+
+  <div class="pattern-stack" style="margin-top:20px">
+    <div class="pat-row">
+      <span class="pat-q">"Build environment has no internet access but needs npm packages"</span>
+      <span class="pat-sep">→</span>
+      <span class="pat-a">CodeArtifact via VPC endpoint — no NAT Gateway needed for packages</span>
+    </div>
+    <div class="pat-row">
+      <span class="pat-q">"Security team needs to audit which packages entered the build"</span>
+      <span class="pat-sep">→</span>
+      <span class="pat-a">CodeArtifact — every request logged to CloudTrail automatically</span>
+    </div>
+    <div class="pat-row">
+      <span class="pat-q">"Public package disappeared and broke all builds overnight"</span>
+      <span class="pat-sep">→</span>
+      <span class="pat-a">CodeArtifact asset caching — cached packages survive upstream removal</span>
+    </div>
+    <div class="pat-row">
+      <span class="pat-q">"Block a vulnerable package version across all team builds"</span>
+      <span class="pat-sep">→</span>
+      <span class="pat-a">Remove from approved-repo — all downstream repos blocked instantly</span>
+    </div>
+    <div class="pat-row">
+      <span class="pat-q">"CodeBuild authentication to CodeArtifact fails despite correct permissions"</span>
+      <span class="pat-sep">→</span>
+      <span class="pat-a">Missing sts:GetServiceBearerToken in the CodeBuild service role</span>
+    </div>
+    <div class="pat-row">
+      <span class="pat-q">"Temporary unreviewed package — unblock build without bypassing governance"</span>
+      <span class="pat-sep">→</span>
+      <span class="pat-a">Temp repo as additional upstream with lower priority — remove after review</span>
+    </div>
+    <div class="pat-row">
+      <span class="pat-q">"VPC endpoint created but package downloads still fail"</span>
+      <span class="pat-sep">→</span>
+      <span class="pat-a">Missing second VPC endpoint — need both .api AND .repositories</span>
+    </div>
+    <div class="pat-row">
+      <span class="pat-q">"Multiple teams share the same internal authentication library"</span>
+      <span class="pat-sep">→</span>
+      <span class="pat-a">Publish to internal-libs repo — teams consume via upstream chain</span>
+    </div>
+  </div>
+</section>
+
+<div class="hr"><span></span><div class="hr-label">Quick Reference</div><span></span></div>
+
+<!-- ══ QUICK REF ═══════════════════════════════════════════════════════════ -->
+<section id="quickref">
+  <div class="qr-dark">
+    <div class="qr-dark-title">Quick Reference Card</div>
+    <div class="qr-dark-grid">
+      <div class="qr-dark-item">
+        <span class="qr-k">Domain</span>
+        <span class="qr-v">One per org. Centralized KMS encryption. Cross-repo sharing endpoint.</span>
+      </div>
+      <div class="qr-dark-item">
+        <span class="qr-k">Repository</span>
+        <span class="qr-v">Scoped to team/project. What build tools point to directly.</span>
+      </div>
+      <div class="qr-dark-item">
+        <span class="qr-k">Upstream — internal</span>
+        <span class="qr-v">Another CodeArtifact repo in same domain. Multiple allowed.</span>
+      </div>
+      <div class="qr-dark-item">
+        <span class="qr-k">Upstream — external</span>
+        <span class="qr-v">Public registry connection. Max 1 external connection per repo.</span>
+      </div>
+      <div class="qr-dark-item">
+        <span class="qr-k">Cached asset retention</span>
+        <span class="qr-v">Removing upstream does NOT remove already-cached packages.</span>
+      </div>
+      <div class="qr-dark-item">
+        <span class="qr-k">Cross-domain upstreams</span>
+        <span class="qr-v">NOT supported. Upstreams must be within the same domain.</span>
+      </div>
+      <div class="qr-dark-item">
+        <span class="qr-k">Auth token expiry</span>
+        <span class="qr-v">Default 12 hours. Must refresh in long-running builds.</span>
+      </div>
+      <div class="qr-dark-item">
+        <span class="qr-k">Missing permission</span>
+        <span class="qr-v">sts:GetServiceBearerToken — required alongside codeartifact:GetAuthorizationToken.</span>
+      </div>
+      <div class="qr-dark-item">
+        <span class="qr-k">VPC endpoints needed</span>
+        <span class="qr-v">TWO required: codeartifact.api AND codeartifact.repositories.</span>
+      </div>
+      <div class="qr-dark-item">
+        <span class="qr-k">CloudTrail audit</span>
+        <span class="qr-v">All package requests logged automatically. Zero configuration needed.</span>
+      </div>
+      <div class="qr-dark-item">
+        <span class="qr-k">Cross-account access</span>
+        <span class="qr-v">Supported via domain and repository resource-based policies.</span>
+      </div>
+      <div class="qr-dark-item">
+        <span class="qr-k">Encryption</span>
+        <span class="qr-v">All packages encrypted at rest. KMS CMK configured at domain level.</span>
+      </div>
+      <div class="qr-dark-item">
+        <span class="qr-k">Temp package pattern</span>
+        <span class="qr-v">Add temp-repo as upstream → use it → remove upstream after review.</span>
+      </div>
+      <div class="qr-dark-item">
+        <span class="qr-k">Priority order</span>
+        <span class="qr-v">First upstream in list wins when package exists in multiple upstreams.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  <strong>AWS CodeArtifact</strong> · Dependency Management & Governance ·
+  AWS Certified DevOps Engineer Professional (DOP-C02) · Domain 1: SDLC Automation
+</footer>
+
+</body>
+</html>

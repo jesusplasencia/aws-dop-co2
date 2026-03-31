@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS CodeDeploy — DOP-C02</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Nunito:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0E0A18;--bg2:#140F22;--bg3:#1A1430;--surf:#201A38;--surf2:#261F42;
+  --p:#B06EF8;--p2:#8B4FD4;--p-l:rgba(176,110,248,0.08);--p-m:rgba(176,110,248,0.15);--p-b:rgba(176,110,248,0.3);
+  --c:#4ECDC4;--c-l:rgba(78,205,196,0.08);--c-b:rgba(78,205,196,0.3);
+  --o:#FF8C42;--o-l:rgba(255,140,66,0.08);--o-b:rgba(255,140,66,0.3);
+  --r:#FF6B6B;--r-l:rgba(255,107,107,0.08);--r-b:rgba(255,107,107,0.3);
+  --g:#6BCB77;--g-l:rgba(107,203,119,0.08);--g-b:rgba(107,203,119,0.3);
+  --tx:#E8E0F8;--tx2:#9080C0;--tx3:#504870;
+  --bord:rgba(176,110,248,0.1);--bord2:rgba(255,255,255,0.04);
+  --cbg:#080512;--cfg:#C0B0E0;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--tx);font-family:'Nunito',sans-serif;font-size:15px;line-height:1.7;overflow-x:hidden}
+
+/* hero */
+.hero{min-height:380px;display:flex;flex-direction:column;justify-content:flex-end;padding:56px 60px 48px;position:relative;overflow:hidden;background:linear-gradient(135deg,#0E0A18 0%,#1A0A30 50%,#0E0A18 100%)}
+.hero-hex{position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg width='60' height='52' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolygon points='30,2 58,17 58,47 30,62 2,47 2,17' fill='none' stroke='rgba(176,110,248,0.06)' stroke-width='1'/%3E%3C/svg%3E");background-size:60px 52px;pointer-events:none}
+.hero-inner{position:relative;z-index:1;max-width:1020px;margin:0 auto;width:100%}
+.hero-kicker{display:inline-flex;align-items:center;gap:8px;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--p);background:var(--p-m);border:1px solid var(--p-b);padding:5px 14px;border-radius:100px;margin-bottom:20px;animation:rise 0.5s ease both}
+.hero h1{font-family:'Rajdhani',sans-serif;font-size:clamp(44px,7.5vw,88px);font-weight:700;line-height:0.95;letter-spacing:0.02em;color:var(--tx);margin-bottom:14px;animation:rise 0.5s 0.1s ease both}
+.hero h1 em{color:var(--p);font-style:normal}
+.hero-sub{font-size:14px;color:var(--tx2);max-width:580px;margin-bottom:28px;font-style:italic;animation:rise 0.5s 0.2s ease both}
+.hero-tags{display:flex;gap:8px;flex-wrap:wrap;animation:rise 0.5s 0.3s ease both}
+.ht{font-family:'Share Tech Mono',monospace;font-size:10px;padding:4px 12px;border-radius:100px;border:1px solid transparent;letter-spacing:0.04em}
+.ht-p{background:var(--p-l);border-color:var(--p-b);color:var(--p)}
+.ht-c{background:var(--c-l);border-color:var(--c-b);color:var(--c)}
+.ht-o{background:var(--o-l);border-color:var(--o-b);color:var(--o)}
+.ht-g{background:var(--g-l);border-color:var(--g-b);color:var(--g)}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+.wrap{max-width:1020px;margin:0 auto;padding:60px 60px 100px}
+.sh{display:flex;align-items:center;gap:12px;margin-bottom:24px}
+.shn{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--p);background:var(--p-l);border:1px solid var(--p-b);padding:3px 10px;border-radius:100px;letter-spacing:0.06em}
+.sh h2{font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;letter-spacing:0.02em;color:var(--tx)}
+.sh-rule{flex:1;height:1px;background:var(--bord2)}
+.sec{margin-bottom:68px}
+
+/* master matrix */
+.matrix{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:20px;border-radius:10px;overflow:hidden;border:1px solid var(--bord)}
+.matrix th{padding:12px 16px;background:var(--surf2);text-align:center;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--tx2);border-bottom:1px solid var(--bord)}
+.matrix th:first-child{text-align:left}
+.matrix td{padding:11px 16px;border-bottom:1px solid var(--bord2);vertical-align:middle;text-align:center;color:var(--tx2);font-size:13px}
+.matrix td:first-child{font-family:'Share Tech Mono',monospace;font-size:12px;font-weight:400;color:var(--p);text-align:left}
+.matrix tr:last-child td{border-bottom:none}
+.matrix tr:hover td{background:var(--p-l)}
+.yes{color:var(--g);font-weight:700}.no{color:var(--r)}.ec2only{color:var(--o);font-size:11px}
+
+/* velocity grid */
+.vel-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px}
+.vel-card{background:var(--surf);border:1px solid var(--bord2);border-radius:10px;padding:22px;transition:all 0.2s}
+.vel-card:hover{border-color:var(--p-b);transform:translateY(-2px)}
+.vel-target{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:10px;padding:3px 8px;border-radius:100px;display:inline-block}
+.vt-ec2{background:var(--o-l);color:var(--o);border:1px solid var(--o-b)}
+.vt-lam{background:var(--p-l);color:var(--p);border:1px solid var(--p-b)}
+.vt-ecs{background:var(--c-l);color:var(--c);border:1px solid var(--c-b)}
+.vel-card h3{font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;margin-bottom:10px;letter-spacing:0.02em}
+.vel-item{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--tx2);padding:3px 0;border-bottom:1px solid var(--bord2);line-height:1.5}
+.vel-item:last-child{border-bottom:none}
+
+/* hooks flow */
+.hooks-flow{background:var(--cbg);border:1px solid var(--bord);border-radius:10px;padding:24px;margin-bottom:20px;font-family:'Share Tech Mono',monospace;font-size:12px;line-height:2.0}
+.hf-phase{color:var(--p);font-weight:400}
+.hf-hook{color:var(--c)}
+.hf-managed{color:var(--tx3);font-style:italic}
+.hf-arrow{color:var(--p-b)}
+.hf-note{color:var(--o)}
+.hf-comment{color:var(--tx3);font-style:italic}
+
+/* g2 */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+
+/* code */
+.cw{background:var(--cbg);border:1px solid rgba(255,255,255,0.05);border-radius:8px;overflow:hidden;margin:14px 0}
+.cb{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;background:rgba(255,255,255,0.02);border-bottom:1px solid rgba(255,255,255,0.04)}
+.dots{display:flex;gap:5px}.dots span{width:9px;height:9px;border-radius:50%}
+.dr{background:#FF5F57}.dy{background:#FFBD2E}.dg{background:#28C840}
+.cfn{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--tx3)}
+.clang{font-family:'Share Tech Mono',monospace;font-size:10px;padding:2px 8px;border-radius:100px;background:var(--p-l);color:var(--p);border:1px solid var(--p-b)}
+pre{padding:18px;font-family:'Share Tech Mono',monospace;font-size:12px;line-height:1.8;color:var(--cfg);overflow-x:auto}
+.ck{color:#FF8080}.cs{color:#80D8A0}.cv{color:#80C0E8}.cc{color:#3A3058;font-style:italic}.cy{color:#D8B870}.cg{color:#80E880}
+
+/* callout */
+.callout{border-radius:8px;padding:14px 18px;margin:14px 0;display:flex;gap:12px;align-items:flex-start}
+.callout.warn{background:var(--r-l);border:1px solid var(--r-b)}
+.callout.tip{background:var(--g-l);border:1px solid var(--g-b)}
+.callout.info{background:var(--c-l);border:1px solid var(--c-b)}
+.callout.purple{background:var(--p-l);border:1px solid var(--p-b)}
+.ci{font-size:16px;flex-shrink:0;margin-top:2px}.cbb{flex:1}
+.cl2{font-family:'Share Tech Mono',monospace;font-size:9.5px;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:4px;display:block}
+.callout.warn .cl2{color:var(--r)}.callout.tip .cl2{color:var(--g)}.callout.info .cl2{color:var(--c)}.callout.purple .cl2{color:var(--p)}
+.callout p{font-size:13px;color:var(--tx2);line-height:1.6}.callout strong{color:var(--tx)}
+.callout code{font-family:'Share Tech Mono',monospace;font-size:11px;background:rgba(255,255,255,0.06);padding:1px 5px;border-radius:3px}
+
+/* pat */
+.pat-list{display:flex;flex-direction:column;gap:6px;margin-bottom:20px}
+.pat{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;background:var(--surf);border:1px solid var(--bord2);border-radius:6px;padding:11px 16px;transition:all 0.18s}
+.pat:hover{border-color:var(--p-b);background:var(--surf2)}
+.pat-q{font-size:13px;font-style:italic;color:var(--tx2);line-height:1.4}
+.pat-sep{color:var(--p);font-size:14px;flex-shrink:0}
+.pat-a{font-family:'Share Tech Mono',monospace;font-size:11.5px;color:var(--p);line-height:1.4}
+
+/* qr */
+.qr{background:var(--surf);border:1px solid var(--bord);border-radius:10px;padding:28px}
+.qr-title{font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700;letter-spacing:0.02em;color:var(--p);margin-bottom:16px}
+.qr-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.qr-item{background:var(--bg3);border:1px solid var(--bord2);border-radius:5px;padding:10px 14px;display:flex;gap:10px;transition:border-color 0.18s}
+.qr-item:hover{border-color:var(--p-b)}
+.qk{font-family:'Share Tech Mono',monospace;font-size:10.5px;color:var(--p);min-width:155px;flex-shrink:0}
+.qv{font-size:12px;color:var(--tx2);line-height:1.5}
+
+footer{background:var(--bg2);border-top:1px solid var(--bord2);padding:24px 60px;text-align:center;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--tx3);letter-spacing:0.06em}
+footer strong{color:var(--p)}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--surf2);border-radius:2px}
+@media(max-width:1024px){.hero,.wrap,footer{padding-left:40px;padding-right:40px}}
+@media(max-width:900px){.vel-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:768px){.hero,.wrap,footer{padding-left:24px;padding-right:24px}.vel-grid{grid-template-columns:1fr}.g2,.qr-grid{grid-template-columns:1fr}.pat{grid-template-columns:1fr}}
+/* ── BACK BUTTON ── */
+.back-home{position:fixed;top:20px;left:20px;z-index:9998;display:inline-flex;align-items:center;gap:6px;font-family:'Courier Prime',monospace;font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--p);background:var(--bg2);border:1px solid var(--p-b);padding:8px 14px;border-radius:4px;text-decoration:none;transition:all 0.2s ease;backdrop-filter:blur(8px)}
+.back-home:hover{background:var(--p-m);transform:translateY(-1px);box-shadow:0 4px 12px rgba(176,110,248,0.15)}
+.back-home svg{width:14px;height:14px}
+</style>
+</head>
+<body>
+
+<a href="../index.html" class="back-home"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 12L6 8l4-4"/></svg>Home</a>
+
+<header class="hero">
+  <div class="hero-hex"></div>
+  <div class="hero-inner">
+    <div class="hero-kicker">DOP-C02 · Domain 1 · SDLC Automation</div>
+    <h1>AWS Code<em>Deploy</em></h1>
+    <p class="hero-sub">Automated application deployments to EC2, Lambda, and ECS. Three targets with entirely different mechanics — knowing which rules apply to which target eliminates wrong answers immediately.</p>
+    <div class="hero-tags">
+      <span class="ht ht-o">EC2 / On-Premises</span>
+      <span class="ht ht-p">Lambda</span>
+      <span class="ht ht-c">ECS</span>
+      <span class="ht ht-g">appspec.yml</span>
+      <span class="ht ht-o">Blue/Green</span>
+      <span class="ht ht-p">In-Place</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+<!-- MASTER MATRIX -->
+<section class="sec">
+  <div class="sh"><span class="shn">01</span><h2>The Master Matrix — 3 Targets, 3 Different Worlds</h2><div class="sh-rule"></div></div>
+  <p style="color:var(--tx2);font-size:14px;margin-bottom:16px;font-style:italic">The exam mixes concepts between targets constantly. Memorize this table first — it eliminates wrong answers before you read the full question.</p>
+  <table class="matrix">
+    <thead><tr><th>Property</th><th>EC2 / On-Premises</th><th>Lambda</th><th>ECS</th></tr></thead>
+    <tbody>
+      <tr><td>Agent Required</td><td class="yes">✓ Yes</td><td class="no">✗ No</td><td class="no">✗ No</td></tr>
+      <tr><td>Blue/Green</td><td class="ec2only">EC2 only</td><td class="yes">✓ Yes (only option)</td><td class="yes">✓ Yes (only option)</td></tr>
+      <tr><td>In-Place</td><td class="yes">✓ Yes</td><td class="no">✗ No</td><td class="no">✗ No</td></tr>
+      <tr><td>appspec hooks type</td><td>Shell scripts</td><td>Lambda functions</td><td>Lambda functions</td></tr>
+      <tr><td>What rotates</td><td>EC2 Instances</td><td>Versions / Aliases</td><td>Task Definitions + ALB TGs</td></tr>
+      <tr><td>On-Premises support</td><td class="yes">✓ Yes (In-Place only)</td><td class="no">✗ No</td><td class="no">✗ No</td></tr>
+    </tbody>
+  </table>
+  <div class="g2">
+    <div class="callout warn"><span class="ci">⚠️</span><div class="cbb"><span class="cl2">Trap #1</span><p>In-Place deployment on Lambda or ECS does <strong>NOT exist</strong>. If you see it as an answer option — eliminate it immediately.</p></div></div>
+    <div class="callout warn"><span class="ci">⚠️</span><div class="cbb"><span class="cl2">Trap #2</span><p>CodeDeploy Agent on Lambda or ECS — <strong>NOT required, NOT installed</strong>. Any answer suggesting it is wrong.</p></div></div>
+  </div>
+</section>
+
+<!-- VELOCITIES -->
+<section class="sec">
+  <div class="sh"><span class="shn">02</span><h2>Deployment Velocities — Memorize the Intervals</h2><div class="sh-rule"></div></div>
+  <div class="vel-grid">
+    <div class="vel-card">
+      <span class="vel-target vt-ec2">EC2 / On-Premises</span>
+      <h3>4 Strategies</h3>
+      <div class="vel-item">AllAtOnce — fastest, full downtime risk</div>
+      <div class="vel-item">HalfAtATime — 50% capacity always available</div>
+      <div class="vel-item">OneAtATime — slowest, safest</div>
+      <div class="vel-item">Custom % — user-defined percentage</div>
+    </div>
+    <div class="vel-card">
+      <span class="vel-target vt-lam">Lambda</span>
+      <h3>Canary + Linear</h3>
+      <div class="vel-item">Canary: 5, 10, 15, 30 min intervals</div>
+      <div class="vel-item">Linear: Every 1, 2, 3, 10 min — 10% each</div>
+      <div class="vel-item">AllAtOnce — instant shift</div>
+      <div class="vel-item" style="color:var(--o);font-size:10.5px">4 Canary options · 4 Linear options</div>
+    </div>
+    <div class="vel-card">
+      <span class="vel-target vt-ecs">ECS</span>
+      <h3>Fewer Options</h3>
+      <div class="vel-item">Canary: 5, 15 min only (2 options)</div>
+      <div class="vel-item">Linear: Every 1, 3 min only (2 options)</div>
+      <div class="vel-item">AllAtOnce — instant shift</div>
+      <div class="vel-item" style="color:var(--r);font-size:10.5px">Only 2 Canary · Only 2 Linear</div>
+    </div>
+  </div>
+  <div class="callout warn"><span class="ci">⚠️</span><div class="cbb"><span class="cl2">Trap #3 — ECS vs Lambda Intervals</span><p>ECS Canary only has 5 and 15 minute options. Lambda has 5, 10, 15, 30. If a scenario requires <strong>10-minute Canary for ECS</strong> — that doesn't exist. Lambda would be the right service for that requirement.</p></div></div>
+</section>
+
+<!-- HOOKS -->
+<section class="sec">
+  <div class="sh"><span class="shn">03</span><h2>Hooks & appspec.yml — Where Most Questions Live</h2><div class="sh-rule"></div></div>
+
+  <div class="g2">
+    <div>
+      <p style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--o);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px">EC2 Lifecycle Order</p>
+      <div class="hooks-flow">
+        <div><span class="hf-phase">BeforeBlockTraffic</span> <span class="hf-note">(ALB only)</span></div>
+        <div><span class="hf-phase">BlockTraffic</span> <span class="hf-managed">← managed</span></div>
+        <div><span class="hf-phase">AfterBlockTraffic</span> <span class="hf-note">(ALB only)</span></div>
+        <div><span class="hf-arrow">↓</span></div>
+        <div><span class="hf-phase">ApplicationStop</span></div>
+        <div><span class="hf-phase">BeforeInstall</span> <span class="hf-comment">← DB migrations here</span></div>
+        <div><span class="hf-phase">Install</span> <span class="hf-managed">← managed</span></div>
+        <div><span class="hf-phase">AfterInstall</span> <span class="hf-comment">← config, permissions</span></div>
+        <div><span class="hf-phase">ApplicationStart</span></div>
+        <div><span class="hf-phase">ValidateService</span> <span class="hf-comment">← health checks here</span></div>
+        <div><span class="hf-arrow">↓</span></div>
+        <div><span class="hf-phase">BeforeAllowTraffic</span> <span class="hf-note">(ALB only)</span></div>
+        <div><span class="hf-phase">AllowTraffic</span> <span class="hf-managed">← managed</span></div>
+        <div><span class="hf-phase">AfterAllowTraffic</span> <span class="hf-note">(ALB only)</span></div>
+      </div>
+    </div>
+    <div>
+      <p style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--p);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px">Lambda & ECS — Only 3 Hooks</p>
+      <div class="hooks-flow" style="margin-bottom:14px">
+        <div><span class="hf-phase">BeforeAllowTraffic</span></div>
+        <div><span class="hf-comment">  ← Your Lambda validates new version</span></div>
+        <div><span class="hf-arrow">↓</span></div>
+        <div><span class="hf-phase">AllowTraffic</span> <span class="hf-managed">← managed by CodeDeploy</span></div>
+        <div><span class="hf-arrow">↓</span></div>
+        <div><span class="hf-phase">AfterAllowTraffic</span></div>
+        <div><span class="hf-comment">  ← Validate after traffic shift</span></div>
+      </div>
+      <div class="callout warn"><span class="ci">⚠️</span><div class="cbb"><span class="cl2">Traps #4 & #5</span><p>Health checks → <strong>ValidateService</strong> not AfterInstall.<br>DB migrations → <strong>BeforeInstall</strong> not ApplicationStop (instance still serving traffic at ApplicationStop).</p></div></div>
+    </div>
+  </div>
+
+  <div class="g2" style="margin-top:8px">
+    <div>
+      <p style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--o);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px">EC2 appspec.yml</p>
+      <div class="cw">
+        <div class="cb"><div class="dots"><span class="dr"></span><span class="dy"></span><span class="dg"></span></div><span class="cfn">appspec.yml (EC2)</span><span class="clang">YAML</span></div>
+        <pre><span class="cy">version</span>: <span class="cs">0.0</span>
+<span class="cy">os</span>: <span class="cs">linux</span>
+
+<span class="cy">files</span>:
+  - <span class="cy">source</span>: <span class="cs">/app</span>
+    <span class="cy">destination</span>: <span class="cs">/opt/myapp</span>
+
+<span class="cy">hooks</span>:
+  <span class="cv">BeforeInstall</span>:
+    - <span class="cy">location</span>: <span class="cs">scripts/stop_server.sh</span>
+      <span class="cy">timeout</span>: <span class="cs">60</span>
+      <span class="cy">runas</span>: <span class="cs">root</span>
+  <span class="cv">AfterInstall</span>:
+    - <span class="cy">location</span>: <span class="cs">scripts/configure.sh</span>
+      <span class="cy">timeout</span>: <span class="cs">120</span>
+  <span class="cv">ApplicationStart</span>:
+    - <span class="cy">location</span>: <span class="cs">scripts/start.sh</span>
+      <span class="cy">timeout</span>: <span class="cs">60</span>
+  <span class="cv">ValidateService</span>:       <span class="cc"># health check here</span>
+    - <span class="cy">location</span>: <span class="cs">scripts/healthcheck.sh</span>
+      <span class="cy">timeout</span>: <span class="cs">180</span></pre>
+      </div>
+    </div>
+    <div>
+      <p style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--p);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px">Lambda appspec.yml</p>
+      <div class="cw">
+        <div class="cb"><div class="dots"><span class="dr"></span><span class="dy"></span><span class="dg"></span></div><span class="cfn">appspec.yml (Lambda)</span><span class="clang">YAML</span></div>
+        <pre><span class="cy">version</span>: <span class="cs">0.0</span>
+<span class="cy">Resources</span>:
+  - <span class="cv">MyLambdaFunction</span>:
+      <span class="cy">Type</span>: <span class="cs">AWS::Lambda::Function</span>
+      <span class="cy">Properties</span>:
+        <span class="cy">Name</span>: <span class="cs">MyFunction</span>
+        <span class="cy">Alias</span>: <span class="cs">live</span>
+        <span class="cy">CurrentVersion</span>: <span class="cg">!Ref VersionA</span>
+        <span class="cy">TargetVersion</span>: <span class="cg">!Ref VersionB</span>
+
+<span class="cy">Hooks</span>:
+  <span class="cv">BeforeAllowTraffic</span>: <span class="cs">SmokeTestFunction</span>
+  <span class="cv">AfterAllowTraffic</span>: <span class="cs">PostValidateFunction</span></pre>
+      </div>
+      <p style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--c);letter-spacing:0.1em;text-transform:uppercase;margin:10px 0 8px">ECS appspec.yml</p>
+      <div class="cw">
+        <div class="cb"><div class="dots"><span class="dr"></span><span class="dy"></span><span class="dg"></span></div><span class="cfn">appspec.yml (ECS)</span><span class="clang">YAML</span></div>
+        <pre><span class="cy">version</span>: <span class="cs">0.0</span>
+<span class="cy">Resources</span>:
+  - <span class="cv">TargetService</span>:
+      <span class="cy">Type</span>: <span class="cs">AWS::ECS::Service</span>
+      <span class="cy">Properties</span>:
+        <span class="cy">TaskDefinition</span>: <span class="cs">arn:aws:ecs:...:myapp:5</span>
+        <span class="cy">LoadBalancerInfo</span>:
+          <span class="cy">ContainerName</span>: <span class="cs">myapp</span>
+          <span class="cy">ContainerPort</span>: <span class="cs">8080</span>
+<span class="cy">Hooks</span>:
+  <span class="cv">BeforeAllowTraffic</span>: <span class="cs">ValidateBeforeFn</span>
+  <span class="cv">AfterAllowTraffic</span>: <span class="cs">ValidateAfterFn</span></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BLUE GREEN ECS -->
+<section class="sec">
+  <div class="sh"><span class="shn">04</span><h2>ECS Blue/Green — Deep Mechanics</h2><div class="sh-rule"></div></div>
+  <div class="hooks-flow">
+    <div><span class="hf-comment"># ECS Blue/Green deployment flow</span></div>
+    <div><span class="hf-arrow">Step 1 →</span> <span class="hf-hook">New ECS task set (Green) created alongside Blue</span></div>
+    <div><span class="hf-arrow">Step 2 →</span> <span class="hf-hook">ALB test listener (port 8080) routes to Green for validation</span></div>
+    <div><span class="hf-arrow">Step 3 →</span> <span class="hf-phase">BeforeAllowTraffic</span> <span class="hf-hook">hook validates Green via test listener</span></div>
+    <div><span class="hf-arrow">Step 4 →</span> <span class="hf-hook">Traffic shifts Blue → Green on production listener (port 443)</span></div>
+    <div><span class="hf-arrow">Step 5 →</span> <span class="hf-phase">AfterAllowTraffic</span> <span class="hf-hook">hook validates production traffic</span></div>
+    <div><span class="hf-arrow">Step 6 →</span> <span class="hf-hook">Blue kept alive during termination wait time</span> <span class="hf-note">(default: 1 hour)</span></div>
+    <div><span class="hf-arrow">Step 7 →</span> <span class="hf-hook">Blue task set terminated after wait period</span></div>
+  </div>
+  <div class="callout warn"><span class="ci">⚠️</span><div class="cbb"><span class="cl2">Trap #6 — Termination Wait Time</span><p>Blue tasks are <strong>NOT immediately terminated</strong> after traffic shifts. Default wait: <strong>1 hour</strong>. During this window Blue can serve as instant rollback — traffic shifts back in seconds because Blue is still running.</p></div></div>
+</section>
+
+<!-- ROLLBACKS -->
+<section class="sec">
+  <div class="sh"><span class="shn">05</span><h2>Rollbacks</h2><div class="sh-rule"></div></div>
+  <div class="g2">
+    <div>
+      <div class="callout info"><span class="ci">💡</span><div class="cbb"><span class="cl2">Rollback is a redeploy, not an undo</span><p>CodeDeploy redeploys the last known good revision as a <strong>new deployment</strong>. It does not restore files in-place. For EC2 In-Place this means running old hooks again — slower. For Lambda/ECS, rollback = fast traffic shift back to Blue/previous alias.</p></div></div>
+    </div>
+    <div>
+      <div class="callout tip"><span class="ci">🎯</span><div class="cbb"><span class="cl2">Trap #7 — Instant Rollback</span><p>"Scenario requires instant rollback capability." Always favor <strong>Blue/Green (Lambda or ECS)</strong> over EC2 In-Place — Blue environment is still live, traffic shift takes seconds.</p></div></div>
+    </div>
+  </div>
+  <table class="matrix">
+    <thead><tr><th>Rollback Trigger</th><th>Behavior</th></tr></thead>
+    <tbody>
+      <tr><td>Deployment failure</td><td style="text-align:left;color:var(--tx2)">CodeDeploy automatically triggers rollback to last successful revision</td></tr>
+      <tr><td>CloudWatch Alarm breach</td><td style="text-align:left;color:var(--tx2)">Alarm configured on deployment metric triggers automatic rollback</td></tr>
+      <tr><td>Manual rollback</td><td style="text-align:left;color:var(--tx2)">You trigger via console, CLI, or SDK</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- EXAM PATTERNS -->
+<section class="sec">
+  <div class="sh"><span class="shn">06</span><h2>DOP-C02 Exam Patterns</h2><div class="sh-rule"></div></div>
+  <div class="pat-list">
+    <div class="pat"><span class="pat-q">"In-Place deployment on Lambda"</span><span class="pat-sep">→</span><span class="pat-a">Does NOT exist — eliminate immediately</span></div>
+    <div class="pat"><span class="pat-q">"CodeDeploy Agent on ECS"</span><span class="pat-sep">→</span><span class="pat-a">Not required — wrong answer</span></div>
+    <div class="pat"><span class="pat-q">"ECS Canary at 10-minute intervals"</span><span class="pat-sep">→</span><span class="pat-a">Not available for ECS — Lambda only</span></div>
+    <div class="pat"><span class="pat-q">"Post-deployment health check"</span><span class="pat-sep">→</span><span class="pat-a">ValidateService hook — NOT AfterInstall</span></div>
+    <div class="pat"><span class="pat-q">"DB migrations before install"</span><span class="pat-sep">→</span><span class="pat-a">BeforeInstall — NOT ApplicationStop</span></div>
+    <div class="pat"><span class="pat-q">"Instant rollback capability needed"</span><span class="pat-sep">→</span><span class="pat-a">Blue/Green Lambda or ECS — not EC2 In-Place</span></div>
+    <div class="pat"><span class="pat-q">"Blue ECS tasks terminated immediately after shift"</span><span class="pat-sep">→</span><span class="pat-a">False — 1 hour termination wait (default)</span></div>
+    <div class="pat"><span class="pat-q">"Agent can't pull deployment bundle"</span><span class="pat-sep">→</span><span class="pat-a">Check EC2 Instance Profile S3 permissions first</span></div>
+  </div>
+</section>
+
+<div class="qr">
+  <div class="qr-title">Quick Reference</div>
+  <div class="qr-grid">
+    <div class="qr-item"><span class="qk">Agent required</span><span class="qv">EC2/On-Premises only — not Lambda, not ECS</span></div>
+    <div class="qr-item"><span class="qk">In-Place exists</span><span class="qv">EC2/On-Premises only — never Lambda or ECS</span></div>
+    <div class="qr-item"><span class="qk">Lambda Canary intervals</span><span class="qv">5, 10, 15, 30 minutes (4 options)</span></div>
+    <div class="qr-item"><span class="qk">ECS Canary intervals</span><span class="qv">5, 15 minutes only (2 options)</span></div>
+    <div class="qr-item"><span class="qk">Health checks hook</span><span class="qv">ValidateService — not AfterInstall</span></div>
+    <div class="qr-item"><span class="qk">DB migrations hook</span><span class="qv">BeforeInstall — not ApplicationStop</span></div>
+    <div class="qr-item"><span class="qk">Traffic hooks</span><span class="qv">Only appear when load balancer is configured</span></div>
+    <div class="qr-item"><span class="qk">ECS termination wait</span><span class="qv">Default 1 hour — Blue stays live for rollback</span></div>
+    <div class="qr-item"><span class="qk">Rollback mechanism</span><span class="qv">Redeploys last good revision — not an undo</span></div>
+    <div class="qr-item"><span class="qk">On-Premises Blue/Green</span><span class="qv">NOT supported — In-Place only</span></div>
+    <div class="qr-item"><span class="qk">appspec.yml location</span><span class="qv">Root of deployment bundle — non-negotiable</span></div>
+    <div class="qr-item"><span class="qk">EC2 Instance Profile</span><span class="qv">Needs S3 GetObject to pull deployment bundle</span></div>
+  </div>
+</div>
+
+</div>
+<footer><strong>AWS CodeDeploy</strong> · 3 Targets · 3 Worlds · DOP-C02 · Domain 1: SDLC Automation</footer>
+</body>
+</html>
