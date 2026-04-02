@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS CodeStar — DOP-C02 Study Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;0,9..144,900;1,9..144,400&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<style>
+:root {
+  --bg:        #0A0E1A;
+  --bg2:       #0F1525;
+  --bg3:       #141C30;
+  --surface:   #1A2340;
+  --surface2:  #1F2A4A;
+  --border:    rgba(99,179,237,0.1);
+  --border2:   rgba(255,255,255,0.05);
+
+  --rose:      #FB7185;
+  --rose-l:    rgba(251,113,133,0.07);
+  --rose-m:    rgba(251,113,133,0.15);
+  --rose-b:    rgba(251,113,133,0.3);
+
+  --cyan:      #38BDF8;
+  --cyan-l:    rgba(56,189,248,0.07);
+  --cyan-m:    rgba(56,189,248,0.15);
+  --cyan-b:    rgba(56,189,248,0.3);
+
+  --violet:    #A78BFA;
+  --violet-l:  rgba(167,139,250,0.07);
+  --violet-m:  rgba(167,139,250,0.15);
+  --violet-b:  rgba(167,139,250,0.3);
+
+  --emerald:   #34D399;
+  --emerald-l: rgba(52,211,153,0.07);
+  --emerald-m: rgba(52,211,153,0.15);
+  --emerald-b: rgba(52,211,153,0.3);
+
+  --amber:     #FCD34D;
+  --amber-l:   rgba(252,211,77,0.07);
+  --amber-m:   rgba(252,211,77,0.12);
+  --amber-b:   rgba(252,211,77,0.3);
+
+  --text:      #E2E8F0;
+  --text2:     #94A3B8;
+  --text3:     #475569;
+  --text4:     #334155;
+
+  --code-bg:   #060912;
+  --code-blue: #79C0FF;
+  --code-grn:  #56D364;
+  --code-org:  #FFA657;
+  --code-red:  #FF7B72;
+  --code-grey: #3D4A5C;
+  --code-yel:  #E3B341;
+
+  --r:         12px;
+  --r-sm:      8px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 15px;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+/* grain overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* ── HERO ── */
+.hero {
+  position: relative;
+  min-height: 480px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 0 60px 60px;
+  overflow: hidden;
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 50% at 80% 20%, rgba(251,113,133,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 40% at 20% 80%, rgba(56,189,248,0.08) 0%, transparent 60%),
+    linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%);
+}
+
+.hero-mesh {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(251,113,133,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(251,113,133,0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse 70% 70% at 80% 30%, black 20%, transparent 80%);
+}
+
+.hero-inner { position: relative; max-width: 1060px; margin: 0 auto; width: 100%; }
+
+.hero-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--rose);
+  background: var(--rose-m);
+  border: 1px solid var(--rose-b);
+  padding: 6px 14px;
+  border-radius: 100px;
+  margin-bottom: 28px;
+  animation: riseUp 0.6s ease both;
+}
+
+.hero-kicker::before {
+  content: '';
+  width: 6px; height: 6px;
+  background: var(--rose);
+  border-radius: 50%;
+  animation: throb 2s ease-in-out infinite;
+}
+
+@keyframes throb {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(0.6); opacity: 0.4; }
+}
+
+.hero h1 {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(40px, 6.5vw, 76px);
+  font-weight: 900;
+  line-height: 1.0;
+  letter-spacing: -0.02em;
+  margin-bottom: 18px;
+  animation: riseUp 0.6s 0.1s ease both;
+}
+
+.hero h1 em {
+  font-style: italic;
+  font-weight: 300;
+  color: var(--rose);
+}
+
+.hero-tagline {
+  font-size: 16px;
+  color: var(--text2);
+  max-width: 560px;
+  font-weight: 300;
+  margin-bottom: 36px;
+  animation: riseUp 0.6s 0.2s ease both;
+  line-height: 1.6;
+}
+
+.hero-chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  animation: riseUp 0.6s 0.3s ease both;
+}
+
+.chip {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 5px 12px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  letter-spacing: 0.04em;
+}
+
+.chip-rose   { background: var(--rose-l);    border-color: var(--rose-b);    color: var(--rose); }
+.chip-cyan   { background: var(--cyan-l);    border-color: var(--cyan-b);    color: var(--cyan); }
+.chip-violet { background: var(--violet-l);  border-color: var(--violet-b);  color: var(--violet); }
+.chip-em     { background: var(--emerald-l); border-color: var(--emerald-b); color: var(--emerald); }
+.chip-amber  { background: var(--amber-l);   border-color: var(--amber-b);   color: var(--amber); }
+
+@keyframes riseUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── NAV BAR ── */
+.nav-bar {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 0 60px;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.nav-bar::-webkit-scrollbar { display: none; }
+
+.nav-item {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text3);
+  padding: 14px 20px;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+  text-decoration: none;
+  display: block;
+}
+
+.nav-item:hover { color: var(--rose); border-bottom-color: var(--rose-b); }
+
+.nav-home {
+  margin-left: auto;
+  font-size: 12px;
+  font-family: 'IBM Plex Mono', monospace;
+  color: var(--text3);
+  padding: 14px 20px;
+  text-decoration: none;
+  transition: color 0.2s;
+  white-space: nowrap;
+}
+
+.nav-home:hover { color: var(--rose); }
+
+/* ── MAIN ── */
+.container {
+  max-width: 1060px;
+  margin: 0 auto;
+  padding: 60px 60px 120px;
+}
+
+/* ── SECTION HEADERS ── */
+.sec-head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.sec-icon {
+  width: 40px; height: 40px;
+  border-radius: var(--r-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.sec-head h2 {
+  font-family: 'Fraunces', serif;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.sec-rule { flex: 1; height: 1px; background: linear-gradient(90deg, var(--border), transparent); }
+
+.sec-block { margin-bottom: 72px; }
+
+/* ── CARDS ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.25s;
+}
+
+.card:hover {
+  border-color: var(--rose-b);
+  transform: translateY(-2px);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.4);
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+}
+
+.card-rose::before   { background: linear-gradient(90deg, var(--rose), var(--violet)); }
+.card-cyan::before   { background: linear-gradient(90deg, var(--cyan), var(--emerald)); }
+.card-amber::before  { background: linear-gradient(90deg, var(--amber), var(--rose)); }
+.card-violet::before { background: linear-gradient(90deg, var(--violet), var(--cyan)); }
+
+.card h3 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.card-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--rose);
+  margin-bottom: 12px;
+  display: block;
+}
+
+/* ── TWO-COLUMN GRID ── */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+/* ── THREE-COLUMN GRID ── */
+.three-col {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+/* ── FLOW DIAGRAM ── */
+.flow {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+
+.flow-step {
+  flex: 1;
+  padding: 20px 16px;
+  text-align: center;
+  position: relative;
+}
+
+.flow-step + .flow-step::before {
+  content: '→';
+  position: absolute;
+  left: -10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text3);
+  font-size: 16px;
+}
+
+.flow-step-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 6px;
+}
+
+.flow-step-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.flow-step-sub {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--text3);
+  line-height: 1.4;
+}
+
+.flow-step.active .flow-step-name { color: var(--rose); }
+
+/* ── INFO ROW ── */
+.info-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.info-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--rose);
+  flex-shrink: 0;
+  margin-top: 8px;
+}
+
+.info-dot-cyan    { background: var(--cyan); }
+.info-dot-emerald { background: var(--emerald); }
+.info-dot-amber   { background: var(--amber); }
+.info-dot-violet  { background: var(--violet); }
+
+/* ── ROLE TABLE ── */
+.role-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.role-card {
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: var(--r-sm);
+  padding: 18px 16px;
+  text-align: center;
+}
+
+.role-name {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
+}
+
+.role-name-owner   { color: var(--rose); }
+.role-name-contrib { color: var(--cyan); }
+.role-name-viewer  { color: var(--emerald); }
+
+.role-desc {
+  font-size: 12px;
+  color: var(--text2);
+  line-height: 1.5;
+}
+
+/* ── CALLOUT ── */
+.callout {
+  border-radius: var(--r-sm);
+  padding: 16px 20px;
+  margin-bottom: 16px;
+  border: 1px solid transparent;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.callout-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.callout-rose   { background: var(--rose-l);    border-color: var(--rose-b); }
+.callout-amber  { background: var(--amber-l);   border-color: var(--amber-b); }
+.callout-emerald{ background: var(--emerald-l); border-color: var(--emerald-b); }
+.callout-cyan   { background: var(--cyan-l);    border-color: var(--cyan-b); }
+
+.callout p { font-size: 14px; color: var(--text2); margin: 0; }
+.callout strong { color: var(--text); font-weight: 600; }
+
+/* ── TRAP LIST ── */
+.trap-list { list-style: none; margin: 0; padding: 0; }
+
+.trap-list li {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border2);
+  font-size: 14px;
+  color: var(--text2);
+}
+
+.trap-list li:last-child { border-bottom: none; }
+
+.trap-num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--rose);
+  background: var(--rose-l);
+  border: 1px solid var(--rose-b);
+  border-radius: 4px;
+  padding: 2px 7px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* ── SCENARIO CHIPS ── */
+.scenario-list { display: flex; flex-direction: column; gap: 10px; }
+
+.scenario-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: var(--r-sm);
+  padding: 14px 16px;
+  transition: border-color 0.2s;
+}
+
+.scenario-item:hover { border-color: var(--rose-b); }
+
+.scenario-q {
+  font-size: 14px;
+  color: var(--text2);
+  flex: 1;
+}
+
+.scenario-arrow {
+  color: var(--text3);
+  font-size: 14px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.scenario-a {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--rose);
+  flex: 1;
+}
+
+/* ── STAT PILLS ── */
+.stat-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.stat-pill {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--r-sm);
+  padding: 12px 20px;
+  text-align: center;
+  min-width: 120px;
+}
+
+.stat-val {
+  font-family: 'Fraunces', serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--rose);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.stat-lbl {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text3);
+}
+
+/* ── CODE ── */
+pre {
+  background: var(--code-bg) !important;
+  border: 1px solid var(--border2);
+  border-radius: var(--r-sm);
+  padding: 20px !important;
+  overflow-x: auto;
+  margin-bottom: 20px;
+}
+
+code { font-family: 'IBM Plex Mono', monospace; font-size: 13px; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 1024px) {
+  .hero { padding-left: 40px; padding-right: 40px; }
+  .container { padding-left: 40px; padding-right: 40px; }
+  .nav-bar { padding-left: 40px; }
+  .three-col { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 768px) {
+  .hero { padding: 0 24px 40px; min-height: 340px; }
+  .container { padding: 40px 24px 80px; }
+  .nav-bar { padding-left: 16px; }
+  .two-col { grid-template-columns: 1fr; }
+  .three-col { grid-template-columns: 1fr; }
+  .role-grid { grid-template-columns: 1fr; }
+  .flow { flex-direction: column; }
+  .flow-step + .flow-step::before { content: '↓'; left: 50%; top: -12px; transform: translateX(-50%); }
+  .stat-row { justify-content: center; }
+}
+
+@media (max-width: 480px) {
+  .hero h1 { font-size: 36px; }
+  .scenario-item { flex-wrap: wrap; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── HERO ── -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-mesh"></div>
+  <div class="hero-inner">
+    <span class="hero-kicker">Domain 1 · SDLC Automation · DOP-C02</span>
+    <h1>AWS Code<em>Star</em></h1>
+    <p class="hero-tagline">Unified project management that wires together the full AWS DevOps toolchain — from repo to deployment — in minutes.</p>
+    <div class="hero-chips">
+      <span class="chip chip-rose">CI/CD Orchestration</span>
+      <span class="chip chip-cyan">Team Access Control</span>
+      <span class="chip chip-violet">Project Templates</span>
+      <span class="chip chip-em">CloudFormation IaC</span>
+      <span class="chip chip-amber">Dashboard &amp; Monitoring</span>
+    </div>
+  </div>
+</section>
+
+<!-- ── NAV ── -->
+<nav class="nav-bar">
+  <a class="nav-item" href="#overview">Overview</a>
+  <a class="nav-item" href="#toolchain">Toolchain</a>
+  <a class="nav-item" href="#access">Access Control</a>
+  <a class="nav-item" href="#exam">Exam Focus</a>
+  <a class="nav-item" href="#scenarios">Scenarios</a>
+  <a class="nav-item" href="#limits">Limits</a>
+  <a class="nav-home" href="../index.html">← Home</a>
+</nav>
+
+<!-- ── MAIN ── -->
+<main class="container">
+
+  <!-- ── OVERVIEW ── -->
+  <section class="sec-block" id="overview">
+    <div class="sec-head">
+      <div class="sec-icon" style="background:var(--rose-l); border:1px solid var(--rose-b);">🚀</div>
+      <h2>What CodeStar Is</h2>
+      <div class="sec-rule"></div>
+    </div>
+
+    <p style="color:var(--text2); max-width:760px; margin-bottom:28px;">
+      CodeStar is a <strong style="color:var(--text)">unified project management service</strong> that bootstraps a complete CI/CD pipeline from a template in minutes — automatically provisioning the source repo, build project, deployment config, and IAM roles as a single unit.
+    </p>
+
+    <div class="three-col">
+      <div class="card card-rose">
+        <span class="card-label">Core Purpose</span>
+        <h3>Pre-configured Toolchains</h3>
+        <p style="font-size:13px; color:var(--text2); margin-top:10px;">Wires together CodeCommit/GitHub → CodeBuild → CodeDeploy/CloudFormation automatically, with pre-set IAM permissions between stages.</p>
+      </div>
+      <div class="card card-cyan">
+        <span class="card-label" style="color:var(--cyan)">Templates</span>
+        <h3>Application Stacks</h3>
+        <p style="font-size:13px; color:var(--text2); margin-top:10px;">Ready-made templates for Lambda (Node.js / Python / Java), EC2 web apps, and static sites. No pipeline wiring required.</p>
+      </div>
+      <div class="card card-violet">
+        <span class="card-label" style="color:var(--violet)">Collaboration</span>
+        <h3>Team &amp; Project Hub</h3>
+        <p style="font-size:13px; color:var(--text2); margin-top:10px;">Integrated dashboards, issue tracking (JIRA / GitHub Issues), and simplified IAM roles for every team member.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── TOOLCHAIN ── -->
+  <section class="sec-block" id="toolchain">
+    <div class="sec-head">
+      <div class="sec-icon" style="background:var(--cyan-l); border:1px solid var(--cyan-b);">⚙️</div>
+      <h2>Integrated Toolchain</h2>
+      <div class="sec-rule"></div>
+    </div>
+
+    <div class="flow">
+      <div class="flow-step active">
+        <div class="flow-step-label">Source</div>
+        <div class="flow-step-name">CodeCommit</div>
+        <div class="flow-step-sub">or GitHub</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-step-label">Build</div>
+        <div class="flow-step-name">CodeBuild</div>
+        <div class="flow-step-sub">+ Unit Tests</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-step-label">Deploy</div>
+        <div class="flow-step-name">CodeDeploy</div>
+        <div class="flow-step-sub">or CloudFormation<br>or Elastic Beanstalk</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="card card-rose">
+        <span class="card-label">Key Advantage</span>
+        <h3>Pre-wired Permissions</h3>
+        <div style="margin-top:14px;">
+          <div class="info-row"><div class="info-dot"></div><div>Single console view across all pipeline stages</div></div>
+          <div class="info-row"><div class="info-dot"></div><div>IAM roles automatically created &amp; linked between services</div></div>
+          <div class="info-row"><div class="info-dot info-dot-cyan"></div><div>CloudFormation manages infrastructure as code via <code>template.yml</code></div></div>
+          <div class="info-row"><div class="info-dot info-dot-emerald"></div><div>AWS Cloud9 web IDE pre-configured with project credentials</div></div>
+        </div>
+      </div>
+      <div class="card card-violet">
+        <span class="card-label" style="color:var(--violet)">Integrations</span>
+        <h3>Ecosystem Connections</h3>
+        <div style="margin-top:14px;">
+          <div class="info-row"><div class="info-dot info-dot-violet"></div><div><strong>AWS Cloud9</strong> — web IDE with project access baked in</div></div>
+          <div class="info-row"><div class="info-dot info-dot-amber"></div><div><strong>AWS CLI/SDK</strong> — <code>aws codestar</code> commands for automation</div></div>
+          <div class="info-row"><div class="info-dot info-dot-cyan"></div><div><strong>CloudFormation</strong> — project infra defined in <code>template.yml</code></div></div>
+          <div class="info-row"><div class="info-dot info-dot-emerald"></div><div><strong>X-Ray</strong> — distributed tracing for serverless templates</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── ACCESS CONTROL ── -->
+  <section class="sec-block" id="access">
+    <div class="sec-head">
+      <div class="sec-icon" style="background:var(--violet-l); border:1px solid var(--violet-b);">🔐</div>
+      <h2>Team Access Control</h2>
+      <div class="sec-rule"></div>
+    </div>
+
+    <div class="role-grid">
+      <div class="role-card">
+        <div class="role-name role-name-owner">Owner</div>
+        <div class="role-desc">Full access. Can add/remove team members and manage all project resources.</div>
+      </div>
+      <div class="role-card">
+        <div class="role-name role-name-contrib">Contributor</div>
+        <div class="role-desc">Read/write to code, build, and deploy. Cannot manage team membership.</div>
+      </div>
+      <div class="role-card">
+        <div class="role-name role-name-viewer">Viewer</div>
+        <div class="role-desc">Read-only access to dashboards, pipelines, and commit history.</div>
+      </div>
+    </div>
+
+    <div class="callout callout-rose">
+      <span class="callout-icon">💡</span>
+      <p>CodeStar <strong>automatically creates policy-bound IAM roles</strong> for each team member — removing the need to manually configure permissions for every underlying service. Supports federated identities.</p>
+    </div>
+
+    <div class="callout callout-amber">
+      <span class="callout-icon">⚠️</span>
+      <p><strong>Exam trap:</strong> CodeStar-managed roles vs. custom roles is a favourite exam topic. Know that you <em>cannot</em> swap in arbitrary IAM policies without breaking the managed role model.</p>
+    </div>
+  </section>
+
+  <!-- ── EXAM FOCUS ── -->
+  <section class="sec-block" id="exam">
+    <div class="sec-head">
+      <div class="sec-icon" style="background:var(--amber-l); border:1px solid var(--amber-b);">🎯</div>
+      <h2>DOP-C02 Exam Focus</h2>
+      <div class="sec-rule"></div>
+    </div>
+
+    <div class="two-col" style="margin-bottom:32px;">
+      <div class="card card-rose">
+        <span class="card-label">Good For</span>
+        <h3 style="color:var(--emerald); margin-bottom:12px;">✅ When to Use CodeStar</h3>
+        <div class="info-row"><div class="info-dot info-dot-emerald"></div><div>Greenfield projects needing <strong>quick CI/CD setup</strong></div></div>
+        <div class="info-row"><div class="info-dot info-dot-emerald"></div><div>Small-to-medium teams wanting <strong>simplified permissions</strong></div></div>
+        <div class="info-row"><div class="info-dot info-dot-emerald"></div><div>Learning / prototyping the full AWS DevOps stack</div></div>
+        <div class="info-row"><div class="info-dot info-dot-emerald"></div><div>When speed-of-setup beats pipeline flexibility</div></div>
+      </div>
+      <div class="card card-amber">
+        <span class="card-label" style="color:var(--rose)">Not Ideal</span>
+        <h3 style="color:var(--rose); margin-bottom:12px;">❌ When NOT to Use CodeStar</h3>
+        <div class="info-row"><div class="info-dot" style="background:var(--rose)"></div><div>Complex existing pipelines → <strong>use CodePipeline directly</strong></div></div>
+        <div class="info-row"><div class="info-dot" style="background:var(--rose)"></div><div>Advanced customisation needs</div></div>
+        <div class="info-row"><div class="info-dot" style="background:var(--rose)"></div><div>Large enterprises with strict IAM policies</div></div>
+        <div class="info-row"><div class="info-dot" style="background:var(--rose)"></div><div>When you need to migrate an existing CodePipeline project (not supported)</div></div>
+      </div>
+    </div>
+
+    <div class="card card-violet" style="margin-bottom:0">
+      <span class="card-label" style="color:var(--violet)">Key Exam Traps</span>
+      <h3 style="margin-bottom:20px;">Watch Out For These</h3>
+      <ul class="trap-list">
+        <li>
+          <span class="trap-num">01</span>
+          <div><strong>CodeStar ≠ CodePipeline.</strong> CodeStar <em>uses</em> CodePipeline but adds a project management + team layer on top.</div>
+        </li>
+        <li>
+          <span class="trap-num">02</span>
+          <div><strong>Limited to supported templates.</strong> You cannot create arbitrary service combinations outside the template catalogue.</div>
+        </li>
+        <li>
+          <span class="trap-num">03</span>
+          <div><strong>IAM role management.</strong> CodeStar-managed roles vs. custom roles — the exam loves this distinction.</div>
+        </li>
+        <li>
+          <span class="trap-num">04</span>
+          <div><strong>Project deletion is destructive.</strong> Deleting a CodeStar project deletes <em>all</em> underlying resources including repos and data. No recovery.</div>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ── SCENARIOS ── -->
+  <section class="sec-block" id="scenarios">
+    <div class="sec-head">
+      <div class="sec-icon" style="background:var(--emerald-l); border:1px solid var(--emerald-b);">📋</div>
+      <h2>Common Exam Scenarios</h2>
+      <div class="sec-rule"></div>
+    </div>
+
+    <div class="scenario-list">
+      <div class="scenario-item">
+        <div class="scenario-q">"Fastest way to set up CI/CD for a new Lambda function"</div>
+        <div class="scenario-arrow">→</div>
+        <div class="scenario-a">CodeStar</div>
+      </div>
+      <div class="scenario-item">
+        <div class="scenario-q">"Need a pipeline with custom approval stages and third-party integrations"</div>
+        <div class="scenario-arrow">→</div>
+        <div class="scenario-a">CodePipeline directly</div>
+      </div>
+      <div class="scenario-item">
+        <div class="scenario-q">"Junior dev needs read-only access to the project dashboard"</div>
+        <div class="scenario-arrow">→</div>
+        <div class="scenario-a">CodeStar Viewer role</div>
+      </div>
+      <div class="scenario-item">
+        <div class="scenario-q">"Team lead accidentally deleted the CodeStar project"</div>
+        <div class="scenario-arrow">→</div>
+        <div class="scenario-a">All resources gone — no recovery</div>
+      </div>
+      <div class="scenario-item">
+        <div class="scenario-q">"Rapid project setup: web IDE + source + pipeline, all pre-configured"</div>
+        <div class="scenario-arrow">→</div>
+        <div class="scenario-a">CodeStar + Cloud9</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── LIMITS ── -->
+  <section class="sec-block" id="limits">
+    <div class="sec-head">
+      <div class="sec-icon" style="background:var(--rose-l); border:1px solid var(--rose-b);">📏</div>
+      <h2>Limits &amp; Constraints</h2>
+      <div class="sec-rule"></div>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-pill">
+        <div class="stat-val">1000</div>
+        <div class="stat-lbl">Projects / account / region</div>
+      </div>
+    </div>
+
+    <div class="callout callout-cyan">
+      <span class="callout-icon">🌍</span>
+      <p><strong>Templates are region-specific.</strong> Some application templates are unavailable in certain AWS regions — check regional availability before recommending CodeStar in an architecture.</p>
+    </div>
+
+    <div class="callout callout-rose">
+      <span class="callout-icon">🚫</span>
+      <p><strong>No migration path.</strong> You cannot migrate an existing CodePipeline project into a CodeStar project. CodeStar projects must be created from scratch using the provided templates.</p>
+    </div>
+  </section>
+
+</main>
+
+<script>hljs.highlightAll();</script>
+</body>
+</html>
