@@ -1,0 +1,1407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS Service Catalog — DOP-C02 Study Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:        #f4f1eb;
+  --bg2:       #ede9e0;
+  --bg3:       #e6e1d5;
+  --ink:       #1a1714;
+  --ink2:      #3d3730;
+  --ink3:      #6b6258;
+  --ink4:      #9c8f82;
+  --rule:      #d5cfc4;
+  --red:       #c0392b;
+  --red-light: #f5ebe9;
+  --red-mid:   #e8c5c0;
+  --teal:      #1a6b6b;
+  --teal-light:#e4f0f0;
+  --gold:      #b8860b;
+  --gold-light:#f7f0dc;
+  --navy:      #1c2d4a;
+  --navy-light:#e8ecf3;
+  --green:     #2d6a4f;
+  --green-light:#e8f3ee;
+  --code-bg:   #1e1b16;
+  --code-text: #e8dfc8;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 15.5px;
+  line-height: 1.7;
+}
+
+/* ── TOP BAR ── */
+.topbar {
+  background: var(--ink);
+  color: var(--bg);
+  padding: 10px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.topbar-left { display: flex; align-items: center; gap: 24px; }
+.topbar-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--red); display: inline-block; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+.topbar-right { display: flex; align-items: center; gap: 20px; color: var(--ink4); }
+.topbar-home {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--bg);
+  opacity: 0.55;
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+.topbar-home:hover { opacity: 1; }
+.topbar-home svg { width: 13px; height: 13px; }
+
+/* ── HERO ── */
+.hero {
+  background: var(--ink);
+  padding: 70px 60px 60px;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: 'SC';
+  position: absolute;
+  right: -20px; top: -40px;
+  font-family: 'Playfair Display', serif;
+  font-size: 320px;
+  font-weight: 900;
+  color: rgba(255,255,255,0.03);
+  line-height: 1;
+  pointer-events: none;
+  user-select: none;
+}
+.hero-inner { max-width: 1200px; margin: 0 auto; }
+.hero-eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--red);
+  margin-bottom: 20px;
+  display: flex; align-items: center; gap: 12px;
+}
+.hero-eyebrow::before { content:''; display:block; width:32px; height:1px; background:var(--red); }
+.hero h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(44px, 7vw, 88px);
+  font-weight: 900;
+  color: #fff;
+  line-height: 1;
+  letter-spacing: -2px;
+  margin-bottom: 8px;
+}
+.hero h1 em {
+  font-style: italic;
+  color: var(--bg2);
+  font-weight: 700;
+}
+.hero-sub {
+  font-size: 17px;
+  color: rgba(255,255,255,0.45);
+  margin-top: 20px;
+  max-width: 520px;
+  font-weight: 300;
+  font-style: italic;
+}
+.hero-meta {
+  margin-top: 40px;
+  display: flex;
+  gap: 32px;
+  flex-wrap: wrap;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  padding-top: 28px;
+}
+
+.hero-stat-val {
+  font-family: 'Playfair Display', serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1;
+}
+.hero-stat-key {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.3);
+  margin-top: 4px;
+}
+
+/* ── LAYOUT ── */
+.layout { display: flex; max-width: 1200px; margin: 0 auto; }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: 230px; min-width: 230px;
+  padding: 40px 0;
+  border-right: 1px solid var(--rule);
+  position: sticky;
+  top: 37px;
+  height: calc(100vh - 37px);
+  overflow-y: auto;
+}
+.sidebar::-webkit-scrollbar { width: 3px; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--rule); }
+.sidebar-group { margin-bottom: 28px; }
+.sidebar-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--ink4);
+  padding: 0 24px;
+  margin-bottom: 6px;
+}
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 24px;
+  color: var(--ink3);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 400;
+  border-left: 2px solid transparent;
+  transition: all 0.15s;
+}
+.nav-link:hover { color: var(--red); border-left-color: var(--red-mid); background: var(--red-light); }
+.nav-link.active { color: var(--red); border-left-color: var(--red); background: var(--red-light); font-weight: 500; }
+.nav-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--ink4);
+  min-width: 20px;
+}
+
+/* ── MAIN ── */
+main { flex: 1; padding: 60px 60px 80px; min-width: 0; }
+
+/* ── SECTIONS ── */
+.section { margin-bottom: 80px; scroll-margin-top: 50px; }
+
+.section-rule {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 36px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid var(--ink);
+}
+.section-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--ink4);
+  letter-spacing: 1px;
+}
+h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 34px;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.5px;
+  line-height: 1.1;
+}
+h3 {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--red);
+  margin: 36px 0 12px;
+}
+h4 {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 8px;
+}
+p { color: var(--ink2); margin-bottom: 14px; font-size: 15px; }
+
+/* ── CARDS ── */
+.card {
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 24px;
+  background: #fff;
+  margin-bottom: 16px;
+}
+.card-red    { border-left: 3px solid var(--red);  background: var(--red-light); }
+.card-teal   { border-left: 3px solid var(--teal); background: var(--teal-light); }
+.card-gold   { border-left: 3px solid var(--gold); background: var(--gold-light); }
+.card-navy   { border-left: 3px solid var(--navy); background: var(--navy-light); }
+.card-green  { border-left: 3px solid var(--green);background: var(--green-light); }
+.card-dark   { background: var(--ink); border-color: var(--ink); color: #fff; }
+
+/* ── CALLOUT ── */
+.callout {
+  padding: 16px 20px;
+  border-radius: 4px;
+  margin: 20px 0;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  font-size: 14px;
+}
+.callout-tip  { background: var(--gold-light); border: 1px solid var(--gold); }
+.callout-tip p { color: #6b4c0a; margin:0; }
+.callout-warn { background: var(--red-light);  border: 1px solid var(--red-mid); }
+.callout-warn p { color: var(--red); margin:0; }
+.callout-info { background: var(--teal-light); border: 1px solid #9fcfcf; }
+.callout-info p { color: var(--teal); margin:0; }
+.callout-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+/* ── CODE ── */
+pre {
+  background: var(--code-bg);
+  border-radius: 6px;
+  padding: 22px 26px;
+  overflow-x: auto;
+  margin: 16px 0;
+  position: relative;
+}
+pre code {
+  font-family: 'DM Mono', monospace;
+  font-size: 12.5px;
+  line-height: 1.8;
+  color: var(--code-text);
+}
+.code-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--ink4);
+  margin-bottom: 6px;
+}
+code {
+  font-family: 'DM Mono', monospace;
+  font-size: 12.5px;
+  background: var(--bg3);
+  color: var(--red);
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+/* Syntax */
+.k  { color: #e06c75; }   /* keyword */
+.s  { color: #98c379; }   /* string */
+.c  { color: #5c6370; font-style: italic; }   /* comment */
+.n  { color: #61afef; }   /* key/name */
+.v  { color: #e5c07b; }   /* value */
+.p  { color: #abb2bf; }   /* punctuation */
+.fn { color: #c678dd; }   /* function */
+
+/* ── TABLE ── */
+.table-wrap { overflow-x: auto; margin: 20px 0; }
+table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+thead th {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--ink4);
+  padding: 10px 14px;
+  border-bottom: 2px solid var(--ink);
+  text-align: left;
+  background: var(--bg2);
+}
+td {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--rule);
+  vertical-align: top;
+  color: var(--ink2);
+}
+tr:last-child td { border-bottom: none; }
+tr:nth-child(even) td { background: rgba(0,0,0,0.02); }
+
+/* ── GRID ── */
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+.grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin: 16px 0; }
+
+/* ── TAGS ── */
+.tag {
+  display: inline-block;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  padding: 2px 9px;
+  border-radius: 2px;
+  font-weight: 500;
+}
+.tag-red   { background: var(--red-mid);   color: var(--red); }
+.tag-teal  { background: #b2d8d8;          color: var(--teal); }
+.tag-gold  { background: #e8d48a;          color: var(--gold); }
+.tag-navy  { background: #b8c8df;          color: var(--navy); }
+.tag-green { background: #a8d5be;          color: var(--green); }
+.tag-dark  { background: var(--ink2);      color: var(--bg); }
+
+/* ── FLOW ── */
+.flow {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex-wrap: wrap;
+  margin: 24px 0;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.flow-step {
+  flex: 1;
+  min-width: 120px;
+  padding: 16px 20px;
+  background: #fff;
+  border-right: 1px solid var(--rule);
+  position: relative;
+}
+.flow-step:last-child { border-right: none; }
+.flow-step::after {
+  content: '→';
+  position: absolute;
+  right: -10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ink4);
+  font-size: 14px;
+  z-index: 1;
+  background: #fff;
+  padding: 0 2px;
+}
+.flow-step:last-child::after { display: none; }
+.flow-step-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--ink4);
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+.flow-step-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+}
+.flow-step-sub {
+  font-size: 11px;
+  color: var(--ink4);
+  margin-top: 3px;
+}
+.flow-step.active-step { background: var(--ink); }
+.flow-step.active-step .flow-step-label { color: #fff; }
+.flow-step.active-step .flow-step-sub { color: rgba(255,255,255,0.5); }
+.flow-step.active-step .flow-step-num { color: var(--red); }
+.flow-step.active-step::after { background: var(--ink); }
+
+/* ── EXAM FOCUS ── */
+.exam-box {
+  background: var(--ink);
+  color: #fff;
+  border-radius: 4px;
+  padding: 24px 28px;
+  margin: 28px 0;
+}
+.exam-box-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--red);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.exam-box-title::before { content:''; display:block; width:20px; height:1px; background:var(--red); }
+.exam-box p { color: rgba(255,255,255,0.7); font-size: 14px; margin-bottom: 8px; }
+.exam-box ul { padding-left: 18px; }
+.exam-box li { color: rgba(255,255,255,0.7); font-size: 14px; margin-bottom: 5px; }
+.exam-box li::marker { color: var(--red); }
+.exam-box strong { color: #fff; }
+
+/* ── COMPARE ── */
+.compare {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 20px 0;
+}
+.compare-col { padding: 20px 22px; }
+.compare-col:first-child { background: var(--red-light); border-right: 1px solid var(--rule); }
+.compare-col:last-child { background: var(--teal-light); }
+.compare-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding-bottom: 10px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--rule);
+}
+.compare-col:first-child .compare-title { color: var(--red); }
+.compare-col:last-child .compare-title  { color: var(--teal); }
+.compare-col li { font-size: 13px; color: var(--ink2); margin-bottom: 6px; }
+
+/* ── ROLE DIAGRAM ── */
+.role-diagram {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 16px;
+  align-items: center;
+  margin: 20px 0;
+}
+.role-box {
+  background: #fff;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 16px 20px;
+}
+.role-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--ink4);
+  margin-bottom: 6px;
+}
+.role-name { font-size: 14px; font-weight: 500; color: var(--ink); }
+.role-detail { font-size: 12px; color: var(--ink4); margin-top: 4px; }
+.role-arrow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: var(--ink3);
+  font-size: 22px;
+}
+.role-arrow-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--ink4);
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+
+/* ── CONSTRAINT PILL ── */
+.constraint-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 16px 0; }
+.constraint-pill {
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.constraint-pill-head {
+  padding: 10px 14px;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+.constraint-pill-body {
+  padding: 12px 14px;
+  background: #fff;
+  font-size: 13px;
+  color: var(--ink2);
+  line-height: 1.5;
+}
+.cp-red  .constraint-pill-head { background: var(--red-mid);   color: var(--red); }
+.cp-teal .constraint-pill-head { background: #b2d8d8;          color: var(--teal); }
+.cp-gold .constraint-pill-head { background: #e8d48a;          color: var(--gold); }
+.cp-navy .constraint-pill-head { background: #b8c8df;          color: var(--navy); }
+.cp-green.constraint-pill-head { background: #a8d5be;          color: var(--green); }
+
+/* ── UL/OL ── */
+ul, ol { padding-left: 20px; margin: 12px 0; }
+li { margin-bottom: 5px; font-size: 15px; color: var(--ink2); }
+li::marker { color: var(--red); }
+
+/* ── DIVIDER ── */
+.divider {
+  height: 1px;
+  background: var(--rule);
+  margin: 40px 0;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .sidebar { display: none; }
+  main { padding: 30px 20px; }
+  .grid2, .grid3, .compare, .constraint-grid { grid-template-columns: 1fr; }
+  .role-diagram { grid-template-columns: 1fr; }
+  .compare-col:first-child { border-right: none; border-bottom: 1px solid var(--rule); }
+  .flow { flex-direction: column; }
+  .flow-step { width: 100%; border-right: none; border-bottom: 1px solid var(--rule); }
+  .flow-step::after { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-left">
+    <span class="topbar-dot"></span>
+    <span>AWS Service Catalog</span>
+    <span>·</span>
+    <span>DOP-C02 Study Guide</span>
+  </div>
+  <div class="topbar-right">
+    <span>Domain 2: Configuration Management &amp; IaC</span>
+    <a href="../index.html" class="topbar-home" title="Back to Home">
+      <svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M1 6.5L6.5 2 12 6.5"/>
+        <path d="M2.5 5.5V11h3V8h2v3h3V5.5"/>
+      </svg>
+      Home
+    </a>
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">DOP-C02 Exam Prep</div>
+    <h1>AWS Service<br><em>Catalog</em></h1>
+    <p class="hero-sub">Governed self-service infrastructure — every concept, constraint, and exam pattern you need.</p>
+    <div class="hero-meta">
+      <div class="hero-stat">
+        <div class="hero-stat-val">Products</div>
+        <div class="hero-stat-key">= CFN Templates</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-val">Portfolios</div>
+        <div class="hero-stat-key">= Collections of Products</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-val">Constraints</div>
+        <div class="hero-stat-key">= Governance Rules</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-val">Self-Service</div>
+        <div class="hero-stat-key">No Deep AWS Knowledge Needed</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BODY -->
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-group">
+      <div class="sidebar-label">Core Concepts</div>
+      <a class="nav-link active" href="#overview"><span class="nav-num">01</span> Overview</a>
+      <a class="nav-link" href="#key-concepts"><span class="nav-num">02</span> Key Concepts</a>
+      <a class="nav-link" href="#how-it-works"><span class="nav-num">03</span> How It Works</a>
+    </div>
+    <div class="sidebar-group">
+      <div class="sidebar-label">Governance</div>
+      <a class="nav-link" href="#portfolios"><span class="nav-num">04</span> Portfolios</a>
+      <a class="nav-link" href="#constraints"><span class="nav-num">05</span> Constraints</a>
+      <a class="nav-link" href="#launch-constraints"><span class="nav-num">06</span> Launch Constraints</a>
+      <a class="nav-link" href="#stackset-constraints"><span class="nav-num">07</span> StackSet Constraints</a>
+    </div>
+    <div class="sidebar-group">
+      <div class="sidebar-label">Advanced</div>
+      <a class="nav-link" href="#iam"><span class="nav-num">08</span> IAM &amp; Permissions</a>
+      <a class="nav-link" href="#cicd"><span class="nav-num">09</span> CI/CD Integration</a>
+      <a class="nav-link" href="#sharing"><span class="nav-num">10</span> Portfolio Sharing</a>
+      <a class="nav-link" href="#tagging"><span class="nav-num">11</span> Tagging &amp; TagOptions</a>
+      <a class="nav-link" href="#exam-tips"><span class="nav-num">12</span> Exam Tips</a>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main>
+
+    <!-- ══════════════════════════════
+         1. OVERVIEW
+    ══════════════════════════════ -->
+    <section class="section" id="overview">
+      <div class="section-rule">
+        <span class="section-num">01</span>
+        <h2>Overview</h2>
+      </div>
+
+      <p>AWS Service Catalog is a managed service that allows organizations to create and manage approved catalogs of IT resources on AWS. It enables <strong>governance</strong>, <strong>compliance</strong>, and <strong>standardization</strong> while giving end users a simple self-service portal to launch pre-approved infrastructure.</p>
+
+      <p>The core idea is separation of concerns: <strong>Admins</strong> define what can be deployed (Products in Portfolios), and <strong>Users</strong> launch those products without needing deep AWS or CloudFormation expertise.</p>
+
+      <!-- Admin vs User flow -->
+      <h3>Two-Layer Architecture</h3>
+      <div class="grid2">
+        <div class="card card-navy">
+          <h4>Admin Tasks</h4>
+          <ol>
+            <li>Write CloudFormation templates (<em>Products</em>)</li>
+            <li>Group products into <em>Portfolios</em></li>
+            <li>Define <em>Constraints</em> on each product</li>
+            <li>Grant IAM access to Portfolios for teams/users</li>
+          </ol>
+        </div>
+        <div class="card card-teal">
+          <h4>User Tasks</h4>
+          <ol>
+            <li>Log in to the Service Catalog self-service portal</li>
+            <li>Browse the product list (filtered by IAM access)</li>
+            <li>Launch a product → CloudFormation stack is created</li>
+            <li>Use the provisioned resource (VM, DB, etc.)</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="callout callout-tip">
+        <span class="callout-icon">💡</span>
+        <p><strong>Key mental model:</strong> Service Catalog is a <em>vending machine</em> for AWS infrastructure. Admins stock the machine with approved products; users select and deploy without touching the underlying AWS services directly.</p>
+      </div>
+
+      <h3>Why Service Catalog Exists</h3>
+      <div class="grid3">
+        <div class="card">
+          <h4 style="color:var(--red);font-size:15px">Governance</h4>
+          <p style="font-size:13px;margin:0">Ensure only pre-approved, compliant infrastructure gets deployed.</p>
+        </div>
+        <div class="card">
+          <h4 style="color:var(--teal);font-size:15px">Consistency</h4>
+          <p style="font-size:13px;margin:0">All teams deploy the same standardized configurations and templates.</p>
+        </div>
+        <div class="card">
+          <h4 style="color:var(--gold);font-size:15px">Self-Service</h4>
+          <p style="font-size:13px;margin:0">Developers move fast without needing IAM privileges for every AWS service.</p>
+        </div>
+      </div>
+
+      <h3>Integrations</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Integration</th><th>Purpose</th><th>Exam Relevance</th></tr></thead>
+          <tbody>
+            <tr><td><strong>ServiceNow / Jira Service Management</strong></td><td>ITSM connector — request AWS resources through ITSM tickets</td><td>Mentioned as self-service portal integration</td></tr>
+            <tr><td><strong>AWS Organizations</strong></td><td>Share portfolios across the entire org or OUs</td><td>Portfolio sharing at org level</td></tr>
+            <tr><td><strong>AWS Config</strong></td><td>Track configuration compliance of provisioned products</td><td>Governance and drift detection</td></tr>
+            <tr><td><strong>AWS CloudTrail</strong></td><td>Audit all Service Catalog API calls</td><td>Compliance &amp; audit trail</td></tr>
+            <tr><td><strong>Amazon EventBridge</strong></td><td>React to provisioning events (launch, update, terminate)</td><td>Event-driven automation</td></tr>
+            <tr><td><strong>CodePipeline / CodeCommit</strong></td><td>CI/CD sync of product templates</td><td>Key CI/CD integration pattern</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════
+         2. KEY CONCEPTS
+    ══════════════════════════════ -->
+    <section class="section" id="key-concepts">
+      <div class="section-rule">
+        <span class="section-num">02</span>
+        <h2>Key Concepts</h2>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Concept</th><th>Definition</th><th>Analogy</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><span class="tag tag-red">Product</span></td>
+              <td>A CloudFormation template with a version history. Represents a deployable IT resource (EC2, RDS, VPC, etc.).</td>
+              <td>An item on the store shelf</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-teal">Portfolio</span></td>
+              <td>A collection of products. Portfolios are shared with IAM users/roles/groups. Multiple portfolios can be created for different teams.</td>
+              <td>A store department (aisle)</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-navy">Provisioned Product</span></td>
+              <td>An instance of a launched product. Behind the scenes, it is a running CloudFormation stack.</td>
+              <td>An item you purchased and own</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-gold">Constraint</span></td>
+              <td>A rule attached to a product that restricts or controls how it can be launched (IAM, regions, notifications, tagging).</td>
+              <td>Store policies and restrictions</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-dark">Product Version</span></td>
+              <td>CloudFormation templates are versioned. Admins can publish new versions; users can update to the latest.</td>
+              <td>Product model year</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Product Lifecycle</h3>
+      <div class="flow">
+        <div class="flow-step">
+          <div class="flow-step-num">01</div>
+          <div class="flow-step-label">Create Product</div>
+          <div class="flow-step-sub">Upload CFN template, set version</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-num">02</div>
+          <div class="flow-step-label">Add to Portfolio</div>
+          <div class="flow-step-sub">Group with related products</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-num">03</div>
+          <div class="flow-step-label">Apply Constraints</div>
+          <div class="flow-step-sub">Launch role, notify, tag, region</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-num">04</div>
+          <div class="flow-step-label">Grant Access</div>
+          <div class="flow-step-sub">IAM users/groups/roles</div>
+        </div>
+        <div class="flow-step active-step">
+          <div class="flow-step-num">05</div>
+          <div class="flow-step-label">User Launches</div>
+          <div class="flow-step-sub">CFN stack provisioned</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════
+         3. HOW IT WORKS
+    ══════════════════════════════ -->
+    <section class="section" id="how-it-works">
+      <div class="section-rule">
+        <span class="section-num">03</span>
+        <h2>How It Works</h2>
+      </div>
+
+      <p>When a user launches a product, Service Catalog uses an <strong>IAM Launch Role</strong> (Launch Constraint) to call CloudFormation on their behalf. The user doesn't need any direct IAM permissions to the underlying AWS services — only <code>servicecatalog:ProvisionProduct</code>.</p>
+
+      <div class="role-diagram">
+        <div class="role-box">
+          <div class="role-label">End User</div>
+          <div class="role-name">Has only servicecatalog:* permissions</div>
+          <div class="role-detail">No EC2, RDS, S3, or CFN permissions needed</div>
+        </div>
+        <div class="role-arrow">
+          <span>→</span>
+          <div class="role-arrow-label">assumes via<br>Launch Constraint</div>
+        </div>
+        <div class="role-box" style="border-color:var(--red);background:var(--red-light)">
+          <div class="role-label" style="color:var(--red)">Launch Constraint IAM Role</div>
+          <div class="role-name">Has cloudformation:*, ec2:*, s3:GetObject...</div>
+          <div class="role-detail">Actually creates the AWS resources</div>
+        </div>
+      </div>
+
+      <div class="callout callout-info">
+        <span class="callout-icon">ℹ️</span>
+        <p><strong>Under the hood:</strong> Every provisioned product is a CloudFormation stack. This means you get full CFN capabilities: rollbacks, update policies, deletion policies, drift detection — all inherited automatically.</p>
+      </div>
+
+      <h3>Provisioned Product Operations</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Operation</th><th>What Happens</th><th>Requires</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Launch</strong></td><td>Creates a new CloudFormation stack from the product template</td><td>Launch Constraint role (if defined)</td></tr>
+            <tr><td><strong>Update</strong></td><td>Updates the CFN stack — can change version or parameters</td><td>Same Launch Constraint role</td></tr>
+            <tr><td><strong>Terminate</strong></td><td>Deletes the CloudFormation stack and all its resources</td><td>Same Launch Constraint role</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════
+         4. PORTFOLIOS
+    ══════════════════════════════ -->
+    <section class="section" id="portfolios">
+      <div class="section-rule">
+        <span class="section-num">04</span>
+        <h2>Portfolios</h2>
+      </div>
+
+      <p>Portfolios are the primary access-control boundary in Service Catalog. You grant access to a portfolio, not to individual products. Anyone with access to a portfolio can see and launch all products in it.</p>
+
+      <h3>Access Model</h3>
+      <div class="card">
+        <div class="grid2">
+          <div>
+            <h4>Who can access a Portfolio?</h4>
+            <ul>
+              <li><strong>IAM Users</strong> — individual user accounts</li>
+              <li><strong>IAM Groups</strong> — collection of users (recommended)</li>
+              <li><strong>IAM Roles</strong> — for federated access / SSO</li>
+            </ul>
+          </div>
+          <div>
+            <h4>Portfolio Sharing</h4>
+            <ul>
+              <li>Share with other <strong>AWS Accounts</strong></li>
+              <li>Share with entire <strong>AWS Organization</strong> or OUs</li>
+              <li>Recipient account can add products to the shared portfolio</li>
+              <li>Changes to the portfolio propagate to shared accounts</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-warn">
+        <span class="callout-icon">⚠️</span>
+        <p><strong>Important:</strong> When you share a portfolio, the receiving account cannot edit the products in the shared portfolio. They can only launch them. To customize, the receiving account must import the product into their own portfolio.</p>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════
+         5. CONSTRAINTS
+    ══════════════════════════════ -->
+    <section class="section" id="constraints">
+      <div class="section-rule">
+        <span class="section-num">05</span>
+        <h2>Constraints</h2>
+      </div>
+
+      <p>Constraints are rules attached to a product <em>within a portfolio</em>. They control how, where, and with what permissions a product can be launched. A constraint is applied at the <strong>Portfolio + Product</strong> level — the same product in different portfolios can have different constraints.</p>
+
+      <div class="constraint-grid">
+        <div class="constraint-pill cp-red">
+          <div class="constraint-pill-head">Launch Constraint</div>
+          <div class="constraint-pill-body">Assigns an IAM role that Service Catalog assumes when provisioning. Enables least-privilege for end users.</div>
+        </div>
+        <div class="constraint-pill cp-teal">
+          <div class="constraint-pill-head">Notification Constraint</div>
+          <div class="constraint-pill-body">Sends stack event notifications to an SNS topic. Useful for monitoring and auditing launches.</div>
+        </div>
+        <div class="constraint-pill cp-gold">
+          <div class="constraint-pill-head">Template Constraint</div>
+          <div class="constraint-pill-body">Restricts the parameter values a user can enter when launching a product (via rules). E.g., limit instance types to t2.micro only.</div>
+        </div>
+        <div class="constraint-pill cp-navy">
+          <div class="constraint-pill-head">StackSet Constraint</div>
+          <div class="constraint-pill-body">Deploys the product as a StackSet across multiple accounts and regions using CloudFormation StackSets.</div>
+        </div>
+        <div class="constraint-pill cp-green">
+          <div class="constraint-pill-head">Tag Update Constraint</div>
+          <div class="constraint-pill-body">Controls whether users can update tags on provisioned products. Can be set to ALLOWED or NOT_ALLOWED.</div>
+        </div>
+        <div class="constraint-pill cp-red">
+          <div class="constraint-pill-head">Resource Update Constraint</div>
+          <div class="constraint-pill-body">Controls whether users can update resources of a provisioned product at all (ALLOWED or NOT_ALLOWED).</div>
+        </div>
+      </div>
+
+      <div class="exam-box">
+        <div class="exam-box-title">Exam Focus — Constraints</div>
+        <ul>
+          <li>Constraints are per <strong>Portfolio + Product</strong> pair, not per product globally.</li>
+          <li>Only <strong>one Launch Constraint</strong> per portfolio/product combination.</li>
+          <li>If no Launch Constraint is defined, Service Catalog uses the <strong>user's own IAM permissions</strong> to provision — which usually means the user needs full permissions. This defeats the purpose.</li>
+          <li><strong>Template Constraints</strong> are great for limiting parameter values (e.g., allowed EC2 instance types, allowed regions via parameter).</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════
+         6. LAUNCH CONSTRAINTS
+    ══════════════════════════════ -->
+    <section class="section" id="launch-constraints">
+      <div class="section-rule">
+        <span class="section-num">06</span>
+        <h2>Launch Constraints</h2>
+      </div>
+
+      <p>A <strong>Launch Constraint</strong> is the most important constraint type. It is an IAM Role that Service Catalog assumes when a user provisions a product. This means the <em>end user</em> only needs <code>servicecatalog:*</code> permissions — Service Catalog uses the Launch Role for all the actual AWS resource creation.</p>
+
+      <h3>Required Permissions for the Launch Role</h3>
+      <div class="grid3">
+        <div class="card card-red">
+          <h4>CloudFormation</h4>
+          <p style="font-size:13px;margin:0">Full access to create, update, delete, describe stacks and set stack policies.</p>
+        </div>
+        <div class="card card-teal">
+          <h4>Target AWS Services</h4>
+          <p style="font-size:13px;margin:0">All permissions needed to create the resources defined in the CFN template (e.g., <code>ec2:*</code>, <code>rds:*</code>).</p>
+        </div>
+        <div class="card card-gold">
+          <h4>S3 Read Access</h4>
+          <p style="font-size:13px;margin:0">Read access to the S3 bucket containing the CloudFormation template (tagged with <code>servicecatalog:provisioning: true</code>).</p>
+        </div>
+      </div>
+
+      <div class="code-label">Launch Constraint IAM Role Policy (Example)</div>
+      <pre><code><span class="p">{</span>
+  <span class="n">"Version"</span>: <span class="s">"2012-10-17"</span><span class="p">,</span>
+  <span class="n">"Statement"</span>: <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="c">// Statement 1: CloudFormation + target service permissions</span>
+      <span class="n">"Effect"</span>: <span class="s">"Allow"</span><span class="p">,</span>
+      <span class="n">"Action"</span>: <span class="p">[</span>
+        <span class="s">"cloudformation:CreateStack"</span><span class="p">,</span>
+        <span class="s">"cloudformation:DeleteStack"</span><span class="p">,</span>
+        <span class="s">"cloudformation:DescribeStackEvents"</span><span class="p">,</span>
+        <span class="s">"cloudformation:DescribeStacks"</span><span class="p">,</span>
+        <span class="s">"cloudformation:GetTemplateSummary"</span><span class="p">,</span>
+        <span class="s">"cloudformation:SetStackPolicy"</span><span class="p">,</span>
+        <span class="s">"cloudformation:ValidateTemplate"</span><span class="p">,</span>
+        <span class="s">"cloudformation:UpdateStack"</span><span class="p">,</span>
+        <span class="s">"ec2:*"</span><span class="p">,</span>           <span class="c">// ← all services used in your CFN template</span>
+        <span class="s">"rds:*"</span><span class="p">,</span>
+        <span class="s">"servicecatalog:*"</span><span class="p">,</span>
+        <span class="s">"sns:*"</span>
+      <span class="p">],</span>
+      <span class="n">"Resource"</span>: <span class="s">"*"</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+      <span class="c">// Statement 2: S3 access for templates (tag-based condition)</span>
+      <span class="n">"Effect"</span>: <span class="s">"Allow"</span><span class="p">,</span>
+      <span class="n">"Action"</span>: <span class="p">[</span><span class="s">"s3:GetObject"</span><span class="p">],</span>
+      <span class="n">"Resource"</span>: <span class="s">"*"</span><span class="p">,</span>
+      <span class="n">"Condition"</span>: <span class="p">{</span>
+        <span class="n">"StringEquals"</span>: <span class="p">{</span>
+          <span class="c">// Only allow S3 access to objects tagged as Service Catalog templates</span>
+          <span class="n">"s3:ExistingObjectTag/servicecatalog:provisioning"</span>: <span class="s">"true"</span>
+        <span class="p">}</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+<span class="p">}</span>
+</code></pre>
+
+      <h3>Trust Policy for the Launch Role</h3>
+      <p>The Launch Constraint IAM Role must have a <strong>trust policy</strong> allowing Service Catalog to assume it:</p>
+      <pre><code><span class="p">{</span>
+  <span class="n">"Version"</span>: <span class="s">"2012-10-17"</span><span class="p">,</span>
+  <span class="n">"Statement"</span>: <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="n">"Effect"</span>: <span class="s">"Allow"</span><span class="p">,</span>
+      <span class="n">"Principal"</span>: <span class="p">{</span>
+        <span class="n">"Service"</span>: <span class="s">"servicecatalog.amazonaws.com"</span>
+      <span class="p">},</span>
+      <span class="n">"Action"</span>: <span class="s">"sts:AssumeRole"</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+<span class="p">}</span>
+</code></pre>
+
+      <div class="callout callout-tip">
+        <span class="callout-icon">💡</span>
+        <p><strong>Minimal User Permissions Pattern:</strong> End user only needs <code>servicecatalog:DescribeProduct</code>, <code>servicecatalog:ProvisionProduct</code>, <code>servicecatalog:ListLaunchPaths</code>, and <code>servicecatalog:SearchProductsAsAdmin</code>. All AWS resource creation is handled by the Launch Constraint IAM Role.</p>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════
+         7. STACKSET CONSTRAINTS
+    ══════════════════════════════ -->
+    <section class="section" id="stackset-constraints">
+      <div class="section-rule">
+        <span class="section-num">07</span>
+        <h2>StackSet Constraints</h2>
+      </div>
+
+      <p>StackSet Constraints let you configure a product so that when it's launched, it deploys as a <strong>CloudFormation StackSet</strong> — provisioning resources across multiple AWS accounts and regions simultaneously.</p>
+
+      <div class="grid3">
+        <div class="card card-navy">
+          <h4>Accounts</h4>
+          <p style="font-size:13px;margin:0">Specify the target AWS account IDs where the product will be deployed.</p>
+        </div>
+        <div class="card card-teal">
+          <h4>Regions</h4>
+          <p style="font-size:13px;margin:0">Specify target regions with optional deployment order (sequential or parallel).</p>
+        </div>
+        <div class="card card-gold">
+          <h4>Permissions</h4>
+          <p style="font-size:13px;margin:0">Requires an IAM StackSet Administrator Role to manage target accounts.</p>
+        </div>
+      </div>
+
+      <div class="callout callout-tip">
+        <span class="callout-icon">💡</span>
+        <p><strong>Region Restriction:</strong> Using a StackSet Constraint, you can enforce that users <em>can only deploy to specific regions</em> — a key governance feature for data residency and compliance requirements.</p>
+      </div>
+
+      <h3>StackSet Constraint vs Standard Deployment</h3>
+      <div class="compare">
+        <div class="compare-col">
+          <div class="compare-title">Standard Launch (no StackSet constraint)</div>
+          <ul>
+            <li>Deploys to the <strong>current account &amp; region</strong> only</li>
+            <li>One CloudFormation stack created</li>
+            <li>Faster, simpler</li>
+            <li>Use for single-account products</li>
+          </ul>
+        </div>
+        <div class="compare-col">
+          <div class="compare-title">StackSet Constraint Launch</div>
+          <ul>
+            <li>Deploys to <strong>multiple accounts &amp; regions</strong></li>
+            <li>CloudFormation StackSet created</li>
+            <li>Ideal for org-wide baseline resources</li>
+            <li>Requires Administrator role setup</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════
+         8. IAM & PERMISSIONS
+    ══════════════════════════════ -->
+    <section class="section" id="iam">
+      <div class="section-rule">
+        <span class="section-num">08</span>
+        <h2>IAM &amp; Permissions</h2>
+      </div>
+
+      <h3>Three IAM Principals in Service Catalog</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Principal</th><th>Typical Permissions</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><span class="tag tag-navy">Admin</span></td>
+              <td><code>servicecatalog:*</code> + <code>cloudformation:*</code> + <code>iam:PassRole</code></td>
+              <td>Creates products, portfolios, constraints. Needs <code>iam:PassRole</code> to assign Launch Constraints.</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-teal">End User</span></td>
+              <td><code>servicecatalog:ProvisionProduct</code>, <code>servicecatalog:ListLaunchPaths</code>, <code>servicecatalog:DescribeProduct</code></td>
+              <td>No direct EC2/RDS/S3 permissions needed if Launch Constraint is set.</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-red">Launch Role</span></td>
+              <td><code>cloudformation:*</code> + all target services + <code>s3:GetObject</code> (conditional)</td>
+              <td>Must trust <code>servicecatalog.amazonaws.com</code> to assume it.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>IAM PassRole Requirement</h3>
+      <p>When an admin creates a Launch Constraint, they must have <code>iam:PassRole</code> on the Launch Role ARN. This prevents privilege escalation — admins can only assign roles they are allowed to pass.</p>
+
+      <pre><code><span class="c">// Admin policy snippet — allows assigning a specific Launch Role</span>
+<span class="p">{</span>
+  <span class="n">"Effect"</span>: <span class="s">"Allow"</span><span class="p">,</span>
+  <span class="n">"Action"</span>: <span class="s">"iam:PassRole"</span><span class="p">,</span>
+  <span class="n">"Resource"</span>: <span class="s">"arn:aws:iam::123456789012:role/SCLaunchRole"</span><span class="p">,</span>
+  <span class="n">"Condition"</span>: <span class="p">{</span>
+    <span class="n">"StringEquals"</span>: <span class="p">{</span>
+      <span class="n">"iam:PassedToService"</span>: <span class="s">"servicecatalog.amazonaws.com"</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </section>
+
+    <!-- ══════════════════════════════
+         9. CI/CD INTEGRATION
+    ══════════════════════════════ -->
+    <section class="section" id="cicd">
+      <div class="section-rule">
+        <span class="section-num">09</span>
+        <h2>CI/CD Integration</h2>
+      </div>
+
+      <p>Service Catalog products should be treated as code — versioned, reviewed, and automatically synced. The recommended pattern is to store CFN templates in a <strong>CodeCommit (or GitHub) repository</strong> and use a Lambda function triggered by repo events to keep products in sync.</p>
+
+      <h3>CodeCommit Sync Pattern</h3>
+      <div class="flow">
+        <div class="flow-step">
+          <div class="flow-step-num">01</div>
+          <div class="flow-step-label">Developer Pushes</div>
+          <div class="flow-step-sub">product-a.yml to CodeCommit</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-num">02</div>
+          <div class="flow-step-label">CodeCommit Trigger</div>
+          <div class="flow-step-sub">Invokes Lambda function</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-num">03</div>
+          <div class="flow-step-label">Lambda Reads mapping.yml</div>
+          <div class="flow-step-sub">Maps files → SC Products</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-num">04</div>
+          <div class="flow-step-label">Lambda Calls SC API</div>
+          <div class="flow-step-sub">UpdateProvisioningArtifact</div>
+        </div>
+        <div class="flow-step active-step">
+          <div class="flow-step-num">05</div>
+          <div class="flow-step-label">Product Updated</div>
+          <div class="flow-step-sub">New version available in SC</div>
+        </div>
+      </div>
+
+      <h3>mapping.yml Example</h3>
+      <pre><code><span class="c"># mapping.yml — maps template files to Service Catalog Products</span>
+<span class="n">Products</span>:
+  - <span class="n">Name</span>: <span class="s">Product VPC</span>
+    <span class="n">Template</span>: <span class="s">product-vpc.yml</span>
+    <span class="n">PortfolioId</span>: <span class="s">port-abc123</span>
+    <span class="n">ProductId</span>: <span class="s">prod-xyz456</span>
+
+  - <span class="n">Name</span>: <span class="s">Product ALB</span>
+    <span class="n">Template</span>: <span class="s">product-alb.yml</span>
+    <span class="n">PortfolioId</span>: <span class="s">port-abc123</span>
+    <span class="n">ProductId</span>: <span class="s">prod-uvw789</span>
+</code></pre>
+
+      <h3>Lambda Sync Function (Key Logic)</h3>
+      <pre><code><span class="c"># SyncServiceCatalogFunction — triggered by CodeCommit push</span>
+<span class="k">import</span> boto3, yaml
+
+<span class="k">def</span> <span class="fn">handler</span>(event, context):
+    sc = boto3.client(<span class="s">'servicecatalog'</span>)
+    cc = boto3.client(<span class="s">'codecommit'</span>)
+    
+    <span class="c"># 1. Read the mapping file from CodeCommit</span>
+    mapping = yaml.safe_load(
+        cc.get_file(repositoryName=<span class="s">'my-repo'</span>, filePath=<span class="s">'mapping.yml'</span>)[<span class="s">'fileContent'</span>]
+    )
+    
+    <span class="c"># 2. For each product in the mapping, update the artifact</span>
+    <span class="k">for</span> product <span class="k">in</span> mapping[<span class="s">'Products'</span>]:
+        template_url = get_s3_url(product[<span class="s">'Template'</span>])  <span class="c"># upload to S3 first</span>
+        
+        <span class="c"># 3. Create a new provisioning artifact (product version)</span>
+        sc.create_provisioning_artifact(
+            ProductId=product[<span class="s">'ProductId'</span>],
+            Parameters={
+                <span class="s">'Name'</span>: <span class="s">'latest'</span>,
+                <span class="s">'Type'</span>: <span class="s">'CLOUD_FORMATION_TEMPLATE'</span>,
+                <span class="s">'Info'</span>: {<span class="s">'LoadTemplateFromURL'</span>: template_url}
+            }
+        )
+</code></pre>
+
+      <h3>Alternative: CodePipeline Integration</h3>
+      <div class="card card-teal">
+        <p style="margin:0;font-size:14px">For more complex workflows, use a full <strong>CodePipeline</strong>:</p>
+        <ul style="margin-top:8px">
+          <li style="font-size:13px"><strong>Source:</strong> CodeCommit / S3 / GitHub</li>
+          <li style="font-size:13px"><strong>Build:</strong> CodeBuild to lint/validate templates</li>
+          <li style="font-size:13px"><strong>Deploy:</strong> Lambda action or custom action to update Service Catalog products</li>
+          <li style="font-size:13px"><strong>Approval:</strong> Manual approval gate before publishing to production portfolio</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════
+         10. PORTFOLIO SHARING
+    ══════════════════════════════ -->
+    <section class="section" id="sharing">
+      <div class="section-rule">
+        <span class="section-num">10</span>
+        <h2>Portfolio Sharing</h2>
+      </div>
+
+      <p>Portfolios can be shared with other AWS accounts or entire AWS Organizations, enabling a central "hub" account to manage products that are consumed by many "spoke" accounts.</p>
+
+      <div class="compare">
+        <div class="compare-col">
+          <div class="compare-title">Account-Level Sharing</div>
+          <ul>
+            <li>Share with specific <strong>account IDs</strong></li>
+            <li>Recipient must accept the share</li>
+            <li>Works without AWS Organizations</li>
+            <li>Good for isolated cross-account scenarios</li>
+          </ul>
+        </div>
+        <div class="compare-col">
+          <div class="compare-title">Org-Level Sharing</div>
+          <ul>
+            <li>Share with <strong>Organization ID</strong> or OU</li>
+            <li>All accounts in OU automatically get access</li>
+            <li>Requires AWS Organizations integration</li>
+            <li>New accounts in OU automatically get portfolio</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Sharing Mechanics</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Aspect</th><th>Behavior</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Product visibility</strong></td><td>Recipient sees products in the imported portfolio but cannot edit them</td></tr>
+            <tr><td><strong>Local customization</strong></td><td>Recipient can add <em>their own</em> constraints to the imported products (e.g., their own launch role)</td></tr>
+            <tr><td><strong>Updates propagation</strong></td><td>When the sharing account updates a product version, the update is available to all recipients immediately</td></tr>
+            <tr><td><strong>Tag Options</strong></td><td>TagOptions associated with the portfolio are also shared and enforced in recipient accounts</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════
+         11. TAGGING & TAGOPTIONS
+    ══════════════════════════════ -->
+    <section class="section" id="tagging">
+      <div class="section-rule">
+        <span class="section-num">11</span>
+        <h2>Tagging &amp; TagOptions</h2>
+      </div>
+
+      <p><strong>TagOptions</strong> is a Service Catalog feature that allows admins to define a key-value tag library that is applied to all provisioned products. This enforces consistent tagging across your organization — critical for cost allocation and compliance.</p>
+
+      <div class="grid2">
+        <div class="card card-gold">
+          <h4>TagOptions Library</h4>
+          <ul style="margin-top:8px">
+            <li style="font-size:13px">Centrally managed list of approved tag keys and allowed values</li>
+            <li style="font-size:13px">Associated with a Portfolio or Product</li>
+            <li style="font-size:13px">Enforced on all provisioned products automatically</li>
+            <li style="font-size:13px">Example: <code>Environment: [dev, staging, prod]</code></li>
+          </ul>
+        </div>
+        <div class="card card-green">
+          <h4>Tag Update Constraint</h4>
+          <ul style="margin-top:8px">
+            <li style="font-size:13px"><code>ALLOWED</code> — users can change tags after provisioning</li>
+            <li style="font-size:13px"><code>NOT_ALLOWED</code> — tags are locked after provisioning</li>
+            <li style="font-size:13px">Use <code>NOT_ALLOWED</code> to prevent tag tampering for cost tracking</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout callout-tip">
+        <span class="callout-icon">💡</span>
+        <p><strong>Exam tip:</strong> TagOptions are shared along with the portfolio when you share portfolios across accounts. Recipient accounts automatically inherit enforced tags.</p>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════
+         12. EXAM TIPS
+    ══════════════════════════════ -->
+    <section class="section" id="exam-tips">
+      <div class="section-rule">
+        <span class="section-num">12</span>
+        <h2>DOP-C02 Exam Tips</h2>
+      </div>
+
+      <div class="exam-box">
+        <div class="exam-box-title">Must-Know Facts</div>
+        <ul>
+          <li>A <strong>Product is a CloudFormation template</strong>. Provisioned Products are CFN stacks.</li>
+          <li>A <strong>Portfolio is a collection of Products</strong> with access granted via IAM users/groups/roles.</li>
+          <li><strong>Launch Constraint</strong> = IAM role that Service Catalog assumes to provision on behalf of the user. The user doesn't need direct AWS resource permissions.</li>
+          <li><strong>StackSet Constraint</strong> = deploy a product across multiple accounts/regions. Also used to <strong>restrict which regions</strong> a product can be deployed to.</li>
+          <li><strong>Template Constraint</strong> = restrict parameter values users can input (e.g., only allow t2.micro instances).</li>
+          <li>Admins need <code>iam:PassRole</code> to assign a Launch Constraint role to a product.</li>
+          <li>The Launch Role must trust <code>servicecatalog.amazonaws.com</code> in its trust policy.</li>
+          <li>Portfolio sharing with Organizations auto-deploys to new accounts added to the OU.</li>
+          <li>Service Catalog integrates with <strong>ServiceNow</strong> for ITSM-driven self-service.</li>
+          <li>CI/CD pattern: <strong>CodeCommit → Lambda (SyncServiceCatalogFunction) → Service Catalog</strong>.</li>
+        </ul>
+      </div>
+
+      <h3>Common Exam Scenarios</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Scenario</th><th>Solution</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><em>"Developers need to launch EC2 instances but should not have direct EC2 permissions"</em></td>
+              <td>Service Catalog with a <strong>Launch Constraint</strong> IAM role that has EC2 permissions. Users only need <code>servicecatalog:ProvisionProduct</code>.</td>
+            </tr>
+            <tr>
+              <td><em>"Ensure all provisioned resources are deployed only to us-east-1 and eu-west-1"</em></td>
+              <td>Use a <strong>StackSet Constraint</strong> with <code>Regions</code> set to the allowed regions only.</td>
+            </tr>
+            <tr>
+              <td><em>"Prevent users from choosing large (expensive) EC2 instance types"</em></td>
+              <td>Apply a <strong>Template Constraint</strong> that limits the <code>InstanceType</code> parameter to allowed values.</td>
+            </tr>
+            <tr>
+              <td><em>"Keep Service Catalog products in sync with CloudFormation templates stored in Git"</em></td>
+              <td><strong>CodeCommit + Lambda</strong> (SyncServiceCatalogFunction) pattern. Lambda updates provisioning artifacts when templates are pushed.</td>
+            </tr>
+            <tr>
+              <td><em>"Deploy a standard security baseline product to all AWS accounts in the organization"</em></td>
+              <td>Share the portfolio at <strong>Organization level</strong> and use a <strong>StackSet Constraint</strong> to deploy to all accounts.</td>
+            </tr>
+            <tr>
+              <td><em>"Ensure all launched products have a mandatory 'CostCenter' tag"</em></td>
+              <td>Create a <strong>TagOptions</strong> entry for <code>CostCenter</code> and associate it with the portfolio. Set Tag Update Constraint to <code>NOT_ALLOWED</code>.</td>
+            </tr>
+            <tr>
+              <td><em>"Allow requests for AWS resources through ITSM ticketing system"</em></td>
+              <td>Service Catalog <strong>ServiceNow connector</strong> (or Jira Service Management connector).</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Service Catalog vs Direct CloudFormation</h3>
+      <div class="compare">
+        <div class="compare-col">
+          <div class="compare-title">Service Catalog</div>
+          <ul>
+            <li>Self-service for <strong>non-technical users</strong></li>
+            <li>Governance and constraint enforcement</li>
+            <li>Centralized product management</li>
+            <li>No need for deep AWS IAM knowledge</li>
+            <li>Consistent tagging across org</li>
+            <li>Portfolio sharing across accounts</li>
+          </ul>
+        </div>
+        <div class="compare-col">
+          <div class="compare-title">Direct CloudFormation</div>
+          <ul>
+            <li>Used by <strong>platform/infra engineers</strong></li>
+            <li>Full flexibility — any template</li>
+            <li>Requires IAM permissions for services</li>
+            <li>No built-in governance layer</li>
+            <li>User manages their own stacks</li>
+            <li>Used under the hood by Service Catalog</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout callout-tip">
+        <span class="callout-icon">🎯</span>
+        <p><strong>One-line summary for the exam:</strong> Service Catalog = <em>CloudFormation templates packaged with governance</em>. When you see "self-service", "least privilege for developers", "governance/compliance", "approved templates", or "non-technical users provisioning AWS resources" — think Service Catalog.</p>
+      </div>
+
+    </section>
+
+  </main>
+</div>
+
+<script>
+  const sections = document.querySelectorAll('.section');
+  const navLinks = document.querySelectorAll('.nav-link');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinks.forEach(n => n.classList.remove('active'));
+        const link = document.querySelector(`.nav-link[href="#${entry.target.id}"]`);
+        if (link) link.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>

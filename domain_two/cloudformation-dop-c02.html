@@ -1,0 +1,1590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS CloudFormation — DOP-C02 Study Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0e17;
+    --surface: #111522;
+    --surface2: #161c2e;
+    --border: #1e2740;
+    --accent: #ff6b35;
+    --accent2: #00d4ff;
+    --accent3: #a78bfa;
+    --gold: #f5c842;
+    --green: #22d3a0;
+    --red: #ff4d6d;
+    --text: #e2e8f0;
+    --text-muted: #7a8aa0;
+    --text-dim: #4a5568;
+    --code-bg: #0d1117;
+    --tag-bg: rgba(255,107,53,0.12);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Lora', Georgia, serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.75;
+    font-size: 16px;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(135deg, #0b0e17 0%, #0d1630 50%, #0b1520 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 80px 40px 60px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -80px; right: -80px;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(255,107,53,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -120px; left: 20%;
+    width: 600px; height: 400px;
+    background: radial-gradient(ellipse, rgba(0,212,255,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-inner { max-width: 1100px; margin: 0 auto; position: relative; z-index: 1; }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--tag-bg); border: 1px solid rgba(255,107,53,0.3);
+    color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    padding: 5px 14px; border-radius: 20px; letter-spacing: 1.5px;
+    text-transform: uppercase; margin-bottom: 24px;
+  }
+  .hero-badge::before { content: '●'; font-size: 8px; animation: blink 2s infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  h1.hero-title {
+    font-family: 'Syne', sans-serif; font-size: clamp(38px,6vw,72px);
+    font-weight: 800; line-height: 1.05; letter-spacing: -2px;
+    color: #fff; margin-bottom: 16px;
+  }
+  h1.hero-title span { color: var(--accent); }
+  .hero-sub {
+    font-family: 'Lora', serif; font-size: 18px; color: var(--text-muted);
+    max-width: 600px; margin-bottom: 40px; font-style: italic;
+  }
+  .hero-stats {
+    display: flex; gap: 40px; flex-wrap: wrap;
+  }
+  .stat { display: flex; flex-direction: column; gap: 4px; }
+  .stat-num {
+    font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; color: var(--accent2);
+  }
+  .stat-label { font-size: 12px; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 1px; }
+
+  /* ── LAYOUT ── */
+  .layout { display: flex; max-width: 1300px; margin: 0 auto; }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: 260px; min-width: 260px; padding: 40px 20px;
+    position: sticky; top: 0; height: 100vh; overflow-y: auto;
+    border-right: 1px solid var(--border);
+  }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  .sidebar-title {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--text-dim); margin-bottom: 16px; padding-left: 12px;
+  }
+  .nav-item {
+    display: block; padding: 8px 12px; border-radius: 6px; text-decoration: none;
+    color: var(--text-muted); font-family: 'Syne', sans-serif; font-size: 13px;
+    font-weight: 600; transition: all 0.2s; border-left: 2px solid transparent;
+    margin-bottom: 2px;
+  }
+  .nav-item:hover { color: var(--accent); background: var(--tag-bg); border-left-color: var(--accent); }
+  .nav-item.active { color: var(--accent); background: var(--tag-bg); border-left-color: var(--accent); }
+  .nav-section { margin-top: 20px; }
+
+  /* ── MAIN ── */
+  main { flex: 1; padding: 60px 50px; max-width: 960px; }
+
+  /* ── SECTIONS ── */
+  .section { margin-bottom: 80px; scroll-margin-top: 30px; }
+  
+  .section-header {
+    display: flex; align-items: center; gap: 16px;
+    margin-bottom: 32px; padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-icon {
+    width: 44px; height: 44px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; flex-shrink: 0;
+  }
+  .section-number {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: var(--text-dim); letter-spacing: 1px; display: block; margin-bottom: 2px;
+  }
+  h2 {
+    font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800;
+    color: #fff; letter-spacing: -0.5px;
+  }
+
+  h3 {
+    font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700;
+    color: var(--accent2); margin: 32px 0 12px; letter-spacing: -0.3px;
+  }
+  h4 {
+    font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700;
+    color: var(--gold); margin: 20px 0 8px; text-transform: uppercase; letter-spacing: 1px;
+  }
+
+  p { margin-bottom: 14px; color: var(--text); }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 24px; margin-bottom: 20px;
+  }
+  .card-accent { border-left: 3px solid var(--accent); }
+  .card-blue { border-left: 3px solid var(--accent2); }
+  .card-purple { border-left: 3px solid var(--accent3); }
+  .card-green { border-left: 3px solid var(--green); }
+  .card-gold { border-left: 3px solid var(--gold); }
+
+  /* ── TIP BOX ── */
+  .tip {
+    background: rgba(245,200,66,0.07); border: 1px solid rgba(245,200,66,0.25);
+    border-radius: 10px; padding: 16px 20px; margin: 20px 0;
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+  .tip-icon { font-size: 18px; flex-shrink: 0; margin-top: 2px; }
+  .tip p { margin: 0; font-size: 14px; color: #c8b04a; }
+  .tip strong { color: var(--gold); }
+
+  .warn {
+    background: rgba(255,77,109,0.07); border: 1px solid rgba(255,77,109,0.25);
+    border-radius: 10px; padding: 16px 20px; margin: 20px 0;
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+  .warn p { margin: 0; font-size: 14px; color: #e88; }
+  .warn strong { color: var(--red); }
+
+  .info {
+    background: rgba(0,212,255,0.06); border: 1px solid rgba(0,212,255,0.2);
+    border-radius: 10px; padding: 16px 20px; margin: 20px 0;
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+  .info p { margin: 0; font-size: 14px; color: #7dd3ee; }
+  .info strong { color: var(--accent2); }
+
+  /* ── CODE BLOCKS ── */
+  pre {
+    background: var(--code-bg); border: 1px solid #1a2035;
+    border-radius: 10px; padding: 20px 24px; overflow-x: auto;
+    margin: 16px 0; position: relative;
+  }
+  pre code {
+    font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.7;
+    color: #c9d1d9;
+  }
+  .code-label {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    color: var(--text-dim); text-transform: uppercase; letter-spacing: 1.5px;
+    margin-bottom: 6px;
+  }
+
+  /* Syntax highlight classes */
+  .kw  { color: #ff7b72; }   /* keywords */
+  .str { color: #a5d6ff; }   /* strings */
+  .key { color: #79c0ff; }   /* yaml keys */
+  .val { color: #f2cc60; }   /* values / types */
+  .cmt { color: #4a5568; font-style: italic; }  /* comments */
+  .fn  { color: #d2a8ff; }   /* functions / intrinsics */
+  .num { color: #ffa657; }   /* numbers */
+
+  code {
+    font-family: 'JetBrains Mono', monospace; font-size: 13px;
+    background: rgba(255,107,53,0.1); color: var(--accent);
+    padding: 2px 7px; border-radius: 4px;
+  }
+
+  /* ── TABLES ── */
+  .table-wrap { overflow-x: auto; margin: 20px 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th {
+    font-family: 'Syne', sans-serif; font-size: 11px; text-transform: uppercase;
+    letter-spacing: 1px; color: var(--text-dim); padding: 12px 16px;
+    border-bottom: 2px solid var(--border); text-align: left;
+    background: var(--surface2);
+  }
+  td { padding: 12px 16px; border-bottom: 1px solid var(--border); vertical-align: top; font-size: 14px; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  /* ── TAGS ── */
+  .tag {
+    display: inline-block; padding: 2px 10px; border-radius: 20px;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    font-weight: 500; letter-spacing: 0.5px;
+  }
+  .tag-orange { background: rgba(255,107,53,0.15); color: var(--accent); border: 1px solid rgba(255,107,53,0.3); }
+  .tag-blue   { background: rgba(0,212,255,0.1);   color: var(--accent2); border: 1px solid rgba(0,212,255,0.25); }
+  .tag-purple { background: rgba(167,139,250,0.1); color: var(--accent3); border: 1px solid rgba(167,139,250,0.25); }
+  .tag-green  { background: rgba(34,211,160,0.1);  color: var(--green);   border: 1px solid rgba(34,211,160,0.25); }
+  .tag-red    { background: rgba(255,77,109,0.1);  color: var(--red);     border: 1px solid rgba(255,77,109,0.25); }
+  .tag-gold   { background: rgba(245,200,66,0.1);  color: var(--gold);    border: 1px solid rgba(245,200,66,0.25); }
+
+  /* ── GRID ── */
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin: 16px 0; }
+
+  /* ── DECISION TREE ── */
+  .dtree {
+    background: var(--code-bg); border: 1px solid #1a2035;
+    border-radius: 10px; padding: 20px 24px; font-family: 'JetBrains Mono', monospace;
+    font-size: 13px; line-height: 1.9; margin: 16px 0;
+  }
+  .dtree .q  { color: var(--accent2); }
+  .dtree .y  { color: var(--green); }
+  .dtree .n  { color: var(--text-muted); }
+  .dtree .r  { color: var(--gold); font-weight: 700; }
+
+  /* ── FLOW DIAGRAM ── */
+  .flow {
+    display: flex; align-items: center; gap: 12px;
+    flex-wrap: wrap; margin: 20px 0;
+  }
+  .flow-box {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 10px 18px; font-family: 'Syne', sans-serif;
+    font-size: 13px; font-weight: 700; white-space: nowrap;
+  }
+  .flow-arrow { color: var(--accent); font-size: 18px; flex-shrink: 0; }
+
+  /* ── LIST ── */
+  ul, ol { padding-left: 20px; margin: 12px 0; }
+  li { margin-bottom: 6px; font-size: 15px; }
+  li::marker { color: var(--accent); }
+
+  /* ── EXAM CALLOUT ── */
+  .exam-focus {
+    background: linear-gradient(135deg, rgba(167,139,250,0.08), rgba(0,212,255,0.06));
+    border: 1px solid rgba(167,139,250,0.3); border-radius: 12px;
+    padding: 20px 24px; margin: 24px 0;
+  }
+  .exam-focus-title {
+    font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 2px; color: var(--accent3);
+    margin-bottom: 10px;
+  }
+  .exam-focus p { font-size: 14px; margin: 0; color: #c4b5fd; }
+  .exam-focus ul { margin: 8px 0 0; }
+  .exam-focus li { font-size: 14px; color: #c4b5fd; }
+  .exam-focus li::marker { color: var(--accent3); }
+
+  /* ── COMPARISON ── */
+  .compare {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+    border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
+    margin: 20px 0;
+  }
+  .compare-col { padding: 20px; }
+  .compare-col:first-child { border-right: 1px solid var(--border); background: rgba(255,107,53,0.04); }
+  .compare-col:last-child { background: rgba(0,212,255,0.04); }
+  .compare-title {
+    font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;
+    padding-bottom: 10px; border-bottom: 1px solid var(--border);
+  }
+  .compare-col:first-child .compare-title { color: var(--accent); }
+  .compare-col:last-child .compare-title { color: var(--accent2); }
+  .compare-col li { font-size: 13px; margin-bottom: 5px; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    .sidebar { display: none; }
+    main { padding: 30px 20px; }
+    .grid2, .grid3 { grid-template-columns: 1fr; }
+    .compare { grid-template-columns: 1fr; }
+    .compare-col:first-child { border-right: none; border-bottom: 1px solid var(--border); }
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-inner">
+    <a href="../index.html" style="display:inline-flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:12px;color:#ff6b35;text-decoration:none;background:rgba(255,107,53,0.1);border:1px solid rgba(255,107,53,0.25);padding:6px 14px;border-radius:20px;margin-bottom:20px;letter-spacing:0.05em;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,107,53,0.2)'" onmouseout="this.style.background='rgba(255,107,53,0.1)'">&#8592; Home</a>
+    <div class="hero-badge">DOP-C02 Exam Prep</div>
+    <h1 class="hero-title">AWS Cloud<span>Formation</span><br>Complete Guide</h1>
+    <p class="hero-sub">Infrastructure as Code at scale — every concept, syntax, and gotcha you need to pass the DevOps Professional exam.</p>
+    <div class="hero-stats">
+      <div class="stat"><span class="stat-num">15+</span><span class="stat-label">Topics Covered</span></div>
+      <div class="stat"><span class="stat-num">700+</span><span class="stat-label">Resource Types</span></div>
+      <div class="stat"><span class="stat-num">DOP-C02</span><span class="stat-label">Exam Target</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="layout">
+  <!-- SIDEBAR NAV -->
+  <nav class="sidebar">
+    <div class="sidebar-title">Contents</div>
+    <a class="nav-item active" href="#overview">Overview & How It Works</a>
+    <a class="nav-item" href="#template-anatomy">Template Anatomy</a>
+    <a class="nav-item" href="#parameters">Parameters</a>
+    <a class="nav-item" href="#mappings">Mappings</a>
+    <a class="nav-item" href="#outputs">Outputs & Exports</a>
+    <a class="nav-item" href="#conditions">Conditions</a>
+    <a class="nav-item" href="#intrinsic">Intrinsic Functions</a>
+    <a class="nav-item" href="#rollback">Rollbacks</a>
+    <a class="nav-item" href="#capabilities">Capabilities & IAM</a>
+    <a class="nav-item" href="#deletion">DeletionPolicy</a>
+    <a class="nav-item" href="#stack-policy">Stack Policy</a>
+    <a class="nav-item" href="#custom-resources">Custom Resources</a>
+    <a class="nav-item" href="#dynamic-refs">Dynamic References</a>
+    <a class="nav-item" href="#helper-scripts">Helper Scripts</a>
+    <a class="nav-item" href="#nested">Nested Stacks</a>
+    <a class="nav-item" href="#stacksets">StackSets</a>
+    <a class="nav-item" href="#changesets">ChangeSets & Drift</a>
+    <a class="nav-item" href="#troubleshooting">Troubleshooting</a>
+    <a class="nav-item" href="#exam-tips">Exam Tips</a>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main>
+
+    <!-- ══════════════════════════════════════════
+         1. OVERVIEW
+    ══════════════════════════════════════════ -->
+    <section class="section" id="overview">
+      <div class="section-header">
+        <div class="section-icon" style="background:rgba(255,107,53,0.1)">🏗️</div>
+        <div>
+          <span class="section-number">01 / Overview</span>
+          <h2>CloudFormation Overview</h2>
+        </div>
+      </div>
+
+      <p>AWS CloudFormation is a declarative Infrastructure-as-Code (IaC) service. You describe <em>what</em> you want, and CloudFormation figures out <em>how</em> to create it — handling dependencies, ordering, and rollback automatically.</p>
+
+      <div class="flow">
+        <div class="flow-box">📄 Template (.yaml/.json)</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box">🪣 S3 Bucket</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box">⚙️ AWS CloudFormation</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box">📦 Stack</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box" style="border-color:var(--accent);color:var(--accent)">☁️ AWS Resources</div>
+      </div>
+
+      <div class="tip">
+        <span class="tip-icon">💡</span>
+        <p>Templates must be uploaded to <strong>S3</strong> before CloudFormation references them. To update a template you must upload a <strong>new version</strong> — you cannot edit the previous one in-place.</p>
+      </div>
+
+      <h3>Key Benefits</h3>
+      <div class="grid2">
+        <div class="card card-accent">
+          <h4>Infrastructure as Code</h4>
+          <p style="margin:0;font-size:14px">No manual resource creation. Version-controlled in Git. Infrastructure changes go through code review.</p>
+        </div>
+        <div class="card card-blue">
+          <h4>Cost Management</h4>
+          <p style="margin:0;font-size:14px">Every resource in a stack gets a stack identifier tag — making cost attribution effortless. Estimate costs before deploying.</p>
+        </div>
+        <div class="card card-purple">
+          <h4>Productivity</h4>
+          <p style="margin:0;font-size:14px">Destroy and recreate entire environments on the fly. Automated diagram generation. Declarative programming model.</p>
+        </div>
+        <div class="card card-green">
+          <h4>Separation of Concerns</h4>
+          <p style="margin:0;font-size:14px">Separate stacks per app, per layer (network, app, DB). Outputs let stacks share references safely.</p>
+        </div>
+      </div>
+
+      <h3>Stack Lifecycle</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Operation</th><th>Behavior</th><th>Exam Note</th></tr></thead>
+          <tbody>
+            <tr><td><span class="tag tag-blue">CREATE</span></td><td>Provisions all resources. On failure, rolls back everything by default.</td><td>Set <code>OnFailure=DO_NOTHING</code> to keep resources for debugging.</td></tr>
+            <tr><td><span class="tag tag-orange">UPDATE</span></td><td>Compares current vs. desired template; executes only the diff.</td><td>Use ChangeSets to preview before applying.</td></tr>
+            <tr><td><span class="tag tag-red">DELETE</span></td><td>Deletes all resources created by the stack (respects DeletionPolicy).</td><td>Non-empty S3 buckets block deletion by default.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="warn">
+        <span class="tip-icon">⚠️</span>
+        <p><strong>Deleting a stack deletes every artifact CloudFormation created.</strong> Use <code>DeletionPolicy: Retain</code> or <code>TerminationProtection</code> to prevent accidental data loss.</p>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════
+         2. TEMPLATE ANATOMY
+    ══════════════════════════════════════════ -->
+    <section class="section" id="template-anatomy">
+      <div class="section-header">
+        <div class="section-icon" style="background:rgba(0,212,255,0.1)">📋</div>
+        <div>
+          <span class="section-number">02 / Structure</span>
+          <h2>Template Anatomy</h2>
+        </div>
+      </div>
+
+      <p>A CloudFormation template is a YAML or JSON document composed of several top-level sections:</p>
+
+      <pre><code><span class="key">AWSTemplateFormatVersion</span>: <span class="str">'2010-09-09'</span>   <span class="cmt"># Optional. Only valid value.</span>
+
+<span class="key">Description</span>: <span class="str">'What this stack does'</span>          <span class="cmt"># Optional. Max 1024 chars.</span>
+
+<span class="key">Metadata</span>:                                    <span class="cmt"># Optional. Arbitrary objects.</span>
+  <span class="key">AWS::CloudFormation::Interface</span>:
+    <span class="key">ParameterGroups</span>: [...]
+
+<span class="key">Parameters</span>:                                  <span class="cmt"># Optional. User inputs.</span>
+  <span class="key">EnvType</span>:
+    <span class="key">Type</span>: <span class="val">String</span>
+    <span class="key">AllowedValues</span>: [<span class="str">dev</span>, <span class="str">prod</span>]
+
+<span class="key">Mappings</span>:                                    <span class="cmt"># Optional. Fixed key-value lookup.</span>
+  <span class="key">RegionMap</span>:
+    <span class="key">us-east-1</span>:
+      <span class="key">HVM64</span>: <span class="str">ami-0ff8a91507f77f867</span>
+
+<span class="key">Conditions</span>:                                  <span class="cmt"># Optional. Conditional logic.</span>
+  <span class="key">IsProd</span>: <span class="fn">!Equals</span> [<span class="fn">!Ref</span> <span class="val">EnvType</span>, <span class="str">prod</span>]
+
+<span class="key">Transform</span>:                                   <span class="cmt"># Optional. SAM / Macros.</span>
+  - <span class="val">AWS::Serverless-2016-10-31</span>
+
+<span class="key">Resources</span>:                                   <span class="cmt"># MANDATORY — the only required section!</span>
+  <span class="key">MyBucket</span>:
+    <span class="key">Type</span>: <span class="val">AWS::S3::Bucket</span>
+    <span class="key">Properties</span>:
+      <span class="key">BucketName</span>: <span class="fn">!Sub</span> <span class="str">'my-bucket-${AWS::AccountId}'</span>
+
+<span class="key">Outputs</span>:                                     <span class="cmt"># Optional. Export values for other stacks.</span>
+  <span class="key">BucketArn</span>:
+    <span class="key">Value</span>: <span class="fn">!GetAtt</span> <span class="val">MyBucket.Arn</span>
+    <span class="key">Export</span>:
+      <span class="key">Name</span>: <span class="fn">!Sub</span> <span class="str">'${AWS::StackName}-BucketArn'</span>
+</code></pre>
+
+      <div class="exam-focus">
+        <div class="exam-focus-title">🎯 Exam Focus</div>
+        <p><strong>Resources</strong> is the only mandatory section. Everything else is optional. Know which section serves which purpose and the difference between Parameters (dynamic input) vs Mappings (static lookup).</p>
+      </div>
+
+      <h3>Resource Type Format</h3>
+      <div class="card card-blue">
+        <div class="code-label">Resource Type Identifier Pattern</div>
+        <pre style="margin:0;border:none;padding:10px 0"><code><span class="val">service-provider</span>::<span class="val">service-name</span>::<span class="val">data-type-name</span>
+
+<span class="cmt"># Examples:</span>
+<span class="val">AWS::EC2::Instance</span>
+<span class="val">AWS::S3::Bucket</span>
+<span class="val">AWS::RDS::DBInstance</span>
+<span class="val">AWS::Lambda::Function</span>
+<span class="val">AWS::IAM::Role</span>
+<span class="val">Custom::MyCustomResource</span>   <span class="cmt"># Custom Resource</span>
+</code></pre>
+      </div>
+      <p>CloudFormation supports <strong>over 700 resource types</strong>. The full reference is at <code>docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/</code>.</p>
+    </section>
+
+    <!-- ══════════════════════════════════════════
+         3. PARAMETERS
+    ══════════════════════════════════════════ -->
+    <section class="section" id="parameters">
+      <div class="section-header">
+        <div class="section-icon" style="background:rgba(167,139,250,0.1)">🎛️</div>
+        <div>
+          <span class="section-number">03 / Parameters</span>
+          <h2>Parameters</h2>
+        </div>
+      </div>
+
+      <p>Parameters let users provide dynamic inputs at stack creation/update time. Use them whenever a value <em>might change</em> across deployments.</p>
+
+      <div class="tip">
+        <span class="tip-icon">💡</span>
+        <p><strong>Decision rule:</strong> Ask yourself — <em>"Is this CloudFormation resource configuration likely to change in the future?"</em> If yes, make it a parameter.</p>
+      </div>
+
+      <h3>Parameter Settings</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Property</th><th>Description</th><th>Example</th></tr></thead>
+          <tbody>
+            <tr><td><code>Type</code></td><td>Data type <strong>(required)</strong></td><td><code>String</code>, <code>Number</code>, <code>List&lt;Number&gt;</code>, <code>CommaDelimitedList</code>, <code>AWS::EC2::KeyPair::KeyName</code>, <code>AWS::SSM::Parameter::Value&lt;String&gt;</code></td></tr>
+            <tr><td><code>Default</code></td><td>Value used if none provided</td><td><code>t2.micro</code></td></tr>
+            <tr><td><code>AllowedValues</code></td><td>Whitelist of valid values</td><td><code>[dev, staging, prod]</code></td></tr>
+            <tr><td><code>AllowedPattern</code></td><td>Regex the value must match</td><td><code>[a-zA-Z0-9]*</code></td></tr>
+            <tr><td><code>MinLength / MaxLength</code></td><td>String length constraints</td><td><code>8</code> / <code>64</code></td></tr>
+            <tr><td><code>MinValue / MaxValue</code></td><td>Numeric range constraints</td><td><code>1</code> / <code>999</code></td></tr>
+            <tr><td><code>NoEcho</code></td><td>Masks value in console/API (for secrets)</td><td><code>true</code></td></tr>
+            <tr><td><code>ConstraintDescription</code></td><td>Error message shown when validation fails</td><td><code>"Must be t2.micro or t2.small"</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <pre><code><span class="key">Parameters</span>:
+  <span class="key">InstanceType</span>:
+    <span class="key">Description</span>: <span class="str">Choose an EC2 Instance Type</span>
+    <span class="key">Type</span>: <span class="val">String</span>
+    <span class="key">AllowedValues</span>: [<span class="str">t2.micro</span>, <span class="str">t2.small</span>, <span class="str">t3.medium</span>]
+    <span class="key">Default</span>: <span class="str">t2.micro</span>
+    <span class="key">ConstraintDescription</span>: <span class="str">"Must be a valid EC2 instance type."</span>
+
+  <span class="key">DatabasePassword</span>:
+    <span class="key">Description</span>: <span class="str">Database Admin Password</span>
+    <span class="key">Type</span>: <span class="val">String</span>
+    <span class="key">NoEcho</span>: <span class="kw">true</span>               <span class="cmt"># never shown in console or logs</span>
+    <span class="key">MinLength</span>: <span class="num">8</span>
+    <span class="key">MaxLength</span>: <span class="num">64</span>
+
+<span class="cmt"># Referencing a parameter:</span>
+<span class="key">Resources</span>:
+  <span class="key">MyInstance</span>:
+    <span class="key">Type</span>: <span class="val">AWS::EC2::Instance</span>
+    <span class="key">Properties</span>:
+      <span class="key">InstanceType</span>: <span class="fn">!Ref</span> <span class="val">InstanceType</span>
+</code></pre>
+
+      <h3>AWS-Specific Parameter Types</h3>
+      <p>These types validate that the value actually exists in your AWS account before the stack is created:</p>
+      <div class="grid2">
+        <div class="card card-blue" style="font-size:13px">
+          <strong style="color:var(--accent2)">AWS::EC2 Types</strong><br>
+          <code>AWS::EC2::KeyPair::KeyName</code><br>
+          <code>AWS::EC2::VPC::Id</code><br>
+          <code>AWS::EC2::Subnet::Id</code><br>
+          <code>AWS::EC2::SecurityGroup::Id</code><br>
+          <code>AWS::EC2::Image::Id</code>
+        </div>
+        <div class="card card-purple" style="font-size:13px">
+          <strong style="color:var(--accent3)">SSM Parameter Types</strong><br>
+          <code>AWS::SSM::Parameter::Value&lt;String&gt;</code><br>
+          <code>AWS::SSM::Parameter::Value&lt;List&lt;String&gt;&gt;</code><br>
+          <code>AWS::SSM::Parameter::Value&lt;AWS::EC2::Image::Id&gt;</code><br>
+          <em style="color:var(--text-dim)">Resolves SSM parameter at deploy time</em>
+        </div>
+      </div>
+
+      <h3>Pseudo Parameters</h3>
+      <p>These are built-in parameters provided by AWS — no need to declare them:</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Pseudo Parameter</th><th>Returns</th></tr></thead>
+          <tbody>
+            <tr><td><code>AWS::AccountId</code></td><td>Your 12-digit AWS account ID</td></tr>
+            <tr><td><code>AWS::Region</code></td><td>Region the stack is being deployed to (e.g. <code>us-east-1</code>)</td></tr>
+            <tr><td><code>AWS::StackId</code></td><td>Full ARN of the stack</td></tr>
+            <tr><td><code>AWS::StackName</code></td><td>Name of the stack</td></tr>
+            <tr><td><code>AWS::NotificationARNs</code></td><td>List of SNS topic ARNs for stack notifications</td></tr>
+            <tr><td><code>AWS::NoValue</code></td><td>Removes a property — useful in Conditions</td></tr>
+            <tr><td><code>AWS::URLSuffix</code></td><td>Suffix for endpoints, e.g. <code>amazonaws.com</code></td></tr>
+            <tr><td><code>AWS::Partition</code></td><td><code>aws</code> | <code>aws-cn</code> | <code>aws-us-gov</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════
+         4. MAPPINGS
+    ══════════════════════════════════════════ -->
+    <section class="section" id="mappings">
+      <div class="section-header">
+        <div class="section-icon" style="background:rgba(34,211,160,0.1)">🗺️</div>
+        <div>
+          <span class="section-number">04 / Mappings</span>
+          <h2>Mappings</h2>
+        </div>
+      </div>
+
+      <p>Mappings are <strong>static, hardcoded lookup tables</strong> embedded in the template. Use them when values are known at design time — typically for environment-based, region-based, or AMI-based lookups.</p>
+
+      <pre><code><span class="key">Mappings</span>:
+  <span class="key">RegionAMIMap</span>:
+    <span class="key">us-east-1</span>:
+      <span class="key">HVM64</span>: <span class="str">ami-0ff8a91507f77f867</span>
+      <span class="key">HVMG2</span>: <span class="str">ami-0a584ac55a7631c0c</span>
+    <span class="key">us-west-2</span>:
+      <span class="key">HVM64</span>: <span class="str">ami-a0cfeed8</span>
+      <span class="key">HVMG2</span>: <span class="str">ami-0e09505bc235aa82d</span>
+    <span class="key">eu-west-1</span>:
+      <span class="key">HVM64</span>: <span class="str">ami-047bb4163c506cd98</span>
+
+  <span class="key">EnvironmentMap</span>:
+    <span class="key">prod</span>:
+      <span class="key">InstanceType</span>: <span class="str">m5.large</span>
+      <span class="key">MultiAZ</span>: <span class="kw">true</span>
+    <span class="key">dev</span>:
+      <span class="key">InstanceType</span>: <span class="str">t2.micro</span>
+      <span class="key">MultiAZ</span>: <span class="kw">false</span>
+
+<span class="key">Resources</span>:
+  <span class="key">MyEC2Instance</span>:
+    <span class="key">Type</span>: <span class="val">AWS::EC2::Instance</span>
+    <span class="key">Properties</span>:
+      <span class="cmt"># !FindInMap [ MapName, TopLevelKey, SecondLevelKey ]</span>
+      <span class="key">ImageId</span>: <span class="fn">!FindInMap</span> [<span class="val">RegionAMIMap</span>, <span class="fn">!Ref</span> <span class="str">"AWS::Region"</span>, <span class="val">HVM64</span>]
+      <span class="key">InstanceType</span>: <span class="fn">!FindInMap</span> [<span class="val">EnvironmentMap</span>, <span class="fn">!Ref</span> <span class="val">EnvType</span>, <span class="val">InstanceType</span>]
+</code></pre>
+
+      <div class="compare">
+        <div class="compare-col">
+          <div class="compare-title">Mappings — Use When</div>
+          <ul>
+            <li>Values are <strong>known at template-write time</strong></li>
+            <li>Need region → AMI lookups</li>
+            <li>Environment-based config (dev/prod)</li>
+            <li>No user input needed</li>
+          </ul>
+        </div>
+        <div class="compare-col">
+          <div class="compare-title">Parameters — Use When</div>
+          <ul>
+            <li>Values are <strong>decided at deploy time</strong></li>
+            <li>Need user/pipeline input</li>
+            <li>Values differ per deployment</li>
+            <li>Reusing the same template across teams</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════
+         5. OUTPUTS
+    ══════════════════════════════════════════ -->
+    <section class="section" id="outputs">
+      <div class="section-header">
+        <div class="section-icon" style="background:rgba(245,200,66,0.1)">📤</div>
+        <div>
+          <span class="section-number">05 / Outputs & Exports</span>
+          <h2>Outputs &amp; Cross-Stack References</h2>
+        </div>
+      </div>
+
+      <p>Outputs let you expose values from a stack so they can be consumed by the console, CLI, or — via Export — by other stacks in the <strong>same region &amp; account</strong>.</p>
+
+      <pre><code><span class="cmt"># Stack A — Network Stack — exports the VPC and Security Group</span>
+<span class="key">Outputs</span>:
+  <span class="key">VPCID</span>:
+    <span class="key">Description</span>: <span class="str">The VPC ID</span>
+    <span class="key">Value</span>: <span class="fn">!Ref</span> <span class="val">MyVPC</span>
+    <span class="key">Export</span>:
+      <span class="key">Name</span>: <span class="fn">!Sub</span> <span class="str">'${AWS::StackName}-VpcId'</span>   <span class="cmt"># unique per region</span>
+
+  <span class="key">SSHSecurityGroupId</span>:
+    <span class="key">Value</span>: <span class="fn">!GetAtt</span> <span class="val">SSHSecurityGroup.GroupId</span>
+    <span class="key">Export</span>:
+      <span class="key">Name</span>: <span class="str">SSHSecurityGroup</span>               <span class="cmt"># export names are region-scoped</span>
+
+<span class="cmt">---</span>
+<span class="cmt"># Stack B — App Stack — imports the security group</span>
+<span class="key">Resources</span>:
+  <span class="key">MyInstance</span>:
+    <span class="key">Type</span>: <span class="val">AWS::EC2::Instance</span>
+    <span class="key">Properties</span>:
+      <span class="key">SecurityGroupIds</span>:
+        - <span class="fn">!ImportValue</span> <span class="str">SSHSecurityGroup</span>    <span class="cmt"># must match Export Name exactly</span>
+      <span class="key">SubnetId</span>: <span class="fn">!ImportValue</span> <span class="str">NetworkStack-VpcId</span>
+</code></pre>
+
+      <div class="warn">
+        <span class="tip-icon">⚠️</span>
+        <p><strong>You cannot delete a stack that has exported outputs being consumed by another stack.</strong> You must first delete the importing stack (or update it to stop importing).</p>
+      </div>
+
+      <div class="info">
+        <span class="tip-icon">ℹ️</span>
+        <p>Export names must be <strong>unique within a region + account</strong>. Best practice: prefix with <code>!Sub '${AWS::StackName}-ExportName'</code> to avoid collisions.</p>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════
+         6. CONDITIONS
+    ══════════════════════════════════════════ -->
+    <section class="section" id="conditions">
+      <div class="section-header">
+        <div class="section-icon" style="background:rgba(0,212,255,0.1)">🔀</div>
+        <div>
+          <span class="section-number">06 / Conditions</span>
+          <h2>Conditions</h2>
+        </div>
+      </div>
+
+      <p>Conditions allow conditional creation of resources, properties, or outputs. They are evaluated at deployment time based on parameter values, mappings, or other conditions.</p>
+
+      <pre><code><span class="key">Conditions</span>:
+  <span class="key">IsProd</span>:       <span class="fn">!Equals</span> [ <span class="fn">!Ref</span> <span class="val">EnvType</span>, <span class="str">prod</span> ]
+  <span class="key">IsNotProd</span>:    <span class="fn">!Not</span>    [<span class="fn">!Condition</span> <span class="val">IsProd</span>]
+  <span class="key">IsUsEast1</span>:    <span class="fn">!Equals</span> [ <span class="fn">!Ref</span> <span class="str">"AWS::Region"</span>, <span class="str">us-east-1</span> ]
+  <span class="key">IsProdUsEast1</span>: <span class="fn">!And</span>
+    - <span class="fn">!Condition</span> <span class="val">IsProd</span>
+    - <span class="fn">!Condition</span> <span class="val">IsUsEast1</span>
+
+<span class="key">Resources</span>:
+  <span class="cmt"># Entire resource conditionally created</span>
+  <span class="key">ProdDatabase</span>:
+    <span class="key">Type</span>: <span class="val">AWS::RDS::DBInstance</span>
+    <span class="key">Condition</span>: <span class="val">IsProd</span>
+    <span class="key">Properties</span>:
+      <span class="key">DBInstanceClass</span>: <span class="str">db.m5.large</span>
+      <span class="key">MultiAZ</span>: <span class="kw">true</span>
+
+  <span class="cmt"># Conditional property value using !If</span>
+  <span class="key">MyInstance</span>:
+    <span class="key">Type</span>: <span class="val">AWS::EC2::Instance</span>
+    <span class="key">Properties</span>:
+      <span class="key">InstanceType</span>: <span class="fn">!If</span> [<span class="val">IsProd</span>, <span class="str">m5.large</span>, <span class="str">t2.micro</span>]
+      <span class="key">DeleteOnTermination</span>: <span class="fn">!If</span> [<span class="val">IsNotProd</span>, <span class="kw">true</span>, <span class="fn">!Ref</span> <span class="str">"AWS::NoValue"</span>]
+</code></pre>
+
+      <h3>Condition Functions</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Function</th><th>Usage</th></tr></thead>
+          <tbody>
+            <tr><td><code>!Equals [a, b]</code></td><td>Returns true if a == b</td></tr>
+            <tr><td><code>!Not [condition]</code></td><td>Logical NOT</td></tr>
+            <tr><td><code>!And [c1, c2, ...]</code></td><td>All conditions must be true (2–10 conditions)</td></tr>
+            <tr><td><code>!Or [c1, c2, ...]</code></td><td>At least one condition must be true (2–10 conditions)</td></tr>
+            <tr><td><code>!If [condition, valueIfTrue, valueIfFalse]</code></td><td>Conditional value selection — can use <code>!Ref AWS::NoValue</code> to omit a property</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════
+         7. INTRINSIC FUNCTIONS
+    ══════════════════════════════════════════ -->
+    <section class="section" id="intrinsic">
+      <div class="section-header">
+        <div class="section-icon" style="background:rgba(167,139,250,0.1)">⚡</div>
+        <div>
+          <span class="section-number">07 / Functions</span>
+          <h2>Intrinsic Functions</h2>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Function</th><th>Short Form</th><th>What it Does</th><th>Example</th></tr></thead>
+          <tbody>
+            <tr><td><code>Ref</code></td><td><code>!Ref</code></td><td>Returns parameter value or resource physical ID</td><td><code>!Ref MyBucket</code> → bucket name</td></tr>
+            <tr><td><code>Fn::GetAtt</code></td><td><code>!GetAtt</code></td><td>Returns an attribute of a resource</td><td><code>!GetAtt MyBucket.Arn</code></td></tr>
+            <tr><td><code>Fn::FindInMap</code></td><td><code>!FindInMap</code></td><td>Looks up a value in Mappings</td><td><code>!FindInMap [MapName, Key1, Key2]</code></td></tr>
+            <tr><td><code>Fn::ImportValue</code></td><td><code>!ImportValue</code></td><td>Imports exported output from another stack</td><td><code>!ImportValue NetworkStack-VpcId</code></td></tr>
+            <tr><td><code>Fn::Base64</code></td><td><code>!Base64</code></td><td>Encodes string to Base64 (used for EC2 UserData)</td><td><code>!Base64 'yum update -y'</code></td></tr>
+            <tr><td><code>Fn::Sub</code></td><td><code>!Sub</code></td><td>String interpolation with <code>${Variable}</code></td><td><code>!Sub 'arn:aws:s3:::${BucketName}/*'</code></td></tr>
+            <tr><td><code>Fn::Join</code></td><td><code>!Join</code></td><td>Joins values with delimiter</td><td><code>!Join [':', [a, b, c]]</code> → <code>a:b:c</code></td></tr>
+            <tr><td><code>Fn::Select</code></td><td><code>!Select</code></td><td>Selects item from list by index</td><td><code>!Select [0, !GetAZs '']</code></td></tr>
+            <tr><td><code>Fn::Split</code></td><td><code>!Split</code></td><td>Splits string into list</td><td><code>!Split [',', 'a,b,c']</code></td></tr>
+            <tr><td><code>Fn::GetAZs</code></td><td><code>!GetAZs</code></td><td>Returns list of AZs for a region</td><td><code>!GetAZs !Ref AWS::Region</code></td></tr>
+            <tr><td><code>Fn::Cidr</code></td><td><code>!Cidr</code></td><td>Generates CIDR block array from VPC CIDR</td><td><code>!Cidr ['10.0.0.0/16', 6, 5]</code></td></tr>
+            <tr><td><code>Fn::If</code></td><td><code>!If</code></td><td>Conditional value</td><td><code>!If [IsProd, m5.large, t2.micro]</code></td></tr>
+            <tr><td><code>Fn::Transform</code></td><td>—</td><td>Applies a Macro transform</td><td>SAM transforms</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <pre><code><span class="cmt"># !Sub — most powerful string function</span>
+<span class="key">BucketPolicy</span>:
+  <span class="key">Type</span>: <span class="val">AWS::S3::BucketPolicy</span>
+  <span class="key">Properties</span>:
+    <span class="key">PolicyDocument</span>:
+      <span class="key">Statement</span>:
+        - <span class="key">Resource</span>: <span class="fn">!Sub</span> <span class="str">'arn:${AWS::Partition}:s3:::${MyBucket}/*'</span>
+
+<span class="cmt"># !Join with !GetAZs — spread across AZs dynamically</span>
+<span class="key">AvailabilityZone</span>: <span class="fn">!Select</span> [<span class="num">0</span>, <span class="fn">!GetAZs</span> <span class="fn">!Ref</span> <span class="str">"AWS::Region"</span>]
+
+<span class="cmt"># EC2 UserData — must always use !Base64</span>
+<span class="key">UserData</span>:
+  <span class="fn">!Base64</span> |
+    #!/bin/bash -xe
+    yum update -y
+    yum install -y httpd
+    systemctl start httpd
+    systemctl enable httpd
+</code></pre>
+    </section>
+
+    <!-- ══════════════════════════════════════════
+         8. ROLLBACKS
+    ══════════════════════════════════════════ -->
+    <section class="section" id="rollback">
+      <div class="section-header">
+        <div class="section-icon" style="background:rgba(255,77,109,0.1)">↩️</div>
+        <div>
+          <span class="section-number">08 / Rollbacks</span>
+          <h2>Rollbacks</h2>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Scenario</th><th>Default Behavior</th><th>Override Option</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Stack Create Failure</strong></td><td>Everything rolls back and is deleted</td><td>Set <code>--on-failure DO_NOTHING</code> to keep failed resources for debugging</td></tr>
+            <tr><td><strong>Stack Update Failure</strong></td><td>Rolls back to the last known good state</td><td>Set <code>DisableRollback</code> to preserve state for investigation</td></tr>
+            <tr><td><strong>Update Rollback Failure</strong></td><td>Stack in <code>UPDATE_ROLLBACK_FAILED</code></td><td>Use <code>ContinueUpdateRollback</code> after manually fixing the issue</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>UPDATE_ROLLBACK_FAILED — Common Causes</h3>
+      <div class="card card-accent">
+        <ul>
+          <li>Resources were <strong>changed outside of CloudFormation</strong> (manual console changes) — drift</li>
+          <li><strong>Insufficient IAM permissions</strong> during rollback</li>
+          <li>A <strong>dependent resource</strong> was deleted outside the stack</li>
+          <li>The AWS service had a <strong>temporary limit or quota issue</strong></li>
+        </ul>
+        <p style="margin-top:12px;font-size:14px"><strong>Fix:</strong> Manually correct the out-of-band change, then call <code>aws cloudformation continue-update-rollback</code>.</p>
+      </div>
+
+      <div class="exam-focus">
+        <div class="exam-focus-title">🎯 Exam Focus</div>
+        <p>Know the difference between <code>ROLLBACK_COMPLETE</code>, <code>UPDATE_ROLLBACK_FAILED</code>, and <code>UPDATE_ROLLBACK_COMPLETE</code>. The fix for <code>UPDATE_ROLLBACK_FAILED</code> is always to manually resolve the issue then call <strong>ContinueUpdateRollback</strong>.</p>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════
+         9. CAPABILITIES
+    ══════════════════════════════════════════ -->
+    <section class="section" id="capabilities">
+      <div class="section-header">
+        <div class="section-icon" style="background:rgba(245,200,66,0.1)">🔑</div>
+        <div>
+          <span class="section-number">09 / Capabilities</span>
+          <h2>Capabilities &amp; IAM</h2>
+        </div>
+      </div>
+
+      <p>When your template creates or modifies IAM resources, you must explicitly acknowledge this by passing capability flags. Without them, CloudFormation throws <code>InsufficientCapabilitiesException</code>.</p>
+
+      <div class="dtree">
+        <div class="q">Does template contain AWS::IAM::* resources?</div>
+        <div>├─ <span class="y">YES</span> → Does it use RoleName / UserName / GroupName / PolicyName?</div>
+        <div>│  ├─ <span class="y">YES</span> → <span class="r">CAPABILITY_NAMED_IAM</span></div>
+        <div>│  └─ <span class="n">NO</span>  → <span class="r">CAPABILITY_IAM</span></div>
+        <div>└─ <span class="n">NO</span>  → No IAM capability needed</div>
+        <div style="margin-top:12px" class="q">Does template use Transform: or AWS::CloudFormation::Stack?</div>
+        <div>├─ <span class="y">YES</span> → <span class="r">CAPABILITY_AUTO_EXPAND</span></div>
+        <div>└─ <span class="n">NO</span>  → No auto-expand capability needed</div>
+      </div>
+
+      <pre><code><span class="cmt"># IAM resources without explicit names</span>
+aws cloudformation deploy \
+  --template-file template.yaml \
+  --stack-name my-stack \
+  --capabilities <span class="val">CAPABILITY_IAM</span>
+
+<span class="cmt"># IAM resources WITH explicit RoleName/PolicyName</span>
+aws cloudformation deploy \
+  --template-file template.yaml \
+  --stack-name my-stack \
+  --capabilities <span class="val">CAPABILITY_NAMED_IAM</span>
+
+<span class="cmt"># SAM/Nested Stacks — both are often needed together</span>
+sam deploy \
+  --template-file template.yaml \
+  --stack-name my-stack \
+  --capabilities <span class="val">CAPABILITY_IAM</span> <span class="val">CAPABILITY_AUTO_EXPAND</span>
+</code></pre>
+
+      <h3>Service Role</h3>
+      <p>A <strong>Service Role</strong> is an IAM role that CloudFormation assumes to create/update/delete stack resources on your behalf. This enables the <strong>least privilege principle</strong>:</p>
+      <ul>
+        <li>The <em>user</em> deploying the stack only needs <code>cloudformation:*</code> and <code>iam:PassRole</code> permissions.</li>
+        <li>The <em>Service Role</em> holds the permissions to create the actual resources (EC2, S3, RDS, etc.).</li>
+        <li>Without a service role, CFN uses your identity's permissions directly.</li>
+      </ul>
+      <div class="tip">
+        <span class="tip-icon">💡</span>
+        <p>The user deploying the stack must have <strong><code>iam:PassRole</code></strong> to pass the service role to CloudFormation.</p>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════
+         10. DELETION POLICY
+    ══════════════════════════════════════════ -->
+    <section class="section" id="deletion">
+      <div class="section-header">
+        <div class="section-icon" style="background:rgba(255,77,109,0.1)">🗑️</div>
+        <div>
+          <span class="section-number">10 / DeletionPolicy</span>
+          <h2>DeletionPolicy &amp; UpdateReplacePolicy</h2>
+        </div>
+      </div>
+
+      <p>Controls what happens to a resource when the stack is deleted or when the resource is <em>replaced</em> during an update.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Policy</th><th>On Stack Delete / Resource Remove</th><th>Supported Resources</th></tr></thead>
+          <tbody>
+            <tr><td><span class="tag tag-red">Delete</span></td><td><strong>Default.</strong> Resource is deleted. Does NOT work on non-empty S3 buckets.</td><td>All</td></tr>
+            <tr><td><span class="tag tag-green">Retain</span></td><td>Resource is kept. CloudFormation releases ownership — resource persists outside the stack.</td><td>All</td></tr>
+            <tr><td><span class="tag tag-blue">Snapshot</span></td><td>Creates a final snapshot <em>before</em> deleting. Then deletes the resource.</td><td>EBS, ElastiCache, RDS, Redshift, Neptune, DocumentDB</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <pre><code><span class="key">Resources</span>:
+  <span class="key">ProductionDB</span>:
+    <span class="key">Type</span>: <span class="val">AWS::RDS::DBInstance</span>
+    <span class="key">DeletionPolicy</span>: <span class="val">Snapshot</span>         <span class="cmt"># snapshot before delete</span>
+    <span class="key">UpdateReplacePolicy</span>: <span class="val">Snapshot</span>    <span class="cmt"># snapshot if resource must be replaced</span>
+    <span class="key">Properties</span>:
+      <span class="key">DBInstanceClass</span>: <span class="str">db.t3.medium</span>
+      <span class="key">Engine</span>: <span class="str">mysql</span>
+
+  <span class="key">ImportantBucket</span>:
+    <span class="key">Type</span>: <span class="val">AWS::S3::Bucket</span>
+    <span class="key">DeletionPolicy</span>: <span class="val">Retain</span>           <span class="cmt"># keep bucket even after stack delete</span>
+</code></pre>
+
+      <div class="info">
+        <span class="tip-icon">ℹ️</span>
+        <p><code>UpdateReplacePolicy</code> is the sibling of <code>DeletionPolicy</code> — it controls what happens when a resource <em>must be replaced</em> during an update (e.g., changing a DB engine forces replacement). Same three options: Delete, Retain, Snapshot.</p>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════
+         11. STACK POLICY
+    ══════════════════════════════════════════ -->
+    <section class="section" id="stack-policy">
+      <div class="section-header">
+        <div class="section-icon" style="background:rgba(0,212,255,0.1)">🛡️</div>
+        <div>
+          <span class="section-number">11 / Stack Policy</span>
+          <h2>Stack Policy &amp; Termination Protection</h2>
+        </div>
+      </div>
+
+      <p>A <strong>Stack Policy</strong> is a JSON document that defines which update actions are allowed on specific resources during a stack update — protecting critical resources from accidental changes.</p>
+
+      <pre><code><span class="cmt">// Example: Allow all updates EXCEPT to ProductionDatabase</span>
+{
+  <span class="key">"Statement"</span>: [
+    {
+      <span class="key">"Effect"</span>: <span class="str">"Allow"</span>,
+      <span class="key">"Action"</span>: <span class="str">"Update:*"</span>,
+      <span class="key">"Principal"</span>: <span class="str">"*"</span>,
+      <span class="key">"Resource"</span>: <span class="str">"*"</span>
+    },
+    {
+      <span class="key">"Effect"</span>: <span class="str">"Deny"</span>,
+      <span class="key">"Action"</span>: <span class="str">"Update:*"</span>,
+      <span class="key">"Principal"</span>: <span class="str">"*"</span>,
+      <span class="key">"Resource"</span>: <span class="str">"LogicalResourceId/ProductionDatabase"</span>
+    }
+  ]
+}
+</code></pre>
+
+      <h3>Update Actions</h3>
+      <div class="grid2">
+        <div class="card" style="font-size:13px">
+          <strong style="color:var(--accent2)">Update Actions</strong><br><br>
+          <code>Update:Modify</code> — in-place updates<br>
+          <code>Update:Replace</code> — replacement updates<br>
+          <code>Update:Delete</code> — removes resource<br>
+          <code>Update:*</code> — all of the above
+        </div>
+        <div class="card" style="font-size:13px">
+          <strong style="color:var(--gold)">Termination Protection</strong><br><br>
+          <p style="margin:8px 0;font-size:13px">Prevents <em>accidental stack deletion</em> entirely. Enable it on all production stacks. Can be toggled via console or CLI after creation.</p>
+          <code>aws cloudformation update-termination-protection --enable-termination-protection --stack-name my-stack</code>
+        </div>
+      </div>
+
+      <div class="exam-focus">
+        <div class="exam-focus-title">🎯 Exam Focus</div>
+        <p>Stack Policy ≠ IAM policy. Stack Policy controls <strong>which CloudFormation update actions</strong> are permitted on resources. IAM controls who can call CloudFormation APIs. Once a Stack Policy is applied, all resources not explicitly allowed are <strong>denied by default</strong>.</p>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════
+         12. CUSTOM RESOURCES
+    ══════════════════════════════════════════ -->
+    <section class="section" id="custom-resources">
+      <div class="section-header">
+        <div class="section-icon" style="background:rgba(255,107,53,0.1)">🧩</div>
+        <div>
+          <span class="section-number">12 / Custom Resources</span>
+          <h2>Custom Resources</h2>
+        </div>
+      </div>
+
+      <p>Custom Resources let you run arbitrary logic (via Lambda or SNS) during CloudFormation Create/Update/Delete events. Use them when:</p>
+      <ul>
+        <li>The AWS resource type isn't yet supported by CloudFormation</li>
+        <li>You need to provision on-premises or third-party resources</li>
+        <li>You need to run custom provisioning logic (e.g., empty an S3 bucket before deletion)</li>
+        <li>You need to lookup values at deploy time (e.g., latest AMI ID from Parameter Store)</li>
+      </ul>
+
+      <pre><code><span class="key">Resources</span>:
+  <span class="cmt"># Step 1: The Lambda function that handles CFN events</span>
+  <span class="key">CustomResourceLambda</span>:
+    <span class="key">Type</span>: <span class="val">AWS::Lambda::Function</span>
+    <span class="key">Properties</span>:
+      <span class="key">Handler</span>: <span class="str">index.handler</span>
+      <span class="key">Runtime</span>: <span class="str">python3.12</span>
+      <span class="key">Role</span>: <span class="fn">!GetAtt</span> <span class="val">LambdaRole.Arn</span>
+      <span class="key">Code</span>:
+        <span class="key">ZipFile</span>: |
+          import cfnresponse, boto3
+          def handler(event, context):
+              request_type = event['RequestType']
+              bucket = event['ResourceProperties']['BucketName']
+              if request_type == 'Delete':
+                  s3 = boto3.resource('s3')
+                  s3.Bucket(bucket).objects.all().delete()
+              cfnresponse.send(event, context, cfnresponse.SUCCESS, {})
+
+  <span class="cmt"># Step 2: Reference the custom resource in your template</span>
+  <span class="key">EmptyBucketOnDelete</span>:
+    <span class="key">Type</span>: <span class="val">Custom::S3BucketCleaner</span>          <span class="cmt"># Custom:: prefix required</span>
+    <span class="key">Properties</span>:
+      <span class="key">ServiceToken</span>: <span class="fn">!GetAtt</span> <span class="val">CustomResourceLambda.Arn</span>  <span class="cmt"># Lambda or SNS ARN</span>
+      <span class="key">BucketName</span>: <span class="fn">!Ref</span> <span class="val">MyBucket</span>
+    <span class="key">DependsOn</span>: <span class="val">MyBucket</span>
+</code></pre>
+
+      <div class="tip">
+        <span class="tip-icon">💡</span>
+        <p>The Lambda <strong>must respond to the CloudFormation pre-signed S3 URL</strong> with either SUCCESS or FAILED. Use the <code>cfnresponse</code> module for Python/Node. If Lambda times out or fails to respond, CloudFormation will wait up to 1 hour before timing out the stack operation.</p>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════
+         13. DYNAMIC REFERENCES
+    ══════════════════════════════════════════ -->
+    <section class="section" id="dynamic-refs">
+      <div class="section-header">
+        <div class="section-icon" style="background:rgba(34,211,160,0.1)">🔗</div>
+        <div>
+          <span class="section-number">13 / Dynamic References</span>
+          <h2>Dynamic References &amp; Secrets</h2>
+        </div>
+      </div>
+
+      <p>Dynamic References resolve values from external stores at stack create/update time — keeping secrets out of your templates entirely.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Syntax</th><th>Source</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td><code>{{resolve:ssm:/param/name:version}}</code></td><td>SSM Parameter Store (plaintext)</td><td>Version is optional; omit for latest</td></tr>
+            <tr><td><code>{{resolve:ssm-secure:/param/name:version}}</code></td><td>SSM Parameter Store (SecureString)</td><td>Not supported in all resource types</td></tr>
+            <tr><td><code>{{resolve:secretsmanager:secret-id:SecretString:key}}</code></td><td>Secrets Manager</td><td>Can reference specific JSON key in secret</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <pre><code><span class="key">Resources</span>:
+  <span class="key">MyDBInstance</span>:
+    <span class="key">Type</span>: <span class="val">AWS::RDS::DBInstance</span>
+    <span class="key">Properties</span>:
+      <span class="cmt"># Pull username from SSM</span>
+      <span class="key">MasterUsername</span>: <span class="str">'{{resolve:ssm:/prod/rds/username:1}}'</span>
+      <span class="cmt"># Pull password from Secrets Manager</span>
+      <span class="key">MasterPassword</span>: <span class="str">'{{resolve:secretsmanager:MyDBSecret:SecretString:password}}'</span>
+      <span class="key">DBInstanceClass</span>: <span class="str">db.t3.micro</span>
+      <span class="key">Engine</span>: <span class="str">mysql</span>
+
+  <span class="cmt"># RDS Native Secret Rotation — ManageMasterUserPassword</span>
+  <span class="key">MyCluster</span>:
+    <span class="key">Type</span>: <span class="val">AWS::RDS::DBCluster</span>
+    <span class="key">Properties</span>:
+      <span class="key">Engine</span>: <span class="str">aurora-mysql</span>
+      <span class="key">MasterUsername</span>: <span class="str">masteruser</span>
+      <span class="key">ManageMasterUserPassword</span>: <span class="kw">true</span>   <span class="cmt"># CFN creates & manages secret in Secrets Manager</span>
+
+<span class="key">Outputs</span>:
+  <span class="key">SecretArn</span>:
+    <span class="key">Value</span>: <span class="fn">!GetAtt</span> <span class="val">MyCluster.MasterUserSecret.SecretArn</span>
+</code></pre>
+    </section>
+
+    <!-- ══════════════════════════════════════════
+         14. HELPER SCRIPTS
+    ══════════════════════════════════════════ -->
+    <section class="section" id="helper-scripts">
+      <div class="section-header">
+        <div class="section-icon" style="background:rgba(0,212,255,0.1)">🛠️</div>
+        <div>
+          <span class="section-number">14 / Helper Scripts</span>
+          <h2>CloudFormation Helper Scripts</h2>
+        </div>
+      </div>
+
+      <p>Helper scripts run on EC2 instances to configure them as part of a CloudFormation stack operation. They are installed via the <code>aws-cfn-bootstrap</code> package.</p>
+
+      <div class="grid2">
+        <div class="card card-blue">
+          <h4>cfn-init</h4>
+          <p style="font-size:14px;margin:0">Reads <code>AWS::CloudFormation::Init</code> metadata from the template and configures the instance. Logs to <code>/var/log/cfn-init.log</code>.</p>
+        </div>
+        <div class="card card-green">
+          <h4>cfn-signal</h4>
+          <p style="font-size:14px;margin:0">Signals CloudFormation that the instance is done configuring. Used with <code>CreationPolicy</code> and <code>WaitCondition</code>.</p>
+        </div>
+        <div class="card card-purple">
+          <h4>cfn-hup</h4>
+          <p style="font-size:14px;margin:0">Daemon that polls for stack metadata changes every 15 minutes and re-runs cfn-init on change. Config in <code>/etc/cfn/cfn-hup.conf</code>.</p>
+        </div>
+        <div class="card card-gold">
+          <h4>cfn-get-metadata</h4>
+          <p style="font-size:14px;margin:0">Retrieves CloudFormation metadata for a specific resource. Useful for debugging.</p>
+        </div>
+      </div>
+
+      <h3>AWS::CloudFormation::Init Sections</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Key</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td><code>packages</code></td><td>Install pre-packaged apps via yum, apt, rpm, python, rubygems</td></tr>
+            <tr><td><code>groups</code></td><td>Define Linux user groups</td></tr>
+            <tr><td><code>users</code></td><td>Create users and assign to groups</td></tr>
+            <tr><td><code>sources</code></td><td>Download tarballs/zips from URLs and unpack them</td></tr>
+            <tr><td><code>files</code></td><td>Create/manage files — inline content or from S3/URL</td></tr>
+            <tr><td><code>commands</code></td><td>Run shell commands in order; supports <code>test</code>, <code>ignoreErrors</code></td></tr>
+            <tr><td><code>services</code></td><td>Start/stop/enable sysvinit/upstart/systemd services</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <pre><code><span class="key">Resources</span>:
+  <span class="key">WebServer</span>:
+    <span class="key">Type</span>: <span class="val">AWS::EC2::Instance</span>
+    <span class="key">Metadata</span>:
+      <span class="key">AWS::CloudFormation::Init</span>:
+        <span class="key">config</span>:
+          <span class="key">packages</span>:
+            <span class="key">yum</span>:
+              <span class="key">httpd</span>: []
+              <span class="key">php</span>: []
+          <span class="key">files</span>:
+            <span class="str">"/var/www/html/index.php"</span>:
+              <span class="key">content</span>: <span class="fn">!Sub</span> |
+                &lt;?php echo "Hello from ${AWS::StackName}"; ?&gt;
+              <span class="key">mode</span>: <span class="str">"000644"</span>
+              <span class="key">owner</span>: <span class="str">apache</span>
+          <span class="key">services</span>:
+            <span class="key">sysvinit</span>:
+              <span class="key">httpd</span>:
+                <span class="key">enabled</span>: <span class="kw">true</span>
+                <span class="key">ensureRunning</span>: <span class="kw">true</span>
+    <span class="key">Properties</span>:
+      <span class="key">UserData</span>:
+        <span class="fn">!Base64</span>
+          <span class="fn">!Sub</span> |
+            #!/bin/bash -xe
+            <span class="cmt"># Install cfn-bootstrap tools</span>
+            yum install -y aws-cfn-bootstrap
+            <span class="cmt"># Run cfn-init — reads Metadata and configures instance</span>
+            /opt/aws/bin/cfn-init -v \
+              --stack ${AWS::StackName} \
+              --resource WebServer \
+              --region ${AWS::Region}
+            <span class="cmt"># Signal success/failure back to CloudFormation</span>
+            /opt/aws/bin/cfn-signal -e $? \
+              --stack ${AWS::StackName} \
+              --resource WebServer \
+              --region ${AWS::Region}
+    <span class="key">CreationPolicy</span>:
+      <span class="key">ResourceSignal</span>:
+        <span class="key">Timeout</span>: <span class="str">PT15M</span>      <span class="cmt"># wait up to 15 minutes for signal</span>
+        <span class="key">Count</span>: <span class="num">1</span>
+</code></pre>
+    </section>
+
+    <!-- ══════════════════════════════════════════
+         15. NESTED STACKS
+    ══════════════════════════════════════════ -->
+    <section class="section" id="nested">
+      <div class="section-header">
+        <div class="section-icon" style="background:rgba(167,139,250,0.1)">🪆</div>
+        <div>
+          <span class="section-number">15 / Nested Stacks</span>
+          <h2>Nested Stacks &amp; DependsOn</h2>
+        </div>
+      </div>
+
+      <p>Nested stacks embed one CloudFormation stack inside another using <code>AWS::CloudFormation::Stack</code>. Use them to isolate reusable patterns (VPC, security groups, ALB) into modular, shareable templates.</p>
+
+      <pre><code><span class="cmt"># Root Stack — references nested stacks stored in S3</span>
+<span class="key">Resources</span>:
+  <span class="key">NetworkStack</span>:
+    <span class="key">Type</span>: <span class="val">AWS::CloudFormation::Stack</span>
+    <span class="key">Properties</span>:
+      <span class="key">TemplateURL</span>: <span class="str">https://s3.amazonaws.com/bucket/network.yaml</span>
+      <span class="key">Parameters</span>:
+        <span class="key">EnvType</span>: <span class="fn">!Ref</span> <span class="val">EnvType</span>
+      <span class="key">TimeoutInMinutes</span>: <span class="num">20</span>
+
+  <span class="key">AppStack</span>:
+    <span class="key">Type</span>: <span class="val">AWS::CloudFormation::Stack</span>
+    <span class="key">DependsOn</span>: <span class="val">NetworkStack</span>
+    <span class="key">Properties</span>:
+      <span class="key">TemplateURL</span>: <span class="str">https://s3.amazonaws.com/bucket/app.yaml</span>
+      <span class="key">Parameters</span>:
+        <span class="cmt"># Pass outputs from NetworkStack to AppStack</span>
+        <span class="key">VpcId</span>: <span class="fn">!GetAtt</span> <span class="val">NetworkStack.Outputs.VpcId</span>
+</code></pre>
+
+      <div class="compare">
+        <div class="compare-col">
+          <div class="compare-title">Nested Stacks</div>
+          <ul>
+            <li>Single account/region</li>
+            <li>Parent manages lifecycle</li>
+            <li>Good for modular templates</li>
+            <li>Update parent to update nested</li>
+            <li>Outputs passed via <code>!GetAtt StackName.Outputs.Key</code></li>
+          </ul>
+        </div>
+        <div class="compare-col">
+          <div class="compare-title">StackSets</div>
+          <ul>
+            <li>Multi-account / multi-region</li>
+            <li>Independent stack instances</li>
+            <li>Good for org-wide baselines</li>
+            <li>Update StackSet propagates to all instances</li>
+            <li>Requires admin + execution roles</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>DependsOn</h3>
+      <p>Forces a resource to be created/deleted after another. <strong>Applied automatically</strong> when using <code>!Ref</code> or <code>!GetAtt</code> — only use explicit <code>DependsOn</code> when there's an implicit dependency CFN can't detect.</p>
+
+      <pre><code><span class="key">Resources</span>:
+  <span class="key">MyEC2Instance</span>:
+    <span class="key">Type</span>: <span class="val">AWS::EC2::Instance</span>
+    <span class="key">DependsOn</span>: <span class="val">MyInternetGatewayAttachment</span>  <span class="cmt"># IGW must be attached first</span>
+    <span class="key">Properties</span>:
+      <span class="key">ImageId</span>: <span class="str">ami-0a3c3a20c09d6f377</span>
+      <span class="key">InstanceType</span>: <span class="str">t3.micro</span>
+
+  <span class="key">MyBucket</span>:
+    <span class="key">Type</span>: <span class="val">AWS::S3::Bucket</span>
+    <span class="key">DependsOn</span>: <span class="val">MyEC2Instance</span>   <span class="cmt"># bucket created after instance</span>
+</code></pre>
+    </section>
+
+    <!-- ══════════════════════════════════════════
+         16. STACKSETS
+    ══════════════════════════════════════════ -->
+    <section class="section" id="stacksets">
+      <div class="section-header">
+        <div class="section-icon" style="background:rgba(34,211,160,0.1)">🌍</div>
+        <div>
+          <span class="section-number">16 / StackSets</span>
+          <h2>StackSets</h2>
+        </div>
+      </div>
+
+      <p>StackSets allow you to deploy the <strong>same CloudFormation template across multiple accounts and/or regions</strong> with a single operation. Ideal for organization-wide security baselines, compliance, and governance.</p>
+
+      <h3>Permission Models</h3>
+      <div class="compare">
+        <div class="compare-col">
+          <div class="compare-title">Self-Managed Permissions</div>
+          <ul>
+            <li>You manually create IAM roles in <strong>admin</strong> and <strong>target</strong> accounts</li>
+            <li><strong>Admin account:</strong> <code>AWSCloudFormationStackSetAdministrationRole</code></li>
+            <li><strong>Target accounts:</strong> <code>AWSCloudFormationStackSetExecutionRole</code></li>
+            <li>Deploy to any account you have role access to</li>
+            <li>Works without AWS Organizations</li>
+          </ul>
+        </div>
+        <div class="compare-col">
+          <div class="compare-title">Service-Managed Permissions</div>
+          <ul>
+            <li>StackSets create IAM roles <strong>on your behalf</strong></li>
+            <li>Requires <strong>trusted access</strong> with AWS Organizations</li>
+            <li>Auto-deploy to <strong>new accounts</strong> added to the org</li>
+            <li>Can target entire OU (Organizational Unit)</li>
+            <li>Simpler setup; recommended for Organizations</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Operation Preferences</h3>
+      <pre><code>aws cloudformation create-stack-instances \
+  --stack-set-name security-baseline \
+  --accounts <span class="num">222222222222</span> <span class="num">333333333333</span> \
+  --regions <span class="str">us-east-1</span> <span class="str">us-west-2</span> <span class="str">eu-west-1</span> \
+  --operation-preferences \
+    <span class="key">FailureToleranceCount</span>=<span class="num">1</span>,\          <span class="cmt"># fail at most 1 account before stopping</span>
+    <span class="key">MaxConcurrentCount</span>=<span class="num">2</span>,\             <span class="cmt"># deploy to 2 accounts in parallel</span>
+    <span class="key">RegionConcurrencyType</span>=<span class="val">PARALLEL</span>    <span class="cmt"># deploy all regions simultaneously per account</span>
+</code></pre>
+
+      <div class="info">
+        <span class="tip-icon">ℹ️</span>
+        <p><strong>Auto Deployment:</strong> With service-managed permissions, StackSets can automatically deploy to new accounts as they're added to an OU — and remove stack instances when accounts leave the OU.</p>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════
+         17. CHANGESETS & DRIFT
+    ══════════════════════════════════════════ -->
+    <section class="section" id="changesets">
+      <div class="section-header">
+        <div class="section-icon" style="background:rgba(245,200,66,0.1)">🔍</div>
+        <div>
+          <span class="section-number">17 / ChangeSets &amp; Drift</span>
+          <h2>ChangeSets &amp; Drift Detection</h2>
+        </div>
+      </div>
+
+      <h3>ChangeSets</h3>
+      <p>ChangeSets let you preview exactly what changes will occur before applying an update — giving you confidence that only the intended resources will be modified.</p>
+
+      <pre><code><span class="cmt"># 1. Create a ChangeSet (does NOT apply changes yet)</span>
+aws cloudformation create-change-set \
+  --stack-name my-stack \
+  --template-body file://updated-template.yaml \
+  --change-set-name my-changes
+
+<span class="cmt"># 2. Review the ChangeSet</span>
+aws cloudformation describe-change-set \
+  --change-set-name my-changes \
+  --stack-name my-stack
+
+<span class="cmt"># 3a. Execute the ChangeSet (applies changes)</span>
+aws cloudformation execute-change-set \
+  --change-set-name my-changes \
+  --stack-name my-stack
+
+<span class="cmt"># 3b. Or delete it (abandons changes)</span>
+aws cloudformation delete-change-set \
+  --change-set-name my-changes \
+  --stack-name my-stack
+</code></pre>
+
+      <div class="tip">
+        <span class="tip-icon">💡</span>
+        <p>ChangeSets for <strong>Nested Stacks</strong> show changes across <em>all</em> child stacks — you see the complete picture before committing.</p>
+      </div>
+
+      <h3>Drift Detection</h3>
+      <p><strong>Drift</strong> occurs when a stack's actual resource configurations differ from what CloudFormation expects based on the template. This typically happens when someone makes manual changes outside of CloudFormation.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Drift Status</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td><span class="tag tag-green">IN_SYNC</span></td><td>Resource matches the template</td></tr>
+            <tr><td><span class="tag tag-red">MODIFIED</span></td><td>Resource exists but differs from template</td></tr>
+            <tr><td><span class="tag tag-orange">DELETED</span></td><td>Resource was deleted outside CloudFormation</td></tr>
+            <tr><td><span class="tag tag-blue">NOT_CHECKED</span></td><td>Drift detection hasn't been run for this resource</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="warn">
+        <span class="tip-icon">⚠️</span>
+        <p><strong>Changes made <em>through</em> CloudFormation to a stack instance are NOT considered drift.</strong> Only out-of-band changes (console, CLI, SDK acting directly on the resource) cause drift.</p>
+      </div>
+
+      <pre><code><span class="cmt"># Detect drift on entire stack</span>
+aws cloudformation detect-stack-drift --stack-name my-stack
+
+<span class="cmt"># Check drift status</span>
+aws cloudformation describe-stack-drift-detection-status \
+  --stack-drift-detection-id &lt;id-from-above&gt;
+
+<span class="cmt"># See drifted resources</span>
+aws cloudformation describe-stack-resource-drifts \
+  --stack-name my-stack \
+  --stack-resource-drift-status-filters MODIFIED DELETED
+</code></pre>
+    </section>
+
+    <!-- ══════════════════════════════════════════
+         18. TROUBLESHOOTING
+    ══════════════════════════════════════════ -->
+    <section class="section" id="troubleshooting">
+      <div class="section-header">
+        <div class="section-icon" style="background:rgba(255,77,109,0.1)">🔧</div>
+        <div>
+          <span class="section-number">18 / Troubleshooting</span>
+          <h2>Troubleshooting</h2>
+        </div>
+      </div>
+
+      <h3>Common Error States</h3>
+
+      <div class="card card-accent" style="margin-bottom:16px">
+        <h4 style="margin-top:0">DELETE_FAILED</h4>
+        <ul>
+          <li><strong>S3 bucket is not empty</strong> — use a Custom Resource Lambda to empty it first</li>
+          <li><strong>Security Group in use</strong> — EC2 instances referencing it must be deleted first</li>
+          <li><strong>RDS with deletion protection</strong> — must disable deletion protection first</li>
+          <li>Consider <code>DeletionPolicy: Retain</code> for resources that block deletion</li>
+        </ul>
+      </div>
+
+      <div class="card card-blue" style="margin-bottom:16px">
+        <h4 style="margin-top:0">UPDATE_ROLLBACK_FAILED</h4>
+        <ul>
+          <li>Resources were changed outside CloudFormation (drift)</li>
+          <li>Insufficient IAM permissions during rollback</li>
+          <li>A service quota was hit</li>
+          <li><strong>Fix:</strong> Manually resolve the issue → <code>aws cloudformation continue-update-rollback</code></li>
+          <li>Skip specific resources with <code>--resources-to-skip</code> flag</li>
+        </ul>
+      </div>
+
+      <div class="card card-purple" style="margin-bottom:16px">
+        <h4 style="margin-top:0">StackSet Failures</h4>
+        <ul>
+          <li>Insufficient permissions in the <strong>target account</strong></li>
+          <li>Template creates globally-unique resources (S3 bucket names) that already exist</li>
+          <li>Admin account doesn't have a <strong>trust relationship</strong> with the target account</li>
+          <li>Target account hasn't enabled <code>AWSCloudFormationStackSetExecutionRole</code></li>
+        </ul>
+      </div>
+
+      <div class="card card-gold">
+        <h4 style="margin-top:0">EC2 / Instance-Related</h4>
+        <ul>
+          <li>Can't set EC2 <code>PrivateDnsName</code> in CFN — not a supported attribute</li>
+          <li><strong>Rule of thumb:</strong> If you can't configure something in the AWS Console, you can't do it in CloudFormation either</li>
+          <li>UserData changes don't take effect until instance replacement (UpdateReplacePolicy)</li>
+          <li>cfn-init failures — check <code>/var/log/cfn-init.log</code> on the instance</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════
+         19. EXAM TIPS
+    ══════════════════════════════════════════ -->
+    <section class="section" id="exam-tips">
+      <div class="section-header">
+        <div class="section-icon" style="background:rgba(167,139,250,0.1)">🎯</div>
+        <div>
+          <span class="section-number">19 / Exam Cheat Sheet</span>
+          <h2>DOP-C02 Exam Tips</h2>
+        </div>
+      </div>
+
+      <div class="exam-focus">
+        <div class="exam-focus-title">🔑 Must-Know Concepts</div>
+        <ul>
+          <li><strong>Resources</strong> is the only mandatory template section.</li>
+          <li><code>!Ref</code> on a Parameter returns the parameter value; on a Resource returns the physical ID (e.g., bucket name).</li>
+          <li><code>!GetAtt</code> returns a specific attribute of a resource (e.g., <code>!GetAtt MyBucket.Arn</code>).</li>
+          <li><code>NoEcho: true</code> on a Parameter masks the value — use for passwords and API keys.</li>
+          <li>Export names must be <strong>unique per region + account</strong>. You can't delete a stack whose exports are in use by another stack.</li>
+          <li><code>CAPABILITY_NAMED_IAM</code> when IAM resources have explicit names; <code>CAPABILITY_IAM</code> when auto-named.</li>
+          <li>EC2 UserData must be passed through <code>!Base64</code> or <code>Fn::Base64</code>.</li>
+          <li><code>cfn-signal</code> + <code>CreationPolicy</code> = wait for instance to be properly configured before marking stack CREATE_COMPLETE.</li>
+          <li>StackSets with <strong>service-managed permissions</strong> support automatic deployment to new org accounts.</li>
+          <li>Drift = out-of-band changes. CFN changes to a stack instance are NOT drift.</li>
+        </ul>
+      </div>
+
+      <h3>Quick Comparison: Parameters vs Mappings vs Dynamic References</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Feature</th><th>Parameters</th><th>Mappings</th><th>Dynamic References</th></tr></thead>
+          <tbody>
+            <tr><td>Value known at?</td><td>Deploy time (user input)</td><td>Template-write time</td><td>Deploy time (external store)</td></tr>
+            <tr><td>Stored where?</td><td>In template</td><td>In template</td><td>SSM / Secrets Manager</td></tr>
+            <tr><td>Supports secrets?</td><td>Yes (<code>NoEcho</code>)</td><td>No</td><td>Yes (best practice)</td></tr>
+            <tr><td>Use case</td><td>Environment, sizes, names</td><td>AMI IDs, region configs</td><td>Passwords, tokens, certs</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>DeletionPolicy Quick Reference</h3>
+      <div class="grid3">
+        <div class="card" style="text-align:center">
+          <div style="font-size:28px">🗑️</div>
+          <div class="tag tag-red" style="margin:8px 0">Delete</div>
+          <p style="font-size:13px;margin:0">Default. Deletes resource on stack delete.</p>
+        </div>
+        <div class="card" style="text-align:center">
+          <div style="font-size:28px">🏛️</div>
+          <div class="tag tag-green" style="margin:8px 0">Retain</div>
+          <p style="font-size:13px;margin:0">Keeps resource; CFN releases ownership.</p>
+        </div>
+        <div class="card" style="text-align:center">
+          <div style="font-size:28px">📸</div>
+          <div class="tag tag-blue" style="margin:8px 0">Snapshot</div>
+          <p style="font-size:13px;margin:0">Snapshots first, then deletes. EBS, RDS, ElastiCache only.</p>
+        </div>
+      </div>
+
+      <h3>Capability Selection Decision</h3>
+      <div class="dtree">
+        <div class="q">Template has AWS::IAM::* resources?</div>
+        <div>├─ <span class="y">Yes</span> + named (RoleName, UserName) → <span class="r">CAPABILITY_NAMED_IAM</span></div>
+        <div>├─ <span class="y">Yes</span> + no explicit names      → <span class="r">CAPABILITY_IAM</span></div>
+        <div>└─ <span class="n">No</span>                           → no IAM capability needed</div>
+        <br>
+        <div class="q">Template has Transform: or AWS::CloudFormation::Stack?</div>
+        <div>├─ <span class="y">Yes</span> → <span class="r">CAPABILITY_AUTO_EXPAND</span></div>
+        <div>└─ <span class="n">No</span>  → no auto-expand needed</div>
+      </div>
+
+      <div class="exam-focus">
+        <div class="exam-focus-title">⚡ Common Scenario: Prevent Accidental Deletion</div>
+        <p>Question asks how to protect a production stack from accidental deletion AND prevent accidental updates to a critical database:</p>
+        <ul>
+          <li>Enable <strong>Termination Protection</strong> on the stack → prevents stack deletion</li>
+          <li>Add a <strong>Stack Policy</strong> with <code>Deny Update:*</code> on the database resource → prevents updates</li>
+          <li>Set <code>DeletionPolicy: Snapshot</code> on the DB resource → snapshot before deletion if somehow triggered</li>
+        </ul>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  // Active nav highlighting on scroll
+  const sections = document.querySelectorAll('.section');
+  const navItems = document.querySelectorAll('.nav-item');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navItems.forEach(n => n.classList.remove('active'));
+        const link = document.querySelector(`.nav-item[href="#${entry.target.id}"]`);
+        if (link) link.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>

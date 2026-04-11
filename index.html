@@ -544,15 +544,47 @@ body::before {
       </div>
     </div>
 
-    <!-- Domain 2: Configuration Management & IaC — DISABLED -->
-    <div class="domain-card disabled" style="--i:1">
+    <!-- Domain 2: Configuration Management & IaC — ACTIVE -->
+    <div class="domain-card active" style="--i:1" onclick="toggleDomain(this)">
       <div class="domain-header">
         <span class="domain-num">02</span>
         <div class="domain-info">
           <h2>Configuration Management &amp; IaC</h2>
           <span class="domain-weight">17% of exam</span>
         </div>
-        <span class="badge-soon">Coming Soon</span>
+        <span class="domain-chevron">&#9662;</span>
+      </div>
+      <div class="domain-body">
+        <hr class="domain-divider">
+        <div class="service-grid">
+
+          <a href="domain_two/cloudformation-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
+            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="5" y="22" width="26" height="8" rx="2"/>
+              <rect x="5" y="14" width="26" height="8" rx="2"/>
+              <rect x="5" y="6" width="26" height="8" rx="2"/>
+              <path d="M10 10h4"/>
+              <path d="M10 18h4"/>
+              <path d="M10 26h4"/>
+            </svg>
+            <span class="svc-label">CloudFormation</span>
+          </a>
+
+          <a href="domain_two/service-catalog-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
+            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="5" y="5" width="11" height="11" rx="2"/>
+              <rect x="20" y="5" width="11" height="11" rx="2"/>
+              <rect x="5" y="20" width="11" height="11" rx="2"/>
+              <rect x="20" y="20" width="11" height="11" rx="2"/>
+              <path d="M8 10.5h5"/>
+              <path d="M23 10.5h5"/>
+              <path d="M8 25.5h5"/>
+              <path d="M23 25.5h5"/>
+            </svg>
+            <span class="svc-label">Service Catalog</span>
+          </a>
+
+        </div>
       </div>
     </div>
 
