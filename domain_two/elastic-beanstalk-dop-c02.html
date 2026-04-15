@@ -1,0 +1,1571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS Elastic Beanstalk — DOP-C02 Study Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,600;0,700;1,300&family=IBM+Plex+Serif:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:        #0d1117;
+  --bg2:       #111820;
+  --bg3:       #161e28;
+  --surface:   #1a2332;
+  --surface2:  #1f2a3c;
+  --border:    #263142;
+  --border2:   #1e2d40;
+
+  --green:     #3fb950;
+  --green-dim: #2d8a3e;
+  --green-glow:rgba(63,185,80,0.12);
+  --amber:     #f0a500;
+  --amber-dim: rgba(240,165,0,0.12);
+  --amber-border: rgba(240,165,0,0.3);
+  --blue:      #58a6ff;
+  --blue-dim:  rgba(88,166,255,0.1);
+  --red:       #ff6b6b;
+  --red-dim:   rgba(255,107,107,0.1);
+  --purple:    #bc8cff;
+  --purple-dim:rgba(188,140,255,0.1);
+  --cyan:      #39d0d8;
+  --cyan-dim:  rgba(57,208,216,0.1);
+
+  --text:      #c9d1d9;
+  --text-dim:  #7d8ea1;
+  --text-faint:#4a5568;
+  --code-text: #e6edf3;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'IBM Plex Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14.5px;
+  line-height: 1.7;
+}
+
+/* ── SCANLINES texture overlay ── */
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.03) 2px,
+    rgba(0,0,0,0.03) 4px
+  );
+  pointer-events:none;
+  z-index:9999;
+}
+
+/* ── HEADER ── */
+header {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 0 40px;
+  position: sticky; top: 0; z-index: 100;
+  display: flex; align-items: stretch;
+  height: 48px;
+}
+.header-brand {
+  display: flex; align-items: center; gap: 12px;
+  border-right: 1px solid var(--border);
+  padding-right: 24px; margin-right: 24px;
+}
+.header-logo {
+  width: 28px; height: 28px;
+  background: var(--green);
+  border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px; font-weight: 600;
+  color: var(--bg);
+  letter-spacing: -1px;
+  flex-shrink: 0;
+}
+.header-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px; font-weight: 500;
+  color: var(--text);
+  letter-spacing: 0.5px;
+}
+.header-nav {
+  display: flex; align-items: center; gap: 0;
+  flex: 1;
+}
+.header-link {
+  display: flex; align-items: center;
+  padding: 0 16px; height: 100%;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px; color: var(--text-dim);
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+  letter-spacing: 0.5px;
+}
+.header-link:hover { color: var(--green); border-bottom-color: var(--green); }
+.header-badge {
+  margin-left: auto;
+  display: flex; align-items: center; gap: 8px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; color: var(--text-faint);
+}
+.status-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 6px var(--green);
+  animation: glow 2s infinite;
+}
+@keyframes glow { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+/* ── HERO ── */
+.hero {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 64px 0 56px;
+  position: relative; overflow: hidden;
+}
+.hero-grid-bg {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(var(--border2) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border2) 1px, transparent 1px);
+  background-size: 40px 40px;
+  opacity: 0.4;
+}
+.hero-inner {
+  max-width: 1240px; margin: 0 auto;
+  padding: 0 60px;
+  position: relative; z-index: 1;
+}
+.hero-eyebrow {
+  display: flex; align-items: center; gap: 10px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px; color: var(--green);
+  letter-spacing: 2px; text-transform: uppercase;
+  margin-bottom: 20px;
+}
+.hero-eyebrow::before {
+  content: '//'; color: var(--text-faint);
+}
+h1.hero-title {
+  font-family: 'IBM Plex Serif', serif;
+  font-size: clamp(40px, 6vw, 72px);
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.05;
+  letter-spacing: -1.5px;
+  margin-bottom: 16px;
+}
+h1.hero-title .accent { color: var(--green); }
+h1.hero-title .dim    { color: var(--text-dim); font-weight: 400; }
+.hero-desc {
+  font-size: 16px; color: var(--text-dim);
+  max-width: 560px; margin-bottom: 40px;
+  font-style: italic; font-weight: 300;
+  font-family: 'IBM Plex Sans', sans-serif;
+}
+.hero-chips {
+  display: flex; gap: 10px; flex-wrap: wrap;
+}
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 12px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px; color: var(--text-dim);
+  background: var(--surface);
+}
+.chip.active { border-color: var(--green); color: var(--green); background: var(--green-glow); }
+.chip::before { content: '▸'; font-size: 8px; }
+
+/* ── LAYOUT ── */
+.layout { display: flex; max-width: 1240px; margin: 0 auto; }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: 220px; min-width: 220px;
+  padding: 32px 0;
+  border-right: 1px solid var(--border);
+  position: sticky; top: 48px;
+  height: calc(100vh - 48px);
+  overflow-y: auto;
+  background: var(--bg2);
+}
+.sidebar::-webkit-scrollbar { width: 3px; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--border); }
+.sidebar-section { margin-bottom: 24px; }
+.sidebar-heading {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px; letter-spacing: 2.5px;
+  text-transform: uppercase; color: var(--text-faint);
+  padding: 0 20px; margin-bottom: 4px;
+}
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px 20px;
+  color: var(--text-dim); text-decoration: none;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11.5px; font-weight: 400;
+  border-left: 2px solid transparent;
+  transition: all 0.12s;
+}
+.nav-item:hover { color: var(--green); border-left-color: var(--green-dim); background: var(--green-glow); }
+.nav-item.active { color: var(--green); border-left-color: var(--green); background: var(--green-glow); }
+.nav-item-num { color: var(--text-faint); font-size: 10px; min-width: 18px; }
+
+/* ── MAIN ── */
+main { flex: 1; padding: 48px 52px 80px; min-width: 0; }
+
+/* ── SECTION ── */
+.section { margin-bottom: 72px; scroll-margin-top: 60px; }
+.section-header {
+  display: flex; align-items: center; gap: 16px;
+  margin-bottom: 28px;
+}
+.section-num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; color: var(--text-faint);
+  letter-spacing: 1px; flex-shrink: 0;
+}
+.section-line {
+  flex: 1; height: 1px;
+  background: linear-gradient(90deg, var(--green-dim), transparent);
+}
+h2 {
+  font-family: 'IBM Plex Serif', serif;
+  font-size: 26px; font-weight: 700;
+  color: #fff; letter-spacing: -0.3px;
+  white-space: nowrap;
+}
+h3 {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--amber);
+  margin: 28px 0 12px;
+  display: flex; align-items: center; gap: 8px;
+}
+h3::after { content:''; flex:1; height:1px; background: var(--border); }
+h4 {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 13px; font-weight: 600;
+  color: var(--text); margin: 0 0 6px;
+}
+p { color: var(--text); margin-bottom: 12px; font-size: 14.5px; line-height: 1.7; }
+
+/* ── CARDS ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 20px;
+  margin-bottom: 14px;
+}
+.card-green  { border-left: 3px solid var(--green);  background: var(--green-glow); }
+.card-amber  { border-left: 3px solid var(--amber);  background: var(--amber-dim); }
+.card-blue   { border-left: 3px solid var(--blue);   background: var(--blue-dim); }
+.card-red    { border-left: 3px solid var(--red);    background: var(--red-dim); }
+.card-purple { border-left: 3px solid var(--purple); background: var(--purple-dim); }
+.card-cyan   { border-left: 3px solid var(--cyan);   background: var(--cyan-dim); }
+
+/* ── CALLOUT ── */
+.callout {
+  display: flex; gap: 14px; align-items: flex-start;
+  padding: 14px 18px; border-radius: 6px;
+  margin: 18px 0; font-size: 13.5px;
+}
+.callout-green  { background: var(--green-glow); border: 1px solid var(--green-dim); }
+.callout-green p { color: #7ee89a; margin:0; }
+.callout-amber  { background: var(--amber-dim);  border: 1px solid var(--amber-border); }
+.callout-amber p { color: #f5c842; margin:0; }
+.callout-red    { background: var(--red-dim);    border: 1px solid rgba(255,107,107,0.3); }
+.callout-red p  { color: #ff9090; margin:0; }
+.callout-blue   { background: var(--blue-dim);   border: 1px solid rgba(88,166,255,0.25); }
+.callout-blue p { color: #80b8ff; margin:0; }
+.callout-icon   { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+
+/* ── CODE ── */
+pre {
+  background: #010409;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 20px 24px;
+  overflow-x: auto; margin: 14px 0;
+}
+pre code {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px; line-height: 1.85;
+  color: var(--code-text);
+}
+.code-filename {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
+  padding: 7px 16px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; color: var(--text-dim);
+  display: flex; align-items: center; gap: 8px;
+}
+.code-filename::before { content:''; width:8px; height:8px; border-radius:50%; background:var(--green); flex-shrink:0; }
+.code-filename + pre { border-radius: 0 0 6px 6px; margin-top:0; }
+code {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  background: var(--surface2);
+  color: var(--green);
+  padding: 1px 6px; border-radius: 3px;
+}
+
+/* Syntax */
+.sk { color: #ff7b72; }   /* string key */
+.sv { color: #a5d6ff; }   /* string value */
+.cm { color: #3d4f5c; font-style:italic; }   /* comment */
+.kw { color: #ff9e64; }   /* keyword */
+.nm { color: #79c0ff; }   /* name / property */
+.fn { color: #d2a8ff; }   /* function */
+.nb { color: #56d364; }   /* number / bool */
+.op { color: #8b949e; }   /* operator */
+
+/* ── TABLE ── */
+.table-wrap { overflow-x: auto; margin: 16px 0; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead th {
+  background: var(--surface2);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--text-dim);
+  padding: 10px 14px; text-align: left;
+  border-bottom: 2px solid var(--green-dim);
+}
+td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border2);
+  vertical-align: top; color: var(--text);
+  font-size: 13px;
+}
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(255,255,255,0.02); }
+
+/* ── GRID ── */
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 14px 0; }
+.grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin: 14px 0; }
+.grid4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin: 14px 0; }
+
+/* ── TAG / BADGE ── */
+.tag {
+  display: inline-block;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; font-weight: 500;
+  padding: 2px 8px; border-radius: 3px;
+}
+.tag-green  { background: rgba(63,185,80,0.2);   color: var(--green);  border:1px solid var(--green-dim); }
+.tag-amber  { background: rgba(240,165,0,0.15);  color: var(--amber);  border:1px solid var(--amber-border); }
+.tag-blue   { background: rgba(88,166,255,0.15); color: var(--blue);   border:1px solid rgba(88,166,255,0.3); }
+.tag-red    { background: rgba(255,107,107,0.15);color: var(--red);    border:1px solid rgba(255,107,107,0.3); }
+.tag-purple { background: rgba(188,140,255,0.15);color: var(--purple); border:1px solid rgba(188,140,255,0.3); }
+.tag-cyan   { background: rgba(57,208,216,0.15); color: var(--cyan);   border:1px solid rgba(57,208,216,0.3); }
+
+/* ── DEPLOYMENT CARDS ── */
+.deploy-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin: 16px 0; }
+.deploy-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 18px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.deploy-card:hover { border-color: var(--green-dim); }
+.deploy-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 2px;
+}
+.dc-allonce::before  { background: var(--red); }
+.dc-rolling::before  { background: var(--amber); }
+.dc-rollingb::before { background: var(--amber); }
+.dc-immutable::before{ background: var(--blue); }
+.dc-bluegreen::before{ background: var(--cyan); }
+.dc-traffic::before  { background: var(--purple); }
+.deploy-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px; font-weight: 600;
+  color: #fff; margin-bottom: 8px;
+}
+.deploy-meta {
+  display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px;
+}
+.deploy-body { font-size: 12.5px; color: var(--text-dim); line-height: 1.6; }
+
+/* ── EXAM BOX ── */
+.exam-box {
+  background: linear-gradient(135deg, #0e1c10, #101820);
+  border: 1px solid var(--green-dim);
+  border-radius: 6px;
+  padding: 22px 26px;
+  margin: 24px 0;
+  position: relative;
+  overflow: hidden;
+}
+.exam-box::before {
+  content: 'EXAM';
+  position: absolute; top: -1px; right: 20px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px; font-weight: 600;
+  letter-spacing: 3px;
+  color: var(--green);
+  background: var(--green-dim);
+  padding: 3px 10px;
+  border-radius: 0 0 4px 4px;
+}
+.exam-box-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--green); margin-bottom: 14px;
+}
+.exam-box ul { padding-left: 16px; }
+.exam-box li { color: #7ee89a; font-size: 13.5px; margin-bottom: 6px; }
+.exam-box li::marker { color: var(--green); }
+.exam-box strong { color: #fff; }
+
+/* ── DECISION TREE ── */
+.dtree {
+  background: #010409;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 20px 24px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px; line-height: 2;
+  margin: 14px 0;
+}
+.dtree .q  { color: var(--blue); }
+.dtree .y  { color: var(--green); }
+.dtree .n  { color: var(--text-dim); }
+.dtree .r  { color: var(--amber); font-weight: 600; }
+.dtree .c  { color: var(--text-faint); font-style: italic; }
+
+/* ── COMPARE ── */
+.compare {
+  display: grid; grid-template-columns: 1fr 1fr;
+  border: 1px solid var(--border); border-radius: 6px;
+  overflow: hidden; margin: 16px 0;
+}
+.compare-col { padding: 20px; }
+.compare-col:first-child { background: rgba(255,107,107,0.04); border-right: 1px solid var(--border); }
+.compare-col:last-child  { background: rgba(63,185,80,0.04); }
+.compare-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;
+  margin-bottom: 12px; padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.compare-col:first-child .compare-title { color: var(--red); }
+.compare-col:last-child  .compare-title { color: var(--green); }
+.compare-col li { font-size: 13px; color: var(--text); margin-bottom: 5px; }
+.compare-col li::marker { color: var(--text-faint); }
+
+/* ── EBEXTENSIONS BLOCK ── */
+.eb-block {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  margin: 14px 0;
+}
+.eb-block-header {
+  background: var(--surface2);
+  padding: 10px 16px;
+  display: flex; align-items: center; gap: 10px;
+  border-bottom: 1px solid var(--border);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px; color: var(--text-dim);
+}
+.eb-block-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+
+/* ── PLATFORM LIST ── */
+.platform-grid {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  margin: 12px 0;
+}
+.platform-badge {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px; color: var(--text-dim);
+  transition: all 0.15s;
+}
+.platform-badge:hover { border-color: var(--green); color: var(--green); }
+
+/* ── UL/OL ── */
+ul, ol { padding-left: 18px; margin: 10px 0; }
+li { margin-bottom: 4px; font-size: 14px; color: var(--text); }
+li::marker { color: var(--green); }
+
+/* ── DIVIDER ── */
+.divider { height:1px; background: var(--border); margin: 32px 0; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .sidebar { display: none; }
+  main { padding: 28px 20px; }
+  .grid2,.grid3,.grid4,.deploy-grid,.compare { grid-template-columns: 1fr; }
+  .compare-col:first-child { border-right: none; border-bottom: 1px solid var(--border); }
+  .header-nav { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-brand">
+    <div class="header-logo">EB</div>
+    <span class="header-title">Elastic Beanstalk</span>
+  </div>
+  <nav class="header-nav">
+    <a class="header-link" href="../index.html">&#8592; Home</a>
+    <a class="header-link" href="#overview">Overview</a>
+    <a class="header-link" href="#components">Components</a>
+    <a class="header-link" href="#iam">IAM &amp; Roles</a>
+    <a class="header-link" href="#deployments">Deployments</a>
+    <a class="header-link" href="#config">Configuration</a>
+    <a class="header-link" href="#monitoring">Monitoring</a>
+    <a class="header-link" href="#exam-tips">Exam Tips</a>
+  </nav>
+  <div class="header-badge">
+    <span class="status-dot"></span>
+    DOP-C02
+  </div>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-grid-bg"></div>
+  <div class="hero-inner">
+    <div class="hero-eyebrow">DOP-C02 · Domain 1 · SDLC Automation</div>
+    <h1 class="hero-title">
+      Elastic<br>
+      <span class="accent">Beanstalk</span>
+      <span class="dim"> /platform as a service</span>
+    </h1>
+    <p class="hero-desc">Developer-centric managed deployment platform. You write code. AWS runs everything else.</p>
+    <div class="hero-chips">
+      <span class="chip active">EC2 · ASG · ELB</span>
+      <span class="chip active">6 Deployment Modes</span>
+      <span class="chip active">Web + Worker Tiers</span>
+      <span class="chip active">.ebextensions</span>
+      <span class="chip active">Docker Support</span>
+      <span class="chip">Free Service</span>
+    </div>
+  </div>
+</div>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-heading">Core</div>
+      <a class="nav-item active" href="#overview"><span class="nav-item-num">01</span>Overview</a>
+      <a class="nav-item" href="#components"><span class="nav-item-num">02</span>Components</a>
+      <a class="nav-item" href="#tiers"><span class="nav-item-num">03</span>Environment Tiers</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-heading">IAM</div>
+      <a class="nav-item" href="#iam"><span class="nav-item-num">04</span>Service Role</a>
+      <a class="nav-item" href="#instance-profile"><span class="nav-item-num">05</span>Instance Profile</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-heading">Deploy</div>
+      <a class="nav-item" href="#deployments"><span class="nav-item-num">06</span>Deployment Options</a>
+      <a class="nav-item" href="#deployment-compare"><span class="nav-item-num">07</span>Comparison Table</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-heading">Advanced</div>
+      <a class="nav-item" href="#config"><span class="nav-item-num">08</span>.ebextensions</a>
+      <a class="nav-item" href="#docker"><span class="nav-item-num">09</span>Docker</a>
+      <a class="nav-item" href="#lifecycle"><span class="nav-item-num">10</span>Lifecycle Policy</a>
+      <a class="nav-item" href="#cloning"><span class="nav-item-num">11</span>Cloning &amp; Migration</a>
+      <a class="nav-item" href="#monitoring"><span class="nav-item-num">12</span>Health &amp; Monitoring</a>
+      <a class="nav-item" href="#notifications"><span class="nav-item-num">13</span>Notifications</a>
+      <a class="nav-item" href="#exam-tips"><span class="nav-item-num">14</span>Exam Tips</a>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main>
+
+    <!-- ════════════════════════════════
+         1. OVERVIEW
+    ════════════════════════════════ -->
+    <section class="section" id="overview">
+      <div class="section-header">
+        <span class="section-num">01</span>
+        <h2>Overview</h2>
+        <div class="section-line"></div>
+      </div>
+
+      <p>AWS Elastic Beanstalk is a <strong>Platform as a Service (PaaS)</strong> that handles all infrastructure provisioning automatically. You upload application code, Beanstalk orchestrates EC2 instances, Auto Scaling Groups, Load Balancers, security groups, and more.</p>
+
+      <div class="callout callout-green">
+        <span class="callout-icon">⚡</span>
+        <p><strong>Core principle:</strong> Developer provides application code. Beanstalk provides everything else — capacity provisioning, load balancing, scaling, health monitoring, instance configuration. You retain full control over underlying resources but none of the management burden.</p>
+      </div>
+
+      <h3>What EB Manages vs What You Manage</h3>
+      <div class="compare">
+        <div class="compare-col">
+          <div class="compare-title">Elastic Beanstalk Manages</div>
+          <ul>
+            <li>EC2 instance provisioning &amp; configuration</li>
+            <li>Auto Scaling Group creation &amp; policies</li>
+            <li>Load Balancer setup (ALB / CLB / NLB)</li>
+            <li>Security Group rules</li>
+            <li>Application health monitoring</li>
+            <li>Platform patching &amp; managed updates</li>
+            <li>Log rotation &amp; CloudWatch integration</li>
+          </ul>
+        </div>
+        <div class="compare-col">
+          <div class="compare-title">You Are Responsible For</div>
+          <ul>
+            <li>Application code</li>
+            <li>Application version management</li>
+            <li>Environment configuration (instance type, VPC)</li>
+            <li>Custom .ebextensions configurations</li>
+            <li>RDS / database management (if external)</li>
+            <li>IAM roles (Service Role + Instance Profile)</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Supported Platforms</h3>
+      <div class="platform-grid">
+        <span class="platform-badge">Go</span>
+        <span class="platform-badge">Java SE</span>
+        <span class="platform-badge">Java + Tomcat</span>
+        <span class="platform-badge">.NET on Windows</span>
+        <span class="platform-badge">.NET on Linux</span>
+        <span class="platform-badge">Node.js</span>
+        <span class="platform-badge">PHP</span>
+        <span class="platform-badge">Python</span>
+        <span class="platform-badge">Ruby</span>
+        <span class="platform-badge">Packer Builder</span>
+        <span class="platform-badge">Docker (Single)</span>
+        <span class="platform-badge">Docker (Multi)</span>
+        <span class="platform-badge">Custom Platform</span>
+      </div>
+
+      <h3>Deployment Modes</h3>
+      <div class="grid2">
+        <div class="card card-amber">
+          <h4>Single Instance</h4>
+          <p style="font-size:13px;margin:0">One EC2 instance with an Elastic IP. No load balancer. Good for <strong>development / test</strong> environments. Includes RDS Master (if configured).</p>
+        </div>
+        <div class="card card-blue">
+          <h4>High Availability with Load Balancer</h4>
+          <p style="font-size:13px;margin:0">ALB + ASG across <strong>multiple AZs</strong>. Optional RDS Master + RDS Standby. Production-grade setup with auto-failover.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════
+         2. COMPONENTS
+    ════════════════════════════════ -->
+    <section class="section" id="components">
+      <div class="section-header">
+        <span class="section-num">02</span>
+        <h2>Components</h2>
+        <div class="section-line"></div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Component</th><th>Definition</th><th>Key Detail</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><span class="tag tag-green">Application</span></td>
+              <td>Top-level container. Holds environments, versions, and configurations.</td>
+              <td>Like a "project" — you can have multiple environments per application.</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-amber">Application Version</span></td>
+              <td>A specific iteration of application code. Points to an S3 object (ZIP or WAR).</td>
+              <td>Versions are stored in S3. Old versions can be cleaned by Lifecycle Policy.</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-blue">Environment</span></td>
+              <td>A running set of AWS resources hosting an application version.</td>
+              <td>Separate envs for dev, test, prod. Each env = its own CFN stack.</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-purple">Configuration</span></td>
+              <td>Saved environment configuration (instance type, scaling settings, etc.).</td>
+              <td>Saved configs can be applied to new environments for quick replication.</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-cyan">Platform</span></td>
+              <td>The OS + runtime + web server combination (e.g., Amazon Linux 2 + Node.js 18).</td>
+              <td>Platforms receive managed updates. You can pin a platform version.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Application Version Workflow</h3>
+      <div class="dtree">
+        <div><span class="op">[ Create Application ]</span></div>
+        <div>&nbsp;&nbsp;→ <span class="y">Upload Version</span> <span class="c"># ZIP/WAR → S3 → EB App Version</span></div>
+        <div>&nbsp;&nbsp;→ <span class="y">Launch Configuration</span> <span class="c"># instance type, VPC, scaling, etc.</span></div>
+        <div>&nbsp;&nbsp;→ <span class="y">Create Environment</span> <span class="c"># EB provisions AWS resources via CloudFormation</span></div>
+        <div>&nbsp;&nbsp;→ <span class="y">Deploy / Update</span> <span class="c"># choose a deployment strategy</span></div>
+        <div>&nbsp;&nbsp;→ <span class="y">Manage Environment</span> <span class="c"># scale, swap URLs, monitor health</span></div>
+        <div>&nbsp;&nbsp;→ <span class="op">[ Iterate — upload new version → deploy ]</span></div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════
+         3. ENVIRONMENT TIERS
+    ════════════════════════════════ -->
+    <section class="section" id="tiers">
+      <div class="section-header">
+        <span class="section-num">03</span>
+        <h2>Environment Tiers</h2>
+        <div class="section-line"></div>
+      </div>
+
+      <div class="grid2">
+        <div class="card card-blue">
+          <h4>Web Server Tier</h4>
+          <ul>
+            <li>Handles <strong>HTTP/HTTPS requests</strong></li>
+            <li>Architecture: ELB → ASG → EC2 instances</li>
+            <li>Publicly accessible via URL (<code>myapp.us-east-1.elasticbeanstalk.com</code>)</li>
+            <li>EC2 instances run the web application</li>
+            <li>Periodic tasks defined in <code>cron.yaml</code></li>
+            <li>Can push messages to SQS → Worker Tier</li>
+          </ul>
+        </div>
+        <div class="card card-purple">
+          <h4>Worker Tier</h4>
+          <ul>
+            <li>Handles <strong>long-running background tasks</strong></li>
+            <li>Architecture: SQS Queue → ASG → EC2 workers</li>
+            <li>Scales based on <strong>number of SQS messages</strong></li>
+            <li>No public URL — not directly accessible</li>
+            <li>Periodic tasks defined in <code>cron.yaml</code></li>
+            <li>Receives messages pushed by Web Tier</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout callout-amber">
+        <span class="callout-icon">💡</span>
+        <p><strong>Decoupling pattern:</strong> Web Server Tier handles user requests and queues heavy work. Worker Tier processes the queue asynchronously. Both define periodic tasks via <code>cron.yaml</code>. Worker Tier auto-scales based on queue depth — not CPU or request count.</p>
+      </div>
+
+      <div class="code-filename">cron.yaml — Worker Tier periodic tasks</div>
+      <pre><code><span class="kw">version</span>: <span class="nb">1</span>
+<span class="nm">cron</span>:
+  - <span class="nm">name</span>: <span class="sv">"process-reports"</span>
+    <span class="nm">url</span>: <span class="sv">"/process-reports"</span>
+    <span class="nm">schedule</span>: <span class="sv">"0 */6 * * *"</span>       <span class="cm"># every 6 hours</span>
+
+  - <span class="nm">name</span>: <span class="sv">"cleanup-old-data"</span>
+    <span class="nm">url</span>: <span class="sv">"/cleanup"</span>
+    <span class="nm">schedule</span>: <span class="sv">"0 0 * * 0"</span>         <span class="cm"># every Sunday midnight</span>
+</code></pre>
+    </section>
+
+    <!-- ════════════════════════════════
+         4. SERVICE ROLE (IAM)
+    ════════════════════════════════ -->
+    <section class="section" id="iam">
+      <div class="section-header">
+        <span class="section-num">04</span>
+        <h2>Service Role</h2>
+        <div class="section-line"></div>
+      </div>
+
+      <p>The <strong>Service Role</strong> is assumed by the Elastic Beanstalk <em>service itself</em> — not by your EC2 instances. It gives EB the permissions to manage AWS resources (ASG, ELB, EC2, CloudWatch) on your behalf.</p>
+
+      <div class="callout callout-amber">
+        <span class="callout-icon">🔑</span>
+        <p><strong>Critical distinction:</strong> Service Role = permissions for EB the service. Instance Profile = permissions for your application code running on EC2. They are different IAM roles with different trust policies.</p>
+      </div>
+
+      <h3>Service Role Permissions Summary</h3>
+      <div class="grid3">
+        <div class="card">
+          <div class="tag tag-amber" style="margin-bottom:8px">autoscaling:*</div>
+          <p style="font-size:12px;margin:0;color:var(--text-dim)">Create, update, delete ASG. Set desired capacity. Attach/terminate instances.</p>
+        </div>
+        <div class="card">
+          <div class="tag tag-blue" style="margin-bottom:8px">ec2:Describe*</div>
+          <p style="font-size:12px;margin:0;color:var(--text-dim)">Describe instances, status, security groups, subnets, VPCs. Run &amp; terminate instances.</p>
+        </div>
+        <div class="card">
+          <div class="tag tag-cyan" style="margin-bottom:8px">elasticloadbalancing:*</div>
+          <p style="font-size:12px;margin:0;color:var(--text-dim)">Register/deregister targets. Describe health. Create/delete load balancers.</p>
+        </div>
+        <div class="card">
+          <div class="tag tag-green" style="margin-bottom:8px">cloudwatch:*</div>
+          <p style="font-size:12px;margin:0;color:var(--text-dim)">Describe, put, delete CloudWatch alarms. Get metric statistics for scaling decisions.</p>
+        </div>
+        <div class="card">
+          <div class="tag tag-purple" style="margin-bottom:8px">iam:PassRole</div>
+          <p style="font-size:12px;margin:0;color:var(--text-dim)">Pass the EC2 Instance Profile role to newly launched EC2 instances.</p>
+        </div>
+        <div class="card">
+          <div class="tag tag-red" style="margin-bottom:8px">s3:GetObject</div>
+          <p style="font-size:12px;margin:0;color:var(--text-dim)">Download application version ZIP from S3 elasticbeanstalk-* bucket.</p>
+        </div>
+      </div>
+
+      <h3>Trust Policy (Service Role)</h3>
+      <pre><code><span class="op">{</span>
+  <span class="sk">"Version"</span>: <span class="sv">"2012-10-17"</span>,
+  <span class="sk">"Statement"</span>: [<span class="op">{</span>
+    <span class="sk">"Effect"</span>:    <span class="sv">"Allow"</span>,
+    <span class="sk">"Principal"</span>: <span class="op">{</span> <span class="sk">"Service"</span>: <span class="sv">"elasticbeanstalk.amazonaws.com"</span> <span class="op">}</span>,
+    <span class="sk">"Action"</span>:    <span class="sv">"sts:AssumeRole"</span>
+  <span class="op">}]</span>
+<span class="op">}</span>
+</code></pre>
+    </section>
+
+    <!-- ════════════════════════════════
+         5. EC2 INSTANCE PROFILE
+    ════════════════════════════════ -->
+    <section class="section" id="instance-profile">
+      <div class="section-header">
+        <span class="section-num">05</span>
+        <h2>EC2 Instance Profile</h2>
+        <div class="section-line"></div>
+      </div>
+
+      <p>An <strong>Instance Profile</strong> is a container for an IAM Role that is attached to EC2 instances. This lets your application code call AWS services (S3, DynamoDB, SQS, etc.) without embedding credentials.</p>
+
+      <h3>What the Instance Profile Enables</h3>
+      <div class="grid2">
+        <div class="card card-green">
+          <h4>Application AWS Access</h4>
+          <ul style="font-size:13px">
+            <li>Read / write to S3 buckets</li>
+            <li>Publish to SNS topics</li>
+            <li>Send / receive SQS messages</li>
+            <li>Read/write DynamoDB tables</li>
+            <li>Call other AWS APIs your app needs</li>
+          </ul>
+        </div>
+        <div class="card card-blue">
+          <h4>EB Internal Operations</h4>
+          <ul style="font-size:13px">
+            <li>Download app bundle from S3</li>
+            <li>Write logs to CloudWatch Logs</li>
+            <li>Report health status</li>
+            <li>Enhanced health reporting data</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Instance Profile Trust Policy</h3>
+      <pre><code><span class="op">{</span>
+  <span class="sk">"Version"</span>: <span class="sv">"2012-10-17"</span>,
+  <span class="sk">"Statement"</span>: [<span class="op">{</span>
+    <span class="sk">"Effect"</span>:    <span class="sv">"Allow"</span>,
+    <span class="sk">"Principal"</span>: <span class="op">{</span> <span class="sk">"Service"</span>: <span class="sv">"ec2.amazonaws.com"</span> <span class="op">}</span>,
+    <span class="cm">// EC2 instances (not EB service) assume this role</span>
+    <span class="sk">"Action"</span>:    <span class="sv">"sts:AssumeRole"</span>
+  <span class="op">}]</span>
+<span class="op">}</span>
+</code></pre>
+
+      <h3>Example Instance Profile Policy</h3>
+      <div class="code-filename">ec2-instance-profile-policy.json</div>
+      <pre><code><span class="op">{</span>
+  <span class="sk">"Statement"</span>: [
+    <span class="op">{</span>
+      <span class="sk">"Sid"</span>: <span class="sv">"S3AppAccess"</span>,
+      <span class="sk">"Action"</span>: [<span class="sv">"s3:GetObject"</span>, <span class="sv">"s3:PutObject"</span>, <span class="sv">"s3:DeleteObject"</span>, <span class="sv">"s3:ListBucket"</span>],
+      <span class="sk">"Resource"</span>: [<span class="sv">"arn:aws:s3:::my-app-bucket"</span>, <span class="sv">"arn:aws:s3:::my-app-bucket/*"</span>]
+    <span class="op">}</span>,
+    <span class="op">{</span>
+      <span class="sk">"Sid"</span>: <span class="sv">"DynamoDBAccess"</span>,
+      <span class="sk">"Action"</span>: [<span class="sv">"dynamodb:GetItem"</span>, <span class="sv">"dynamodb:Query"</span>, <span class="sv">"dynamodb:PutItem"</span>],
+      <span class="sk">"Resource"</span>: <span class="sv">"arn:aws:dynamodb:us-east-1:123456789012:table/MyAppTable"</span>
+    <span class="op">}</span>,
+    <span class="op">{</span>
+      <span class="sk">"Sid"</span>: <span class="sv">"EBMinimumRequired"</span>,       <span class="cm">// EB needs these for internal operations</span>
+      <span class="sk">"Action"</span>: [<span class="sv">"s3:GetObject"</span>, <span class="sv">"s3:PutObject"</span>],
+      <span class="sk">"Resource"</span>: <span class="sv">"arn:aws:s3:::elasticbeanstalk-*"</span>
+    <span class="op">}</span>,
+    <span class="op">{</span>
+      <span class="sk">"Sid"</span>: <span class="sv">"CloudWatchLogs"</span>,
+      <span class="sk">"Action"</span>: [<span class="sv">"logs:CreateLogGroup"</span>, <span class="sv">"logs:CreateLogStream"</span>, <span class="sv">"logs:PutLogEvents"</span>],
+      <span class="sk">"Resource"</span>: <span class="sv">"arn:aws:logs:*:*:*"</span>
+    <span class="op">}</span>
+  ]
+<span class="op">}</span>
+</code></pre>
+
+      <div class="callout callout-red">
+        <span class="callout-icon">⚠️</span>
+        <p><strong>Always include <code>elasticbeanstalk-*</code> S3 access</strong> in the Instance Profile. Without it, EB cannot download your application bundle to the instance during deployment.</p>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════
+         6. DEPLOYMENT OPTIONS
+    ════════════════════════════════ -->
+    <section class="section" id="deployments">
+      <div class="section-header">
+        <span class="section-num">06</span>
+        <h2>Deployment Options</h2>
+        <div class="section-line"></div>
+      </div>
+
+      <p>Elastic Beanstalk offers six deployment strategies. Choosing the right one requires trading off <strong>speed</strong>, <strong>availability</strong>, <strong>cost</strong>, and <strong>rollback complexity</strong>.</p>
+
+      <div class="deploy-grid">
+
+        <div class="deploy-card dc-allonce">
+          <div class="deploy-title">All at Once</div>
+          <div class="deploy-meta">
+            <span class="tag tag-red">Downtime</span>
+            <span class="tag tag-green">Fastest</span>
+            <span class="tag tag-green">Free</span>
+          </div>
+          <div class="deploy-body">
+            Deploys to ALL instances simultaneously. Application is unavailable during the update. Fastest deployment — no extra cost. <strong>Not suitable for production.</strong> Rollback requires another full re-deploy.
+          </div>
+        </div>
+
+        <div class="deploy-card dc-rolling">
+          <div class="deploy-title">Rolling</div>
+          <div class="deploy-meta">
+            <span class="tag tag-amber">Reduced Capacity</span>
+            <span class="tag tag-green">No Downtime</span>
+            <span class="tag tag-green">Free</span>
+          </div>
+          <div class="deploy-body">
+            Deploys to a configurable <strong>batch size</strong> at a time. Old and new versions run simultaneously. Capacity is reduced during deployment (bucket size is removed from pool). Long deployment if many instances.
+          </div>
+        </div>
+
+        <div class="deploy-card dc-rollingb">
+          <div class="deploy-title">Rolling with Addl. Batches</div>
+          <div class="deploy-meta">
+            <span class="tag tag-blue">Full Capacity</span>
+            <span class="tag tag-green">No Downtime</span>
+            <span class="tag tag-amber">Small Extra Cost</span>
+          </div>
+          <div class="deploy-body">
+            Like Rolling but <strong>spins up new instances</strong> first to maintain full capacity throughout. Old application stays fully available. Slightly more expensive. Good for production with steady traffic.
+          </div>
+        </div>
+
+        <div class="deploy-card dc-immutable">
+          <div class="deploy-title">Immutable</div>
+          <div class="deploy-meta">
+            <span class="tag tag-blue">Zero Downtime</span>
+            <span class="tag tag-blue">Best Rollback</span>
+            <span class="tag tag-red">Highest Cost</span>
+          </div>
+          <div class="deploy-body">
+            Launches a <strong>new temporary ASG</strong> with new instances running the new version. When all healthy, moves them to original ASG and terminates old instances. Longest deployment. One-click instant rollback (just terminate new ASG).
+          </div>
+        </div>
+
+        <div class="deploy-card dc-bluegreen">
+          <div class="deploy-title">Blue / Green</div>
+          <div class="deploy-meta">
+            <span class="tag tag-cyan">Zero Downtime</span>
+            <span class="tag tag-cyan">URL Swap</span>
+            <span class="tag tag-red">2x Cost</span>
+          </div>
+          <div class="deploy-body">
+            Create a <strong>completely new environment</strong> (green), deploy there, then <strong>swap URLs</strong> using Route 53 weighted routing or EB URL swap. Full rollback by swapping URLs back. Not natively "one button" in EB — done manually.
+          </div>
+        </div>
+
+        <div class="deploy-card dc-traffic">
+          <div class="deploy-title">Traffic Splitting</div>
+          <div class="deploy-meta">
+            <span class="tag tag-purple">Canary</span>
+            <span class="tag tag-purple">A/B Testing</span>
+            <span class="tag tag-amber">Medium Cost</span>
+          </div>
+          <div class="deploy-body">
+            Sends a configurable <strong>% of traffic to new version</strong> (canary testing). EB creates new ASG with same capacity. ALB routes traffic based on percentage. If unhealthy, traffic automatically reverts — <strong>automated rollback</strong>.
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════
+         7. DEPLOYMENT COMPARISON
+    ════════════════════════════════ -->
+    <section class="section" id="deployment-compare">
+      <div class="section-header">
+        <span class="section-num">07</span>
+        <h2>Deployment Comparison</h2>
+        <div class="section-line"></div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Strategy</th>
+              <th>Downtime?</th>
+              <th>Capacity During Deploy</th>
+              <th>Deployment Speed</th>
+              <th>Rollback</th>
+              <th>Extra Cost</th>
+              <th>Use Case</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="tag tag-red">All at Once</span></td>
+              <td>✅ Yes</td>
+              <td>Zero capacity</td>
+              <td>⚡ Fastest</td>
+              <td>Re-deploy</td>
+              <td>None</td>
+              <td>Dev / quick iterations</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-amber">Rolling</span></td>
+              <td>❌ No</td>
+              <td>Reduced (batch removed)</td>
+              <td>Medium</td>
+              <td>Re-deploy</td>
+              <td>None</td>
+              <td>Low-traffic production</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-amber">Rolling + Batches</span></td>
+              <td>❌ No</td>
+              <td>Full capacity</td>
+              <td>Medium-Slow</td>
+              <td>Re-deploy</td>
+              <td>Small</td>
+              <td>Production w/ stable capacity</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-blue">Immutable</span></td>
+              <td>❌ No</td>
+              <td>Full + temp extra ASG</td>
+              <td>🐢 Slowest</td>
+              <td>⚡ Instant (terminate new ASG)</td>
+              <td>2x for duration</td>
+              <td>Production, safety critical</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-cyan">Blue / Green</span></td>
+              <td>❌ No</td>
+              <td>Full (2 envs)</td>
+              <td>Slow (full env)</td>
+              <td>⚡ URL swap back</td>
+              <td>2x ongoing</td>
+              <td>High-stakes releases</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-purple">Traffic Splitting</span></td>
+              <td>❌ No</td>
+              <td>Full + canary group</td>
+              <td>Medium</td>
+              <td>⚡ Auto (health-based)</td>
+              <td>Moderate</td>
+              <td>Canary / A-B testing</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="exam-box">
+        <div class="exam-box-title">Deployment Decision Tree</div>
+        <div class="dtree" style="background:transparent;border:none;padding:0;margin:0">
+          <div class="q">Need zero downtime?</div>
+          <div>├─ <span class="n">NO</span>  → <span class="r">All at Once</span> <span class="c">(dev only)</span></div>
+          <div>└─ <span class="y">YES</span></div>
+          <div>&nbsp;&nbsp;&nbsp;├─ <span class="q">Need instant rollback + best safety?</span></div>
+          <div>&nbsp;&nbsp;&nbsp;│  └─ <span class="y">YES</span> → <span class="r">Immutable</span> or <span class="r">Blue/Green</span></div>
+          <div>&nbsp;&nbsp;&nbsp;├─ <span class="q">Need canary / gradual traffic shift?</span></div>
+          <div>&nbsp;&nbsp;&nbsp;│  └─ <span class="y">YES</span> → <span class="r">Traffic Splitting</span></div>
+          <div>&nbsp;&nbsp;&nbsp;├─ <span class="q">Need full capacity during deploy?</span></div>
+          <div>&nbsp;&nbsp;&nbsp;│  └─ <span class="y">YES</span> → <span class="r">Rolling with Additional Batches</span></div>
+          <div>&nbsp;&nbsp;&nbsp;└─ <span class="q">Capacity reduction is OK?</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; └─ <span class="y">YES</span> → <span class="r">Rolling</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════
+         8. .EBEXTENSIONS
+    ════════════════════════════════ -->
+    <section class="section" id="config">
+      <div class="section-header">
+        <span class="section-num">08</span>
+        <h2>.ebextensions Configuration</h2>
+        <div class="section-line"></div>
+      </div>
+
+      <p>The <code>.ebextensions/</code> directory at the root of your application source bundle lets you customize and configure the environment using YAML/JSON configuration files. Files must have a <code>.config</code> extension.</p>
+
+      <div class="callout callout-green">
+        <span class="callout-icon">📁</span>
+        <p><strong>Location:</strong> <code>.ebextensions/*.config</code> — placed in the <strong>root of your application ZIP</strong>. Executed during environment creation and each deployment, before the application is started.</p>
+      </div>
+
+      <h3>Key .ebextensions Sections</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Section</th><th>Purpose</th><th>Example Use</th></tr></thead>
+          <tbody>
+            <tr><td><code>option_settings</code></td><td>Set EB configuration options (same as EB console)</td><td>Environment variables, instance type, scaling settings</td></tr>
+            <tr><td><code>Resources</code></td><td>Create AWS resources via CloudFormation syntax</td><td>Add SQS queue, SNS topic, DynamoDB table to the env</td></tr>
+            <tr><td><code>packages</code></td><td>Install OS packages via yum/apt/rpm</td><td>Install nginx, git, custom packages</td></tr>
+            <tr><td><code>files</code></td><td>Create/write files on the EC2 instance</td><td>Nginx config, app config files, SSL certs</td></tr>
+            <tr><td><code>commands</code></td><td>Run shell commands <em>before</em> app deployment</td><td>DB schema migration, folder creation</td></tr>
+            <tr><td><code>container_commands</code></td><td>Run commands <em>after</em> app is extracted but <em>before</em> it starts</td><td>Run migrations, <code>leader_only: true</code> for single-instance commands</td></tr>
+            <tr><td><code>services</code></td><td>Start/stop Linux services</td><td>Ensure nginx, cron, custom daemon starts</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="code-filename">.ebextensions/environment.config</div>
+      <pre><code><span class="nm">option_settings</span>:
+  <span class="nm">aws:elasticbeanstalk:application:environment</span>:
+    <span class="nm">NODE_ENV</span>: <span class="sv">production</span>
+    <span class="nm">DATABASE_URL</span>: <span class="sv">"{{resolve:ssm:/myapp/db-url}}"</span>
+  <span class="nm">aws:autoscaling:asg</span>:
+    <span class="nm">MinSize</span>: <span class="nb">2</span>
+    <span class="nm">MaxSize</span>: <span class="nb">8</span>
+  <span class="nm">aws:ec2:instances</span>:
+    <span class="nm">InstanceTypes</span>: <span class="sv">"t3.medium,t3.large"</span>  <span class="cm"># mixed instance types</span>
+</code></pre>
+
+      <div class="code-filename">.ebextensions/packages-and-files.config</div>
+      <pre><code><span class="nm">packages</span>:
+  <span class="nm">yum</span>:
+    <span class="nm">git</span>: []
+    <span class="nm">nginx</span>: []
+
+<span class="nm">files</span>:
+  <span class="sv">"/etc/nginx/conf.d/proxy.conf"</span>:
+    <span class="nm">mode</span>: <span class="sv">"000644"</span>
+    <span class="nm">owner</span>: <span class="sv">root</span>
+    <span class="nm">content</span>: |
+      server {
+        listen 80;
+        location / { proxy_pass http://localhost:3000; }
+      }
+
+<span class="nm">container_commands</span>:
+  <span class="nm">01-run-migrations</span>:
+    <span class="nm">command</span>: <span class="sv">"python manage.py migrate"</span>
+    <span class="nm">leader_only</span>: <span class="nb">true</span>   <span class="cm"># only runs on the leader instance (1 instance)</span>
+  <span class="nm">02-collect-static</span>:
+    <span class="nm">command</span>: <span class="sv">"python manage.py collectstatic --noinput"</span>
+
+<span class="nm">services</span>:
+  <span class="nm">sysvinit</span>:
+    <span class="nm">nginx</span>:
+      <span class="nm">enabled</span>: <span class="nb">true</span>
+      <span class="nm">ensureRunning</span>: <span class="nb">true</span>
+</code></pre>
+
+      <div class="code-filename">.ebextensions/custom-resource.config — Add SQS queue to environment</div>
+      <pre><code><span class="nm">Resources</span>:
+  <span class="nm">MyWorkerQueue</span>:                      <span class="cm"># CloudFormation syntax inside EB</span>
+    <span class="nm">Type</span>: <span class="sv">AWS::SQS::Queue</span>
+    <span class="nm">Properties</span>:
+      <span class="nm">QueueName</span>: <span class="sv">my-worker-queue</span>
+      <span class="nm">VisibilityTimeout</span>: <span class="nb">300</span>
+
+<span class="nm">option_settings</span>:
+  <span class="nm">aws:elasticbeanstalk:application:environment</span>:
+    <span class="nm">QUEUE_URL</span>:
+      <span class="nm">Fn::GetOptionSetting</span>:          <span class="cm"># reference CFN resource output</span>
+        <span class="nm">Namespace</span>: <span class="sv">aws:cloudformation:outputs</span>
+</code></pre>
+    </section>
+
+    <!-- ════════════════════════════════
+         9. DOCKER
+    ════════════════════════════════ -->
+    <section class="section" id="docker">
+      <div class="section-header">
+        <span class="section-num">09</span>
+        <h2>Docker on Elastic Beanstalk</h2>
+        <div class="section-line"></div>
+      </div>
+
+      <div class="grid2">
+        <div class="card card-blue">
+          <h4>Single Container Docker</h4>
+          <ul style="font-size:13px">
+            <li>Uses <code>Dockerfile</code> or <code>Dockerrun.aws.json v1</code></li>
+            <li>Runs a single Docker container on each EC2 instance</li>
+            <li>EB manages the Docker daemon directly</li>
+            <li>Good for simple, single-service apps</li>
+            <li>No ECS involved — Docker runs on EC2 directly</li>
+          </ul>
+        </div>
+        <div class="card card-cyan">
+          <h4>Multi-Container Docker</h4>
+          <ul style="font-size:13px">
+            <li>Uses <code>Dockerrun.aws.json v2</code></li>
+            <li>Runs multiple containers per EC2 instance</li>
+            <li>Uses <strong>Amazon ECS</strong> under the hood</li>
+            <li>Requires images pre-built in ECR or Docker Hub</li>
+            <li>Good for microservices or sidecar patterns</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="code-filename">Dockerrun.aws.json v2 — Multi-Container</div>
+      <pre><code><span class="op">{</span>
+  <span class="sk">"AWSEBDockerrunVersion"</span>: <span class="nb">2</span>,
+  <span class="sk">"containerDefinitions"</span>: [
+    <span class="op">{</span>
+      <span class="sk">"name"</span>:    <span class="sv">"web"</span>,
+      <span class="sk">"image"</span>:   <span class="sv">"123456789012.dkr.ecr.us-east-1.amazonaws.com/myapp:latest"</span>,
+      <span class="sk">"memory"</span>:  <span class="nb">512</span>,
+      <span class="sk">"portMappings"</span>: [<span class="op">{</span> <span class="sk">"hostPort"</span>: <span class="nb">80</span>, <span class="sk">"containerPort"</span>: <span class="nb">3000</span> <span class="op">}</span>],
+      <span class="sk">"essential"</span>: <span class="nb">true</span>
+    <span class="op">}</span>,
+    <span class="op">{</span>
+      <span class="sk">"name"</span>:   <span class="sv">"nginx-proxy"</span>,
+      <span class="sk">"image"</span>:  <span class="sv">"nginx:latest"</span>,
+      <span class="sk">"memory"</span>: <span class="nb">128</span>,
+      <span class="sk">"links"</span>:  [<span class="sv">"web"</span>]
+    <span class="op">}</span>
+  ]
+<span class="op">}</span>
+</code></pre>
+    </section>
+
+    <!-- ════════════════════════════════
+         10. LIFECYCLE POLICY
+    ════════════════════════════════ -->
+    <section class="section" id="lifecycle">
+      <div class="section-header">
+        <span class="section-num">10</span>
+        <h2>Application Version Lifecycle Policy</h2>
+        <div class="section-line"></div>
+      </div>
+
+      <p>EB can store up to <strong>1,000 application versions</strong>. If you don't clean up old versions you can hit this limit and be unable to deploy. A Lifecycle Policy automates cleanup.</p>
+
+      <div class="grid2">
+        <div class="card card-amber">
+          <h4>Time-Based</h4>
+          <p style="font-size:13px;margin:0">Delete versions older than N days (e.g., keep last 90 days of versions).</p>
+        </div>
+        <div class="card card-blue">
+          <h4>Count-Based</h4>
+          <p style="font-size:13px;margin:0">Keep only the N most recent versions (e.g., keep last 200 versions).</p>
+        </div>
+      </div>
+
+      <div class="callout callout-amber">
+        <span class="callout-icon">💡</span>
+        <p><strong>Important:</strong> By default, EB does NOT delete the source bundle from S3 when it deletes a version. You can optionally set the policy to also delete the S3 source bundle, saving storage costs. <strong>Versions currently deployed to an environment are never deleted</strong> by lifecycle policy.</p>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════
+         11. CLONING & MIGRATION
+    ════════════════════════════════ -->
+    <section class="section" id="cloning">
+      <div class="section-header">
+        <span class="section-num">11</span>
+        <h2>Cloning &amp; Migration</h2>
+        <div class="section-line"></div>
+      </div>
+
+      <div class="grid2">
+        <div class="card card-green">
+          <h4>Environment Cloning</h4>
+          <ul style="font-size:13px">
+            <li>Clone an existing environment to create an <strong>exact copy</strong></li>
+            <li>Preserves: environment options, environment variables, installed software, config files</li>
+            <li>Useful for: promoting staging → production, Blue/Green setup</li>
+            <li>RDS data is <strong>NOT cloned</strong> — new empty database created</li>
+            <li>CLI: <code>eb clone my-env --clone_name my-env-prod</code></li>
+          </ul>
+        </div>
+        <div class="card card-red">
+          <h4>RDS Decoupling (Migration)</h4>
+          <ul style="font-size:13px">
+            <li>RDS created inside EB environment is <strong>tied to the env lifecycle</strong></li>
+            <li>If env is terminated → RDS is deleted (even with Retain policy if not careful)</li>
+            <li><strong>Best practice:</strong> Create RDS outside EB, reference via env variable</li>
+            <li>To decouple existing RDS: take snapshot → create new external RDS from snapshot → update env variable → delete old RDS</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Swapping Environment URLs (Blue/Green)</h3>
+      <pre><code><span class="cm"># Using EB CLI to swap environment CNAME (Blue/Green URL swap)</span>
+eb swap blue-env --destination_name green-env
+
+<span class="cm"># Or via AWS CLI</span>
+aws elasticbeanstalk swap-environment-cnames \
+  --source-environment-name my-app-blue \
+  --destination-environment-name my-app-green
+</code></pre>
+
+      <div class="callout callout-blue">
+        <span class="callout-icon">ℹ️</span>
+        <p>URL swapping is a <strong>DNS-level change</strong> (CNAME swap). It takes effect within seconds for most clients, but DNS TTL means some clients may still hit the old environment briefly. Route 53 weighted routing gives more precise control for gradual shifts.</p>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════
+         12. HEALTH & MONITORING
+    ════════════════════════════════ -->
+    <section class="section" id="monitoring">
+      <div class="section-header">
+        <span class="section-num">12</span>
+        <h2>Health &amp; Monitoring</h2>
+        <div class="section-line"></div>
+      </div>
+
+      <h3>Health Reporting Modes</h3>
+      <div class="grid2">
+        <div class="card">
+          <h4>Basic Health Reporting</h4>
+          <ul style="font-size:13px">
+            <li>Reports a single color: <span class="tag tag-green">Green</span> <span class="tag tag-amber">Yellow</span> <span class="tag tag-red">Red</span> <span class="tag tag-purple">Grey</span></li>
+            <li>Based on ELB health checks and EC2 status checks</li>
+            <li>Free — no additional cost</li>
+            <li>Limited visibility into root cause</li>
+          </ul>
+        </div>
+        <div class="card card-green">
+          <h4>Enhanced Health Reporting</h4>
+          <ul style="font-size:13px">
+            <li>Detailed per-instance metrics (CPU, memory, load, disk)</li>
+            <li>HTTP response codes (2xx, 3xx, 4xx, 5xx rates)</li>
+            <li>Requires <strong>enhanced health agent</strong> on instance (via AMI or config)</li>
+            <li>Publishes metrics to CloudWatch (additional cost)</li>
+            <li><strong>Required for managed platform updates</strong></li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Health Status Colors</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Color</th><th>Meaning</th><th>Common Causes</th></tr></thead>
+          <tbody>
+            <tr><td><span class="tag tag-green">Green</span></td><td>All healthy — environment functioning normally</td><td>—</td></tr>
+            <tr><td><span class="tag tag-amber">Yellow</span></td><td>Degraded — some checks failed recently</td><td>High latency, occasional health check failures, recent scale events</td></tr>
+            <tr><td><span class="tag tag-red">Red</span></td><td>Severe — environment not functional</td><td>Instance crashes, deployment failures, health check failures for multiple instances</td></tr>
+            <tr><td><span class="tag tag-purple">Grey</span></td><td>Unknown — no data from environment</td><td>Environment updating, no instances running, EB cannot reach environment</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Managed Platform Updates</h3>
+      <p>EB can automatically apply platform patches (OS, runtime) during a <strong>configurable maintenance window</strong>. Requires Enhanced Health Reporting to be enabled. You choose whether to allow minor and patch version updates automatically.</p>
+
+      <pre><code><span class="cm"># .ebextensions to configure managed updates</span>
+<span class="nm">option_settings</span>:
+  <span class="nm">aws:elasticbeanstalk:managedactions</span>:
+    <span class="nm">ManagedActionsEnabled</span>: <span class="nb">true</span>
+    <span class="nm">PreferredStartTime</span>: <span class="sv">"Tue:09:00"</span>   <span class="cm"># UTC</span>
+  <span class="nm">aws:elasticbeanstalk:managedactions:platformupdate</span>:
+    <span class="nm">UpdateLevel</span>: <span class="sv">minor</span>                  <span class="cm"># minor | patch</span>
+    <span class="nm">InstanceRefreshEnabled</span>: <span class="nb">true</span>
+</code></pre>
+    </section>
+
+    <!-- ════════════════════════════════
+         13. NOTIFICATIONS
+    ════════════════════════════════ -->
+    <section class="section" id="notifications">
+      <div class="section-header">
+        <span class="section-num">13</span>
+        <h2>Notifications &amp; Events</h2>
+        <div class="section-line"></div>
+      </div>
+
+      <p>Elastic Beanstalk emits events to <strong>Amazon EventBridge</strong>. You can create rules to react to environment and resource state changes, trigger Lambda, SNS, SQS, or other targets.</p>
+
+      <h3>EventBridge Event Categories</h3>
+      <div class="grid2">
+        <div class="card card-amber">
+          <h4>Environment Operations</h4>
+          <ul style="font-size:13px">
+            <li>Environment <strong>create</strong> — start, success, fail</li>
+            <li>Environment <strong>update</strong> — start, success, fail</li>
+            <li>Environment <strong>terminate</strong> — start, success, fail</li>
+          </ul>
+        </div>
+        <div class="card card-blue">
+          <h4>Resource Status</h4>
+          <ul style="font-size:13px">
+            <li>Auto Scaling Group events</li>
+            <li>ELB events</li>
+            <li>EC2 Instance events</li>
+          </ul>
+        </div>
+        <div class="card card-red">
+          <h4>Managed Updates</h4>
+          <ul style="font-size:13px">
+            <li>Managed update <strong>started</strong></li>
+            <li>Managed update <strong>failed</strong></li>
+            <li>Managed update <strong>completed</strong></li>
+          </ul>
+        </div>
+        <div class="card card-green">
+          <h4>Environment Health</h4>
+          <ul style="font-size:13px">
+            <li>Health transitions (Green → Yellow → Red)</li>
+            <li>Trigger SNS notification or Lambda</li>
+            <li>Drive downstream alerting pipelines</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="code-filename">EventBridge rule — alert on deployment failure</div>
+      <pre><code><span class="op">{</span>
+  <span class="sk">"source"</span>: [<span class="sv">"aws.elasticbeanstalk"</span>],
+  <span class="sk">"detail-type"</span>: [<span class="sv">"Elastic Beanstalk resource status change"</span>],
+  <span class="sk">"detail"</span>: <span class="op">{</span>
+    <span class="sk">"Status"</span>: [<span class="sv">"Environment update failed"</span>, <span class="sv">"Failed"</span>],
+    <span class="sk">"EnvironmentName"</span>: [<span class="sv">"my-app-production"</span>]
+  <span class="op">}</span>
+<span class="op">}</span>
+<span class="cm">// Target: SNS → send email/PagerDuty alert</span>
+<span class="cm">// Target: Lambda → auto-rollback, notify Slack</span>
+</code></pre>
+    </section>
+
+    <!-- ════════════════════════════════
+         14. EXAM TIPS
+    ════════════════════════════════ -->
+    <section class="section" id="exam-tips">
+      <div class="section-header">
+        <span class="section-num">14</span>
+        <h2>DOP-C02 Exam Tips</h2>
+        <div class="section-line"></div>
+      </div>
+
+      <div class="exam-box">
+        <div class="exam-box-title">Must-Know Facts</div>
+        <ul>
+          <li><strong>Service Role</strong> = permissions for EB service to manage EC2/ASG/ELB. Trusts <code>elasticbeanstalk.amazonaws.com</code>.</li>
+          <li><strong>Instance Profile</strong> = IAM role for your app code on EC2. Trusts <code>ec2.amazonaws.com</code>. Must include <code>elasticbeanstalk-*</code> S3 access.</li>
+          <li><strong>Immutable</strong> = best rollback (terminate new ASG), highest cost, safest for prod.</li>
+          <li><strong>Traffic Splitting</strong> = canary testing with automated rollback based on health metrics.</li>
+          <li><strong>Blue/Green</strong> = swap environment URLs, NOT a native single-click EB feature — done via CNAME swap.</li>
+          <li><strong>.ebextensions</strong> = <code>.config</code> files in application ZIP root. CloudFormation syntax in <code>Resources:</code> section. <code>container_commands</code> supports <code>leader_only: true</code>.</li>
+          <li><strong>Worker Tier</strong> scales on <strong>SQS queue depth</strong>, not CPU/requests.</li>
+          <li><strong>cron.yaml</strong> defines periodic tasks in the Worker Tier (and Web Tier).</li>
+          <li><strong>Enhanced Health Reporting</strong> is required for Managed Platform Updates.</li>
+          <li><strong>Version Limit:</strong> 1,000 max. Use Lifecycle Policy (time-based or count-based) to avoid hitting the limit.</li>
+          <li><strong>RDS inside EB env</strong> = tied to env lifecycle. Best practice: create RDS outside EB.</li>
+          <li><strong>Multi-Container Docker</strong> uses ECS under the hood (<code>Dockerrun.aws.json v2</code>).</li>
+        </ul>
+      </div>
+
+      <h3>Common Exam Scenarios</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Scenario</th><th>Answer</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><em>"Deploy with zero downtime and ability to instantly revert if issues found"</em></td>
+              <td><strong>Immutable</strong> deployment (or Blue/Green). Immutable = instant rollback by terminating temp ASG.</td>
+            </tr>
+            <tr>
+              <td><em>"Test new version with 5% of real production traffic before full rollout"</em></td>
+              <td><strong>Traffic Splitting</strong> (canary deployment). Configurable % with automated rollback on failures.</td>
+            </tr>
+            <tr>
+              <td><em>"App needs to process long-running background jobs triggered by web requests"</em></td>
+              <td><strong>Web Tier + Worker Tier</strong> with SQS decoupling. Web tier queues tasks; Worker tier scales on SQS depth.</td>
+            </tr>
+            <tr>
+              <td><em>"Run DB migration only on one instance during deployment"</em></td>
+              <td><code>.ebextensions</code> <strong>container_commands</strong> with <code>leader_only: true</code>.</td>
+            </tr>
+            <tr>
+              <td><em>"App failed to deploy. Need to investigate without losing the failed state"</em></td>
+              <td>Deploy with <code>--on-failure DO_NOTHING</code> (disable rollback). Inspect the instance logs.</td>
+            </tr>
+            <tr>
+              <td><em>"Prevent accidental deletion of production database when EB env is terminated"</em></td>
+              <td>Create RDS <strong>outside</strong> of EB environment. Reference it via environment variable. Never put prod RDS inside EB.</td>
+            </tr>
+            <tr>
+              <td><em>"Reached 1000 application version limit and cannot deploy"</em></td>
+              <td>Configure an <strong>Application Version Lifecycle Policy</strong> (count-based or time-based).</td>
+            </tr>
+            <tr>
+              <td><em>"Need to get notified when a production deployment fails"</em></td>
+              <td><strong>EventBridge rule</strong> on EB events → SNS topic → email/PagerDuty. Or Lambda for auto-rollback.</td>
+            </tr>
+            <tr>
+              <td><em>"Application needs to read/write to an S3 bucket from EC2 instances"</em></td>
+              <td>Add S3 permissions to the <strong>EC2 Instance Profile</strong> IAM role, not the Service Role.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>EB vs Other AWS Services</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Service</th><th>When to Choose</th></tr></thead>
+          <tbody>
+            <tr><td><span class="tag tag-green">Elastic Beanstalk</span></td><td>Developer wants PaaS simplicity. Application code only. Standard web apps. Full control still available.</td></tr>
+            <tr><td><span class="tag tag-blue">ECS / Fargate</span></td><td>Need containers with fine-grained control over task definitions, networking, IAM, and cluster configuration.</td></tr>
+            <tr><td><span class="tag tag-amber">CloudFormation</span></td><td>Need full IaC control of every resource. Multi-service stacks. Beanstalk actually uses CFN under the hood.</td></tr>
+            <tr><td><span class="tag tag-purple">CodeDeploy</span></td><td>Need deployment control over existing EC2 fleets or Lambda. Not opinionated about platform/stack.</td></tr>
+            <tr><td><span class="tag tag-cyan">App Runner</span></td><td>Fully managed, no config. Simpler than EB. Good for containers with zero infrastructure management.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </section>
+
+  </main>
+</div>
+
+<script>
+  const sections = document.querySelectorAll('.section');
+  const navItems = document.querySelectorAll('.nav-item');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navItems.forEach(n => n.classList.remove('active'));
+        const link = document.querySelector(`.nav-item[href="#${entry.target.id}"]`);
+        if (link) link.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-15% 0px -70% 0px' });
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
