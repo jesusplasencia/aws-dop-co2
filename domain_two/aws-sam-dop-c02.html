@@ -1,0 +1,1611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS SAM — DOP-C02 Study Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,300;1,9..144,600&family=Epilogue:ital,wght@0,300;0,400;0,500;0,600;1,300&family=Fragment+Mono:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper:     #faf7f2;
+  --paper2:    #f4f0e8;
+  --paper3:    #ede7db;
+  --ink:       #1c1810;
+  --ink2:      #3a3428;
+  --ink3:      #6b6050;
+  --ink4:      #9c9080;
+  --rule:      #ddd5c5;
+  --rule2:     #c9bfad;
+
+  --coral:     #d95f3b;
+  --coral-bg:  #fdf0eb;
+  --coral-mid: #f0b49a;
+  --teal:      #2a7c72;
+  --teal-bg:   #e8f4f2;
+  --teal-mid:  #88c4be;
+  --gold:      #b07d1a;
+  --gold-bg:   #fdf4e0;
+  --gold-mid:  #e8c97a;
+  --slate:     #2c4a6e;
+  --slate-bg:  #e8eef5;
+  --slate-mid: #8aaac8;
+  --plum:      #7a3d6e;
+  --plum-bg:   #f5eaf3;
+  --plum-mid:  #c89abf;
+
+  --mono-bg:   #1a1510;
+  --mono-text: #ead9c0;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Epilogue', sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 15px;
+  line-height: 1.75;
+}
+
+/* ── MASTHEAD ── */
+.masthead {
+  background: var(--ink);
+  padding: 14px 48px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top:0; z-index:100;
+}
+.masthead-left {
+  display: flex; align-items: center; gap: 20px;
+}
+.masthead-logo {
+  font-family: 'Fraunces', serif;
+  font-size: 18px; font-weight: 900;
+  color: #fff; letter-spacing: -0.5px;
+  display: flex; align-items: center; gap: 2px;
+}
+.masthead-logo span { color: var(--coral); }
+.masthead-sep { width: 1px; height: 18px; background: rgba(255,255,255,0.15); }
+.masthead-cat {
+  font-family: 'Fragment Mono', monospace;
+  font-size: 10px; letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.4);
+}
+.masthead-right {
+  font-family: 'Fragment Mono', monospace;
+  font-size: 10px; color: rgba(255,255,255,0.3);
+  letter-spacing: 1px;
+  display: flex; align-items: center; gap: 6px;
+}
+.pulse { width:5px; height:5px; border-radius:50%; background:var(--coral); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+/* ── HERO ── */
+.hero {
+  background: var(--ink);
+  padding: 80px 0 72px;
+  position: relative; overflow:hidden;
+}
+.hero::after {
+  content: '';
+  position: absolute; bottom: 0; left:0; right:0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--coral), var(--gold), var(--teal));
+}
+/* decorative large letter */
+.hero-deco {
+  position: absolute;
+  right: 6%;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: 'Fraunces', serif;
+  font-size: 280px;
+  font-weight: 900;
+  font-style: italic;
+  color: rgba(255,255,255,0.03);
+  line-height: 1;
+  pointer-events: none;
+  user-select: none;
+}
+.hero-inner { max-width: 1200px; margin: 0 auto; padding: 0 60px; position:relative; z-index:1; }
+.hero-kicker {
+  font-family: 'Fragment Mono', monospace;
+  font-size: 11px; letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--coral);
+  margin-bottom: 18px;
+}
+.hero h1 {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(52px, 8vw, 100px);
+  font-weight: 900;
+  color: #fff;
+  line-height: 0.95;
+  letter-spacing: -3px;
+  margin-bottom: 10px;
+}
+.hero h1 .sub {
+  display: block;
+  font-weight: 300;
+  font-style: italic;
+  font-size: 0.55em;
+  letter-spacing: -1px;
+  color: rgba(255,255,255,0.35);
+}
+.hero-tagline {
+  font-family: 'Epilogue', sans-serif;
+  font-size: 16px; font-weight: 300; font-style: italic;
+  color: rgba(255,255,255,0.45);
+  max-width: 500px; margin-top: 22px; margin-bottom: 44px;
+  line-height: 1.5;
+}
+.hero-pills {
+  display: flex; gap: 10px; flex-wrap: wrap;
+}
+.pill {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 6px 14px;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 2px;
+  font-family: 'Fragment Mono', monospace;
+  font-size: 11px; color: rgba(255,255,255,0.45);
+  background: rgba(255,255,255,0.04);
+}
+.pill-active { border-color: var(--coral); color: var(--coral); background: rgba(217,95,59,0.1); }
+.pill::before { content:'λ'; font-size:10px; opacity:0.6; }
+
+/* ── LAYOUT ── */
+.wrapper { max-width: 1200px; margin: 0 auto; display: flex; }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: 210px; min-width: 210px;
+  padding: 44px 0;
+  border-right: 1px solid var(--rule);
+  position: sticky; top: 47px;
+  height: calc(100vh - 47px);
+  overflow-y: auto;
+  background: var(--paper2);
+}
+.sidebar::-webkit-scrollbar { width: 3px; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--rule); }
+.sb-group { margin-bottom: 28px; }
+.sb-label {
+  font-family: 'Fragment Mono', monospace;
+  font-size: 9px; letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--ink4);
+  padding: 0 22px; margin-bottom: 5px;
+}
+.sb-link {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 22px;
+  color: var(--ink3); text-decoration: none;
+  font-family: 'Epilogue', sans-serif;
+  font-size: 12.5px; font-weight: 400;
+  border-left: 2px solid transparent;
+  transition: all 0.12s;
+  line-height: 1.3;
+}
+.sb-link:hover  { color: var(--coral); border-left-color: var(--coral-mid); background: var(--coral-bg); }
+.sb-link.active { color: var(--coral); border-left-color: var(--coral);     background: var(--coral-bg); font-weight: 500; }
+.sb-num { font-family: 'Fragment Mono', monospace; font-size: 9.5px; color: var(--ink4); min-width: 18px; }
+
+/* ── MAIN ── */
+main { flex:1; padding: 60px 56px 90px; min-width: 0; }
+
+/* ── SECTION ── */
+.section { margin-bottom: 80px; scroll-margin-top: 60px; }
+.section-eyebrow {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 14px;
+}
+.section-num {
+  font-family: 'Fragment Mono', monospace;
+  font-size: 10px; color: var(--ink4);
+  letter-spacing: 1px;
+}
+.section-tag {
+  font-family: 'Fragment Mono', monospace;
+  font-size: 9px; letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--coral);
+  background: var(--coral-bg);
+  border: 1px solid var(--coral-mid);
+  padding: 2px 8px; border-radius: 2px;
+}
+h2 {
+  font-family: 'Fraunces', serif;
+  font-size: 38px; font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -1px; line-height: 1.05;
+  margin-bottom: 6px;
+}
+.section-rule {
+  height: 2px;
+  background: var(--ink);
+  margin: 16px 0 24px;
+  position: relative;
+}
+.section-rule::after {
+  content:'';
+  position: absolute; left:0; top:0;
+  height: 2px; width: 40px;
+  background: var(--coral);
+}
+
+h3 {
+  font-family: 'Epilogue', sans-serif;
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 2.5px; text-transform: uppercase;
+  color: var(--gold);
+  margin: 30px 0 12px;
+  display: flex; align-items: center; gap: 12px;
+}
+h3::after { content:''; flex:1; height:1px; background:var(--rule); }
+
+h4 {
+  font-family: 'Fraunces', serif;
+  font-size: 17px; font-weight: 600;
+  color: var(--ink); margin: 0 0 7px;
+}
+
+p { color: var(--ink2); margin-bottom: 13px; font-size: 14.5px; }
+
+/* ── CARDS ── */
+.card {
+  background: #fff;
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 22px;
+  margin-bottom: 14px;
+}
+.card-coral  { border-left: 3px solid var(--coral); background: var(--coral-bg); }
+.card-teal   { border-left: 3px solid var(--teal);  background: var(--teal-bg);  }
+.card-gold   { border-left: 3px solid var(--gold);  background: var(--gold-bg);  }
+.card-slate  { border-left: 3px solid var(--slate); background: var(--slate-bg); }
+.card-plum   { border-left: 3px solid var(--plum);  background: var(--plum-bg);  }
+.card-ink    { background: var(--ink); border-color: var(--ink); }
+
+/* ── CALLOUT ── */
+.callout {
+  padding: 15px 20px; border-radius: 3px;
+  margin: 18px 0; display: flex; gap: 14px; align-items: flex-start;
+  font-size: 13.5px;
+}
+.co-coral { background: var(--coral-bg); border: 1px solid var(--coral-mid); }
+.co-coral p { color: #9b3a1e; margin:0; }
+.co-teal  { background: var(--teal-bg);  border: 1px solid var(--teal-mid); }
+.co-teal  p { color: #1f5c54; margin:0; }
+.co-gold  { background: var(--gold-bg);  border: 1px solid var(--gold-mid); }
+.co-gold  p { color: #7a5610; margin:0; }
+.co-slate { background: var(--slate-bg); border: 1px solid var(--slate-mid); }
+.co-slate p { color: #1e3a58; margin:0; }
+.co-icon  { font-size:15px; flex-shrink:0; margin-top:1px; }
+
+/* ── CODE ── */
+.code-file {
+  background: var(--paper3);
+  border: 1px solid var(--rule2);
+  border-bottom: none;
+  border-radius: 3px 3px 0 0;
+  padding: 8px 16px;
+  display: flex; align-items: center; gap: 10px;
+  font-family: 'Fragment Mono', monospace;
+  font-size: 10px; color: var(--ink4);
+}
+.code-file-dot { width:7px; height:7px; border-radius:50%; background:var(--coral); }
+.code-file + pre { border-top-left-radius: 0; border-top-right-radius: 0; margin-top:0; }
+
+pre {
+  background: var(--mono-bg);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 3px;
+  padding: 20px 24px;
+  overflow-x: auto; margin: 14px 0;
+}
+pre code {
+  font-family: 'Fragment Mono', monospace;
+  font-size: 12.5px; line-height: 1.85;
+  color: var(--mono-text);
+}
+code {
+  font-family: 'Fragment Mono', monospace;
+  font-size: 12.5px;
+  background: var(--paper3);
+  color: var(--coral);
+  padding: 1px 6px; border-radius: 2px;
+  border: 1px solid var(--rule);
+}
+
+/* Syntax */
+.sk  { color: #e8a87c; }   /* yaml key */
+.sv  { color: #98d4a3; }   /* string value */
+.sc  { color: #5a6a55; font-style:italic; }   /* comment */
+.sn  { color: #7ec8e3; }   /* intrinsic / func */
+.si  { color: #f0c060; }   /* resource type */
+.sb  { color: #d4a0e0; }   /* bool/special */
+.snum{ color: #f0a060; }   /* number */
+.scmd{ color: #c8d8e8; }   /* bash command */
+
+/* ── TABLE ── */
+.table-wrap { overflow-x: auto; margin: 16px 0; border: 1px solid var(--rule); border-radius: 3px; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead th {
+  background: var(--paper3);
+  font-family: 'Fragment Mono', monospace;
+  font-size: 9.5px; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--ink4);
+  padding: 10px 14px; text-align: left;
+  border-bottom: 2px solid var(--rule2);
+}
+td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--rule);
+  vertical-align: top; color: var(--ink2);
+  font-size: 13px;
+}
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(0,0,0,0.015); }
+
+/* ── GRID ── */
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 14px 0; }
+.grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin: 14px 0; }
+
+/* ── TAG ── */
+.tag {
+  display: inline-block;
+  font-family: 'Fragment Mono', monospace;
+  font-size: 10px; padding: 2px 8px;
+  border-radius: 2px;
+}
+.t-coral { background:var(--coral-bg); color:var(--coral); border:1px solid var(--coral-mid); }
+.t-teal  { background:var(--teal-bg);  color:var(--teal);  border:1px solid var(--teal-mid);  }
+.t-gold  { background:var(--gold-bg);  color:var(--gold);  border:1px solid var(--gold-mid);  }
+.t-slate { background:var(--slate-bg); color:var(--slate); border:1px solid var(--slate-mid); }
+.t-plum  { background:var(--plum-bg);  color:var(--plum);  border:1px solid var(--plum-mid);  }
+.t-ink   { background:var(--ink);      color:var(--paper); border:1px solid var(--ink2); }
+
+/* ── EXAM BOX ── */
+.exam-box {
+  background: var(--ink);
+  border-radius: 3px;
+  padding: 26px 28px;
+  margin: 26px 0;
+  position: relative; overflow: hidden;
+}
+.exam-box::before {
+  content: 'EXAM FOCUS';
+  position: absolute; top:0; right:22px;
+  font-family: 'Fragment Mono', monospace;
+  font-size: 9px; font-weight: 600; letter-spacing: 3px;
+  color: var(--coral);
+  background: rgba(217,95,59,0.15);
+  padding: 4px 12px;
+  border-radius: 0 0 4px 4px;
+}
+.exam-box::after {
+  content: '';
+  position: absolute; left:0; top:0; bottom:0;
+  width: 3px; background: var(--coral);
+}
+.exam-box-title {
+  font-family: 'Fraunces', serif;
+  font-size: 20px; font-weight: 600; font-style: italic;
+  color: #fff; margin-bottom: 16px; padding-top: 6px;
+}
+.exam-box ul { padding-left: 18px; }
+.exam-box li { color: rgba(255,255,255,0.7); font-size: 13.5px; margin-bottom: 6px; }
+.exam-box li::marker { color: var(--coral); }
+.exam-box strong { color: #fff; }
+.exam-box p { color: rgba(255,255,255,0.65); font-size:13.5px; }
+
+/* ── FLOW STRIP ── */
+.flow-strip {
+  display: flex; align-items: stretch;
+  border: 1px solid var(--rule); border-radius: 3px;
+  overflow: hidden; margin: 18px 0;
+}
+.flow-step {
+  flex:1; padding: 16px 14px;
+  background: #fff;
+  border-right: 1px solid var(--rule);
+  position: relative;
+}
+.flow-step:last-child { border-right: none; }
+.flow-step-num {
+  font-family: 'Fragment Mono', monospace;
+  font-size: 9px; letter-spacing: 1px;
+  color: var(--ink4); margin-bottom: 4px;
+}
+.flow-step-icon { font-size: 18px; margin-bottom: 6px; }
+.flow-step-name { font-size: 12px; font-weight: 600; color: var(--ink); margin-bottom: 2px; }
+.flow-step-cmd  {
+  font-family: 'Fragment Mono', monospace;
+  font-size: 10px; color: var(--coral);
+  background: var(--coral-bg);
+  padding: 2px 6px; border-radius: 2px; margin-top: 5px; display: inline-block;
+}
+.flow-step-sub  { font-size: 11px; color: var(--ink4); line-height: 1.4; }
+.flow-arrow {
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 4px; background: var(--paper2);
+  font-size: 14px; color: var(--ink4);
+  border-right: 1px solid var(--rule);
+  min-width: 28px;
+}
+
+/* ── RESOURCE TYPE CARDS ── */
+.resource-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin:14px 0; }
+.res-card {
+  border: 1px solid var(--rule);
+  border-radius: 3px; overflow: hidden;
+}
+.res-card-head {
+  padding: 10px 14px;
+  font-family: 'Fragment Mono', monospace;
+  font-size: 10px; font-weight: 500;
+  letter-spacing: 0.3px;
+  border-bottom: 1px solid var(--rule);
+}
+.res-card-body { padding: 12px 14px; background: #fff; font-size: 12.5px; color: var(--ink3); line-height: 1.55; }
+.rc-fn   .res-card-head { background: var(--coral-bg); color: var(--coral); }
+.rc-api  .res-card-head { background: var(--teal-bg);  color: var(--teal);  }
+.rc-tb   .res-card-head { background: var(--gold-bg);  color: var(--gold);  }
+.rc-st   .res-card-head { background: var(--slate-bg); color: var(--slate); }
+.rc-ly   .res-card-head { background: var(--plum-bg);  color: var(--plum);  }
+.rc-sm   .res-card-head { background: var(--paper3);   color: var(--ink3);  }
+
+/* ── DEPLOYMENT TYPE STRIPS ── */
+.deploy-strip {
+  border: 1px solid var(--rule); border-radius: 3px;
+  overflow: hidden; margin: 10px 0;
+}
+.deploy-strip-head {
+  display: flex; align-items: center; gap: 14px;
+  padding: 11px 16px;
+  background: var(--paper2);
+  border-bottom: 1px solid var(--rule);
+}
+.deploy-strip-name {
+  font-family: 'Fragment Mono', monospace;
+  font-size: 11px; font-weight: 500;
+  color: var(--ink);
+}
+.deploy-strip-body {
+  padding: 12px 16px;
+  background: #fff;
+  font-size: 13px; color: var(--ink3); line-height: 1.6;
+}
+
+/* ── COMPARE ── */
+.compare {
+  display: grid; grid-template-columns: 1fr 1fr;
+  border: 1px solid var(--rule); border-radius: 3px;
+  overflow: hidden; margin: 16px 0;
+}
+.cmp-col { padding: 20px 22px; }
+.cmp-col:first-child { background: var(--coral-bg); border-right: 1px solid var(--rule); }
+.cmp-col:last-child  { background: var(--teal-bg); }
+.cmp-title {
+  font-family: 'Fragment Mono', monospace;
+  font-size: 9.5px; letter-spacing: 1.5px;
+  text-transform: uppercase; margin-bottom: 12px;
+  padding-bottom: 8px; border-bottom: 1px solid var(--rule);
+}
+.cmp-col:first-child .cmp-title { color: var(--coral); }
+.cmp-col:last-child  .cmp-title { color: var(--teal); }
+.cmp-col li { font-size: 13px; color: var(--ink2); margin-bottom: 5px; }
+
+/* ── UL/OL ── */
+ul, ol { padding-left: 18px; margin: 10px 0; }
+li { margin-bottom: 4px; font-size: 14px; color: var(--ink2); }
+li::marker { color: var(--coral); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .sidebar { display: none; }
+  main { padding: 28px 20px; }
+  .grid2,.grid3,.resource-grid,.compare { grid-template-columns: 1fr; }
+  .flow-strip { flex-direction: column; }
+  .flow-step { border-right: none; border-bottom: 1px solid var(--rule); }
+  .flow-arrow { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- MASTHEAD -->
+<header class="masthead">
+  <div class="masthead-left">
+    <div class="masthead-logo">AWS <span>SAM</span></div>
+    <div class="masthead-sep"></div>
+    <div class="masthead-cat">Serverless Application Model</div>
+  </div>
+  <div class="masthead-right">
+    <a href="../index.html" style="display:inline-flex;align-items:center;gap:6px;font-family:'Fragment Mono',monospace;font-size:10px;letter-spacing:1px;color:rgba(255,255,255,0.45);text-decoration:none;padding:5px 12px;border:1px solid rgba(255,255,255,0.12);border-radius:100px;transition:all 0.2s ease;" onmouseover="this.style.color='#fff';this.style.borderColor='rgba(255,255,255,0.3)'" onmouseout="this.style.color='rgba(255,255,255,0.45)';this.style.borderColor='rgba(255,255,255,0.12)'">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      HOME
+    </a>
+    <span class="pulse"></span>
+    DOP-C02 Study Guide
+  </div>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-deco">λ</div>
+  <div class="hero-inner">
+    <div class="hero-kicker">DOP-C02 · Domain 1 · SDLC Automation</div>
+    <h1>AWS SAM<span class="sub">Serverless Application Model</span></h1>
+    <p class="hero-tagline">CloudFormation's shorthand for serverless — write less, deploy faster, deploy safer.</p>
+    <div class="hero-pills">
+      <span class="pill pill-active">Lambda · API GW · DynamoDB</span>
+      <span class="pill pill-active">6 Resource Types</span>
+      <span class="pill pill-active">CodeDeploy Traffic Shifting</span>
+      <span class="pill pill-active">Local Testing</span>
+      <span class="pill">SAM Accelerate</span>
+      <span class="pill">sam sync --watch</span>
+    </div>
+  </div>
+</div>
+
+<!-- BODY -->
+<div class="wrapper">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sb-group">
+      <div class="sb-label">Foundation</div>
+      <a class="sb-link active" href="#overview"><span class="sb-num">01</span>Overview</a>
+      <a class="sb-link" href="#how-sam-works"><span class="sb-num">02</span>How SAM Works</a>
+      <a class="sb-link" href="#template-anatomy"><span class="sb-num">03</span>Template Anatomy</a>
+    </div>
+    <div class="sb-group">
+      <div class="sb-label">Resource Types</div>
+      <a class="sb-link" href="#resource-types"><span class="sb-num">04</span>All Resource Types</a>
+      <a class="sb-link" href="#function"><span class="sb-num">05</span>Function</a>
+      <a class="sb-link" href="#api"><span class="sb-num">06</span>API</a>
+      <a class="sb-link" href="#other-resources"><span class="sb-num">07</span>Table &amp; Others</a>
+    </div>
+    <div class="sb-group">
+      <div class="sb-label">CLI &amp; Deploy</div>
+      <a class="sb-link" href="#cli"><span class="sb-num">08</span>SAM CLI Commands</a>
+      <a class="sb-link" href="#accelerate"><span class="sb-num">09</span>SAM Accelerate</a>
+      <a class="sb-link" href="#local"><span class="sb-num">10</span>Local Testing</a>
+    </div>
+    <div class="sb-group">
+      <div class="sb-label">Advanced</div>
+      <a class="sb-link" href="#codedeploy"><span class="sb-num">11</span>CodeDeploy Integration</a>
+      <a class="sb-link" href="#layers"><span class="sb-num">12</span>Layers &amp; Policy Templates</a>
+      <a class="sb-link" href="#sar"><span class="sb-num">13</span>Serverless App Repo</a>
+      <a class="sb-link" href="#exam-tips"><span class="sb-num">14</span>Exam Tips</a>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main>
+
+    <!-- ════════════════════════
+         01 OVERVIEW
+    ════════════════════════ -->
+    <section class="section" id="overview">
+      <div class="section-eyebrow">
+        <span class="section-num">01</span>
+        <span class="section-tag">Foundation</span>
+      </div>
+      <h2>Overview</h2>
+      <div class="section-rule"></div>
+
+      <p>AWS SAM (Serverless Application Model) is an open-source framework that extends CloudFormation with a simplified syntax specifically for serverless applications. A SAM template is <strong>transformed</strong> into a standard CloudFormation template at deploy time — meaning you get all CFN power with far less verbosity.</p>
+
+      <div class="callout co-coral">
+        <span class="co-icon">🔑</span>
+        <p><strong>Core mental model:</strong> SAM is syntactic sugar on top of CloudFormation. Every SAM resource (<code>AWS::Serverless::Function</code>) expands into multiple standard CFN resources (Lambda function + IAM role + event source mappings + aliases). You write 10 lines; CFN sees 80.</p>
+      </div>
+
+      <h3>What SAM Gives You</h3>
+      <div class="grid3">
+        <div class="card card-coral">
+          <h4>Simplified Syntax</h4>
+          <p style="font-size:13px;margin:0">Define Lambda functions, APIs, and tables in a fraction of the CloudFormation code. SAM handles the boilerplate.</p>
+        </div>
+        <div class="card card-teal">
+          <h4>Local Development</h4>
+          <p style="font-size:13px;margin:0">Run and test Lambda, API Gateway, and DynamoDB locally using Docker containers — no AWS account needed for dev.</p>
+        </div>
+        <div class="card card-gold">
+          <h4>Safe Deployments</h4>
+          <p style="font-size:13px;margin:0">Built-in CodeDeploy integration for Lambda traffic shifting with automated rollback on CloudWatch alarms.</p>
+        </div>
+      </div>
+
+      <h3>SAM vs Pure CloudFormation</h3>
+      <div class="compare">
+        <div class="cmp-col">
+          <div class="cmp-title">Pure CloudFormation</div>
+          <ul>
+            <li>Verbose: Lambda needs Function + Role + Permission resources</li>
+            <li>Manual IAM policy writing for common patterns</li>
+            <li>No local testing toolchain</li>
+            <li>No built-in traffic shifting</li>
+            <li>Works for any AWS resource</li>
+          </ul>
+        </div>
+        <div class="cmp-col">
+          <div class="cmp-title">SAM (extends CFN)</div>
+          <ul>
+            <li>Concise: one <code>AWS::Serverless::Function</code> expands to all of the above</li>
+            <li>Policy templates for common permissions (S3, DynamoDB, SQS)</li>
+            <li><code>sam local invoke</code> and <code>sam local start-api</code></li>
+            <li>Built-in <code>DeploymentPreference</code> with CodeDeploy</li>
+            <li>Serverless-focused; falls back to full CFN when needed</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════
+         02 HOW SAM WORKS
+    ════════════════════════ -->
+    <section class="section" id="how-sam-works">
+      <div class="section-eyebrow">
+        <span class="section-num">02</span>
+        <span class="section-tag">Foundation</span>
+      </div>
+      <h2>How SAM Works</h2>
+      <div class="section-rule"></div>
+
+      <p>SAM operates as a two-phase process: <strong>build locally</strong>, then <strong>package and deploy to AWS</strong>. The <code>sam build</code> command compiles and prepares your application. The <code>sam deploy</code> command transforms the SAM template into CloudFormation, uploads artifacts to S3, and creates/updates the CloudFormation stack.</p>
+
+      <div class="flow-strip">
+        <div class="flow-step">
+          <div class="flow-step-num">STEP 01</div>
+          <div class="flow-step-icon">✍️</div>
+          <div class="flow-step-name">Write SAM Template</div>
+          <div class="flow-step-sub">YAML with <code>AWS::Serverless::*</code> resources</div>
+          <div class="flow-step-cmd">template.yaml</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-step-num">STEP 02</div>
+          <div class="flow-step-icon">🔨</div>
+          <div class="flow-step-name">sam build</div>
+          <div class="flow-step-sub">Compile code, resolve dependencies, prepare artifacts</div>
+          <div class="flow-step-cmd">sam build</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-step-num">STEP 03</div>
+          <div class="flow-step-icon">🔄</div>
+          <div class="flow-step-name">Transform → CFN</div>
+          <div class="flow-step-sub">SAM expands resources to full CloudFormation template</div>
+          <div class="flow-step-cmd">Transform macro</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-step-num">STEP 04</div>
+          <div class="flow-step-icon">📦</div>
+          <div class="flow-step-name">Package &amp; Upload</div>
+          <div class="flow-step-sub">ZIP code to S3, update template refs</div>
+          <div class="flow-step-cmd">sam package</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-step-num">STEP 05</div>
+          <div class="flow-step-icon">🚀</div>
+          <div class="flow-step-name">Deploy to AWS</div>
+          <div class="flow-step-sub">Creates/executes CloudFormation ChangeSet</div>
+          <div class="flow-step-cmd">sam deploy</div>
+        </div>
+      </div>
+
+      <div class="callout co-teal">
+        <span class="co-icon">ℹ️</span>
+        <p><strong>Under the hood:</strong> SAM uses the <code>Transform: 'AWS::Serverless-2016-10-31'</code> CloudFormation macro. When CloudFormation processes the template, it calls this macro which expands all <code>AWS::Serverless::*</code> resources into standard CloudFormation resources. You need <code>CAPABILITY_IAM</code> and <code>CAPABILITY_AUTO_EXPAND</code> when deploying SAM templates.</p>
+      </div>
+    </section>
+
+    <!-- ════════════════════════
+         03 TEMPLATE ANATOMY
+    ════════════════════════ -->
+    <section class="section" id="template-anatomy">
+      <div class="section-eyebrow">
+        <span class="section-num">03</span>
+        <span class="section-tag">Foundation</span>
+      </div>
+      <h2>Template Anatomy</h2>
+      <div class="section-rule"></div>
+
+      <div class="code-file"><div class="code-file-dot"></div>template.yaml — complete SAM template structure</div>
+      <pre><code><span class="sc"># ① REQUIRED: declare the SAM transform</span>
+<span class="sk">AWSTemplateFormatVersion</span>: <span class="sv">'2010-09-09'</span>
+<span class="sk">Transform</span>: <span class="sv">'AWS::Serverless-2016-10-31'</span>   <span class="sc"># ← makes this a SAM template</span>
+<span class="sk">Description</span>: <span class="sv">My serverless API</span>
+
+<span class="sc"># ② Standard CFN sections all work — Parameters, Mappings, Conditions, Outputs</span>
+<span class="sk">Parameters</span>:
+  <span class="sk">Stage</span>:
+    <span class="sk">Type</span>: <span class="si">String</span>
+    <span class="sk">Default</span>: <span class="sv">prod</span>
+    <span class="sk">AllowedValues</span>: [<span class="sv">dev</span>, <span class="sv">staging</span>, <span class="sv">prod</span>]
+
+<span class="sc"># ③ Global defaults applied to all serverless resources</span>
+<span class="sk">Globals</span>:
+  <span class="sk">Function</span>:
+    <span class="sk">Runtime</span>: <span class="sv">python3.12</span>
+    <span class="sk">Timeout</span>: <span class="snum">30</span>
+    <span class="sk">MemorySize</span>: <span class="snum">256</span>
+    <span class="sk">Environment</span>:
+      <span class="sk">Variables</span>:
+        <span class="sk">STAGE</span>: <span class="sn">!Ref</span> <span class="sv">Stage</span>
+    <span class="sk">Tracing</span>: <span class="sv">Active</span>               <span class="sc"># X-Ray on all functions</span>
+  <span class="sk">Api</span>:
+    <span class="sk">Cors</span>: <span class="sv">"'*'"</span>
+    <span class="sk">TracingEnabled</span>: <span class="sb">true</span>
+
+<span class="sc"># ④ Resources — SAM + standard CFN resources can co-exist</span>
+<span class="sk">Resources</span>:
+  <span class="sk">MyFunction</span>:
+    <span class="sk">Type</span>: <span class="si">AWS::Serverless::Function</span>
+    <span class="sk">Properties</span>:
+      <span class="sk">Handler</span>: <span class="sv">app.handler</span>
+      <span class="sk">CodeUri</span>: <span class="sv">./src/</span>
+      <span class="sk">Events</span>:
+        <span class="sk">ApiEvent</span>:
+          <span class="sk">Type</span>: <span class="si">Api</span>
+          <span class="sk">Properties</span>:
+            <span class="sk">Path</span>: <span class="sv">/items</span>
+            <span class="sk">Method</span>: <span class="sv">GET</span>
+
+<span class="sc"># ⑤ Standard CFN Outputs</span>
+<span class="sk">Outputs</span>:
+  <span class="sk">ApiUrl</span>:
+    <span class="sk">Value</span>: <span class="sn">!Sub</span> <span class="sv">'https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/${Stage}/'</span>
+</code></pre>
+
+      <div class="callout co-gold">
+        <span class="co-icon">💡</span>
+        <p><strong>Globals section</strong> is SAM-specific — it sets default property values for all <code>Function</code>, <code>Api</code>, <code>HttpApi</code>, and <code>SimpleTable</code> resources. Individual resource properties override globals. Reduces repetition across many functions.</p>
+      </div>
+    </section>
+
+    <!-- ════════════════════════
+         04 RESOURCE TYPES
+    ════════════════════════ -->
+    <section class="section" id="resource-types">
+      <div class="section-eyebrow">
+        <span class="section-num">04</span>
+        <span class="section-tag">Resource Types</span>
+      </div>
+      <h2>All SAM Resource Types</h2>
+      <div class="section-rule"></div>
+
+      <p>SAM provides six resource types that expand into multiple CloudFormation resources. You can mix these with standard <code>AWS::*</code> CloudFormation resources in the same template.</p>
+
+      <div class="resource-grid">
+        <div class="res-card rc-fn">
+          <div class="res-card-head">AWS::Serverless::Function</div>
+          <div class="res-card-body">Lambda function + IAM execution role + event source mappings + aliases + versions. The most commonly used SAM resource.</div>
+        </div>
+        <div class="res-card rc-api">
+          <div class="res-card-head">AWS::Serverless::Api</div>
+          <div class="res-card-body">REST API Gateway (v1). Generates ApiGateway::RestApi + Deployment + Stage. Supports OpenAPI inline or S3.</div>
+        </div>
+        <div class="res-card rc-api" style="">
+          <div class="res-card-head" style="background:var(--teal-bg);color:var(--teal)">AWS::Serverless::HttpApi</div>
+          <div class="res-card-body">HTTP API Gateway (v2). Cheaper, faster alternative to REST API. Supports JWT authorizers, CORS config.</div>
+        </div>
+        <div class="res-card rc-tb">
+          <div class="res-card-head">AWS::Serverless::SimpleTable</div>
+          <div class="res-card-body">DynamoDB table with a single primary key. Expands to AWS::DynamoDB::Table. Good for simple use cases.</div>
+        </div>
+        <div class="res-card rc-ly">
+          <div class="res-card-head">AWS::Serverless::LayerVersion</div>
+          <div class="res-card-body">Lambda Layer containing shared code or dependencies. SAM handles building and publishing the layer version.</div>
+        </div>
+        <div class="res-card rc-sm">
+          <div class="res-card-head">AWS::Serverless::StateMachine</div>
+          <div class="res-card-body">Step Functions state machine. Supports event triggers, IAM policies, and definition inline or via file.</div>
+        </div>
+      </div>
+
+      <div class="callout co-coral">
+        <span class="co-icon">⚠️</span>
+        <p><strong>SAM resources expand into multiple CFN resources.</strong> A single <code>AWS::Serverless::Function</code> generates: <code>AWS::Lambda::Function</code> + <code>AWS::IAM::Role</code> + any <code>AWS::Lambda::Permission</code> entries for each event. This is why <code>CAPABILITY_IAM</code> is always required when deploying SAM templates.</p>
+      </div>
+    </section>
+
+    <!-- ════════════════════════
+         05 FUNCTION
+    ════════════════════════ -->
+    <section class="section" id="function">
+      <div class="section-eyebrow">
+        <span class="section-num">05</span>
+        <span class="section-tag">Resource Types</span>
+      </div>
+      <h2>AWS::Serverless::Function</h2>
+      <div class="section-rule"></div>
+
+      <div class="code-file"><div class="code-file-dot"></div>function-complete.yaml — full feature showcase</div>
+      <pre><code><span class="sk">Resources</span>:
+  <span class="sk">MyApiFunction</span>:
+    <span class="sk">Type</span>: <span class="si">AWS::Serverless::Function</span>
+    <span class="sk">Properties</span>:
+      <span class="sc"># Code location</span>
+      <span class="sk">Handler</span>: <span class="sv">src/app.handler</span>        <span class="sc"># file.exportedFunction</span>
+      <span class="sk">Runtime</span>: <span class="sv">python3.12</span>
+      <span class="sk">CodeUri</span>: <span class="sv">./src/</span>                 <span class="sc"># local path or S3 URI</span>
+      <span class="sk">Architectures</span>: [<span class="sv">arm64</span>]         <span class="sc"># arm64 is cheaper than x86_64</span>
+
+      <span class="sc"># Performance</span>
+      <span class="sk">MemorySize</span>: <span class="snum">512</span>
+      <span class="sk">Timeout</span>: <span class="snum">30</span>
+      <span class="sk">EphemeralStorage</span>:
+        <span class="sk">Size</span>: <span class="snum">1024</span>                    <span class="sc"># /tmp storage in MB (512-10240)</span>
+
+      <span class="sc"># Environment &amp; config</span>
+      <span class="sk">Environment</span>:
+        <span class="sk">Variables</span>:
+          <span class="sk">TABLE_NAME</span>: <span class="sn">!Ref</span> <span class="sv">MyTable</span>
+          <span class="sk">SECRET_ARN</span>: <span class="sv">'{{resolve:secretsmanager:MySecret}}'</span>
+
+      <span class="sc"># Networking (for VPC access)</span>
+      <span class="sk">VpcConfig</span>:
+        <span class="sk">SubnetIds</span>: [<span class="sn">!Ref</span> <span class="sv">PrivateSubnet1</span>]
+        <span class="sk">SecurityGroupIds</span>: [<span class="sn">!Ref</span> <span class="sv">LambdaSG</span>]
+
+      <span class="sc"># IAM — use managed policy templates OR custom policies</span>
+      <span class="sk">Policies</span>:
+        - <span class="si">AmazonDynamoDBFullAccess</span>      <span class="sc"># managed policy ARN or name</span>
+        - <span class="sk">DynamoDBCrudPolicy</span>:           <span class="sc"># SAM policy template (shorthand)</span>
+            <span class="sk">TableName</span>: <span class="sn">!Ref</span> <span class="sv">MyTable</span>
+        - <span class="sk">Statement</span>:                    <span class="sc"># inline policy</span>
+            - <span class="sk">Effect</span>: <span class="sv">Allow</span>
+              <span class="sk">Action</span>: <span class="sv">ssm:GetParameter</span>
+              <span class="sk">Resource</span>: <span class="sv">'*'</span>
+
+      <span class="sc"># Observability</span>
+      <span class="sk">Tracing</span>: <span class="sv">Active</span>                  <span class="sc"># X-Ray tracing</span>
+      <span class="sk">Layers</span>:
+        - <span class="sn">!Ref</span> <span class="sv">MyLayer</span>                  <span class="sc"># reference a Lambda Layer</span>
+
+      <span class="sc"># Versioning &amp; Aliases (required for DeploymentPreference)</span>
+      <span class="sk">AutoPublishAlias</span>: <span class="sv">live</span>           <span class="sc"># auto-creates alias + publishes version on each deploy</span>
+
+      <span class="sc"># Event sources — SAM creates all trigger permissions automatically</span>
+      <span class="sk">Events</span>:
+        <span class="sk">RestApiEvent</span>:
+          <span class="sk">Type</span>: <span class="si">Api</span>
+          <span class="sk">Properties</span>:
+            <span class="sk">Path</span>: <span class="sv">/items/{id}</span>
+            <span class="sk">Method</span>: <span class="sv">GET</span>
+        <span class="sk">ScheduledEvent</span>:
+          <span class="sk">Type</span>: <span class="si">Schedule</span>
+          <span class="sk">Properties</span>:
+            <span class="sk">Schedule</span>: <span class="sv">rate(5 minutes)</span>
+        <span class="sk">SQSEvent</span>:
+          <span class="sk">Type</span>: <span class="si">SQS</span>
+          <span class="sk">Properties</span>:
+            <span class="sk">Queue</span>: <span class="sn">!GetAtt</span> <span class="sv">MyQueue.Arn</span>
+            <span class="sk">BatchSize</span>: <span class="snum">10</span>
+        <span class="sk">S3Event</span>:
+          <span class="sk">Type</span>: <span class="si">S3</span>
+          <span class="sk">Properties</span>:
+            <span class="sk">Bucket</span>: <span class="sn">!Ref</span> <span class="sv">MyBucket</span>
+            <span class="sk">Events</span>: <span class="sv">s3:ObjectCreated:*</span>
+        <span class="sk">DynamoDBStream</span>:
+          <span class="sk">Type</span>: <span class="si">DynamoDB</span>
+          <span class="sk">Properties</span>:
+            <span class="sk">Stream</span>: <span class="sn">!GetAtt</span> <span class="sv">MyTable.StreamArn</span>
+            <span class="sk">StartingPosition</span>: <span class="sv">TRIM_HORIZON</span>
+</code></pre>
+
+      <h3>Event Source Types</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Type</th><th>Trigger</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td><span class="tag t-coral">Api</span></td><td>REST API Gateway (v1)</td><td>Auto-creates implicit API if no explicit <code>AWS::Serverless::Api</code> defined</td></tr>
+            <tr><td><span class="tag t-teal">HttpApi</span></td><td>HTTP API Gateway (v2)</td><td>Lower cost, lower latency; JWT auth support</td></tr>
+            <tr><td><span class="tag t-gold">Schedule / ScheduleV2</span></td><td>EventBridge Scheduler</td><td>cron or rate expressions</td></tr>
+            <tr><td><span class="tag t-slate">SQS</span></td><td>SQS Queue</td><td>Configurable batch size and concurrency</td></tr>
+            <tr><td><span class="tag t-plum">SNS</span></td><td>SNS Topic subscription</td><td>Automatic Lambda permission + subscription</td></tr>
+            <tr><td><span class="tag t-coral">S3</span></td><td>S3 bucket event notification</td><td>ObjectCreated, ObjectRemoved, etc.</td></tr>
+            <tr><td><span class="tag t-teal">DynamoDB</span></td><td>DynamoDB Stream</td><td>Requires stream enabled on the table</td></tr>
+            <tr><td><span class="tag t-gold">Kinesis</span></td><td>Kinesis Data Stream</td><td>Configurable starting position and batch size</td></tr>
+            <tr><td><span class="tag t-slate">EventBridgeRule</span></td><td>EventBridge event pattern</td><td>Custom patterns and rules</td></tr>
+            <tr><td><span class="tag t-plum">Cognito</span></td><td>Cognito User Pool trigger</td><td>Pre-signup, post-confirmation, etc.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ════════════════════════
+         06 API
+    ════════════════════════ -->
+    <section class="section" id="api">
+      <div class="section-eyebrow">
+        <span class="section-num">06</span>
+        <span class="section-tag">Resource Types</span>
+      </div>
+      <h2>AWS::Serverless::Api &amp; HttpApi</h2>
+      <div class="section-rule"></div>
+
+      <div class="grid2">
+        <div>
+          <div class="code-file"><div class="code-file-dot"></div>REST API (v1)</div>
+          <pre><code><span class="sk">MyRestApi</span>:
+  <span class="sk">Type</span>: <span class="si">AWS::Serverless::Api</span>
+  <span class="sk">Properties</span>:
+    <span class="sk">StageName</span>: <span class="sv">prod</span>
+    <span class="sk">TracingEnabled</span>: <span class="sb">true</span>
+    <span class="sk">AccessLogSetting</span>:
+      <span class="sk">DestinationArn</span>: <span class="sn">!GetAtt</span> <span class="sv">LogGroup.Arn</span>
+    <span class="sk">MethodSettings</span>:
+      - <span class="sk">ResourcePath</span>: <span class="sv">"/*"</span>
+        <span class="sk">HttpMethod</span>: <span class="sv">"*"</span>
+        <span class="sk">ThrottlingRateLimit</span>: <span class="snum">1000</span>
+        <span class="sk">ThrottlingBurstLimit</span>: <span class="snum">500</span>
+    <span class="sk">Auth</span>:
+      <span class="sk">DefaultAuthorizer</span>: <span class="sv">MyCognitoAuth</span>
+      <span class="sk">Authorizers</span>:
+        <span class="sk">MyCognitoAuth</span>:
+          <span class="sk">UserPoolArn</span>: <span class="sn">!GetAtt</span> <span class="sv">UserPool.Arn</span>
+    <span class="sc"># Use OpenAPI definition from file</span>
+    <span class="sk">DefinitionUri</span>: <span class="sv">./openapi.yaml</span>
+</code></pre>
+        </div>
+        <div>
+          <div class="code-file"><div class="code-file-dot"></div>HTTP API (v2) — cheaper & faster</div>
+          <pre><code><span class="sk">MyHttpApi</span>:
+  <span class="sk">Type</span>: <span class="si">AWS::Serverless::HttpApi</span>
+  <span class="sk">Properties</span>:
+    <span class="sk">StageName</span>: <span class="sv">prod</span>
+    <span class="sk">CorsConfiguration</span>:
+      <span class="sk">AllowOrigins</span>:
+        - <span class="sv">"https://example.com"</span>
+      <span class="sk">AllowMethods</span>:
+        - <span class="sv">GET</span>
+        - <span class="sv">POST</span>
+    <span class="sk">Auth</span>:
+      <span class="sk">DefaultAuthorizer</span>: <span class="sv">JWTAuth</span>
+      <span class="sk">Authorizers</span>:
+        <span class="sk">JWTAuth</span>:
+          <span class="sk">JwtConfiguration</span>:
+            <span class="sk">issuer</span>: <span class="sv">"https://cognito-idp..."</span>
+            <span class="sk">audience</span>: [<span class="sv">my-client-id</span>]
+          <span class="sk">IdentitySource</span>: <span class="sv">"$request.header.Authorization"</span>
+</code></pre>
+        </div>
+      </div>
+
+      <div class="callout co-teal">
+        <span class="co-icon">ℹ️</span>
+        <p><strong>Implicit vs Explicit API:</strong> If you define an <code>Events</code> block with <code>Type: Api</code> and don't define an explicit <code>AWS::Serverless::Api</code>, SAM creates an implicit API called <code>ServerlessRestApi</code>. Use explicit API definitions when you need custom domain names, throttling, authorizers, or access logging.</p>
+      </div>
+    </section>
+
+    <!-- ════════════════════════
+         07 TABLE & OTHERS
+    ════════════════════════ -->
+    <section class="section" id="other-resources">
+      <div class="section-eyebrow">
+        <span class="section-num">07</span>
+        <span class="section-tag">Resource Types</span>
+      </div>
+      <h2>SimpleTable, LayerVersion &amp; StateMachine</h2>
+      <div class="section-rule"></div>
+
+      <div class="code-file"><div class="code-file-dot"></div>all-other-resources.yaml</div>
+      <pre><code><span class="sk">Resources</span>:
+
+  <span class="sc"># SimpleTable — DynamoDB with a single primary key</span>
+  <span class="sk">MyTable</span>:
+    <span class="sk">Type</span>: <span class="si">AWS::Serverless::SimpleTable</span>
+    <span class="sk">Properties</span>:
+      <span class="sk">PrimaryKey</span>:
+        <span class="sk">Name</span>: <span class="sv">pk</span>
+        <span class="sk">Type</span>: <span class="sv">String</span>
+      <span class="sk">ProvisionedThroughput</span>:
+        <span class="sk">ReadCapacityUnits</span>:  <span class="snum">5</span>
+        <span class="sk">WriteCapacityUnits</span>: <span class="snum">5</span>
+      <span class="sk">SSESpecification</span>:
+        <span class="sk">SSEEnabled</span>: <span class="sb">true</span>
+
+  <span class="sc"># LayerVersion — shared dependencies / code</span>
+  <span class="sk">MyDependencyLayer</span>:
+    <span class="sk">Type</span>: <span class="si">AWS::Serverless::LayerVersion</span>
+    <span class="sk">Properties</span>:
+      <span class="sk">LayerName</span>: <span class="sv">my-dependencies</span>
+      <span class="sk">ContentUri</span>: <span class="sv">./layer/</span>           <span class="sc"># SAM builds this directory</span>
+      <span class="sk">CompatibleRuntimes</span>: [<span class="sv">python3.12</span>, <span class="sv">python3.11</span>]
+      <span class="sk">RetentionPolicy</span>: <span class="sv">Retain</span>        <span class="sc"># keep old versions when updating</span>
+    <span class="sk">Metadata</span>:
+      <span class="sk">BuildMethod</span>: <span class="sv">python3.12</span>       <span class="sc"># sam build uses this</span>
+
+  <span class="sc"># StateMachine — Step Functions with event trigger</span>
+  <span class="sk">MyWorkflow</span>:
+    <span class="sk">Type</span>: <span class="si">AWS::Serverless::StateMachine</span>
+    <span class="sk">Properties</span>:
+      <span class="sk">DefinitionUri</span>: <span class="sv">./statemachine/workflow.asl.json</span>
+      <span class="sk">DefinitionSubstitutions</span>:
+        <span class="sk">ProcessFunctionArn</span>: <span class="sn">!GetAtt</span> <span class="sv">ProcessFunction.Arn</span>
+      <span class="sk">Policies</span>:
+        - <span class="si">LambdaInvokePolicy</span>:
+            <span class="sk">FunctionName</span>: <span class="sn">!Ref</span> <span class="sv">ProcessFunction</span>
+      <span class="sk">Events</span>:
+        <span class="sk">HourlyTrigger</span>:
+          <span class="sk">Type</span>: <span class="si">Schedule</span>
+          <span class="sk">Properties</span>:
+            <span class="sk">Schedule</span>: <span class="sv">rate(1 hour)</span>
+</code></pre>
+
+      <div class="callout co-gold">
+        <span class="co-icon">💡</span>
+        <p><strong>SimpleTable limitation:</strong> <code>AWS::Serverless::SimpleTable</code> only supports a <strong>single primary key</strong> (no sort key, no LSIs, no GSIs). For anything complex, use a full <code>AWS::DynamoDB::Table</code> resource alongside your SAM template.</p>
+      </div>
+    </section>
+
+    <!-- ════════════════════════
+         08 CLI COMMANDS
+    ════════════════════════ -->
+    <section class="section" id="cli">
+      <div class="section-eyebrow">
+        <span class="section-num">08</span>
+        <span class="section-tag">CLI &amp; Deploy</span>
+      </div>
+      <h2>SAM CLI Commands</h2>
+      <div class="section-rule"></div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Command</th><th>What It Does</th><th>Key Flags</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><code>sam init</code></td>
+              <td>Bootstrap a new SAM project from a template (Hello World, Step Functions, etc.)</td>
+              <td><code>--runtime python3.12</code> <code>--name my-app</code></td>
+            </tr>
+            <tr>
+              <td><code>sam build</code></td>
+              <td>Compile code, resolve dependencies (pip, npm, etc.), package into <code>.aws-sam/</code></td>
+              <td><code>--use-container</code> (build in Docker) <code>--parallel</code></td>
+            </tr>
+            <tr>
+              <td><code>sam validate</code></td>
+              <td>Lint and validate SAM template syntax and CloudFormation rules</td>
+              <td><code>--lint</code> (stricter checks)</td>
+            </tr>
+            <tr>
+              <td><code>sam package</code></td>
+              <td>Upload code artifacts to S3, output a packaged template</td>
+              <td><code>--s3-bucket</code> <code>--output-template-file</code></td>
+            </tr>
+            <tr>
+              <td><code>sam deploy</code></td>
+              <td>Transform + package + deploy to CloudFormation</td>
+              <td><code>--guided</code> (interactive) <code>--confirm-changeset</code></td>
+            </tr>
+            <tr>
+              <td><code>sam local invoke</code></td>
+              <td>Invoke a Lambda function locally with a test event</td>
+              <td><code>-e event.json</code> <code>--env-vars env.json</code></td>
+            </tr>
+            <tr>
+              <td><code>sam local start-api</code></td>
+              <td>Start a local API Gateway server on localhost:3000</td>
+              <td><code>--port 3000</code> <code>--env-vars env.json</code></td>
+            </tr>
+            <tr>
+              <td><code>sam local start-lambda</code></td>
+              <td>Emulate Lambda endpoint for testing SDK integrations locally</td>
+              <td><code>--host</code> <code>--port</code></td>
+            </tr>
+            <tr>
+              <td><code>sam logs</code></td>
+              <td>Fetch and tail CloudWatch logs for a Lambda function</td>
+              <td><code>-n FunctionName</code> <code>--tail</code> <code>--filter ERROR</code></td>
+            </tr>
+            <tr>
+              <td><code>sam sync</code></td>
+              <td>Sync local changes to AWS (see SAM Accelerate)</td>
+              <td><code>--code</code> <code>--watch</code> <code>--resource-id</code></td>
+            </tr>
+            <tr>
+              <td><code>sam delete</code></td>
+              <td>Delete the CloudFormation stack and all its resources</td>
+              <td><code>--stack-name</code> <code>--no-prompts</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>samconfig.toml — Persistent Configuration</h3>
+      <p>Running <code>sam deploy --guided</code> creates a <code>samconfig.toml</code> file that stores your deployment config so you don't have to re-enter flags every time.</p>
+      <div class="code-file"><div class="code-file-dot"></div>samconfig.toml</div>
+      <pre><code><span class="sc"># Auto-generated by sam deploy --guided</span>
+<span class="scmd">version = 0.1</span>
+
+<span class="scmd">[default.deploy.parameters]</span>
+<span class="scmd">stack_name = "my-serverless-app"</span>
+<span class="scmd">resolve_s3 = true</span>
+<span class="scmd">s3_prefix = "my-serverless-app"</span>
+<span class="scmd">region = "us-east-1"</span>
+<span class="scmd">confirm_changeset = true</span>
+<span class="scmd">capabilities = "CAPABILITY_IAM CAPABILITY_AUTO_EXPAND"</span>
+<span class="scmd">parameter_overrides = "Stage=prod"</span>
+</code></pre>
+    </section>
+
+    <!-- ════════════════════════
+         09 SAM ACCELERATE
+    ════════════════════════ -->
+    <section class="section" id="accelerate">
+      <div class="section-eyebrow">
+        <span class="section-num">09</span>
+        <span class="section-tag">CLI &amp; Deploy</span>
+      </div>
+      <h2>SAM Accelerate (sam sync)</h2>
+      <div class="section-rule"></div>
+
+      <p>SAM Accelerate speeds up the development feedback loop by <strong>bypassing CloudFormation for code-only changes</strong>. Instead of the full CFN update cycle (minutes), code changes deploy in seconds by updating Lambda directly.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Command</th><th>What Syncs</th><th>Uses CloudFormation?</th><th>Speed</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><code>sam sync</code></td>
+              <td>Both code AND infrastructure changes</td>
+              <td>Yes — full CFN update</td>
+              <td>Slower (~minutes)</td>
+            </tr>
+            <tr>
+              <td><code>sam sync --code</code></td>
+              <td>Code changes only (Lambda function code)</td>
+              <td><strong>No</strong> — bypasses CFN entirely</td>
+              <td>⚡ Seconds</td>
+            </tr>
+            <tr>
+              <td><code>sam sync --code --resource AWS::Serverless::Function</code></td>
+              <td>All Lambda functions and their dependencies</td>
+              <td><strong>No</strong></td>
+              <td>⚡ Seconds</td>
+            </tr>
+            <tr>
+              <td><code>sam sync --code --resource-id HelloWorldFunction</code></td>
+              <td>Only the specific named function</td>
+              <td><strong>No</strong></td>
+              <td>⚡ Fastest</td>
+            </tr>
+            <tr>
+              <td><code>sam sync --watch</code></td>
+              <td>Detects file changes automatically and syncs</td>
+              <td>Config changes → Yes; Code changes → No</td>
+              <td>Auto-chooses</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout co-coral">
+        <span class="co-icon">⚠️</span>
+        <p><strong><code>sam sync --code</code> bypasses CloudFormation.</strong> This means it does NOT create a ChangeSet or go through the standard CFN pipeline. It's only safe for development — never use <code>--code</code> in production pipelines since infrastructure drift can occur.</p>
+      </div>
+
+      <div class="callout co-gold">
+        <span class="co-icon">💡</span>
+        <p><strong><code>sam sync --watch</code> smart detection:</strong> It monitors your project for file changes. If only Lambda function code changed → uses <code>sam sync --code</code> (seconds). If template.yaml or other config changed → uses full <code>sam sync</code> (minutes). Best for inner dev loop.</p>
+      </div>
+    </section>
+
+    <!-- ════════════════════════
+         10 LOCAL TESTING
+    ════════════════════════ -->
+    <section class="section" id="local">
+      <div class="section-eyebrow">
+        <span class="section-num">10</span>
+        <span class="section-tag">CLI &amp; Deploy</span>
+      </div>
+      <h2>Local Testing</h2>
+      <div class="section-rule"></div>
+
+      <p>SAM CLI uses <strong>AWS Lambda Runtime Interface Emulator (RIE)</strong> via Docker to run Lambda functions locally. Requires Docker to be running on your machine.</p>
+
+      <div class="code-file"><div class="code-file-dot"></div>local-testing-examples.sh</div>
+      <pre><code><span class="sc"># ── Invoke a function with a local event file ──</span>
+<span class="scmd">sam local invoke MyFunction --event events/api-event.json</span>
+<span class="scmd">sam local invoke MyFunction --event events/sqs-event.json --env-vars env.json</span>
+
+<span class="sc"># ── Generate a sample event for testing ──</span>
+<span class="scmd">sam local generate-event apigateway aws-proxy > events/api-event.json</span>
+<span class="scmd">sam local generate-event s3 put > events/s3-put.json</span>
+<span class="scmd">sam local generate-event sqs receive-message > events/sqs.json</span>
+<span class="scmd">sam local generate-event sns notification > events/sns.json</span>
+
+<span class="sc"># ── Start local REST API on port 3000 ──</span>
+<span class="scmd">sam local start-api</span>
+<span class="scmd">sam local start-api --port 8080 --env-vars env.json --warm-containers EAGER</span>
+
+<span class="sc"># ── Start Lambda endpoint (for SDK testing) ──</span>
+<span class="scmd">sam local start-lambda</span>
+<span class="sc"># Then invoke via SDK:</span>
+<span class="sc"># aws lambda invoke --function-name MyFunction --endpoint-url http://localhost:3001 out.json</span>
+
+<span class="sc"># ── Run unit tests with DynamoDB Local ──</span>
+<span class="scmd">docker run -d -p 8000:8000 amazon/dynamodb-local</span>
+<span class="scmd">AWS_SAM_LOCAL=true pytest tests/</span>
+</code></pre>
+
+      <h3>What Can Be Tested Locally</h3>
+      <div class="grid3">
+        <div class="card card-teal">
+          <h4>✅ Lambda Functions</h4>
+          <p style="font-size:13px;margin:0">Full Lambda runtime emulation. Same execution context as AWS. Environment variables, layers, timeouts.</p>
+        </div>
+        <div class="card card-teal">
+          <h4>✅ API Gateway</h4>
+          <p style="font-size:13px;margin:0">Local HTTP server that routes requests to Lambda functions. Supports path params, query strings, headers.</p>
+        </div>
+        <div class="card card-teal">
+          <h4>✅ DynamoDB</h4>
+          <p style="font-size:13px;margin:0">Use DynamoDB Local (Docker) or DynamoDB Local CLI with SAM. Point your app at <code>localhost:8000</code>.</p>
+        </div>
+      </div>
+
+      <div class="callout co-coral">
+        <span class="co-icon">⚠️</span>
+        <p><strong>Local limitations:</strong> SAM local does NOT emulate SQS, SNS, EventBridge, or Step Functions locally. For those, you need mocking libraries (moto for Python, aws-sdk-mock for Node) or integration tests against real AWS services in a dev account.</p>
+      </div>
+    </section>
+
+    <!-- ════════════════════════
+         11 CODEDEPLOY
+    ════════════════════════ -->
+    <section class="section" id="codedeploy">
+      <div class="section-eyebrow">
+        <span class="section-num">11</span>
+        <span class="section-tag">Advanced</span>
+      </div>
+      <h2>SAM + CodeDeploy Integration</h2>
+      <div class="section-rule"></div>
+
+      <p>When you specify <code>DeploymentPreference</code> on a <code>AWS::Serverless::Function</code>, SAM automatically creates a CodeDeploy Application, Deployment Group, and CloudWatch Alarms to manage <strong>Lambda traffic shifting</strong> — routing traffic from the old function version to the new one gradually.</p>
+
+      <div class="callout co-gold">
+        <span class="co-icon">💡</span>
+        <p><strong>How it works:</strong> SAM sets <code>AutoPublishAlias</code> which creates a Lambda Alias (e.g., <code>live</code>). On each deploy, a new version is published. CodeDeploy gradually shifts traffic from the old version to the new one. If CloudWatch alarms trigger, CodeDeploy automatically rolls back to 100% old version.</p>
+      </div>
+
+      <h3>Deployment Preference Types</h3>
+      <div class="deploy-strip">
+        <div class="deploy-strip-head">
+          <span class="tag t-coral">Canary</span>
+          <span class="deploy-strip-name">Canary10Percent5Minutes / Canary10Percent30Minutes</span>
+        </div>
+        <div class="deploy-strip-body">Send <strong>10%</strong> of traffic to new version, wait N minutes monitoring alarms, then shift <strong>remaining 90%</strong> at once. Best for validation with real traffic before full cutover.</div>
+      </div>
+      <div class="deploy-strip">
+        <div class="deploy-strip-head">
+          <span class="tag t-teal">Linear</span>
+          <span class="deploy-strip-name">Linear10PercentEvery1Minute / Linear10PercentEvery10Minutes</span>
+        </div>
+        <div class="deploy-strip-body">Shift traffic in <strong>equal increments every N minutes</strong> (10% every minute = fully shifted in 10 minutes). More gradual than Canary. More monitoring points to catch problems early.</div>
+      </div>
+      <div class="deploy-strip">
+        <div class="deploy-strip-head">
+          <span class="tag t-plum">AllAtOnce</span>
+          <span class="deploy-strip-name">AllAtOnce</span>
+        </div>
+        <div class="deploy-strip-body">Shifts <strong>100% of traffic immediately</strong> to new version. No gradual rollout. Still uses CodeDeploy pipeline — alarms can trigger rollback. Fastest, highest risk.</div>
+      </div>
+
+      <div class="code-file"><div class="code-file-dot"></div>codedeploy-integration.yaml — full DeploymentPreference example</div>
+      <pre><code><span class="sk">Resources</span>:
+  <span class="sk">MyLambdaFunction</span>:
+    <span class="sk">Type</span>: <span class="si">AWS::Serverless::Function</span>
+    <span class="sk">Properties</span>:
+      <span class="sk">Handler</span>: <span class="sv">index.handler</span>
+      <span class="sk">Runtime</span>: <span class="sv">nodejs20.x</span>
+      <span class="sk">CodeUri</span>: <span class="sv">s3://my-bucket/code.zip</span>
+
+      <span class="sc"># Required: creates versioning + alias for traffic shifting</span>
+      <span class="sk">AutoPublishAlias</span>: <span class="sv">live</span>
+
+      <span class="sk">DeploymentPreference</span>:
+        <span class="sk">Type</span>: <span class="sv">Canary10Percent10Minutes</span>   <span class="sc"># Canary | Linear | AllAtOnce</span>
+
+        <span class="sc"># CloudWatch alarms — trigger automatic rollback if breached</span>
+        <span class="sk">Alarms</span>:
+          - <span class="sn">!Ref</span> <span class="sv">AliasErrorRateAlarm</span>
+          - <span class="sn">!Ref</span> <span class="sv">LatencyAlarm</span>
+
+        <span class="sc"># Hooks — Lambda functions run before/after traffic shift</span>
+        <span class="sk">Hooks</span>:
+          <span class="sk">PreTraffic</span>:  <span class="sn">!Ref</span> <span class="sv">PreTrafficValidatorFn</span>   <span class="sc"># smoke test before shift</span>
+          <span class="sk">PostTraffic</span>: <span class="sn">!Ref</span> <span class="sv">PostTrafficValidatorFn</span>  <span class="sc"># integration test after shift</span>
+
+        <span class="sc"># Enable/disable without removing config</span>
+        <span class="sk">Enabled</span>: <span class="sb">true</span>
+
+        <span class="sc"># Deploy to specific CodeDeploy deployment group</span>
+        <span class="sk">DeploymentGroupName</span>: <span class="sv">MyDeploymentGroup</span>
+
+  <span class="sc"># Alarm that watches the function alias error rate</span>
+  <span class="sk">AliasErrorRateAlarm</span>:
+    <span class="sk">Type</span>: <span class="si">AWS::CloudWatch::Alarm</span>
+    <span class="sk">Properties</span>:
+      <span class="sk">AlarmDescription</span>: <span class="sv">Lambda alias errors</span>
+      <span class="sk">Namespace</span>: <span class="sv">AWS/Lambda</span>
+      <span class="sk">MetricName</span>: <span class="sv">Errors</span>
+      <span class="sk">Dimensions</span>:
+        - <span class="sk">Name</span>: <span class="sv">FunctionName</span>
+          <span class="sk">Value</span>: <span class="sn">!Ref</span> <span class="sv">MyLambdaFunction</span>
+        - <span class="sk">Name</span>: <span class="sv">Resource</span>
+          <span class="sk">Value</span>: <span class="sn">!Sub</span> <span class="sv">'${MyLambdaFunction}:live'</span>   <span class="sc"># watch the alias</span>
+      <span class="sk">Statistic</span>: <span class="sv">Sum</span>
+      <span class="sk">Period</span>: <span class="snum">60</span>
+      <span class="sk">EvaluationPeriods</span>: <span class="snum">1</span>
+      <span class="sk">Threshold</span>: <span class="snum">0</span>
+      <span class="sk">ComparisonOperator</span>: <span class="sv">GreaterThanThreshold</span>
+
+  <span class="sc"># Pre-traffic hook — must signal CodeDeploy with success/failure</span>
+  <span class="sk">PreTrafficValidatorFn</span>:
+    <span class="sk">Type</span>: <span class="si">AWS::Serverless::Function</span>
+    <span class="sk">Properties</span>:
+      <span class="sk">Handler</span>: <span class="sv">pre_traffic.handler</span>
+      <span class="sk">Policies</span>:
+        - <span class="sk">Version</span>: <span class="sv">'2012-10-17'</span>
+          <span class="sk">Statement</span>:
+            - <span class="sk">Effect</span>: <span class="sv">Allow</span>
+              <span class="sk">Action</span>: <span class="sv">codedeploy:PutLifecycleEventHookExecutionStatus</span>
+              <span class="sk">Resource</span>: <span class="sv">'*'</span>
+</code></pre>
+
+      <h3>Traffic Hook Lambda Pattern</h3>
+      <div class="code-file"><div class="code-file-dot"></div>pre_traffic.py — must call PutLifecycleEventHookExecutionStatus</div>
+      <pre><code><span class="sc"># Pre-traffic hook — runs BEFORE any traffic shifts to new version</span>
+<span class="sk">import boto3</span>
+
+<span class="sk">def</span> <span class="sn">handler</span>(event, context):
+    codedeploy = boto3.client(<span class="sv">'codedeploy'</span>)
+
+    <span class="sc"># Run your smoke tests / health checks against the new function version</span>
+    deployment_id        = event[<span class="sv">'DeploymentId'</span>]
+    lifecycle_event_hook = event[<span class="sv">'LifecycleEventHookExecutionId'</span>]
+
+    <span class="sk">try</span>:
+        <span class="sc"># Invoke new function version directly (not the alias)</span>
+        result = run_smoke_tests()
+        status = <span class="sv">'Succeeded'</span> <span class="sk">if</span> result <span class="sk">else</span> <span class="sv">'Failed'</span>
+    <span class="sk">except</span> Exception:
+        status = <span class="sv">'Failed'</span>
+
+    <span class="sc"># MUST call this — CodeDeploy waits for it</span>
+    codedeploy.put_lifecycle_event_hook_execution_status(
+        deploymentId=deployment_id,
+        lifecycleEventHookExecutionId=lifecycle_event_hook,
+        status=status    <span class="sc"># 'Succeeded' → continue; 'Failed' → rollback</span>
+    )
+</code></pre>
+    </section>
+
+    <!-- ════════════════════════
+         12 LAYERS & POLICIES
+    ════════════════════════ -->
+    <section class="section" id="layers">
+      <div class="section-eyebrow">
+        <span class="section-num">12</span>
+        <span class="section-tag">Advanced</span>
+      </div>
+      <h2>Layers &amp; SAM Policy Templates</h2>
+      <div class="section-rule"></div>
+
+      <h3>SAM Policy Templates</h3>
+      <p>SAM provides <strong>policy templates</strong> — shorthand for common IAM permission patterns. Instead of writing full IAM policy documents, you use a policy template name with a parameter.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Policy Template</th><th>Grants</th><th>Parameter</th></tr></thead>
+          <tbody>
+            <tr><td><code>DynamoDBCrudPolicy</code></td><td>PutItem, DeleteItem, GetItem, Scan, Query, UpdateItem, BatchWriteItem, BatchGetItem, DescribeTable, ConditionCheckItem</td><td><code>TableName</code></td></tr>
+            <tr><td><code>DynamoDBReadPolicy</code></td><td>GetItem, Scan, Query, BatchGetItem, DescribeTable</td><td><code>TableName</code></td></tr>
+            <tr><td><code>S3CrudPolicy</code></td><td>GetObject, PutObject, DeleteObject, ListBucket</td><td><code>BucketName</code></td></tr>
+            <tr><td><code>S3ReadPolicy</code></td><td>GetObject, GetObjectAcl, ListBucket</td><td><code>BucketName</code></td></tr>
+            <tr><td><code>SQSPollerPolicy</code></td><td>ReceiveMessage, DeleteMessage, GetQueueAttributes, ChangeMessageVisibility</td><td><code>QueueName</code></td></tr>
+            <tr><td><code>SQSSendMessagePolicy</code></td><td>sqs:SendMessage</td><td><code>QueueName</code></td></tr>
+            <tr><td><code>SNSPublishMessagePolicy</code></td><td>sns:Publish</td><td><code>TopicName</code></td></tr>
+            <tr><td><code>LambdaInvokePolicy</code></td><td>lambda:InvokeFunction</td><td><code>FunctionName</code></td></tr>
+            <tr><td><code>SecretsManagerRotationPolicy</code></td><td>secretsmanager:DescribeSecret, GetSecretValue, PutSecretValue, UpdateSecretVersionStage</td><td><code>SecretArn</code></td></tr>
+            <tr><td><code>CloudWatchPutMetricPolicy</code></td><td>cloudwatch:PutMetricData</td><td>none</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="code-file"><div class="code-file-dot"></div>policy-templates-usage.yaml</div>
+      <pre><code><span class="sk">Policies</span>:
+  <span class="sc"># Using SAM policy templates — clean and concise</span>
+  - <span class="sk">DynamoDBCrudPolicy</span>:
+      <span class="sk">TableName</span>: <span class="sn">!Ref</span> <span class="sv">MyTable</span>
+  - <span class="sk">S3CrudPolicy</span>:
+      <span class="sk">BucketName</span>: <span class="sn">!Ref</span> <span class="sv">MyBucket</span>
+  - <span class="sk">SQSSendMessagePolicy</span>:
+      <span class="sk">QueueName</span>: <span class="sn">!GetAtt</span> <span class="sv">MyQueue.QueueName</span>
+  <span class="sc"># Mix with managed policies and inline statements</span>
+  - <span class="si">AWSXRayDaemonWriteAccess</span>
+  - <span class="sk">Statement</span>:
+      - <span class="sk">Effect</span>: <span class="sv">Allow</span>
+        <span class="sk">Action</span>: [<span class="sv">ssm:GetParameter</span>, <span class="sv">ssm:GetParameters</span>]
+        <span class="sk">Resource</span>: <span class="sn">!Sub</span> <span class="sv">'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/myapp/*'</span>
+</code></pre>
+    </section>
+
+    <!-- ════════════════════════
+         13 SAR
+    ════════════════════════ -->
+    <section class="section" id="sar">
+      <div class="section-eyebrow">
+        <span class="section-num">13</span>
+        <span class="section-tag">Advanced</span>
+      </div>
+      <h2>Serverless Application Repository (SAR)</h2>
+      <div class="section-rule"></div>
+
+      <p>The <strong>AWS Serverless Application Repository (SAR)</strong> is a managed repository for serverless applications. You can publish SAM applications to SAR to share them within your organization or publicly, and consume pre-built applications from the public catalog.</p>
+
+      <div class="grid2">
+        <div class="card card-teal">
+          <h4>Publishing to SAR</h4>
+          <ul style="font-size:13px">
+            <li>Package your SAM application: <code>sam package</code></li>
+            <li>Add <code>Metadata</code> block to <code>template.yaml</code> with <code>AWS::ServerlessRepo::Application</code></li>
+            <li>Publish: <code>sam publish</code></li>
+            <li>Set as <strong>public</strong> (anyone) or <strong>private</strong> (your org / specific accounts)</li>
+            <li>Versioning with semantic versioning support</li>
+          </ul>
+        </div>
+        <div class="card card-slate">
+          <h4>Consuming from SAR</h4>
+          <ul style="font-size:13px">
+            <li>Deploy directly from AWS Console → Serverless Application Repository</li>
+            <li>Reference in CloudFormation/SAM via <code>AWS::Serverless::Application</code></li>
+            <li>Common use cases: authorizers, data transformers, monitoring components</li>
+            <li>Requires <code>CAPABILITY_AUTO_EXPAND</code> when deploying nested SAR apps</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="code-file"><div class="code-file-dot"></div>template.yaml — publishing metadata + consuming a SAR app</div>
+      <pre><code><span class="sc"># ── Publishing: add metadata to your template ──</span>
+<span class="sk">Metadata</span>:
+  <span class="sk">AWS::ServerlessRepo::Application</span>:
+    <span class="sk">Name</span>: <span class="sv">my-image-resizer</span>
+    <span class="sk">Description</span>: <span class="sv">Automatically resizes images uploaded to S3</span>
+    <span class="sk">Author</span>: <span class="sv">My Company</span>
+    <span class="sk">SpdxLicenseId</span>: <span class="sv">Apache-2.0</span>
+    <span class="sk">LicenseUrl</span>: <span class="sv">LICENSE.txt</span>
+    <span class="sk">ReadmeUrl</span>: <span class="sv">README.md</span>
+    <span class="sk">Labels</span>: [<span class="sv">image</span>, <span class="sv">s3</span>, <span class="sv">processing</span>]
+    <span class="sk">HomePageUrl</span>: <span class="sv">https://github.com/myco/my-image-resizer</span>
+    <span class="sk">SemanticVersion</span>: <span class="sv">1.2.0</span>
+    <span class="sk">SourceCodeUrl</span>: <span class="sv">https://github.com/myco/my-image-resizer</span>
+
+<span class="sc">---</span>
+<span class="sc"># ── Consuming: reference a SAR application as a nested app ──</span>
+<span class="sk">Resources</span>:
+  <span class="sk">NestedApp</span>:
+    <span class="sk">Type</span>: <span class="si">AWS::Serverless::Application</span>
+    <span class="sk">Properties</span>:
+      <span class="sk">Location</span>:
+        <span class="sk">ApplicationId</span>: <span class="sv">arn:aws:serverlessrepo:us-east-1:123456789012:applications/my-image-resizer</span>
+        <span class="sk">SemanticVersion</span>: <span class="sv">1.2.0</span>
+      <span class="sk">Parameters</span>:
+        <span class="sk">BucketName</span>: <span class="sn">!Ref</span> <span class="sv">MyBucket</span>
+</code></pre>
+    </section>
+
+    <!-- ════════════════════════
+         14 EXAM TIPS
+    ════════════════════════ -->
+    <section class="section" id="exam-tips">
+      <div class="section-eyebrow">
+        <span class="section-num">14</span>
+        <span class="section-tag">Exam Focus</span>
+      </div>
+      <h2>DOP-C02 Exam Tips</h2>
+      <div class="section-rule"></div>
+
+      <div class="exam-box">
+        <div class="exam-box-title">Must-Know Facts for the Exam</div>
+        <ul>
+          <li><strong>SAM = CloudFormation with serverless syntactic sugar.</strong> The <code>Transform: 'AWS::Serverless-2016-10-31'</code> line makes it SAM. Deploying requires <code>CAPABILITY_IAM</code> + <code>CAPABILITY_AUTO_EXPAND</code>.</li>
+          <li><strong>AutoPublishAlias is required for DeploymentPreference</strong> (CodeDeploy traffic shifting). It creates a Lambda Alias and automatically publishes a new version on each deploy.</li>
+          <li><strong>Three DeploymentPreference types:</strong> <code>Canary</code> (10% then rest), <code>Linear</code> (gradual equal increments), <code>AllAtOnce</code> (instant shift). All support Alarms for auto-rollback.</li>
+          <li><strong>Pre/Post traffic hooks</strong> are Lambda functions that run before/after the traffic shift. They MUST call <code>codedeploy:PutLifecycleEventHookExecutionStatus</code> with Succeeded or Failed.</li>
+          <li><strong><code>sam sync --code</code> bypasses CloudFormation.</strong> For development only. <code>sam sync --watch</code> automatically uses <code>--code</code> for code-only changes.</li>
+          <li><strong>SAM local testing</strong> requires Docker. Supports Lambda, API Gateway (REST), and DynamoDB Local. Does NOT emulate SQS, SNS, or EventBridge locally.</li>
+          <li><strong>Globals section</strong> sets default values for all functions/APIs. Individual resources override globals.</li>
+          <li><strong>SimpleTable</strong> only supports a single primary key. No sort key, no GSIs. Use raw <code>AWS::DynamoDB::Table</code> for anything complex.</li>
+          <li><strong>SAM Policy Templates</strong> (<code>DynamoDBCrudPolicy</code>, <code>S3CrudPolicy</code>, etc.) expand to full IAM policies. Exam may ask about least-privilege Lambda permissions.</li>
+          <li><strong>SAR</strong> = AWS Serverless Application Repository. Publish with <code>sam publish</code>. Consume as <code>AWS::Serverless::Application</code>. Nested SAR apps need <code>CAPABILITY_AUTO_EXPAND</code>.</li>
+        </ul>
+      </div>
+
+      <h3>Common Exam Scenarios</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Scenario</th><th>Answer</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><em>"Deploy a Lambda update with 10% traffic routed to new version for 10 minutes, then all traffic shifts"</em></td>
+              <td>SAM + CodeDeploy with <code>DeploymentPreference: Type: Canary10Percent10Minutes</code> and <code>AutoPublishAlias: live</code></td>
+            </tr>
+            <tr>
+              <td><em>"Automatically roll back a Lambda deployment if error rate exceeds 1%"</em></td>
+              <td>Add a <code>CloudWatch::Alarm</code> watching the alias error metric and reference it in <code>DeploymentPreference.Alarms</code></td>
+            </tr>
+            <tr>
+              <td><em>"Run integration tests against the new Lambda version before any production traffic is shifted"</em></td>
+              <td>Use <code>DeploymentPreference.Hooks.PreTraffic</code> pointing to a validation Lambda function</td>
+            </tr>
+            <tr>
+              <td><em>"Developer wants to test code changes without waiting for CloudFormation"</em></td>
+              <td><code>sam sync --code</code> (bypasses CFN) or <code>sam sync --watch</code> (auto-detects code vs config changes)</td>
+            </tr>
+            <tr>
+              <td><em>"Test Lambda function and API Gateway locally before deploying to AWS"</em></td>
+              <td><code>sam local invoke</code> for functions, <code>sam local start-api</code> for API Gateway emulation (requires Docker)</td>
+            </tr>
+            <tr>
+              <td><em>"What capabilities are needed to deploy a SAM template?"</em></td>
+              <td><code>CAPABILITY_IAM</code> (SAM creates IAM roles) + <code>CAPABILITY_AUTO_EXPAND</code> (SAM uses a Transform macro)</td>
+            </tr>
+            <tr>
+              <td><em>"Share a serverless application across multiple AWS accounts in the organization"</em></td>
+              <td>Publish to <strong>AWS Serverless Application Repository (SAR)</strong> as a private app with org-level permissions</td>
+            </tr>
+            <tr>
+              <td><em>"SAM template needs to grant Lambda write access to a DynamoDB table with least privilege"</em></td>
+              <td>Use SAM Policy Template <code>DynamoDBCrudPolicy</code> with the <code>TableName</code> parameter instead of <code>AmazonDynamoDBFullAccess</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>SAM vs CDK vs Serverless Framework</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th></th><th>AWS SAM</th><th>AWS CDK</th><th>Serverless Framework</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Language</strong></td><td>YAML/JSON</td><td>TypeScript, Python, Java, etc.</td><td>YAML</td></tr>
+            <tr><td><strong>Scope</strong></td><td>Serverless-focused</td><td>All AWS resources</td><td>Serverless-focused (multi-cloud)</td></tr>
+            <tr><td><strong>Backed by</strong></td><td>CloudFormation</td><td>CloudFormation</td><td>CloudFormation (AWS) or native APIs</td></tr>
+            <tr><td><strong>Local testing</strong></td><td>Built-in (<code>sam local</code>)</td><td>No native (use SAM for local)</td><td>Plugin-based</td></tr>
+            <tr><td><strong>Exam relevance</strong></td><td>⭐⭐⭐ Core DOP-C02 topic</td><td>⭐⭐ Mentioned, less detail</td><td>⭐ Generally not tested</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </section>
+
+  </main>
+</div>
+
+<script>
+  const sections = document.querySelectorAll('.section');
+  const links    = document.querySelectorAll('.sb-link');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const a = document.querySelector(`.sb-link[href="#${entry.target.id}"]`);
+        if (a) a.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-15% 0px -70% 0px' });
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>

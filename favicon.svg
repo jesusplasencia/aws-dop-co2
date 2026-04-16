@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Dark background pill -->
+  <rect width="32" height="32" rx="7" fill="#0A0E1A"/>
+
+  <!-- AWS smile arrow (orange) -->
+  <path d="M7 20 Q16 25 25 20" fill="none" stroke="#FF9900" stroke-width="2.2" stroke-linecap="round"/>
+  <polygon points="24,18.5 25.8,21 27.5,18.8" fill="#FF9900"/>
+
+  <!-- "AWS" lettermark -->
+  <text x="16" y="17"
+        font-family="Arial Black, sans-serif"
+        font-size="9.5"
+        font-weight="900"
+        fill="#FFFFFF"
+        text-anchor="middle"
+        letter-spacing="0.5">AWS</text>
+</svg>
