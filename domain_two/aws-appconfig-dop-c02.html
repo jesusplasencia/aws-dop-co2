@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS AppConfig — DOP-C02 Exam Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Geist+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* ── Minimal, precise, clinical. White + forest green + slate. No noise. ── */
+:root {
+  --bg:     #ffffff;
+  --bg2:    #f7f8f7;
+  --bg3:    #eff1ef;
+  --ink:    #111c11;
+  --ink2:   #2e3d2e;
+  --ink3:   #566356;
+  --ink4:   #8a9e8a;
+  --rule:   #dde5dd;
+  --rule2:  #c5d1c5;
+
+  --green:  #1a6b2e;
+  --gbg:    #edf5ef;
+  --gb:     #8ec89e;
+  --slate:  #2c4a6e;
+  --sbg:    #eaeff7;
+  --sb:     #90afd0;
+  --amber:  #8a5a00;
+  --abg:    #fdf5e0;
+  --ab:     #d4b060;
+  --red:    #b02020;
+  --rbg:    #fef0f0;
+  --rb:     #e09090;
+
+  --code:   #141e14;
+  --codefg: #d0e8d0;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:'Geist',sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+  font-size:14px;
+  line-height:1.65;
+}
+
+/* ── TOP BAR ── */
+.bar{
+  height:3px;
+  background:linear-gradient(90deg,var(--green),#3a9e5a,var(--slate));
+}
+.nav{
+  background:var(--ink);
+  height:46px;
+  display:flex;align-items:center;
+  padding:0 40px;
+  position:sticky;top:3px;z-index:100;
+  gap:24px;
+}
+.nav-logo{
+  font-family:'Geist Mono',monospace;
+  font-size:11px;font-weight:500;
+  color:#fff;letter-spacing:1px;
+  display:flex;align-items:center;gap:8px;
+}
+.nav-dot{
+  width:8px;height:8px;border-radius:50%;
+  background:var(--green);flex-shrink:0;
+}
+.nav-links{
+  display:flex;gap:0;margin-left:auto;
+}
+.nav-a{
+  font-family:'Geist Mono',monospace;
+  font-size:10px;letter-spacing:0.5px;
+  color:rgba(255,255,255,0.35);text-decoration:none;
+  padding:0 12px;height:46px;display:flex;align-items:center;
+  border-bottom:2px solid transparent;margin-bottom:-2px;
+  transition:all .1s;
+}
+.nav-a:hover{color:rgba(255,255,255,0.85);border-bottom-color:var(--green);}
+.nav-home{
+  font-family:'Geist Mono',monospace;
+  font-size:10px;letter-spacing:0.5px;
+  color:rgba(255,255,255,0.35);text-decoration:none;
+  padding:0 12px;height:46px;display:flex;align-items:center;gap:6px;
+  border-bottom:2px solid transparent;margin-bottom:-2px;
+  transition:all .1s;
+}
+.nav-home:hover{color:rgba(255,255,255,0.85);border-bottom-color:var(--green);}
+.nav-home svg{width:12px;height:12px;}
+
+/* ── HERO — spare and focused ── */
+.hero{
+  padding:52px 0 44px;
+  border-bottom:1px solid var(--rule);
+}
+.hero-inner{max-width:1060px;margin:0 auto;padding:0 48px;}
+.hero-label{
+  font-family:'Geist Mono',monospace;
+  font-size:10px;letter-spacing:2.5px;text-transform:uppercase;
+  color:var(--green);margin-bottom:14px;
+  display:flex;align-items:center;gap:10px;
+}
+.hero-label::before{content:'';display:block;width:20px;height:1px;background:var(--green);}
+h1{
+  font-size:clamp(36px,5vw,58px);font-weight:800;
+  color:var(--ink);letter-spacing:-1.5px;line-height:1;
+  margin-bottom:12px;
+}
+h1 span{color:var(--green);}
+.hero-sub{
+  font-size:15px;color:var(--ink3);
+  max-width:520px;font-weight:400;line-height:1.55;
+  margin-bottom:28px;
+}
+.hero-tags{display:flex;gap:8px;flex-wrap:wrap;}
+.htag{
+  font-family:'Geist Mono',monospace;font-size:10px;
+  padding:4px 10px;border:1px solid var(--rule2);
+  border-radius:2px;color:var(--ink4);background:var(--bg2);
+}
+.htag.hi{border-color:var(--gb);color:var(--green);background:var(--gbg);}
+
+/* ── LAYOUT ── */
+.wrap{
+  max-width:1060px;margin:0 auto;
+  display:grid;grid-template-columns:180px 1fr;
+  gap:0;
+}
+
+/* ── SIDEBAR ── */
+.sb{
+  padding:32px 0;
+  border-right:1px solid var(--rule);
+  position:sticky;top:49px;
+  height:calc(100vh - 49px);
+  overflow-y:auto;background:var(--bg2);
+}
+.sb::-webkit-scrollbar{width:0;}
+.sb-g{margin-bottom:20px;}
+.sb-l{
+  font-family:'Geist Mono',monospace;
+  font-size:8px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--ink4);padding:0 18px;margin-bottom:3px;
+}
+.sb-a{
+  display:flex;align-items:center;gap:8px;
+  padding:6px 18px;color:var(--ink3);text-decoration:none;
+  font-size:12px;font-weight:400;
+  border-left:2px solid transparent;transition:all .1s;
+}
+.sb-a:hover{color:var(--green);border-left-color:var(--gb);background:var(--gbg);}
+.sb-a.on{color:var(--green);border-left-color:var(--green);background:var(--gbg);font-weight:600;}
+.sb-n{font-family:'Geist Mono',monospace;font-size:9px;color:var(--ink4);min-width:16px;}
+
+/* ── MAIN ── */
+main{padding:44px 48px 80px;}
+
+/* ── SECTION ── */
+.sec{margin-bottom:60px;scroll-margin-top:56px;}
+.sec-ey{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.sec-n{font-family:'Geist Mono',monospace;font-size:9px;color:var(--ink4);}
+.sec-c{
+  font-family:'Geist Mono',monospace;font-size:8.5px;
+  letter-spacing:2px;text-transform:uppercase;
+  color:var(--green);background:var(--gbg);
+  border:1px solid var(--gb);padding:2px 7px;border-radius:2px;
+}
+h2{
+  font-size:22px;font-weight:800;color:var(--ink);
+  letter-spacing:-0.3px;margin-bottom:4px;
+}
+.rule{height:1px;background:linear-gradient(90deg,var(--green),var(--rule),transparent);margin:10px 0 18px;}
+h3{
+  font-family:'Geist Mono',monospace;
+  font-size:9.5px;font-weight:500;letter-spacing:2px;text-transform:uppercase;
+  color:var(--slate);margin:22px 0 10px;
+  display:flex;align-items:center;gap:8px;
+}
+h3::after{content:'';flex:1;height:1px;background:var(--rule);}
+h4{font-size:13px;font-weight:700;color:var(--ink);margin:0 0 5px;}
+p{color:var(--ink2);margin-bottom:10px;font-size:14px;line-height:1.65;}
+
+/* ── CARDS ── */
+.card{background:var(--bg);border:1px solid var(--rule);border-radius:3px;padding:16px;margin-bottom:10px;}
+.cg{border-left:3px solid var(--green);background:var(--gbg);}
+.cs{border-left:3px solid var(--slate);background:var(--sbg);}
+.ca{border-left:3px solid var(--amber);background:var(--abg);}
+.cr{border-left:3px solid var(--red);  background:var(--rbg);}
+
+/* ── CALLOUT ── */
+.co{
+  padding:12px 16px;border-radius:3px;margin:14px 0;
+  display:flex;gap:11px;align-items:flex-start;font-size:13px;
+}
+.co-g{background:var(--gbg);border:1px solid var(--gb);}
+.co-g p{color:#175a28;margin:0;}
+.co-s{background:var(--sbg);border:1px solid var(--sb);}
+.co-s p{color:#1c3a58;margin:0;}
+.co-a{background:var(--abg);border:1px solid var(--ab);}
+.co-a p{color:#6a4200;margin:0;}
+.co-r{background:var(--rbg);border:1px solid var(--rb);}
+.co-r p{color:#8a1818;margin:0;}
+.co-i{font-size:13px;flex-shrink:0;margin-top:1px;}
+
+/* ── CODE ── */
+.cf{
+  background:var(--bg3);border:1px solid var(--rule2);
+  border-bottom:none;border-radius:3px 3px 0 0;
+  padding:6px 14px;display:flex;align-items:center;gap:8px;
+  font-family:'Geist Mono',monospace;font-size:9.5px;color:var(--ink4);
+}
+.cf-d{width:6px;height:6px;border-radius:50%;background:var(--green);}
+.cf+pre{border-radius:0 0 3px 3px;margin-top:0;}
+pre{
+  background:var(--code);border:1px solid rgba(255,255,255,0.05);
+  border-radius:3px;padding:16px 20px;overflow-x:auto;margin:10px 0;
+}
+pre code{font-family:'Geist Mono',monospace;font-size:11.5px;line-height:1.85;color:var(--codefg);}
+code{
+  font-family:'Geist Mono',monospace;font-size:11.5px;
+  background:var(--bg3);color:var(--green);
+  padding:1px 5px;border-radius:2px;border:1px solid var(--rule);
+}
+.sk{color:#78c878;} .sv{color:#a8d898;} .sc{color:#2e4e2e;font-style:italic;}
+.sn{color:#68a8e8;} .si{color:#e8c870;} .sb2{color:#c888e8;}
+
+/* ── TABLE ── */
+.tw{overflow-x:auto;margin:12px 0;border:1px solid var(--rule);border-radius:3px;}
+table{width:100%;border-collapse:collapse;font-size:12.5px;}
+thead th{
+  background:var(--bg3);
+  font-family:'Geist Mono',monospace;
+  font-size:8.5px;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--ink4);padding:8px 12px;text-align:left;
+  border-bottom:2px solid var(--gb);
+}
+td{padding:9px 12px;border-bottom:1px solid var(--rule);vertical-align:top;color:var(--ink2);}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:var(--bg2);}
+
+/* ── GRID ── */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:10px 0;}
+
+/* ── TAG ── */
+.tag{
+  display:inline-block;font-family:'Geist Mono',monospace;
+  font-size:9.5px;padding:1px 7px;border-radius:2px;
+}
+.tg{background:var(--gbg);color:var(--green);border:1px solid var(--gb);}
+.ts{background:var(--sbg);color:var(--slate);border:1px solid var(--sb);}
+.ta{background:var(--abg);color:var(--amber);border:1px solid var(--ab);}
+.tr{background:var(--rbg);color:var(--red);border:1px solid var(--rb);}
+
+/* ── FLOW ── */
+.flow{
+  display:flex;align-items:stretch;
+  border:1px solid var(--rule);border-radius:3px;
+  overflow:hidden;margin:12px 0;
+}
+.fs{
+  flex:1;padding:12px 12px;background:var(--bg);
+  border-right:1px solid var(--rule);
+}
+.fs:last-child{border-right:none;}
+.fsn{font-family:'Geist Mono',monospace;font-size:8.5px;color:var(--ink4);margin-bottom:2px;}
+.fsi{font-size:16px;margin-bottom:3px;}
+.fsname{font-size:12px;font-weight:700;color:var(--ink);}
+.fssub{font-size:11px;color:var(--ink4);margin-top:2px;line-height:1.4;}
+.farr{
+  display:flex;align-items:center;justify-content:center;
+  min-width:22px;background:var(--bg3);
+  color:var(--ink4);font-size:12px;
+  border-right:1px solid var(--rule);
+}
+
+/* ── EXAM BOX ── */
+.exam{
+  background:var(--ink);border-radius:3px;
+  padding:20px 24px;margin:20px 0;position:relative;
+}
+.exam::before{
+  content:'EXAM';position:absolute;top:0;right:16px;
+  font-family:'Geist Mono',monospace;font-size:8px;
+  letter-spacing:3px;color:var(--green);
+  background:rgba(26,107,46,0.2);padding:3px 9px;
+  border-radius:0 0 3px 3px;
+}
+.exam::after{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--green);}
+.exam-t{font-size:14px;font-weight:700;color:#fff;margin-bottom:10px;padding-top:2px;}
+.exam ul{padding-left:16px;}
+.exam li{color:rgba(255,255,255,.65);font-size:13px;margin-bottom:4px;}
+.exam li::marker{color:var(--green);}
+.exam strong{color:#fff;}
+
+ul,ol{padding-left:16px;margin:8px 0;}
+li{margin-bottom:3px;font-size:13.5px;color:var(--ink2);}
+li::marker{color:var(--green);}
+
+/* ── COMPARISON BLOCK ── */
+.cmp{
+  display:grid;grid-template-columns:1fr 1fr;
+  border:1px solid var(--rule);border-radius:3px;
+  overflow:hidden;margin:12px 0;
+}
+.cmp-c{padding:16px 18px;}
+.cmp-c:first-child{background:var(--gbg);border-right:1px solid var(--rule);}
+.cmp-c:last-child{background:var(--sbg);}
+.cmp-t{
+  font-family:'Geist Mono',monospace;font-size:8.5px;
+  letter-spacing:1.5px;text-transform:uppercase;
+  margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--rule);
+}
+.cmp-c:first-child .cmp-t{color:var(--green);}
+.cmp-c:last-child  .cmp-t{color:var(--slate);}
+.cmp-c li{font-size:12.5px;color:var(--ink2);margin-bottom:3px;}
+
+@media(max-width:860px){
+  .sb{display:none;}
+  .wrap{grid-template-columns:1fr;}
+  main{padding:28px 18px;}
+  .g2,.g3,.cmp{grid-template-columns:1fr;}
+  .flow{flex-direction:column;}
+  .fs{border-right:none;border-bottom:1px solid var(--rule);}
+  .farr{display:none;}
+  .nav-links{display:none;}
+}
+</style>
+</head>
+<body>
+<div class="bar"></div>
+
+<nav class="nav">
+  <div class="nav-logo"><div class="nav-dot"></div>AWS AppConfig</div>
+  <a class="nav-home" href="../index.html">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M2 6.5L8 2l6 4.5V14H10v-3.5H6V14H2V6.5z"/>
+    </svg>
+    Home
+  </a>
+  <div class="nav-links">
+    <a class="nav-a" href="#overview">Overview</a>
+    <a class="nav-a" href="#concepts">Concepts</a>
+    <a class="nav-a" href="#deployment">Deployment</a>
+    <a class="nav-a" href="#validation">Validation</a>
+    <a class="nav-a" href="#rollback">Rollback</a>
+    <a class="nav-a" href="#retrieval">Retrieval</a>
+    <a class="nav-a" href="#exam">Exam Tips</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-label">DOP-C02 · Configuration Management</div>
+    <h1>AWS App<span>Config</span></h1>
+    <p class="hero-sub">Gradually deploy and validate runtime configuration changes to applications — without redeployment or outages.</p>
+    <div class="hero-tags">
+      <span class="htag hi">Feature Flags</span>
+      <span class="htag hi">Gradual Rollout</span>
+      <span class="htag hi">Auto Rollback</span>
+      <span class="htag hi">Validation</span>
+      <span class="htag">EC2 · Lambda · ECS · EKS</span>
+      <span class="htag">SSM · S3 · Parameter Store</span>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+<nav class="sb">
+  <div class="sb-g">
+    <div class="sb-l">Core</div>
+    <a class="sb-a on" href="#overview"><span class="sb-n">01</span>Overview</a>
+    <a class="sb-a" href="#concepts"><span class="sb-n">02</span>Concepts</a>
+    <a class="sb-a" href="#sources"><span class="sb-n">03</span>Config Sources</a>
+  </div>
+  <div class="sb-g">
+    <div class="sb-l">Deploy</div>
+    <a class="sb-a" href="#deployment"><span class="sb-n">04</span>Deployment Strategies</a>
+    <a class="sb-a" href="#validation"><span class="sb-n">05</span>Validation</a>
+    <a class="sb-a" href="#rollback"><span class="sb-n">06</span>Rollback &amp; Alarms</a>
+  </div>
+  <div class="sb-g">
+    <div class="sb-l">Usage</div>
+    <a class="sb-a" href="#retrieval"><span class="sb-n">07</span>Retrieval Patterns</a>
+    <a class="sb-a" href="#exam"><span class="sb-n">08</span>Exam Tips</a>
+  </div>
+</nav>
+
+<main>
+
+<!-- ══ 01 ══ -->
+<section class="sec" id="overview">
+  <div class="sec-ey"><span class="sec-n">01</span><span class="sec-c">Core</span></div>
+  <h2>Overview</h2><div class="rule"></div>
+
+  <p>AWS AppConfig is a capability of <strong>AWS Systems Manager</strong> that lets you deploy <em>runtime configuration</em> to applications <strong>separately from code deployments</strong>. Changes take effect without restarting the application or pushing new code.</p>
+
+  <div class="co co-g">
+    <span class="co-i">💡</span>
+    <p><strong>Key insight:</strong> AppConfig solves the "config in code" problem. Instead of hardcoding feature flags or tuning parameters and redeploying, you push config changes through a <em>safe deployment pipeline</em> with validation and automatic rollback.</p>
+  </div>
+
+  <h3>What it solves</h3>
+  <div class="g3">
+    <div class="card cg">
+      <h4>Feature Flags</h4>
+      <p style="font-size:12.5px;margin:0">Turn features on/off for all users or a subset without deploying code. A/B testing, gradual rollouts, kill switches.</p>
+    </div>
+    <div class="card cs">
+      <h4>Tunable Parameters</h4>
+      <p style="font-size:12.5px;margin:0">Change rate limits, timeout values, connection pool sizes, logging levels at runtime — no redeployment.</p>
+    </div>
+    <div class="card ca">
+      <h4>Allow/Block Lists</h4>
+      <p style="font-size:12.5px;margin:0">Maintain dynamic lists of IPs, user IDs, or regions to allow or deny. Update instantly without redeployment.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 02 ══ -->
+<section class="sec" id="concepts">
+  <div class="sec-ey"><span class="sec-n">02</span><span class="sec-c">Core</span></div>
+  <h2>Core Concepts</h2><div class="rule"></div>
+
+  <div class="tw"><table>
+    <thead><tr><th>Concept</th><th>Definition</th><th>Analogy</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Application</strong></td><td>A logical container. Groups environments and config profiles for one app.</td><td>The project / app name</td></tr>
+      <tr><td><strong>Environment</strong></td><td>Represents a deployment target: <code>dev</code>, <code>staging</code>, <code>prod</code>. Has its own deployment history and alarms.</td><td>A deployment stage</td></tr>
+      <tr><td><strong>Configuration Profile</strong></td><td>Points to the configuration source (SSM, S3, AppConfig Feature Flags) and defines validators.</td><td>The config "type"</td></tr>
+      <tr><td><strong>Hosted Configuration</strong></td><td>Config data stored <em>natively inside AppConfig</em>. No external source needed. Supports versioning.</td><td>Built-in config store</td></tr>
+      <tr><td><strong>Deployment Strategy</strong></td><td>Controls how fast config rolls out (linear %, Canary, AllAtOnce) and bake time.</td><td>The rollout plan</td></tr>
+      <tr><td><strong>Deployment</strong></td><td>An instance of deploying a config version to an environment using a deployment strategy.</td><td>A release</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Hierarchy</h3>
+  <div class="flow">
+    <div class="fs"><div class="fsn">Level 1</div><div class="fsi">📦</div><div class="fsname">Application</div><div class="fssub">e.g., "my-api"</div></div>
+    <div class="farr">→</div>
+    <div class="fs"><div class="fsn">Level 2</div><div class="fsi">🌍</div><div class="fsname">Environment</div><div class="fssub">dev / prod</div></div>
+    <div class="farr">→</div>
+    <div class="fs"><div class="fsn">Level 3</div><div class="fsi">📄</div><div class="fsname">Config Profile</div><div class="fssub">Feature Flags / Freeform</div></div>
+    <div class="farr">→</div>
+    <div class="fs"><div class="fsn">Level 4</div><div class="fsi">🚀</div><div class="fsname">Deployment</div><div class="fssub">Version + Strategy</div></div>
+    <div class="farr">→</div>
+    <div class="fs"><div class="fsn">Level 5</div><div class="fsi">📱</div><div class="fsname">Application polls</div><div class="fssub">Gets current config</div></div>
+  </div>
+</section>
+
+<!-- ══ 03 ══ -->
+<section class="sec" id="sources">
+  <div class="sec-ey"><span class="sec-n">03</span><span class="sec-c">Core</span></div>
+  <h2>Configuration Sources</h2><div class="rule"></div>
+
+  <div class="tw"><table>
+    <thead><tr><th>Source</th><th>Type</th><th>Best For</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tag tg">AppConfig Hosted</span></td><td>Native — stored inside AppConfig</td><td>Feature flags, simple JSON/YAML config. Recommended — no external dependency.</td></tr>
+      <tr><td><span class="tag ts">SSM Parameter Store</span></td><td>External — polls SSM SecureString or String</td><td>Sensitive values, existing SSM parameters. SecureString = encrypted.</td></tr>
+      <tr><td><span class="tag ts">SSM Documents</span></td><td>External — SSM Document content</td><td>Complex YAML/JSON configs already in SSM Documents.</td></tr>
+      <tr><td><span class="tag ta">S3 Bucket</span></td><td>External — reads object from S3</td><td>Large config files (&gt;64KB). Requires S3 access from AppConfig role.</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="co co-a">
+    <span class="co-i">💡</span>
+    <p><strong>Exam note:</strong> The <strong>AppConfig Hosted Configuration Store</strong> is the recommended source — it's built-in, versioned, and requires no extra AWS resources. SSM Parameter Store and S3 are supported for existing workflows.</p>
+  </div>
+</section>
+
+<!-- ══ 04 ══ -->
+<section class="sec" id="deployment">
+  <div class="sec-ey"><span class="sec-n">04</span><span class="sec-c">Deploy</span></div>
+  <h2>Deployment Strategies</h2><div class="rule"></div>
+
+  <p>A deployment strategy defines <strong>how fast</strong> the new config is rolled out and how long to <strong>bake</strong> (wait after 100% rollout before marking complete).</p>
+
+  <div class="tw"><table>
+    <thead><tr><th>Strategy</th><th>Growth Type</th><th>Behavior</th><th>Use Case</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="tag tr">AppConfig.AllAtOnce</span></td>
+        <td>All at once</td>
+        <td>100% of clients receive new config immediately. No gradual rollout.</td>
+        <td>Dev/test environments only. Not recommended for prod.</td>
+      </tr>
+      <tr>
+        <td><span class="tag ta">AppConfig.Linear50PercentEvery30Seconds</span></td>
+        <td>Linear</td>
+        <td>50% → 100% over 60 seconds. 1-minute bake time.</td>
+        <td>Testing / staging environments.</td>
+      </tr>
+      <tr>
+        <td><span class="tag tg">AppConfig.Canary10Percent20Minutes</span></td>
+        <td>Exponential</td>
+        <td>10% immediately, then 100% after 20 minutes if no alarms fire.</td>
+        <td>Production — safe gradual rollout with alarm monitoring.</td>
+      </tr>
+      <tr>
+        <td><span class="tag ts">Custom</span></td>
+        <td>Linear or Exponential</td>
+        <td>Define your own growth factor, interval, and bake time.</td>
+        <td>Any specific requirement.</td>
+      </tr>
+    </tbody>
+  </table></div>
+
+  <h3>Custom Strategy Parameters</h3>
+  <div class="g3">
+    <div class="card">
+      <h4>Growth Factor</h4>
+      <p style="font-size:12.5px;margin:0">% of clients to add each interval. E.g., <code>10</code> = add 10% each step.</p>
+    </div>
+    <div class="card">
+      <h4>Deployment Duration</h4>
+      <p style="font-size:12.5px;margin:0">Total time for the full rollout (in minutes). Controls step interval.</p>
+    </div>
+    <div class="card">
+      <h4>Bake Time</h4>
+      <p style="font-size:12.5px;margin:0">Minutes to wait <em>after</em> 100% rollout. Alarms can still trigger rollback during bake.</p>
+    </div>
+  </div>
+
+  <div class="cf"><div class="cf-d"></div>custom deployment strategy — CloudFormation</div>
+  <pre><code><span class="sk">MyDeploymentStrategy</span>:
+  <span class="sk">Type</span>: <span class="si">AWS::AppConfig::DeploymentStrategy</span>
+  <span class="sk">Properties</span>:
+    <span class="sk">Name</span>: <span class="sv">Prod-Canary-10Percent-10Min</span>
+    <span class="sk">DeploymentDurationInMinutes</span>: <span class="sn">10</span>
+    <span class="sk">FinalBakeTimeInMinutes</span>: <span class="sn">10</span>      <span class="sc"># wait 10 min after 100% for alarm monitoring</span>
+    <span class="sk">GrowthFactor</span>: <span class="sn">10</span>                  <span class="sc"># 10% → 20% → ... → 100%</span>
+    <span class="sk">GrowthType</span>: <span class="sv">LINEAR</span>               <span class="sc"># or EXPONENTIAL</span>
+    <span class="sk">ReplicateTo</span>: <span class="sv">NONE</span>                 <span class="sc"># or SSM_DOCUMENT</span>
+</code></pre>
+</section>
+
+<!-- ══ 05 ══ -->
+<section class="sec" id="validation">
+  <div class="sec-ey"><span class="sec-n">05</span><span class="sec-c">Deploy</span></div>
+  <h2>Validation</h2><div class="rule"></div>
+
+  <p>AppConfig validates configuration <strong>before deploying it</strong>. If validation fails, the deployment is blocked. Two validator types exist:</p>
+
+  <div class="cmp">
+    <div class="cmp-c">
+      <div class="cmp-t">JSON Schema — Syntactic Check</div>
+      <ul>
+        <li>Validates config against a JSON Schema</li>
+        <li>Checks <strong>structure and data types</strong></li>
+        <li>Runs automatically on every save and deploy</li>
+        <li>No Lambda needed — purely declarative</li>
+        <li>Best for: required fields, type checking, format validation</li>
+      </ul>
+    </div>
+    <div class="cmp-c">
+      <div class="cmp-t">Lambda — Semantic Check</div>
+      <ul>
+        <li>AppConfig invokes your Lambda with the config</li>
+        <li>Lambda can check <strong>business logic</strong></li>
+        <li>E.g., validate feature flag % sum = 100%</li>
+        <li>E.g., verify referenced resource ARNs exist</li>
+        <li>Lambda must return HTTP 200 for validation to pass</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="cf"><div class="cf-d"></div>json-schema-validator.json + lambda-validator.py</div>
+  <pre><code><span class="sc">// JSON Schema validator — attached to Configuration Profile</span>
+{
+  <span class="sk">"$schema"</span>: <span class="sv">"http://json-schema.org/draft-04/schema#"</span>,
+  <span class="sk">"title"</span>: <span class="sv">"FeatureFlags"</span>,
+  <span class="sk">"type"</span>: <span class="sv">"object"</span>,
+  <span class="sk">"required"</span>: [<span class="sv">"dark_mode_enabled"</span>, <span class="sv">"max_upload_mb"</span>],
+  <span class="sk">"properties"</span>: {
+    <span class="sk">"dark_mode_enabled"</span>: { <span class="sk">"type"</span>: <span class="sv">"boolean"</span> },
+    <span class="sk">"max_upload_mb"</span>: {
+      <span class="sk">"type"</span>: <span class="sv">"integer"</span>,
+      <span class="sk">"minimum"</span>: <span class="sn">1</span>, <span class="sk">"maximum"</span>: <span class="sn">100</span>
+    }
+  }
+}
+
+<span class="sc"># Lambda validator — checks business logic</span>
+<span class="sk">import</span> json
+
+<span class="sk">def</span> <span class="sn">handler</span>(event, context):
+    config = json.loads(event[<span class="sv">'content'</span>])
+    <span class="sc"># Semantic check: rollout percentages must sum to 100</span>
+    rollouts = config.get(<span class="sv">'rollout_percentages'</span>, {})
+    total = sum(rollouts.values())
+    <span class="sk">if</span> total != <span class="sn">100</span>:
+        <span class="sk">raise</span> ValueError(<span class="sv">f"Rollout percentages sum to {total}, not 100"</span>)
+    <span class="sc"># Validation passes — return nothing (HTTP 200 implicit)</span>
+</code></pre>
+
+  <div class="co co-r">
+    <span class="co-i">⚠️</span>
+    <p><strong>Lambda validator must throw an exception to fail validation.</strong> If it returns normally (any value), validation passes. AppConfig grants the Lambda invoke permission via the configuration profile's IAM setup.</p>
+  </div>
+</section>
+
+<!-- ══ 06 ══ -->
+<section class="sec" id="rollback">
+  <div class="sec-ey"><span class="sec-n">06</span><span class="sec-c">Deploy</span></div>
+  <h2>Rollback &amp; CloudWatch Alarms</h2><div class="rule"></div>
+
+  <p>You can attach <strong>CloudWatch Alarms</strong> to an AppConfig Environment. If any alarm enters the <code>ALARM</code> state during a deployment (including bake time), AppConfig <strong>automatically rolls back</strong> to the previous config version.</p>
+
+  <div class="flow">
+    <div class="fs"><div class="fsi">🚀</div><div class="fsname">Deploy starts</div><div class="fssub">10% of clients get new config</div></div>
+    <div class="farr">→</div>
+    <div class="fs"><div class="fsi">📊</div><div class="fsname">CW Alarm monitors</div><div class="fssub">Error rate, latency, custom metric</div></div>
+    <div class="farr">→</div>
+    <div class="fs" style="background:var(--rbg)"><div class="fsi">🚨</div><div class="fsname" style="color:var(--red)">Alarm fires</div><div class="fssub">Metric threshold breached</div></div>
+    <div class="farr">→</div>
+    <div class="fs"><div class="fsi">⏪</div><div class="fsname">Auto rollback</div><div class="fssub">Previous version restored to ALL clients</div></div>
+  </div>
+
+  <div class="co co-g">
+    <span class="co-i">💡</span>
+    <p><strong>Rollback is automatic and immediate.</strong> AppConfig monitors alarms throughout the entire deployment <em>and</em> bake period. You can also trigger a manual rollback via <code>StopDeployment</code> API at any time during an active deployment.</p>
+  </div>
+
+  <div class="cf"><div class="cf-d"></div>appconfig-environment-with-alarm.yaml</div>
+  <pre><code><span class="sk">MyProdEnvironment</span>:
+  <span class="sk">Type</span>: <span class="si">AWS::AppConfig::Environment</span>
+  <span class="sk">Properties</span>:
+    <span class="sk">ApplicationId</span>: <span class="sn">!Ref</span> <span class="sv">MyApp</span>
+    <span class="sk">Name</span>: <span class="sv">production</span>
+    <span class="sk">Monitors</span>:
+      - <span class="sk">AlarmArn</span>: <span class="sn">!GetAtt</span> <span class="sv">ErrorRateAlarm.Arn</span>
+        <span class="sk">AlarmRoleArn</span>: <span class="sn">!GetAtt</span> <span class="sv">AppConfigAlarmRole.Arn</span>  <span class="sc"># role to read CW alarms</span>
+</code></pre>
+</section>
+
+<!-- ══ 07 ══ -->
+<section class="sec" id="retrieval">
+  <div class="sec-ey"><span class="sec-n">07</span><span class="sec-c">Usage</span></div>
+  <h2>Config Retrieval Patterns</h2><div class="rule"></div>
+
+  <p>Applications retrieve config by <strong>polling the AppConfig API</strong>. They cache the result locally and only call the API again when the cache expires. <strong>AppConfig does not push config to apps.</strong></p>
+
+  <h3>AppConfig Agent (Recommended)</h3>
+  <p>The AppConfig Agent is a sidecar/daemon that handles polling, caching, and token management. Your app reads from a <strong>local HTTP endpoint</strong> — no SDK needed.</p>
+
+  <div class="cf"><div class="cf-d"></div>app reads config from local agent (any language)</div>
+  <pre><code><span class="sc"># Agent runs locally — polls AppConfig on a configurable interval</span>
+<span class="sc"># Your app just reads from localhost:2772</span>
+<span class="sk">import</span> urllib.request, json
+
+<span class="sk">def</span> <span class="sn">get_config</span>():
+    url = <span class="sv">"http://localhost:2772/applications/my-app/environments/prod/configurations/feature-flags"</span>
+    <span class="sk">with</span> urllib.request.urlopen(url) <span class="sk">as</span> r:
+        <span class="sk">return</span> json.loads(r.read())
+
+config = get_config()
+<span class="sk">if</span> config[<span class="sv">'dark_mode_enabled'</span>]:
+    enable_dark_mode()
+</code></pre>
+
+  <h3>AWS SDK (Direct API)</h3>
+  <p>For Lambda and other environments where a sidecar isn't available, use the SDK directly. Always use <code>GetLatestConfiguration</code> with a token for efficient polling.</p>
+
+  <div class="cf"><div class="cf-d"></div>lambda-sdk-retrieval.py</div>
+  <pre><code><span class="sk">import</span> boto3, json, os
+
+appconfig = boto3.client(<span class="sv">'appconfigdata'</span>)
+
+<span class="sc"># Cache the session token between invocations (Lambda /tmp or global)</span>
+_session_token = None
+
+<span class="sk">def</span> <span class="sn">get_config</span>():
+    <span class="sk">global</span> _session_token
+    <span class="sk">if not</span> _session_token:
+        resp = appconfig.start_configuration_session(
+            ApplicationIdentifier=<span class="sv">'my-app'</span>,
+            EnvironmentIdentifier=<span class="sv">'prod'</span>,
+            ConfigurationProfileIdentifier=<span class="sv">'feature-flags'</span>,
+            RequiredMinimumPollIntervalInSeconds=<span class="sn">30</span>
+        )
+        _session_token = resp[<span class="sv">'InitialConfigurationToken'</span>]
+
+    resp = appconfig.get_latest_configuration(ConfigurationToken=_session_token)
+    _session_token = resp[<span class="sv">'NextPollConfigurationToken'</span>]  <span class="sc"># rotate token each poll</span>
+
+    <span class="sk">if</span> resp[<span class="sv">'Configuration'</span>].read():   <span class="sc"># empty = no change since last poll</span>
+        <span class="sk">return</span> json.loads(resp[<span class="sv">'Configuration'</span>].read())
+    <span class="sk">return</span> <span class="sn">None</span>  <span class="sc"># no change — use cached config</span>
+</code></pre>
+
+  <div class="co co-s">
+    <span class="co-i">ℹ️</span>
+    <p><strong>Token rotation is mandatory.</strong> Each call to <code>GetLatestConfiguration</code> returns a new token — you must use it for the next call. If the response body is empty, config hasn't changed since last poll — use your cached version. AppConfig charges per API call, so caching is important.</p>
+  </div>
+
+  <h3>Retrieval by Platform</h3>
+  <div class="tw"><table>
+    <thead><tr><th>Platform</th><th>Recommended Method</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tag tg">EC2</span></td><td>AppConfig Agent (daemon)</td><td>Install as systemd service, reads from localhost:2772</td></tr>
+      <tr><td><span class="tag tg">ECS / EKS</span></td><td>AppConfig Agent (sidecar container)</td><td>Add as sidecar in task/pod definition</td></tr>
+      <tr><td><span class="tag tg">Lambda</span></td><td>Lambda Extension (Agent as extension)</td><td>Add AppConfig Lambda Extension layer to function</td></tr>
+      <tr><td><span class="tag ts">On-premises</span></td><td>AppConfig Agent or SDK</td><td>Agent runs anywhere with network access to AWS</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ══ 08 ══ -->
+<section class="sec" id="exam">
+  <div class="sec-ey"><span class="sec-n">08</span><span class="sec-c">Exam Focus</span></div>
+  <h2>Exam Tips</h2><div class="rule"></div>
+
+  <div class="exam">
+    <div class="exam-t">Must-Know Facts</div>
+    <ul>
+      <li><strong>AppConfig is for runtime config, not code deployment.</strong> No restarts or redeployments needed — apps poll for the new config.</li>
+      <li><strong>Two validator types:</strong> JSON Schema = syntax/structure check. Lambda = semantic/business logic check. Both block deployment on failure.</li>
+      <li><strong>CloudWatch Alarms trigger automatic rollback</strong> during deployment and bake time. Attach alarms to the Environment (not the config profile).</li>
+      <li><strong>Deployment strategies control rollout speed:</strong> AllAtOnce (dev only), Linear, Canary (recommended for prod). Bake time gives alarms time to fire after 100% rollout.</li>
+      <li><strong>AppConfig Hosted Config Store</strong> is the recommended source — built in, versioned, no extra resources. SSM and S3 are alternatives.</li>
+      <li><strong>Lambda Extension</strong> is the recommended retrieval method for Lambda — runs as an extension alongside function, caches config locally.</li>
+      <li>AppConfig is part of <strong>AWS Systems Manager</strong> — important for exam categorization questions.</li>
+    </ul>
+  </div>
+
+  <h3>Scenario Patterns</h3>
+  <div class="tw"><table>
+    <thead><tr><th>Scenario</th><th>Answer</th></tr></thead>
+    <tbody>
+      <tr><td><em>"Roll out a new feature to 10% of users first, monitor for errors, then 100%"</em></td><td>AppConfig with <strong>Canary10Percent deployment strategy</strong> + CloudWatch alarm on error rate</td></tr>
+      <tr><td><em>"Config was deployed but increased error rate — revert to previous"</em></td><td>CloudWatch Alarm attached to AppConfig Environment triggers <strong>automatic rollback</strong></td></tr>
+      <tr><td><em>"Ensure config JSON always has required fields before deploying"</em></td><td><strong>JSON Schema validator</strong> on the Configuration Profile</td></tr>
+      <tr><td><em>"Validate that feature flag percentages sum to 100% before deploying"</em></td><td><strong>Lambda validator</strong> (semantic check — JSON Schema can't express this)</td></tr>
+      <tr><td><em>"Change a Lambda's feature flag without redeploying the Lambda"</em></td><td>AppConfig with <strong>Lambda Extension</strong> — Lambda polls via local endpoint</td></tr>
+      <tr><td><em>"Turn off a misbehaving feature immediately across all instances"</em></td><td>Update AppConfig config + deploy with <strong>AllAtOnce strategy</strong> — all instances get it on next poll</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>AppConfig vs Related Services</h3>
+  <div class="tw"><table>
+    <thead><tr><th>Service</th><th>Use When</th></tr></thead>
+    <tbody>
+      <tr><td><strong>AppConfig</strong></td><td>Gradual config rollout with validation + auto-rollback. Feature flags at scale.</td></tr>
+      <tr><td><strong>SSM Parameter Store</strong></td><td>Store secrets/config values. No gradual rollout, no built-in validation or rollback.</td></tr>
+      <tr><td><strong>Secrets Manager</strong></td><td>Credentials that need automatic rotation. Not for feature flags or tunable params.</td></tr>
+      <tr><td><strong>Environment Variables</strong></td><td>Static config baked at deploy time. Requires redeployment to change.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+</main>
+</div>
+
+<script>
+const secs  = document.querySelectorAll('.sec');
+const links = document.querySelectorAll('.sb-a');
+const obs   = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      links.forEach(l => l.classList.remove('on'));
+      const a = document.querySelector(`.sb-a[href="#${e.target.id}"]`);
+      if (a) a.classList.add('on');
+    }
+  });
+}, { rootMargin: '-15% 0px -70% 0px' });
+secs.forEach(s => obs.observe(s));
+</script>
+</body>
+</html>

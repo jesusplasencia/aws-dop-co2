@@ -1,0 +1,1447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS CDK — DOP-C02 Study Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Unbounded:wght@400;700;900&family=Azeret+Mono:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+/* ── DESIGN DIRECTION: Brutalist geometric. Deep indigo bg, electric yellow accents,
+   strong grid lines, blocky typography, deliberate asymmetry, construction feel. ── */
+
+:root {
+  --bg:        #0f0e1a;
+  --bg2:       #13122a;
+  --bg3:       #181730;
+  --surface:   #1e1c38;
+  --surface2:  #252345;
+  --border:    #2d2b50;
+  --border2:   #3a3870;
+
+  --yellow:    #f5e642;
+  --yellow-dim:rgba(245,230,66,0.12);
+  --yellow-b:  rgba(245,230,66,0.3);
+  --cyan:      #00e5ff;
+  --cyan-dim:  rgba(0,229,255,0.1);
+  --cyan-b:    rgba(0,229,255,0.3);
+  --violet:    #b48eff;
+  --violet-dim:rgba(180,142,255,0.1);
+  --violet-b:  rgba(180,142,255,0.3);
+  --pink:      #ff6b9d;
+  --pink-dim:  rgba(255,107,157,0.1);
+  --pink-b:    rgba(255,107,157,0.3);
+  --green:     #39ff85;
+  --green-dim: rgba(57,255,133,0.1);
+  --green-b:   rgba(57,255,133,0.3);
+  --orange:    #ff9533;
+  --orange-dim:rgba(255,149,51,0.1);
+  --orange-b:  rgba(255,149,51,0.3);
+
+  --text:      #d8d6f0;
+  --text-dim:  #7a78a8;
+  --text-faint:#3d3b68;
+  --code-bg:   #090813;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+
+body{
+  font-family:'Space Grotesk',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  font-size:14.5px;
+  line-height:1.7;
+}
+
+/* ── NOISE texture ── */
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:9999;opacity:0.5;
+}
+
+/* ── TOP STRIP ── */
+.topstrip{
+  background:var(--yellow);
+  height:4px;
+  background:linear-gradient(90deg,var(--yellow),var(--cyan),var(--violet),var(--pink),var(--green));
+}
+
+/* ── NAV BAR ── */
+.navbar{
+  background:var(--bg2);
+  border-bottom:1px solid var(--border);
+  padding:0 44px;
+  display:flex;align-items:center;
+  height:50px;
+  position:sticky;top:4px;z-index:100;
+}
+.nav-logo{
+  font-family:'Unbounded',sans-serif;
+  font-size:13px;font-weight:900;
+  color:#fff;letter-spacing:1px;
+  margin-right:28px;
+  display:flex;align-items:center;gap:8px;
+}
+.nav-logo-box{
+  width:26px;height:26px;
+  background:var(--yellow);
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:900;color:var(--bg);
+  border-radius:2px;flex-shrink:0;
+}
+.nav-links{
+  display:flex;align-items:center;gap:0;flex:1;
+  border-left:1px solid var(--border);
+  padding-left:28px;
+}
+.nav-link{
+  font-family:'Azeret Mono',monospace;
+  font-size:10px;letter-spacing:1px;text-transform:uppercase;
+  color:var(--text-dim);text-decoration:none;
+  padding:0 14px;height:50px;display:flex;align-items:center;
+  border-bottom:3px solid transparent;
+  transition:all .12s;
+}
+.nav-link:hover{color:var(--yellow);border-bottom-color:var(--yellow);}
+.nav-right{
+  margin-left:auto;
+  font-family:'Azeret Mono',monospace;
+  font-size:9px;letter-spacing:2px;
+  color:var(--text-faint);
+  display:flex;align-items:center;gap:8px;
+}
+.nav-home{
+  font-family:'Azeret Mono',monospace;
+  font-size:10px;letter-spacing:1px;text-transform:uppercase;
+  color:var(--text-dim);text-decoration:none;
+  padding:0 14px;height:50px;display:flex;align-items:center;gap:6px;
+  border-bottom:3px solid transparent;
+  transition:all .12s;
+}
+.nav-home:hover{color:var(--yellow);border-bottom-color:var(--yellow);}
+.nav-home svg{width:12px;height:12px;}
+.blink{animation:blink .8s step-end infinite;}
+@keyframes blink{50%{opacity:0;}}
+
+/* ── HERO ── */
+.hero{
+  background:var(--bg2);
+  border-bottom:1px solid var(--border);
+  padding:72px 0 64px;
+  position:relative;overflow:hidden;
+}
+/* geometric grid lines */
+.hero::before{
+  content:'';
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(var(--border) 1px,transparent 1px),
+    linear-gradient(90deg,var(--border) 1px,transparent 1px);
+  background-size:60px 60px;
+  opacity:0.25;
+}
+/* diagonal accent */
+.hero::after{
+  content:'';
+  position:absolute;
+  right:-60px;top:-40px;
+  width:400px;height:400px;
+  background:conic-gradient(from 30deg,var(--yellow-dim),transparent 30%,var(--cyan-dim) 60%,transparent);
+  border-radius:50%;
+  pointer-events:none;
+}
+.hero-inner{
+  max-width:1240px;margin:0 auto;padding:0 60px;
+  position:relative;z-index:1;
+  display:grid;grid-template-columns:1fr auto;gap:60px;align-items:end;
+}
+.hero-text{}
+.hero-kicker{
+  font-family:'Azeret Mono',monospace;
+  font-size:10px;letter-spacing:3px;text-transform:uppercase;
+  color:var(--yellow);margin-bottom:16px;
+  display:flex;align-items:center;gap:10px;
+}
+.hero-kicker::before{content:'';display:block;width:24px;height:2px;background:var(--yellow);}
+h1{
+  font-family:'Unbounded',sans-serif;
+  font-size:clamp(40px,6.5vw,80px);
+  font-weight:900;color:#fff;
+  line-height:0.95;letter-spacing:-2px;
+  margin-bottom:14px;
+}
+h1 .hl{color:var(--yellow);}
+h1 .sm{
+  display:block;font-size:0.45em;font-weight:400;
+  color:var(--text-dim);letter-spacing:0px;margin-top:10px;
+}
+.hero-desc{
+  font-size:15px;color:var(--text-dim);
+  max-width:480px;margin-top:20px;margin-bottom:36px;
+  font-weight:300;line-height:1.6;
+}
+.hero-langs{
+  display:flex;flex-wrap:wrap;gap:8px;
+}
+.lang-tag{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:6px 14px;
+  border:1px solid var(--border2);border-radius:3px;
+  font-family:'Azeret Mono',monospace;font-size:11px;
+  color:var(--text-dim);background:var(--surface);
+  transition:all .15s;
+}
+.lang-tag:hover{border-color:var(--yellow);color:var(--yellow);}
+.lang-tag.active{border-color:var(--yellow);color:var(--yellow);background:var(--yellow-dim);}
+
+.hero-stats{
+  display:flex;flex-direction:column;gap:2px;
+  background:var(--surface);
+  border:1px solid var(--border2);
+  border-radius:4px;overflow:hidden;
+  min-width:200px;
+  align-self:start;margin-top:20px;
+}
+.stat-row{
+  padding:14px 20px;
+  border-bottom:1px solid var(--border);
+}
+.stat-row:last-child{border-bottom:none;}
+.stat-val{
+  font-family:'Unbounded',sans-serif;
+  font-size:18px;font-weight:700;color:var(--yellow);
+  line-height:1;margin-bottom:3px;
+}
+.stat-key{
+  font-family:'Azeret Mono',monospace;
+  font-size:9px;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--text-faint);
+}
+
+/* ── LAYOUT ── */
+.wrapper{max-width:1240px;margin:0 auto;display:flex;}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  width:215px;min-width:215px;
+  padding:36px 0;
+  border-right:1px solid var(--border);
+  position:sticky;top:54px;
+  height:calc(100vh - 54px);
+  overflow-y:auto;
+  background:var(--bg2);
+}
+.sidebar::-webkit-scrollbar{width:3px;}
+.sidebar::-webkit-scrollbar-thumb{background:var(--border2);}
+.sb-group{margin-bottom:24px;}
+.sb-label{
+  font-family:'Azeret Mono',monospace;
+  font-size:8.5px;letter-spacing:2.5px;text-transform:uppercase;
+  color:var(--text-faint);padding:0 20px;margin-bottom:4px;
+}
+.sb-link{
+  display:flex;align-items:center;gap:9px;
+  padding:8px 20px;color:var(--text-dim);text-decoration:none;
+  font-family:'Space Grotesk',sans-serif;
+  font-size:12.5px;font-weight:400;
+  border-left:2px solid transparent;
+  transition:all .12s;
+}
+.sb-link:hover{color:var(--yellow);border-left-color:rgba(245,230,66,.4);background:var(--yellow-dim);}
+.sb-link.active{color:var(--yellow);border-left-color:var(--yellow);background:var(--yellow-dim);font-weight:500;}
+.sb-n{font-family:'Azeret Mono',monospace;font-size:9px;color:var(--text-faint);min-width:16px;}
+
+/* ── MAIN ── */
+main{flex:1;padding:56px 52px 90px;min-width:0;}
+
+/* ── SECTION ── */
+.section{margin-bottom:76px;scroll-margin-top:62px;}
+
+.sec-eyebrow{
+  display:flex;align-items:center;gap:12px;margin-bottom:10px;
+}
+.sec-num{
+  font-family:'Azeret Mono',monospace;
+  font-size:9px;color:var(--text-faint);letter-spacing:1px;
+}
+.sec-cat{
+  font-family:'Azeret Mono',monospace;
+  font-size:9px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--yellow);background:var(--yellow-dim);
+  border:1px solid var(--yellow-b);
+  padding:2px 9px;border-radius:2px;
+}
+
+h2{
+  font-family:'Unbounded',sans-serif;
+  font-size:26px;font-weight:700;
+  color:#fff;letter-spacing:-0.5px;line-height:1.1;
+  margin-bottom:0;
+}
+.sec-rule{
+  height:1px;
+  background:linear-gradient(90deg,var(--yellow),var(--border),transparent);
+  margin:14px 0 22px;
+}
+
+h3{
+  font-family:'Azeret Mono',monospace;
+  font-size:10px;font-weight:500;letter-spacing:2.5px;text-transform:uppercase;
+  color:var(--cyan);margin:28px 0 11px;
+  display:flex;align-items:center;gap:10px;
+}
+h3::after{content:'';flex:1;height:1px;background:var(--border);}
+
+h4{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:14px;font-weight:600;color:#fff;
+  margin:0 0 6px;
+}
+
+p{color:var(--text);margin-bottom:12px;font-size:14.5px;line-height:1.7;}
+
+/* ── CARDS ── */
+.card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:4px;padding:20px;margin-bottom:12px;
+}
+.card-y{border-left:3px solid var(--yellow);background:var(--yellow-dim);}
+.card-c{border-left:3px solid var(--cyan);  background:var(--cyan-dim);}
+.card-v{border-left:3px solid var(--violet);background:var(--violet-dim);}
+.card-p{border-left:3px solid var(--pink);  background:var(--pink-dim);}
+.card-g{border-left:3px solid var(--green); background:var(--green-dim);}
+.card-o{border-left:3px solid var(--orange);background:var(--orange-dim);}
+
+/* ── CALLOUT ── */
+.callout{
+  padding:14px 18px;border-radius:4px;margin:16px 0;
+  display:flex;gap:12px;align-items:flex-start;font-size:13.5px;
+}
+.co-y{background:var(--yellow-dim);border:1px solid var(--yellow-b);}
+.co-y p{color:#d4c528;margin:0;}
+.co-c{background:var(--cyan-dim);border:1px solid var(--cyan-b);}
+.co-c p{color:#5dd8f0;margin:0;}
+.co-p{background:var(--pink-dim);border:1px solid var(--pink-b);}
+.co-p p{color:#f08ab0;margin:0;}
+.co-g{background:var(--green-dim);border:1px solid var(--green-b);}
+.co-g p{color:#5ee89a;margin:0;}
+.co-v{background:var(--violet-dim);border:1px solid var(--violet-b);}
+.co-v p{color:#c0a0ff;margin:0;}
+.co-icon{font-size:14px;flex-shrink:0;margin-top:1px;}
+
+/* ── CODE ── */
+.cf{
+  background:var(--surface2);
+  border:1px solid var(--border2);
+  border-bottom:none;border-radius:4px 4px 0 0;
+  padding:8px 16px;
+  display:flex;align-items:center;gap:10px;
+  font-family:'Azeret Mono',monospace;font-size:10px;
+  color:var(--text-dim);
+}
+.cf-dot{width:7px;height:7px;border-radius:50%;background:var(--yellow);flex-shrink:0;}
+.cf+pre{border-top-left-radius:0;border-top-right-radius:0;margin-top:0;}
+
+pre{
+  background:var(--code-bg);
+  border:1px solid rgba(255,255,255,0.05);
+  border-radius:4px;padding:18px 22px;
+  overflow-x:auto;margin:12px 0;
+}
+pre code{
+  font-family:'Azeret Mono',monospace;
+  font-size:12px;line-height:1.9;
+  color:#c8c0e8;
+}
+code{
+  font-family:'Azeret Mono',monospace;font-size:12px;
+  background:var(--surface2);color:var(--yellow);
+  padding:1px 6px;border-radius:3px;border:1px solid var(--border2);
+}
+
+/* syntax */
+.ky{color:#f5e642;}   /* keyword / key */
+.sv{color:#6ee09a;}   /* string value */
+.cm{color:#3e3c6a;font-style:italic;}  /* comment */
+.ty{color:#7dd5f8;}   /* type / class */
+.fn{color:#c9a0ff;}   /* function / method */
+.nu{color:#ffaa55;}   /* number */
+.im{color:#ff6b9d;}   /* import */
+.de{color:#f5e642;}   /* decorator */
+.sh{color:#98e0a8;}   /* shell command */
+
+/* ── TABLE ── */
+.tw{overflow-x:auto;margin:14px 0;border:1px solid var(--border);border-radius:4px;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead th{
+  background:var(--surface2);
+  font-family:'Azeret Mono',monospace;
+  font-size:9px;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--text-dim);padding:10px 14px;text-align:left;
+  border-bottom:2px solid var(--yellow-b);
+}
+td{
+  padding:10px 14px;border-bottom:1px solid var(--border);
+  vertical-align:top;color:var(--text);font-size:13px;
+}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(255,255,255,.02);}
+
+/* ── GRID ── */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin:12px 0;}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0;}
+
+/* ── TAG ── */
+.tag{
+  display:inline-block;
+  font-family:'Azeret Mono',monospace;font-size:9.5px;
+  padding:2px 8px;border-radius:2px;font-weight:500;
+}
+.t-y{background:var(--yellow-dim);color:var(--yellow);border:1px solid var(--yellow-b);}
+.t-c{background:var(--cyan-dim);color:var(--cyan);border:1px solid var(--cyan-b);}
+.t-v{background:var(--violet-dim);color:var(--violet);border:1px solid var(--violet-b);}
+.t-p{background:var(--pink-dim);color:var(--pink);border:1px solid var(--pink-b);}
+.t-g{background:var(--green-dim);color:var(--green);border:1px solid var(--green-b);}
+.t-o{background:var(--orange-dim);color:var(--orange);border:1px solid var(--orange-b);}
+
+/* ── CONSTRUCT LEVELS ── */
+.level-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin:14px 0;border:1px solid var(--border);border-radius:4px;overflow:hidden;}
+.level-card{padding:20px 18px;border-right:1px solid var(--border);position:relative;}
+.level-card:last-child{border-right:none;}
+.level-badge{
+  font-family:'Unbounded',sans-serif;font-size:28px;font-weight:900;
+  line-height:1;margin-bottom:8px;
+}
+.level-name{font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;color:#fff;margin-bottom:6px;}
+.level-desc{font-size:12px;color:var(--text-dim);line-height:1.5;}
+.l1{background:rgba(0,229,255,.05);}  .l1 .level-badge{color:var(--cyan);}
+.l2{background:rgba(245,230,66,.05);} .l2 .level-badge{color:var(--yellow);}
+.l3{background:rgba(180,142,255,.05);}.l3 .level-badge{color:var(--violet);}
+
+/* ── PIPELINE STRIP ── */
+.pipeline{
+  display:flex;align-items:stretch;
+  border:1px solid var(--border);border-radius:4px;overflow:hidden;margin:16px 0;
+}
+.pipe-step{
+  flex:1;padding:14px 14px;background:var(--surface);
+  border-right:1px solid var(--border);
+}
+.pipe-step:last-child{border-right:none;}
+.pipe-num{font-family:'Azeret Mono',monospace;font-size:9px;color:var(--text-faint);letter-spacing:1px;margin-bottom:4px;}
+.pipe-icon{font-size:18px;margin-bottom:5px;}
+.pipe-name{font-size:12px;font-weight:600;color:#fff;margin-bottom:2px;}
+.pipe-cmd{
+  font-family:'Azeret Mono',monospace;font-size:9.5px;
+  color:var(--yellow);background:var(--yellow-dim);
+  padding:2px 6px;border-radius:2px;margin-top:4px;display:inline-block;
+}
+.pipe-sub{font-size:11px;color:var(--text-dim);line-height:1.4;margin-top:4px;}
+.pipe-arr{
+  display:flex;align-items:center;justify-content:center;
+  min-width:26px;background:var(--bg3);
+  color:var(--text-faint);font-size:14px;
+  border-right:1px solid var(--border);
+}
+
+/* ── EXAM BOX ── */
+.exam{
+  background:linear-gradient(135deg,#0c0a20,#130f28);
+  border:1px solid var(--yellow-b);
+  border-radius:4px;padding:24px 26px;margin:24px 0;
+  position:relative;overflow:hidden;
+}
+.exam::before{
+  content:'EXAM';
+  position:absolute;top:0;right:20px;
+  font-family:'Azeret Mono',monospace;font-size:8px;
+  letter-spacing:3px;color:var(--yellow);
+  background:var(--yellow-dim);padding:3px 10px;
+  border-radius:0 0 4px 4px;
+}
+.exam::after{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:var(--yellow);
+}
+.exam-title{
+  font-family:'Unbounded',sans-serif;
+  font-size:16px;font-weight:700;color:#fff;
+  margin-bottom:14px;padding-top:4px;
+}
+.exam ul{padding-left:18px;}
+.exam li{color:rgba(255,255,255,.7);font-size:13.5px;margin-bottom:5px;}
+.exam li::marker{color:var(--yellow);}
+.exam strong{color:#fff;}
+.exam p{color:rgba(255,255,255,.65);font-size:13.5px;}
+
+/* ── COMPARE ── */
+.cmp{
+  display:grid;grid-template-columns:1fr 1fr;
+  border:1px solid var(--border);border-radius:4px;
+  overflow:hidden;margin:14px 0;
+}
+.cmp-col{padding:20px 22px;}
+.cmp-col:first-child{background:rgba(0,229,255,.04);border-right:1px solid var(--border);}
+.cmp-col:last-child{background:rgba(245,230,66,.04);}
+.cmp-title{
+  font-family:'Azeret Mono',monospace;font-size:9px;
+  letter-spacing:1.5px;text-transform:uppercase;
+  margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border);
+}
+.cmp-col:first-child .cmp-title{color:var(--cyan);}
+.cmp-col:last-child  .cmp-title{color:var(--yellow);}
+.cmp-col li{font-size:13px;color:var(--text);margin-bottom:5px;}
+.cmp-col li::marker{color:var(--text-faint);}
+
+/* ── UL/OL ── */
+ul,ol{padding-left:18px;margin:10px 0;}
+li{margin-bottom:4px;font-size:14px;color:var(--text);}
+li::marker{color:var(--yellow);}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .sidebar{display:none;}
+  main{padding:28px 20px;}
+  .g2,.g3,.g4,.cmp,.level-grid{grid-template-columns:1fr;}
+  .hero-inner{grid-template-columns:1fr;}
+  .pipeline{flex-direction:column;}
+  .pipe-step{border-right:none;border-bottom:1px solid var(--border);}
+  .pipe-arr{display:none;}
+  .nav-links{display:none;}
+}
+</style>
+</head>
+<body>
+<div class="topstrip"></div>
+
+<!-- NAV -->
+<nav class="navbar">
+  <div class="nav-logo">
+    <div class="nav-logo-box">CDK</div>
+    AWS CDK
+  </div>
+  <div class="nav-links">
+    <a class="nav-link" href="#overview">Overview</a>
+    <a class="nav-link" href="#constructs">Constructs</a>
+    <a class="nav-link" href="#app-stack">App &amp; Stack</a>
+    <a class="nav-link" href="#cli">CLI</a>
+    <a class="nav-link" href="#pipeline">Pipelines</a>
+    <a class="nav-link" href="#testing">Testing</a>
+    <a class="nav-link" href="#exam-tips">Exam Tips</a>
+  </div>
+  <div class="nav-right">
+    <a class="nav-home" href="../index.html">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M2 6.5L8 2l6 4.5V14H10v-3.5H6V14H2V6.5z"/>
+      </svg>
+      Home
+    </a>
+    <span class="blink">▮</span>
+    DOP-C02
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-text">
+      <div class="hero-kicker">DOP-C02 · Domain 1 · SDLC Automation</div>
+      <h1>AWS <span class="hl">CDK</span><span class="sm">Cloud Development Kit</span></h1>
+      <p class="hero-desc">Infrastructure as real code. Write AWS resources in TypeScript, Python, Java, .NET — outputs CloudFormation. No more YAML.</p>
+      <div class="hero-langs">
+        <span class="lang-tag active">TypeScript</span>
+        <span class="lang-tag active">Python</span>
+        <span class="lang-tag">Java</span>
+        <span class="lang-tag">.NET / C#</span>
+        <span class="lang-tag">Go</span>
+        <span class="lang-tag">All AWS Services</span>
+        <span class="lang-tag">Constructs</span>
+      </div>
+    </div>
+    <div class="hero-stats">
+      <div class="stat-row">
+        <div class="stat-val">L1–L3</div>
+        <div class="stat-key">Construct Levels</div>
+      </div>
+      <div class="stat-row">
+        <div class="stat-val">CFN</div>
+        <div class="stat-key">Output Format</div>
+      </div>
+      <div class="stat-row">
+        <div class="stat-val">cdk synth</div>
+        <div class="stat-key">Generate Template</div>
+      </div>
+      <div class="stat-row">
+        <div class="stat-val">Pipelines</div>
+        <div class="stat-key">Self-Mutating CI/CD</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BODY -->
+<div class="wrapper">
+<nav class="sidebar">
+  <div class="sb-group">
+    <div class="sb-label">Foundation</div>
+    <a class="sb-link active" href="#overview"><span class="sb-n">01</span>Overview</a>
+    <a class="sb-link" href="#how-it-works"><span class="sb-n">02</span>How CDK Works</a>
+    <a class="sb-link" href="#constructs"><span class="sb-n">03</span>Constructs L1–L3</a>
+    <a class="sb-link" href="#app-stack"><span class="sb-n">04</span>App, Stack &amp; Env</a>
+  </div>
+  <div class="sb-group">
+    <div class="sb-label">Code</div>
+    <a class="sb-link" href="#typescript"><span class="sb-n">05</span>TypeScript Examples</a>
+    <a class="sb-link" href="#python"><span class="sb-n">06</span>Python Examples</a>
+    <a class="sb-link" href="#aspects"><span class="sb-n">07</span>Aspects &amp; Context</a>
+  </div>
+  <div class="sb-group">
+    <div class="sb-label">CLI &amp; Deploy</div>
+    <a class="sb-link" href="#cli"><span class="sb-n">08</span>CDK CLI Commands</a>
+    <a class="sb-link" href="#bootstrap"><span class="sb-n">09</span>Bootstrap</a>
+    <a class="sb-link" href="#sam-local"><span class="sb-n">10</span>SAM + CDK Local</a>
+  </div>
+  <div class="sb-group">
+    <div class="sb-label">Advanced</div>
+    <a class="sb-link" href="#pipeline"><span class="sb-n">11</span>CDK Pipelines</a>
+    <a class="sb-link" href="#testing"><span class="sb-n">12</span>Testing</a>
+    <a class="sb-link" href="#cfn-escape"><span class="sb-n">13</span>CFN Escape Hatches</a>
+    <a class="sb-link" href="#exam-tips"><span class="sb-n">14</span>Exam Tips</a>
+  </div>
+</nav>
+
+<main>
+
+<!-- ══════════════════════ 01 OVERVIEW ══════════════════════ -->
+<section class="section" id="overview">
+  <div class="sec-eyebrow"><span class="sec-num">01</span><span class="sec-cat">Foundation</span></div>
+  <h2>Overview</h2>
+  <div class="sec-rule"></div>
+
+  <p>AWS CDK (Cloud Development Kit) is an open-source framework that lets you define cloud infrastructure using <strong>real programming languages</strong>. Instead of writing YAML/JSON, you write code — with loops, conditions, functions, IDE autocomplete, and unit tests. CDK synthesizes your code into a standard CloudFormation template for deployment.</p>
+
+  <div class="callout co-y">
+    <span class="co-icon">⚡</span>
+    <p><strong>Core mental model:</strong> CDK is <em>not</em> an alternative to CloudFormation — it's a code-first abstraction layer <em>on top of</em> CloudFormation. Every CDK app ultimately becomes a CFN stack. You get the full power of a programming language to generate infrastructure definitions.</p>
+  </div>
+
+  <h3>Key Advantages</h3>
+  <div class="g3">
+    <div class="card card-y">
+      <h4>Real Language Power</h4>
+      <p style="font-size:13px;margin:0">Loops, conditionals, functions, classes, inheritance — generate complex infrastructure patterns that are impossible in YAML.</p>
+    </div>
+    <div class="card card-c">
+      <h4>Type Safety &amp; IDE Support</h4>
+      <p style="font-size:13px;margin:0">TypeScript/Java give you compile-time errors before any deployment. Autocomplete for every AWS resource property.</p>
+    </div>
+    <div class="card card-v">
+      <h4>Reusable Constructs</h4>
+      <p style="font-size:13px;margin:0">Package infrastructure patterns as npm/PyPI packages. Share your VPC or ECS service pattern across teams.</p>
+    </div>
+  </div>
+
+  <h3>CDK vs SAM vs CloudFormation</h3>
+  <div class="tw">
+    <table>
+      <thead><tr><th></th><th>CloudFormation</th><th>SAM</th><th>CDK</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Language</strong></td><td>YAML / JSON</td><td>YAML / JSON</td><td>TS, Python, Java, .NET, Go</td></tr>
+        <tr><td><strong>Scope</strong></td><td>All AWS</td><td>Serverless focused</td><td>All AWS</td></tr>
+        <tr><td><strong>Abstraction</strong></td><td>Low — every resource explicit</td><td>Medium — SAM shortcuts</td><td>High — constructs hide boilerplate</td></tr>
+        <tr><td><strong>Output</strong></td><td>CFN Template (is the template)</td><td>CFN Template (via transform)</td><td>CFN Template (via <code>cdk synth</code>)</td></tr>
+        <tr><td><strong>Unit Testing</strong></td><td>❌ Limited</td><td>❌ Limited</td><td>✅ Built-in assertions library</td></tr>
+        <tr><td><strong>Local Testing</strong></td><td>❌</td><td>✅ <code>sam local</code></td><td>✅ via SAM CLI + <code>cdk synth</code></td></tr>
+        <tr><td><strong>Reusability</strong></td><td>Nested stacks / modules</td><td>SAR</td><td>npm / PyPI packages</td></tr>
+        <tr><td><strong>Best For</strong></td><td>Pure IaC, full control</td><td>Lambda APIs, quick serverless</td><td>Complex multi-service apps, teams</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ══════════════════════ 02 HOW IT WORKS ══════════════════════ -->
+<section class="section" id="how-it-works">
+  <div class="sec-eyebrow"><span class="sec-num">02</span><span class="sec-cat">Foundation</span></div>
+  <h2>How CDK Works</h2>
+  <div class="sec-rule"></div>
+
+  <p>CDK follows a <strong>synthesize → deploy</strong> model. Your code constructs a tree of Constructs. <code>cdk synth</code> converts that tree into one or more CloudFormation templates. <code>cdk deploy</code> uploads assets to S3 and creates/updates the CloudFormation stack.</p>
+
+  <div class="pipeline">
+    <div class="pipe-step">
+      <div class="pipe-num">01</div><div class="pipe-icon">✍️</div>
+      <div class="pipe-name">Write CDK Code</div>
+      <div class="pipe-sub">TypeScript/Python classes, Constructs, Stacks</div>
+      <div class="pipe-cmd">app.ts / app.py</div>
+    </div>
+    <div class="pipe-arr">→</div>
+    <div class="pipe-step">
+      <div class="pipe-num">02</div><div class="pipe-icon">🔨</div>
+      <div class="pipe-name">cdk synth</div>
+      <div class="pipe-sub">Executes code, outputs CFN JSON/YAML to <code>cdk.out/</code></div>
+      <div class="pipe-cmd">cdk synth</div>
+    </div>
+    <div class="pipe-arr">→</div>
+    <div class="pipe-step">
+      <div class="pipe-num">03</div><div class="pipe-icon">📦</div>
+      <div class="pipe-name">Asset Bundling</div>
+      <div class="pipe-sub">Lambda code, Docker images uploaded to CDKToolkit S3/ECR</div>
+      <div class="pipe-cmd">cdk assets</div>
+    </div>
+    <div class="pipe-arr">→</div>
+    <div class="pipe-step">
+      <div class="pipe-num">04</div><div class="pipe-icon">🔍</div>
+      <div class="pipe-name">cdk diff</div>
+      <div class="pipe-sub">Optional — preview what will change vs current stack</div>
+      <div class="pipe-cmd">cdk diff</div>
+    </div>
+    <div class="pipe-arr">→</div>
+    <div class="pipe-step">
+      <div class="pipe-num">05</div><div class="pipe-icon">🚀</div>
+      <div class="pipe-name">cdk deploy</div>
+      <div class="pipe-sub">Creates CFN ChangeSet and executes it</div>
+      <div class="pipe-cmd">cdk deploy</div>
+    </div>
+  </div>
+
+  <div class="callout co-c">
+    <span class="co-icon">ℹ️</span>
+    <p><strong>cdk.out/</strong> directory contains the synthesized CFN templates and asset manifests. It is generated by <code>cdk synth</code> and should generally be <strong>gitignored</strong> (it's a build artifact). CI/CD pipelines often run <code>cdk synth</code> first and then deploy from <code>cdk.out/</code>.</p>
+  </div>
+</section>
+
+<!-- ══════════════════════ 03 CONSTRUCTS ══════════════════════ -->
+<section class="section" id="constructs">
+  <div class="sec-eyebrow"><span class="sec-num">03</span><span class="sec-cat">Foundation</span></div>
+  <h2>Constructs — L1, L2, L3</h2>
+  <div class="sec-rule"></div>
+
+  <p>A <strong>Construct</strong> is the fundamental building block of CDK. Every CDK component — from a single S3 bucket to an entire three-tier application — is a Construct. Constructs come in three abstraction levels.</p>
+
+  <div class="level-grid">
+    <div class="level-card l1">
+      <div class="level-badge">L1</div>
+      <div class="level-name">CFN Resources (Cfn*)</div>
+      <div class="level-desc">Direct 1:1 mapping to CloudFormation resources. Auto-generated from CFN spec. Every property is explicit. Prefix: <code>Cfn</code> (e.g., <code>CfnBucket</code>). Use when you need full CFN control.</div>
+    </div>
+    <div class="level-card l2">
+      <div class="level-badge">L2</div>
+      <div class="level-name">AWS Constructs</div>
+      <div class="level-desc">Higher-level AWS constructs with sensible defaults, helper methods, and automatic IAM grant methods. E.g., <code>s3.Bucket</code>, <code>lambda.Function</code>, <code>ec2.Vpc</code>. This is what you use most of the time.</div>
+    </div>
+    <div class="level-card l3">
+      <div class="level-badge">L3</div>
+      <div class="level-name">Patterns (Solutions)</div>
+      <div class="level-desc">Multi-service patterns combining multiple AWS resources. E.g., <code>aws-solutions-constructs</code> package provides <code>LambdaToDynamoDB</code>, <code>ApiGatewayToLambda</code>. Highest abstraction.</div>
+    </div>
+  </div>
+
+  <div class="callout co-y">
+    <span class="co-icon">💡</span>
+    <p><strong>Construct Tree:</strong> All constructs live in a tree. Every construct has a <strong>scope</strong> (parent) and an <strong>id</strong> (unique within parent). The root is the <code>App</code>. Children are <code>Stack</code>s. Inside stacks are <code>Construct</code>s. The tree path determines logical IDs in CloudFormation (e.g., <code>MyStack/MyBucket/Resource</code>).</p>
+  </div>
+
+  <h3>L1 vs L2 Example — S3 Bucket</h3>
+  <div class="g2">
+    <div>
+      <div class="cf"><div class="cf-dot"></div>L1 (Cfn) — verbose, 1:1 CFN</div>
+      <pre><code><span class="im">import</span> { <span class="ty">CfnBucket</span> } <span class="im">from</span> <span class="sv">'aws-cdk-lib/aws-s3'</span>;
+
+<span class="sc">// Must specify everything manually</span>
+<span class="ky">new</span> <span class="ty">CfnBucket</span>(<span class="ky">this</span>, <span class="sv">'MyBucket'</span>, {
+  <span class="ky">bucketName</span>: <span class="sv">'my-bucket'</span>,
+  <span class="ky">versioningConfiguration</span>: {
+    <span class="ky">status</span>: <span class="sv">'Enabled'</span>,
+  },
+  <span class="ky">publicAccessBlockConfiguration</span>: {
+    <span class="ky">blockPublicAcls</span>: <span class="ky">true</span>,
+    <span class="ky">blockPublicPolicy</span>: <span class="ky">true</span>,
+    <span class="ky">ignorePublicAcls</span>: <span class="ky">true</span>,
+    <span class="ky">restrictPublicBuckets</span>: <span class="ky">true</span>,
+  },
+});
+</code></pre>
+    </div>
+    <div>
+      <div class="cf"><div class="cf-dot"></div>L2 (Bucket) — smart defaults + methods</div>
+      <pre><code><span class="im">import</span> * <span class="im">as</span> <span class="ty">s3</span> <span class="im">from</span> <span class="sv">'aws-cdk-lib/aws-s3'</span>;
+
+<span class="sc">// Sensible defaults — public access blocked by default</span>
+<span class="ky">const</span> bucket = <span class="ky">new</span> <span class="ty">s3.Bucket</span>(<span class="ky">this</span>, <span class="sv">'MyBucket'</span>, {
+  <span class="ky">versioned</span>: <span class="ky">true</span>,
+  <span class="ky">encryption</span>: <span class="ty">s3.BucketEncryption</span>.<span class="fn">S3_MANAGED</span>,
+  <span class="ky">removalPolicy</span>: <span class="ty">RemovalPolicy</span>.<span class="fn">DESTROY</span>,
+  <span class="ky">autoDeleteObjects</span>: <span class="ky">true</span>,
+});
+
+<span class="sc">// L2 grant methods auto-create IAM policies</span>
+bucket.<span class="fn">grantRead</span>(myLambdaFn);
+bucket.<span class="fn">grantReadWrite</span>(myEcsTaskRole);
+</code></pre>
+    </div>
+  </div>
+
+  <h3>Custom Construct — Reusable Pattern</h3>
+  <div class="cf"><div class="cf-dot"></div>constructs/secure-bucket.ts — your own L2/L3 construct</div>
+  <pre><code><span class="im">import</span> { <span class="ty">Construct</span> } <span class="im">from</span> <span class="sv">'constructs'</span>;
+<span class="im">import</span> * <span class="im">as</span> <span class="ty">s3</span> <span class="im">from</span> <span class="sv">'aws-cdk-lib/aws-s3'</span>;
+<span class="im">import</span> { <span class="ty">RemovalPolicy</span> } <span class="im">from</span> <span class="sv">'aws-cdk-lib'</span>;
+
+<span class="sc">// Every construct extends Construct</span>
+<span class="ky">export class</span> <span class="ty">SecureBucket</span> <span class="ky">extends</span> <span class="ty">Construct</span> {
+  <span class="ky">public readonly</span> bucket: <span class="ty">s3.Bucket</span>;
+
+  <span class="ky">constructor</span>(scope: <span class="ty">Construct</span>, id: <span class="ty">string</span>) {
+    <span class="ky">super</span>(scope, id);  <span class="sc">// ← scope + id = position in construct tree</span>
+
+    <span class="ky">this</span>.bucket = <span class="ky">new</span> <span class="ty">s3.Bucket</span>(<span class="ky">this</span>, <span class="sv">'Resource'</span>, {
+      <span class="ky">versioned</span>: <span class="ky">true</span>,
+      <span class="ky">encryption</span>: <span class="ty">s3.BucketEncryption</span>.<span class="fn">KMS_MANAGED</span>,
+      <span class="ky">blockPublicAccess</span>: <span class="ty">s3.BlockPublicAccess</span>.<span class="fn">BLOCK_ALL</span>,
+      <span class="ky">enforceSSL</span>: <span class="ky">true</span>,
+      <span class="ky">removalPolicy</span>: <span class="ty">RemovalPolicy</span>.<span class="fn">RETAIN</span>,
+    });
+  }
+}
+
+<span class="sc">// Use anywhere in your app — same as any built-in construct</span>
+<span class="ky">const</span> myBucket = <span class="ky">new</span> <span class="ty">SecureBucket</span>(<span class="ky">this</span>, <span class="sv">'DataBucket'</span>);
+</code></pre>
+</section>
+
+<!-- ══════════════════════ 04 APP & STACK ══════════════════════ -->
+<section class="section" id="app-stack">
+  <div class="sec-eyebrow"><span class="sec-num">04</span><span class="sec-cat">Foundation</span></div>
+  <h2>App, Stack &amp; Environment</h2>
+  <div class="sec-rule"></div>
+
+  <div class="g3">
+    <div class="card card-y">
+      <h4>App</h4>
+      <p style="font-size:13px;margin:0">Root of the construct tree. Creates the execution context. One App can contain <strong>multiple Stacks</strong>. Entry point of every CDK program.</p>
+    </div>
+    <div class="card card-c">
+      <h4>Stack</h4>
+      <p style="font-size:13px;margin:0">Maps 1:1 to a <strong>CloudFormation Stack</strong>. Unit of deployment. Has an optional <code>env</code> specifying account + region. Can be <em>environment-agnostic</em> (resolved at deploy time) or <em>explicit</em>.</p>
+    </div>
+    <div class="card card-v">
+      <h4>Environment (env)</h4>
+      <p style="font-size:13px;margin:0">Combination of <code>account</code> + <code>region</code>. Set explicitly or read from CDK environment variables. Required for cross-account/cross-region deployments.</p>
+    </div>
+  </div>
+
+  <div class="cf"><div class="cf-dot"></div>bin/app.ts — multi-stack multi-environment CDK app</div>
+  <pre><code><span class="im">import</span> * <span class="im">as</span> <span class="ty">cdk</span> <span class="im">from</span> <span class="sv">'aws-cdk-lib'</span>;
+<span class="im">import</span> { <span class="ty">NetworkStack</span> } <span class="im">from</span> <span class="sv">'../lib/network-stack'</span>;
+<span class="im">import</span> { <span class="ty">AppStack</span> }     <span class="im">from</span> <span class="sv">'../lib/app-stack'</span>;
+
+<span class="ky">const</span> app = <span class="ky">new</span> <span class="ty">cdk.App</span>();   <span class="sc">// root of construct tree</span>
+
+<span class="sc">// Shared environment config</span>
+<span class="ky">const</span> devEnv  = { <span class="ky">account</span>: <span class="sv">'111111111111'</span>, <span class="ky">region</span>: <span class="sv">'us-east-1'</span> };
+<span class="ky">const</span> prodEnv = { <span class="ky">account</span>: <span class="sv">'222222222222'</span>, <span class="ky">region</span>: <span class="sv">'us-east-1'</span> };
+
+<span class="sc">// Deploy same infrastructure to dev and prod accounts</span>
+<span class="ky">const</span> devNet  = <span class="ky">new</span> <span class="ty">NetworkStack</span>(app, <span class="sv">'NetworkStack-Dev'</span>,  { <span class="ky">env</span>: devEnv  });
+<span class="ky">const</span> prodNet = <span class="ky">new</span> <span class="ty">NetworkStack</span>(app, <span class="sv">'NetworkStack-Prod'</span>, { <span class="ky">env</span>: prodEnv });
+
+<span class="sc">// AppStack depends on NetworkStack output (VPC ID)</span>
+<span class="ky">const</span> devApp  = <span class="ky">new</span> <span class="ty">AppStack</span>(app, <span class="sv">'AppStack-Dev'</span>, {
+  <span class="ky">env</span>: devEnv,
+  <span class="ky">vpc</span>: devNet.vpc,           <span class="sc">// pass resource references between stacks</span>
+  <span class="ky">isProd</span>: <span class="ky">false</span>,
+});
+
+<span class="sc">// Stack tags — applied to all resources in the stack</span>
+<span class="ty">cdk.Tags</span>.<span class="fn">of</span>(app).<span class="fn">add</span>(<span class="sv">'ManagedBy'</span>, <span class="sv">'CDK'</span>);
+<span class="ty">cdk.Tags</span>.<span class="fn">of</span>(prodNet).<span class="fn">add</span>(<span class="sv">'Environment'</span>, <span class="sv">'Production'</span>);
+</code></pre>
+
+  <div class="callout co-v">
+    <span class="co-icon">⚠️</span>
+    <p><strong>Cross-stack references:</strong> When you pass a resource (like a VPC) from one Stack to another, CDK automatically creates a CloudFormation Export/Import. The two stacks become linked — you cannot delete the exporting stack while the importing stack references it.</p>
+  </div>
+</section>
+
+<!-- ══════════════════════ 05 TS EXAMPLES ══════════════════════ -->
+<section class="section" id="typescript">
+  <div class="sec-eyebrow"><span class="sec-num">05</span><span class="sec-cat">Code</span></div>
+  <h2>TypeScript — Full Stack Example</h2>
+  <div class="sec-rule"></div>
+
+  <div class="cf"><div class="cf-dot"></div>lib/api-stack.ts — Lambda + API Gateway + DynamoDB</div>
+  <pre><code><span class="im">import</span> * <span class="im">as</span> <span class="ty">cdk</span>      <span class="im">from</span> <span class="sv">'aws-cdk-lib'</span>;
+<span class="im">import</span> * <span class="im">as</span> <span class="ty">lambda</span>   <span class="im">from</span> <span class="sv">'aws-cdk-lib/aws-lambda'</span>;
+<span class="im">import</span> * <span class="im">as</span> <span class="ty">apigw</span>    <span class="im">from</span> <span class="sv">'aws-cdk-lib/aws-apigateway'</span>;
+<span class="im">import</span> * <span class="im">as</span> <span class="ty">dynamodb</span> <span class="im">from</span> <span class="sv">'aws-cdk-lib/aws-dynamodb'</span>;
+<span class="im">import</span> { <span class="ty">Construct</span> } <span class="im">from</span> <span class="sv">'constructs'</span>;
+
+<span class="ky">export class</span> <span class="ty">ApiStack</span> <span class="ky">extends</span> <span class="ty">cdk.Stack</span> {
+  <span class="ky">constructor</span>(scope: <span class="ty">Construct</span>, id: <span class="ty">string</span>, props?: <span class="ty">cdk.StackProps</span>) {
+    <span class="ky">super</span>(scope, id, props);
+
+    <span class="sc">// DynamoDB table — L2 construct with smart defaults</span>
+    <span class="ky">const</span> table = <span class="ky">new</span> <span class="ty">dynamodb.Table</span>(<span class="ky">this</span>, <span class="sv">'ItemsTable'</span>, {
+      <span class="ky">partitionKey</span>: { <span class="ky">name</span>: <span class="sv">'pk'</span>, <span class="ky">type</span>: <span class="ty">dynamodb.AttributeType</span>.<span class="fn">STRING</span> },
+      <span class="ky">sortKey</span>:      { <span class="ky">name</span>: <span class="sv">'sk'</span>, <span class="ky">type</span>: <span class="ty">dynamodb.AttributeType</span>.<span class="fn">STRING</span> },
+      <span class="ky">billingMode</span>:  <span class="ty">dynamodb.BillingMode</span>.<span class="fn">PAY_PER_REQUEST</span>,
+      <span class="ky">removalPolicy</span>:<span class="ty">cdk.RemovalPolicy</span>.<span class="fn">RETAIN</span>,
+      <span class="ky">pointInTimeRecovery</span>: <span class="ky">true</span>,
+    });
+
+    <span class="sc">// Lambda function — L2 with bundling</span>
+    <span class="ky">const</span> fn = <span class="ky">new</span> <span class="ty">lambda.Function</span>(<span class="ky">this</span>, <span class="sv">'ItemsHandler'</span>, {
+      <span class="ky">runtime</span>:     <span class="ty">lambda.Runtime</span>.<span class="fn">NODEJS_20_X</span>,
+      <span class="ky">handler</span>:     <span class="sv">'index.handler'</span>,
+      <span class="ky">code</span>:        <span class="ty">lambda.Code</span>.<span class="fn">fromAsset</span>(<span class="sv">'./src/lambda'</span>),
+      <span class="ky">architecture</span>:<span class="ty">lambda.Architecture</span>.<span class="fn">ARM_64</span>,
+      <span class="ky">environment</span>: { TABLE_NAME: table.<span class="fn">tableName</span> },
+      <span class="ky">tracing</span>:     <span class="ty">lambda.Tracing</span>.<span class="fn">ACTIVE</span>,
+    });
+
+    <span class="sc">// Grant Lambda read/write to table — auto-creates IAM policy</span>
+    table.<span class="fn">grantReadWriteData</span>(fn);
+
+    <span class="sc">// API Gateway REST API — L2</span>
+    <span class="ky">const</span> api = <span class="ky">new</span> <span class="ty">apigw.RestApi</span>(<span class="ky">this</span>, <span class="sv">'ItemsApi'</span>, {
+      <span class="ky">restApiName</span>: <span class="sv">'Items Service'</span>,
+      <span class="ky">deployOptions</span>: { <span class="ky">stageName</span>: <span class="sv">'prod'</span>, <span class="ky">tracingEnabled</span>: <span class="ky">true</span> },
+    });
+
+    <span class="ky">const</span> items = api.<span class="fn">root</span>.<span class="fn">addResource</span>(<span class="sv">'items'</span>);
+    items.<span class="fn">addMethod</span>(<span class="sv">'GET'</span>,  <span class="ky">new</span> <span class="ty">apigw.LambdaIntegration</span>(fn));
+    items.<span class="fn">addMethod</span>(<span class="sv">'POST'</span>, <span class="ky">new</span> <span class="ty">apigw.LambdaIntegration</span>(fn));
+
+    <span class="sc">// Stack Output — visible in CFN outputs and cdk deploy</span>
+    <span class="ky">new</span> <span class="ty">cdk.CfnOutput</span>(<span class="ky">this</span>, <span class="sv">'ApiUrl'</span>, { <span class="ky">value</span>: api.<span class="fn">url</span> });
+  }
+}
+</code></pre>
+</section>
+
+<!-- ══════════════════════ 06 PYTHON ══════════════════════ -->
+<section class="section" id="python">
+  <div class="sec-eyebrow"><span class="sec-num">06</span><span class="sec-cat">Code</span></div>
+  <h2>Python — Full Stack Example</h2>
+  <div class="sec-rule"></div>
+
+  <div class="cf"><div class="cf-dot"></div>app.py — Python CDK entry point</div>
+  <pre><code><span class="im">from</span> aws_cdk <span class="im">import</span> App
+<span class="im">from</span> stacks.api_stack <span class="im">import</span> ApiStack
+
+app = App()
+ApiStack(app, <span class="sv">"ApiStack"</span>, env={
+    <span class="sv">"account"</span>: <span class="sv">"123456789012"</span>,
+    <span class="sv">"region"</span>: <span class="sv">"us-east-1"</span>
+})
+app.synth()
+</code></pre>
+
+  <div class="cf"><div class="cf-dot"></div>stacks/api_stack.py — Lambda + DynamoDB + SQS</div>
+  <pre><code><span class="im">from</span> aws_cdk <span class="im">import</span> (
+    Stack, Duration, RemovalPolicy, CfnOutput,
+    aws_lambda    <span class="im">as</span> _lambda,
+    aws_dynamodb  <span class="im">as</span> ddb,
+    aws_sqs       <span class="im">as</span> sqs,
+    aws_lambda_event_sources <span class="im">as</span> sources,
+)
+<span class="im">from</span> constructs <span class="im">import</span> Construct
+
+<span class="ky">class</span> <span class="ty">ApiStack</span>(Stack):
+    <span class="ky">def</span> <span class="fn">__init__</span>(self, scope: Construct, construct_id: str, **kwargs):
+        <span class="ky">super</span>().__init__(scope, construct_id, **kwargs)
+
+        <span class="sc"># DynamoDB table</span>
+        table = ddb.Table(self, <span class="sv">"ItemsTable"</span>,
+            partition_key=ddb.Attribute(name=<span class="sv">"pk"</span>, type=ddb.AttributeType.STRING),
+            billing_mode=ddb.BillingMode.PAY_PER_REQUEST,
+            removal_policy=RemovalPolicy.DESTROY,
+        )
+
+        <span class="sc"># Dead letter queue for failed messages</span>
+        dlq = sqs.Queue(self, <span class="sv">"DLQ"</span>, retention_period=Duration.days(<span class="nu">14</span>))
+
+        <span class="sc"># Main processing queue</span>
+        queue = sqs.Queue(self, <span class="sv">"WorkQueue"</span>,
+            visibility_timeout=Duration.seconds(<span class="nu">300</span>),
+            dead_letter_queue=sqs.DeadLetterQueue(queue=dlq, max_receive_count=<span class="nu">3</span>),
+        )
+
+        <span class="sc"># Lambda worker — triggered by SQS</span>
+        worker = _lambda.Function(self, <span class="sv">"WorkerFn"</span>,
+            runtime=_lambda.Runtime.PYTHON_3_12,
+            handler=<span class="sv">"worker.handler"</span>,
+            code=_lambda.Code.from_asset(<span class="sv">"./src"</span>),
+            environment={<span class="sv">"TABLE_NAME"</span>: table.table_name},
+        )
+
+        <span class="sc"># Grant permissions using L2 grant methods</span>
+        table.grant_write_data(worker)
+        queue.grant_consume_messages(worker)
+
+        <span class="sc"># Add SQS as event source</span>
+        worker.add_event_source(sources.SqsEventSource(queue, batch_size=<span class="nu">10</span>))
+
+        CfnOutput(self, <span class="sv">"QueueUrl"</span>, value=queue.queue_url)
+</code></pre>
+
+  <h3>Python Project Setup</h3>
+  <pre><code><span class="cm"># Initialize a new CDK Python project</span>
+<span class="sh">cdk init app --language python</span>
+
+<span class="cm"># Activate virtual environment &amp; install dependencies</span>
+<span class="sh">source .venv/bin/activate</span>
+<span class="sh">pip install -r requirements.txt</span>
+
+<span class="cm"># requirements.txt</span>
+<span class="sv">aws-cdk-lib==2.x.x</span>
+<span class="sv">constructs>=10.0.0,<11.0.0</span>
+</code></pre>
+</section>
+
+<!-- ══════════════════════ 07 ASPECTS & CONTEXT ══════════════════════ -->
+<section class="section" id="aspects">
+  <div class="sec-eyebrow"><span class="sec-num">07</span><span class="sec-cat">Code</span></div>
+  <h2>Aspects, Context &amp; Parameters</h2>
+  <div class="sec-rule"></div>
+
+  <h3>Aspects — Policy-as-Code</h3>
+  <p>Aspects are a way to apply an operation to all constructs in a tree. Perfect for enforcing organization-wide policies (e.g., all S3 buckets must have encryption, all Lambda functions must have tracing).</p>
+
+  <div class="cf"><div class="cf-dot"></div>aspects/enforce-encryption.ts</div>
+  <pre><code><span class="im">import</span> { <span class="ty">IAspect</span>, <span class="ty">Annotations</span> } <span class="im">from</span> <span class="sv">'aws-cdk-lib'</span>;
+<span class="im">import</span> { <span class="ty">Bucket</span> }                <span class="im">from</span> <span class="sv">'aws-cdk-lib/aws-s3'</span>;
+<span class="im">import</span> { <span class="ty">IConstruct</span> }           <span class="im">from</span> <span class="sv">'constructs'</span>;
+
+<span class="sc">// Aspect that enforces encryption on all S3 buckets in the tree</span>
+<span class="ky">export class</span> <span class="ty">EnforceS3Encryption</span> <span class="ky">implements</span> <span class="ty">IAspect</span> {
+  <span class="fn">visit</span>(node: <span class="ty">IConstruct</span>) {
+    <span class="ky">if</span> (node <span class="im">instanceof</span> <span class="ty">Bucket</span>) {
+      <span class="ky">if</span> (node.<span class="fn">encryptionKey</span> === <span class="ky">undefined</span>) {
+        <span class="ty">Annotations</span>.<span class="fn">of</span>(node).<span class="fn">addError</span>(<span class="sv">'S3 Bucket must have encryption enabled'</span>);
+      }
+    }
+  }
+}
+
+<span class="sc">// Apply to entire app or specific stack</span>
+<span class="ty">Aspects</span>.<span class="fn">of</span>(app).<span class="fn">add</span>(<span class="ky">new</span> <span class="ty">EnforceS3Encryption</span>());
+</code></pre>
+
+  <h3>Context &amp; Parameters</h3>
+  <div class="g2">
+    <div class="card card-c">
+      <h4>Context Values</h4>
+      <p style="font-size:13px;margin:0">Key-value pairs passed to CDK at synth time. Set in <code>cdk.json</code>, <code>~/.cdk.json</code>, or via <code>--context</code> flag. Used for environment-specific values. <strong>Resolved at synth time</strong> — baked into the template.</p>
+      <pre style="margin-top:8px"><code><span class="cm">// Read context in code</span>
+<span class="ky">const</span> stage = <span class="ky">this</span>.<span class="fn">node.tryGetContext</span>(<span class="sv">'stage'</span>) ?? <span class="sv">'dev'</span>;
+
+<span class="cm">// Pass at synth time</span>
+<span class="sh">cdk synth --context stage=prod</span>
+</code></pre>
+    </div>
+    <div class="card card-v">
+      <h4>CfnParameters</h4>
+      <p style="font-size:13px;margin:0">CloudFormation parameters that are resolved at <strong>deploy time</strong> (not synth time). Use sparingly in CDK — context is usually preferred. Required when value is truly unknown until deployment.</p>
+      <pre style="margin-top:8px"><code><span class="ky">const</span> param = <span class="ky">new</span> <span class="ty">cdk.CfnParameter</span>(<span class="ky">this</span>, <span class="sv">'DBPass'</span>, {
+  <span class="ky">type</span>: <span class="sv">'String'</span>,
+  <span class="ky">noEcho</span>: <span class="ky">true</span>,
+});
+
+<span class="cm">// Deploy with parameter value</span>
+<span class="sh">cdk deploy --parameters DBPass=secret</span>
+</code></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════ 08 CLI ══════════════════════ -->
+<section class="section" id="cli">
+  <div class="sec-eyebrow"><span class="sec-num">08</span><span class="sec-cat">CLI &amp; Deploy</span></div>
+  <h2>CDK CLI Commands</h2>
+  <div class="sec-rule"></div>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Command</th><th>What It Does</th><th>Key Flags</th></tr></thead>
+      <tbody>
+        <tr><td><code>cdk init</code></td><td>Create a new CDK project from a template</td><td><code>--language typescript|python|java|csharp|go</code></td></tr>
+        <tr><td><code>cdk ls</code></td><td>List all stacks in the app</td><td><code>--long</code> (show env info)</td></tr>
+        <tr><td><code>cdk synth</code></td><td>Synthesize and print the CloudFormation template</td><td><code>--quiet</code> <code>--output cdk.out/</code></td></tr>
+        <tr><td><code>cdk diff</code></td><td>Compare local stack with deployed stack — shows what will change</td><td><code>--context</code> <code>StackName</code></td></tr>
+        <tr><td><code>cdk deploy</code></td><td>Deploy stack(s) to AWS</td><td><code>--all</code> <code>--require-approval never</code> <code>--outputs-file</code></td></tr>
+        <tr><td><code>cdk destroy</code></td><td>Delete deployed stack(s)</td><td><code>--force</code></td></tr>
+        <tr><td><code>cdk bootstrap</code></td><td>Provision CDKToolkit stack (S3, ECR, IAM) in an account/region</td><td><code>--trust AccountId</code> <code>--cloudformation-execution-policies</code></td></tr>
+        <tr><td><code>cdk doctor</code></td><td>Diagnose CDK environment issues (versions, credentials)</td><td>—</td></tr>
+        <tr><td><code>cdk metadata</code></td><td>Display metadata for stacks</td><td>—</td></tr>
+        <tr><td><code>cdk context</code></td><td>Manage cached context values</td><td><code>--clear</code> <code>--reset key</code></td></tr>
+        <tr><td><code>cdk watch</code></td><td>Watch for changes and redeploy (hot-swap when possible)</td><td><code>--hotswap</code></td></tr>
+        <tr><td><code>cdk hotswap</code></td><td>Fast deploy for Lambda code/alias/mapping changes (skips CFN)</td><td>⚠️ Dev only — not safe for prod</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout co-p">
+    <span class="co-icon">⚠️</span>
+    <p><strong><code>cdk hotswap</code> and <code>cdk watch --hotswap</code></strong> bypass CloudFormation to update Lambda functions, ECS services, and Step Functions directly. Fast for development, but <strong>never use in production</strong> — it causes infrastructure drift between your CDK state and actual AWS resources.</p>
+  </div>
+</section>
+
+<!-- ══════════════════════ 09 BOOTSTRAP ══════════════════════ -->
+<section class="section" id="bootstrap">
+  <div class="sec-eyebrow"><span class="sec-num">09</span><span class="sec-cat">CLI &amp; Deploy</span></div>
+  <h2>CDK Bootstrap</h2>
+  <div class="sec-rule"></div>
+
+  <p>Before you can deploy CDK apps to an account/region for the first time, you must run <code>cdk bootstrap</code>. This creates a CloudFormation stack called <strong>CDKToolkit</strong> that provisions the infrastructure CDK needs to operate.</p>
+
+  <h3>What Bootstrap Creates</h3>
+  <div class="g4">
+    <div class="card" style="font-size:12px;text-align:center;padding:14px 12px">
+      <div style="font-size:22px;margin-bottom:6px">🪣</div>
+      <strong style="color:#fff">S3 Bucket</strong>
+      <p style="margin-top:4px;font-size:11px;color:var(--text-dim)">Stores Lambda code, CFN templates, and other assets</p>
+    </div>
+    <div class="card" style="font-size:12px;text-align:center;padding:14px 12px">
+      <div style="font-size:22px;margin-bottom:6px">🐳</div>
+      <strong style="color:#fff">ECR Repository</strong>
+      <p style="margin-top:4px;font-size:11px;color:var(--text-dim)">Stores Docker images used by ECS/Lambda container deployments</p>
+    </div>
+    <div class="card" style="font-size:12px;text-align:center;padding:14px 12px">
+      <div style="font-size:22px;margin-bottom:6px">🔑</div>
+      <strong style="color:#fff">IAM Roles</strong>
+      <p style="margin-top:4px;font-size:11px;color:var(--text-dim)">Deployment role, CloudFormation execution role, lookup role</p>
+    </div>
+    <div class="card" style="font-size:12px;text-align:center;padding:14px 12px">
+      <div style="font-size:22px;margin-bottom:6px">🔐</div>
+      <strong style="color:#fff">KMS Key</strong>
+      <p style="margin-top:4px;font-size:11px;color:var(--text-dim)">Encrypts assets stored in the CDKToolkit S3 bucket</p>
+    </div>
+  </div>
+
+  <div class="callout co-y">
+    <span class="co-icon">💡</span>
+    <p><strong>Bootstrap is per account + per region.</strong> If you deploy to <code>us-east-1</code> and <code>eu-west-1</code>, you must bootstrap each region separately. In Organizations, you can configure <strong>trust policies</strong> to allow a central pipeline account to deploy into target accounts.</p>
+  </div>
+
+  <pre><code><span class="cm"># Bootstrap current account/region (uses credentials from env)</span>
+<span class="sh">cdk bootstrap</span>
+
+<span class="cm"># Bootstrap specific account and region</span>
+<span class="sh">cdk bootstrap aws://123456789012/us-east-1</span>
+
+<span class="cm"># Bootstrap for cross-account pipeline (trust pipeline account)</span>
+<span class="sh">cdk bootstrap aws://TARGET_ACCOUNT/us-east-1 \
+  --trust PIPELINE_ACCOUNT_ID \
+  --cloudformation-execution-policies arn:aws:iam::aws:policy/AdministratorAccess</span>
+
+<span class="cm"># Upgrade bootstrap version (after CDK version upgrades)</span>
+<span class="sh">cdk bootstrap --force</span>
+</code></pre>
+</section>
+
+<!-- ══════════════════════ 10 SAM LOCAL ══════════════════════ -->
+<section class="section" id="sam-local">
+  <div class="sec-eyebrow"><span class="sec-num">10</span><span class="sec-cat">CLI &amp; Deploy</span></div>
+  <h2>SAM CLI + CDK Local Testing</h2>
+  <div class="sec-rule"></div>
+
+  <p>You can use the SAM CLI to locally invoke Lambda functions defined in CDK apps. Since CDK outputs CloudFormation templates, and SAM CLI can read CFN templates, the two work together seamlessly.</p>
+
+  <pre><code><span class="cm"># Step 1: Synthesize the CDK app — produces cdk.out/MyStack.template.json</span>
+<span class="sh">cdk synth MyStack</span>
+
+<span class="cm"># Step 2: Use SAM to invoke a Lambda from the synthesized template</span>
+<span class="sh">sam local invoke MyFunctionName \
+  --template cdk.out/MyStack.template.json \
+  --event events/test-event.json</span>
+
+<span class="cm"># Start local API from CDK-synthesized template</span>
+<span class="sh">sam local start-api \
+  --template cdk.out/MyStack.template.json \
+  --port 3000</span>
+
+<span class="cm"># Watch mode — re-synth + restart SAM on changes</span>
+<span class="cm"># Run in separate terminal:</span>
+<span class="sh">cdk watch  # auto re-synths on changes</span>
+<span class="sh">sam local start-api --template cdk.out/MyStack.template.json</span>
+</code></pre>
+
+  <div class="callout co-g">
+    <span class="co-icon">✅</span>
+    <p><strong>Key workflow for DOP-C02:</strong> <code>cdk synth</code> → <code>sam local invoke -t cdk.out/StackName.template.json FunctionLogicalId</code>. The function's <strong>logical ID</strong> in the synthesized template is CDK-generated (e.g., <code>ItemsHandler1234ABCD</code>) — use <code>cdk synth</code> and inspect the template or use <code>cdk ls --long</code> to find it.</p>
+  </div>
+</section>
+
+<!-- ══════════════════════ 11 CDK PIPELINES ══════════════════════ -->
+<section class="section" id="pipeline">
+  <div class="sec-eyebrow"><span class="sec-num">11</span><span class="sec-cat">Advanced</span></div>
+  <h2>CDK Pipelines — Self-Mutating CI/CD</h2>
+  <div class="sec-rule"></div>
+
+  <p>CDK Pipelines is a high-level L3 construct for creating <strong>self-mutating</strong> CI/CD pipelines. "Self-mutating" means the pipeline updates itself whenever the CDK code defining the pipeline changes — you never need to manually update the pipeline infrastructure.</p>
+
+  <div class="callout co-y">
+    <span class="co-icon">⚡</span>
+    <p><strong>Self-mutating:</strong> On every commit, the pipeline first runs a <em>UpdatePipeline</em> step that redeploys the pipeline itself. Then the rest of the stages run with the latest pipeline definition. This means adding a new deploy stage to your CDK code automatically adds it to the real pipeline.</p>
+  </div>
+
+  <div class="cf"><div class="cf-dot"></div>lib/pipeline-stack.ts — CDK self-mutating pipeline</div>
+  <pre><code><span class="im">import</span> * <span class="im">as</span> <span class="ty">cdk</span>      <span class="im">from</span> <span class="sv">'aws-cdk-lib'</span>;
+<span class="im">import</span> * <span class="im">as</span> <span class="ty">pipelines</span> <span class="im">from</span> <span class="sv">'aws-cdk-lib/pipelines'</span>;
+<span class="im">import</span> { <span class="ty">AppStack</span> }    <span class="im">from</span> <span class="sv">'./app-stack'</span>;
+<span class="im">import</span> { <span class="ty">Construct</span> }   <span class="im">from</span> <span class="sv">'constructs'</span>;
+
+<span class="sc">// Stage = group of stacks deployed together</span>
+<span class="ky">class</span> <span class="ty">AppStage</span> <span class="ky">extends</span> <span class="ty">cdk.Stage</span> {
+  <span class="ky">constructor</span>(scope: <span class="ty">Construct</span>, id: <span class="ty">string</span>, props?: <span class="ty">cdk.StageProps</span>) {
+    <span class="ky">super</span>(scope, id, props);
+    <span class="ky">new</span> <span class="ty">AppStack</span>(<span class="ky">this</span>, <span class="sv">'AppStack'</span>);
+  }
+}
+
+<span class="ky">export class</span> <span class="ty">PipelineStack</span> <span class="ky">extends</span> <span class="ty">cdk.Stack</span> {
+  <span class="ky">constructor</span>(scope: <span class="ty">Construct</span>, id: <span class="ty">string</span>) {
+    <span class="ky">super</span>(scope, id);
+
+    <span class="sc">// Source from CodeCommit / GitHub / CodeStar</span>
+    <span class="ky">const</span> source = <span class="ty">pipelines.CodePipelineSource</span>.<span class="fn">codeCommit</span>(
+      <span class="ty">codecommit.Repository</span>.<span class="fn">fromRepositoryName</span>(<span class="ky">this</span>, <span class="sv">'Repo'</span>, <span class="sv">'my-app'</span>),
+      <span class="sv">'main'</span>
+    );
+
+    <span class="ky">const</span> pipeline = <span class="ky">new</span> <span class="ty">pipelines.CodePipeline</span>(<span class="ky">this</span>, <span class="sv">'Pipeline'</span>, {
+      <span class="ky">pipelineName</span>: <span class="sv">'MyAppPipeline'</span>,
+      <span class="ky">synth</span>: <span class="ky">new</span> <span class="ty">pipelines.ShellStep</span>(<span class="sv">'Synth'</span>, {
+        <span class="ky">input</span>: source,
+        <span class="ky">commands</span>: [<span class="sv">'npm ci'</span>, <span class="sv">'npx cdk synth'</span>],  <span class="sc">// produces cdk.out/</span>
+      }),
+    });
+
+    <span class="sc">// Add deployment wave — dev (no approval)</span>
+    pipeline.<span class="fn">addStage</span>(<span class="ky">new</span> <span class="ty">AppStage</span>(<span class="ky">this</span>, <span class="sv">'Dev'</span>, {
+      <span class="ky">env</span>: { <span class="ky">account</span>: <span class="sv">'111111111111'</span>, <span class="ky">region</span>: <span class="sv">'us-east-1'</span> },
+    }));
+
+    <span class="sc">// Add production stage WITH manual approval gate</span>
+    pipeline.<span class="fn">addStage</span>(<span class="ky">new</span> <span class="ty">AppStage</span>(<span class="ky">this</span>, <span class="sv">'Prod'</span>, {
+      <span class="ky">env</span>: { <span class="ky">account</span>: <span class="sv">'222222222222'</span>, <span class="ky">region</span>: <span class="sv">'us-east-1'</span> },
+    }), {
+      <span class="ky">pre</span>: [<span class="ky">new</span> <span class="ty">pipelines.ManualApprovalStep</span>(<span class="sv">'PromoteToProd'</span>)],
+      <span class="ky">post</span>: [
+        <span class="ky">new</span> <span class="ty">pipelines.ShellStep</span>(<span class="sv">'IntegTests'</span>, {
+          <span class="ky">commands</span>: [<span class="sv">'npm run test:integration'</span>],
+        }),
+      ],
+    });
+  }
+}
+</code></pre>
+
+  <h3>Pipeline Structure</h3>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Stage</th><th>Runs</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td><span class="tag t-y">Source</span></td><td>Fetch code from CodeCommit/GitHub/S3</td><td>Triggers on push to main branch</td></tr>
+        <tr><td><span class="tag t-c">Build (Synth)</span></td><td><code>npm ci &amp;&amp; cdk synth</code></td><td>Produces <code>cdk.out/</code> assembly</td></tr>
+        <tr><td><span class="tag t-v">UpdatePipeline</span></td><td>Deploys the pipeline stack itself</td><td>Self-mutation step — runs before app stages</td></tr>
+        <tr><td><span class="tag t-p">Assets</span></td><td>Upload Lambda ZIPs, Docker images to CDKToolkit S3/ECR</td><td>Parallel upload of all assets</td></tr>
+        <tr><td><span class="tag t-g">Deploy Dev</span></td><td>CFN ChangeSet create + execute</td><td>Automatic, no approval</td></tr>
+        <tr><td><span class="tag t-o">Approval</span></td><td>Manual gate before prod</td><td>Sends SNS notification to reviewers</td></tr>
+        <tr><td><span class="tag t-g">Deploy Prod</span></td><td>CFN ChangeSet create + execute</td><td>Cross-account if different env</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ══════════════════════ 12 TESTING ══════════════════════ -->
+<section class="section" id="testing">
+  <div class="sec-eyebrow"><span class="sec-num">12</span><span class="sec-cat">Advanced</span></div>
+  <h2>CDK Testing</h2>
+  <div class="sec-rule"></div>
+
+  <p>CDK provides the <code>aws-cdk-lib/assertions</code> module for testing synthesized CloudFormation templates. Tests run with Jest (TS) or pytest (Python) — fast, no AWS calls needed.</p>
+
+  <div class="g2">
+    <div class="card card-c">
+      <h4>Fine-Grained Assertions</h4>
+      <p style="font-size:13px;margin:0">Check that specific resources exist with specific properties. Most common test type.</p>
+    </div>
+    <div class="card card-v">
+      <h4>Snapshot Tests</h4>
+      <p style="font-size:13px;margin:0">Save the entire synthesized template as a snapshot. Subsequent test runs compare against the saved snapshot — detect unexpected changes.</p>
+    </div>
+  </div>
+
+  <div class="cf"><div class="cf-dot"></div>test/api-stack.test.ts — Jest + assertions</div>
+  <pre><code><span class="im">import</span> { <span class="ty">Template</span>, <span class="ty">Match</span> } <span class="im">from</span> <span class="sv">'aws-cdk-lib/assertions'</span>;
+<span class="im">import</span> * <span class="im">as</span> <span class="ty">cdk</span> <span class="im">from</span> <span class="sv">'aws-cdk-lib'</span>;
+<span class="im">import</span> { <span class="ty">ApiStack</span> }         <span class="im">from</span> <span class="sv">'../lib/api-stack'</span>;
+
+<span class="fn">describe</span>(<span class="sv">'ApiStack'</span>, () => {
+  <span class="ky">let</span> template: <span class="ty">Template</span>;
+
+  <span class="fn">beforeEach</span>(() => {
+    <span class="ky">const</span> app   = <span class="ky">new</span> <span class="ty">cdk.App</span>();
+    <span class="ky">const</span> stack = <span class="ky">new</span> <span class="ty">ApiStack</span>(app, <span class="sv">'TestStack'</span>);
+    template = <span class="ty">Template</span>.<span class="fn">fromStack</span>(stack);  <span class="sc">// no AWS calls — pure synthesis</span>
+  });
+
+  <span class="fn">test</span>(<span class="sv">'creates DynamoDB table'</span>, () => {
+    template.<span class="fn">hasResourceProperties</span>(<span class="sv">'AWS::DynamoDB::Table'</span>, {
+      <span class="ky">BillingMode</span>: <span class="sv">'PAY_PER_REQUEST'</span>,
+      <span class="ky">PointInTimeRecoverySpecification</span>: { <span class="ky">PointInTimeRecoveryEnabled</span>: <span class="ky">true</span> },
+    });
+  });
+
+  <span class="fn">test</span>(<span class="sv">'Lambda has correct runtime and tracing'</span>, () => {
+    template.<span class="fn">hasResourceProperties</span>(<span class="sv">'AWS::Lambda::Function'</span>, {
+      <span class="ky">Runtime</span>: <span class="sv">'nodejs20.x'</span>,
+      <span class="ky">TracingConfig</span>: { <span class="ky">Mode</span>: <span class="sv">'Active'</span> },
+    });
+  });
+
+  <span class="fn">test</span>(<span class="sv">'exactly 2 Lambda functions created'</span>, () => {
+    template.<span class="fn">resourceCountIs</span>(<span class="sv">'AWS::Lambda::Function'</span>, <span class="nu">2</span>);
+  });
+
+  <span class="fn">test</span>(<span class="sv">'API has prod stage'</span>, () => {
+    template.<span class="fn">hasResourceProperties</span>(<span class="sv">'AWS::ApiGateway::Stage'</span>, {
+      <span class="ky">StageName</span>: <span class="sv">'prod'</span>,
+    });
+  });
+
+  <span class="fn">test</span>(<span class="sv">'snapshot test — full template'</span>, () => {
+    <span class="fn">expect</span>(template.<span class="fn">toJSON</span>()).<span class="fn">toMatchSnapshot</span>();
+  });
+
+  <span class="fn">test</span>(<span class="sv">'IAM policy grants DynamoDB access to Lambda'</span>, () => {
+    template.<span class="fn">hasResourceProperties</span>(<span class="sv">'AWS::IAM::Policy'</span>, {
+      <span class="ky">PolicyDocument</span>: {
+        <span class="ky">Statement</span>: <span class="ty">Match</span>.<span class="fn">arrayWith</span>([
+          <span class="ty">Match</span>.<span class="fn">objectLike</span>({
+            <span class="ky">Action</span>: <span class="ty">Match</span>.<span class="fn">arrayWith</span>([<span class="sv">'dynamodb:GetItem'</span>, <span class="sv">'dynamodb:PutItem'</span>]),
+            <span class="ky">Effect</span>: <span class="sv">'Allow'</span>,
+          }),
+        ]),
+      },
+    });
+  });
+});
+</code></pre>
+</section>
+
+<!-- ══════════════════════ 13 CFN ESCAPE HATCHES ══════════════════════ -->
+<section class="section" id="cfn-escape">
+  <div class="sec-eyebrow"><span class="sec-num">13</span><span class="sec-cat">Advanced</span></div>
+  <h2>CloudFormation Escape Hatches</h2>
+  <div class="sec-rule"></div>
+
+  <p>When CDK's L2 constructs don't expose a property you need, you can drop down to the underlying L1 (CFN) resource to set anything available in raw CloudFormation.</p>
+
+  <div class="cf"><div class="cf-dot"></div>escape-hatch.ts — accessing the underlying CfnResource</div>
+  <pre><code><span class="sc">// Get the underlying L1 (Cfn) resource from an L2 construct</span>
+<span class="ky">const</span> bucket = <span class="ky">new</span> <span class="ty">s3.Bucket</span>(<span class="ky">this</span>, <span class="sv">'MyBucket'</span>);
+<span class="ky">const</span> cfnBucket = bucket.<span class="fn">node.defaultChild</span> <span class="im">as</span> <span class="ty">s3.CfnBucket</span>;
+
+<span class="sc">// Set any CFN property not exposed by L2</span>
+cfnBucket.<span class="fn">addPropertyOverride</span>(<span class="sv">'NotificationConfiguration.TopicConfigurations'</span>, [...]);
+
+<span class="sc">// Override existing property set by CDK</span>
+cfnBucket.<span class="fn">addPropertyOverride</span>(<span class="sv">'BucketName'</span>, <span class="sv">'my-forced-name'</span>);
+
+<span class="sc">// Inject raw CFN — useful for new AWS features before CDK supports them</span>
+<span class="ky">const</span> cfnFn = fn.<span class="fn">node.defaultChild</span> <span class="im">as</span> <span class="ty">lambda.CfnFunction</span>;
+cfnFn.<span class="fn">addPropertyOverride</span>(<span class="sv">'SnapStart.ApplyOn'span>, <span class="sv">'PublishedVersions'</span>);
+
+<span class="sc">// Raw CFN resource override — full JSON merge</span>
+cfnBucket.<span class="fn">cfnOptions.metadata</span> = { <span class="ky">Comment</span>: <span class="sv">'Added via escape hatch'</span> };
+
+<span class="sc">// Add CFN metadata / deletion policy overrides</span>
+cfnBucket.<span class="fn">cfnOptions.deletionPolicy</span> = <span class="ty">cdk.CfnDeletionPolicy</span>.<span class="fn">RETAIN</span>;
+</code></pre>
+</section>
+
+<!-- ══════════════════════ 14 EXAM TIPS ══════════════════════ -->
+<section class="section" id="exam-tips">
+  <div class="sec-eyebrow"><span class="sec-num">14</span><span class="sec-cat">Exam Focus</span></div>
+  <h2>DOP-C02 Exam Tips</h2>
+  <div class="sec-rule"></div>
+
+  <div class="exam">
+    <div class="exam-title">Must-Know Facts</div>
+    <ul>
+      <li><strong>CDK synthesizes into CloudFormation.</strong> <code>cdk synth</code> generates CFN templates. Every CDK resource becomes a CFN resource. <code>cdk deploy</code> creates/updates a CFN stack.</li>
+      <li><strong>Bootstrap is required once per account + region.</strong> Creates CDKToolkit stack (S3 bucket, ECR repo, IAM roles). Must re-bootstrap when trust policies or CDK major versions change.</li>
+      <li><strong>Three Construct levels:</strong> L1 (Cfn* — direct CFN mapping), L2 (smart defaults, grant methods), L3 (multi-service patterns).</li>
+      <li><strong>CDK + SAM local testing:</strong> <code>cdk synth</code> → <code>sam local invoke -t cdk.out/Stack.template.json FunctionId</code>.</li>
+      <li><strong>CDK Pipelines = self-mutating.</strong> The pipeline updates itself before deploying your app. Requires bootstrap trust between pipeline account and target accounts.</li>
+      <li><strong><code>cdk hotswap</code></strong> bypasses CloudFormation for Lambda/ECS changes. Fast but causes drift. Dev only — never production.</li>
+      <li><strong>Aspects</strong> = policy-as-code. Visit every construct in the tree. Use to enforce tagging, encryption, compliance rules across all stacks.</li>
+      <li><strong>Context values</strong> are resolved at synth time (baked into template). <code>CfnParameters</code> are resolved at deploy time. Prefer context for most CDK use cases.</li>
+      <li><strong>CDK unit tests</strong> use <code>Template.fromStack()</code> — no AWS calls, runs in milliseconds. <code>hasResourceProperties</code>, <code>resourceCountIs</code>, <code>toMatchSnapshot</code>.</li>
+      <li><strong>Cross-stack references</strong> create CFN Export/Import. Cannot delete exporting stack while importing stack references it.</li>
+    </ul>
+  </div>
+
+  <h3>Common Exam Scenarios</h3>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Scenario</th><th>Answer</th></tr></thead>
+      <tbody>
+        <tr><td><em>"Team wants to use TypeScript to define AWS infrastructure including ECS, VPC, RDS"</em></td><td>AWS CDK — supports all AWS services, TypeScript is first-class language. SAM is serverless-only.</td></tr>
+        <tr><td><em>"Deploying CDK for the first time to a new AWS account/region fails with 'no bucket' error"</em></td><td>Run <code>cdk bootstrap aws://ACCOUNT/REGION</code> to create the CDKToolkit stack first.</td></tr>
+        <tr><td><em>"Need to test a Lambda function defined in CDK locally without deploying"</em></td><td><code>cdk synth</code> then <code>sam local invoke -t cdk.out/Stack.template.json FunctionLogicalId</code></td></tr>
+        <tr><td><em>"Pipeline should update itself whenever CDK pipeline definition changes"</em></td><td>Use CDK Pipelines (<code>aws-cdk-lib/pipelines</code>) — it's self-mutating by design.</td></tr>
+        <tr><td><em>"Enforce that all S3 buckets across all CDK stacks must have encryption"</em></td><td>Write a CDK <strong>Aspect</strong> that checks for encryption and apply it to the App with <code>Aspects.of(app).add(...)</code></td></tr>
+        <tr><td><em>"CDK L2 construct doesn't expose a property I need — it's available in raw CloudFormation"</em></td><td>Use a <strong>CFN Escape Hatch</strong>: <code>construct.node.defaultChild as CfnResource</code>, then <code>addPropertyOverride()</code></td></tr>
+        <tr><td><em>"Unit test that a CDK stack creates exactly one DynamoDB table with PAY_PER_REQUEST billing"</em></td><td>Use <code>Template.fromStack(stack).hasResourceProperties('AWS::DynamoDB::Table', { BillingMode: 'PAY_PER_REQUEST' })</code></td></tr>
+        <tr><td><em>"What capabilities are needed when deploying a CDK stack?"</em></td><td><code>CAPABILITY_IAM</code> (CDK creates IAM roles) + <code>CAPABILITY_AUTO_EXPAND</code> (CDK uses nested stacks). Handled automatically by <code>cdk deploy</code>.</td></tr>
+        <tr><td><em>"Developer wants Lambda code changes to reflect in seconds during development"</em></td><td><code>cdk watch --hotswap</code> or <code>cdk hotswap</code> — bypasses CFN for Lambda code updates. Dev only.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>CDK Project File Structure</h3>
+  <pre><code><span class="sh">my-cdk-app/</span>
+<span class="sh">├── bin/</span>
+<span class="sh">│   └── app.ts              </span><span class="cm"># Entry point — creates App and Stacks</span>
+<span class="sh">├── lib/</span>
+<span class="sh">│   ├── network-stack.ts    </span><span class="cm"># VPC, subnets, security groups</span>
+<span class="sh">│   ├── app-stack.ts        </span><span class="cm"># Lambda, API GW, DynamoDB</span>
+<span class="sh">│   └── constructs/         </span><span class="cm"># Custom reusable constructs</span>
+<span class="sh">├── test/</span>
+<span class="sh">│   └── app-stack.test.ts   </span><span class="cm"># Jest tests using assertions library</span>
+<span class="sh">├── src/</span>
+<span class="sh">│   └── lambda/             </span><span class="cm"># Lambda function code</span>
+<span class="sh">├── cdk.json                </span><span class="cm"># CDK config, context values</span>
+<span class="sh">├── cdk.out/                </span><span class="cm"># Synthesized output (gitignored)</span>
+<span class="sh">├── package.json</span>
+<span class="sh">└── tsconfig.json</span>
+</code></pre>
+
+</section>
+</main>
+</div>
+
+<script>
+const secs  = document.querySelectorAll('.section');
+const links = document.querySelectorAll('.sb-link');
+const obs   = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      links.forEach(l => l.classList.remove('active'));
+      const a = document.querySelector(`.sb-link[href="#${e.target.id}"]`);
+      if (a) a.classList.add('active');
+    }
+  });
+}, { rootMargin:'-15% 0px -70% 0px' });
+secs.forEach(s => obs.observe(s));
+</script>
+</body>
+</html>

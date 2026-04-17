@@ -1,0 +1,1371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS Step Functions — DOP-C02 Study Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Fira+Code:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* ── AESTHETIC: Clean warm-white with terracotta/rust accent. Very structured
+   grid layout. Distinct from all previous guides. Dense info, well-organized. ── */
+:root {
+  --bg:      #fefcf8;
+  --bg2:     #f9f6f0;
+  --bg3:     #f2ede4;
+  --ink:     #18140e;
+  --ink2:    #3a3228;
+  --ink3:    #6b5d4f;
+  --ink4:    #9e8e7e;
+  --rule:    #e0d8cc;
+  --rule2:   #c8bfb0;
+
+  --rust:    #c94f2c;
+  --rust-bg: #fdf3ef;
+  --rust-b:  #f0bfb0;
+  --teal:    #1b7a6e;
+  --teal-bg: #eaf5f3;
+  --teal-b:  #8ecfc8;
+  --navy:    #1e3a5f;
+  --navy-bg: #eaeff7;
+  --navy-b:  #90afd0;
+  --plum:    #6d2d7e;
+  --plum-bg: #f4eef7;
+  --plum-b:  #c49ed4;
+  --gold:    #9a6b00;
+  --gold-bg: #fdf5e0;
+  --gold-b:  #d4b060;
+  --green:   #2a6b3a;
+  --green-bg:#eaf5ee;
+  --green-b: #88c49a;
+
+  --code-bg: #161210;
+  --code-fg: #e8dfd0;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:'Outfit',sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+  font-size:14.5px;
+  line-height:1.7;
+}
+
+/* ── HEADER ── */
+.hdr{
+  background:var(--ink);
+  height:52px;
+  display:flex;align-items:center;
+  padding:0 44px;
+  position:sticky;top:0;z-index:100;
+  border-bottom:3px solid var(--rust);
+}
+.hdr-brand{
+  display:flex;align-items:center;gap:12px;
+  font-family:'Outfit',sans-serif;
+  font-weight:800;font-size:14px;color:#fff;
+  letter-spacing:0.5px;margin-right:32px;
+}
+.hdr-icon{
+  width:30px;height:30px;
+  background:var(--rust);border-radius:5px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;color:#fff;font-weight:900;
+  flex-shrink:0;
+}
+.hdr-sep{width:1px;height:20px;background:rgba(255,255,255,0.12);}
+.hdr-nav{display:flex;align-items:center;gap:0;flex:1;}
+.hdr-a{
+  font-family:'Fira Code',monospace;
+  font-size:10.5px;letter-spacing:0.5px;
+  color:rgba(255,255,255,0.4);text-decoration:none;
+  padding:0 14px;height:52px;display:flex;align-items:center;
+  border-bottom:3px solid transparent;margin-bottom:-3px;
+  transition:all .12s;
+}
+.hdr-a:hover{color:#fff;border-bottom-color:var(--rust);}
+.hdr-right{
+  margin-left:auto;
+  font-family:'Fira Code',monospace;
+  font-size:10px;color:rgba(255,255,255,0.25);
+  letter-spacing:1.5px;
+  display:flex;align-items:center;gap:16px;
+}
+.hdr-home{
+  font-family:'Fira Code',monospace;
+  font-size:10.5px;letter-spacing:0.5px;
+  color:rgba(255,255,255,0.4);text-decoration:none;
+  display:flex;align-items:center;gap:6px;
+  padding:0 2px;height:52px;
+  border-bottom:3px solid transparent;margin-bottom:-3px;
+  transition:all .12s;
+}
+.hdr-home:hover{color:#fff;border-bottom-color:var(--rust);}
+.hdr-home svg{width:12px;height:12px;}
+
+/* ── HERO ── */
+.hero{
+  background:var(--ink);
+  padding:70px 0 62px;
+  position:relative;overflow:hidden;
+}
+.hero-mesh{
+  position:absolute;inset:0;
+  background-image:
+    radial-gradient(ellipse 60% 60% at 80% 50%, rgba(201,79,44,0.08) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 80% at 10% 80%, rgba(27,122,110,0.06) 0%, transparent 60%);
+}
+.hero-inner{max-width:1200px;margin:0 auto;padding:0 56px;position:relative;z-index:1;}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(201,79,44,0.15);
+  border:1px solid rgba(201,79,44,0.35);
+  border-radius:3px;padding:4px 12px;
+  font-family:'Fira Code',monospace;
+  font-size:10px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--rust);margin-bottom:20px;
+}
+.hero-badge::before{content:'●';font-size:7px;animation:blink 2s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+h1.htitle{
+  font-family:'Outfit',sans-serif;
+  font-size:clamp(44px,6.5vw,82px);
+  font-weight:900;color:#fff;
+  line-height:0.95;letter-spacing:-2.5px;
+  margin-bottom:8px;
+}
+h1.htitle .accent{color:var(--rust);}
+h1.htitle .tiny{
+  display:block;font-size:0.38em;font-weight:400;
+  letter-spacing:0;color:rgba(255,255,255,0.3);
+  margin-top:10px;
+}
+.hero-desc{
+  font-size:16px;color:rgba(255,255,255,0.4);
+  max-width:520px;margin:22px 0 36px;
+  font-weight:300;line-height:1.6;
+}
+.hero-chips{display:flex;gap:8px;flex-wrap:wrap;}
+.chip{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:5px 12px;
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:2px;font-family:'Fira Code',monospace;
+  font-size:10.5px;color:rgba(255,255,255,0.4);
+  background:rgba(255,255,255,0.04);
+}
+.chip.on{border-color:var(--rust);color:var(--rust);background:rgba(201,79,44,0.1);}
+
+/* ── LAYOUT ── */
+.wrap{max-width:1200px;margin:0 auto;display:flex;}
+
+/* ── SIDEBAR ── */
+.sb{
+  width:210px;min-width:210px;
+  padding:36px 0;
+  border-right:1px solid var(--rule);
+  position:sticky;top:52px;
+  height:calc(100vh - 52px);
+  overflow-y:auto;
+  background:var(--bg2);
+}
+.sb::-webkit-scrollbar{width:3px;}
+.sb::-webkit-scrollbar-thumb{background:var(--rule);}
+.sb-grp{margin-bottom:22px;}
+.sb-lbl{
+  font-family:'Fira Code',monospace;
+  font-size:8.5px;letter-spacing:2.5px;text-transform:uppercase;
+  color:var(--ink4);padding:0 20px;margin-bottom:4px;
+}
+.sb-a{
+  display:flex;align-items:center;gap:9px;
+  padding:7px 20px;color:var(--ink3);text-decoration:none;
+  font-size:12.5px;font-weight:400;
+  border-left:2px solid transparent;transition:all .12s;
+}
+.sb-a:hover{color:var(--rust);border-left-color:rgba(201,79,44,.4);background:var(--rust-bg);}
+.sb-a.act{color:var(--rust);border-left-color:var(--rust);background:var(--rust-bg);font-weight:600;}
+.sb-n{font-family:'Fira Code',monospace;font-size:9px;color:var(--ink4);min-width:18px;}
+
+/* ── MAIN ── */
+main{flex:1;padding:52px 50px 88px;min-width:0;}
+
+/* ── SECTION ── */
+.sec{margin-bottom:74px;scroll-margin-top:60px;}
+.sec-ey{display:flex;align-items:center;gap:12px;margin-bottom:8px;}
+.sec-num{font-family:'Fira Code',monospace;font-size:9.5px;color:var(--ink4);letter-spacing:1px;}
+.sec-cat{
+  font-family:'Fira Code',monospace;font-size:9px;
+  letter-spacing:2px;text-transform:uppercase;
+  color:var(--rust);background:var(--rust-bg);
+  border:1px solid var(--rust-b);padding:2px 8px;border-radius:2px;
+}
+h2{
+  font-family:'Outfit',sans-serif;
+  font-size:28px;font-weight:800;
+  color:var(--ink);letter-spacing:-0.5px;line-height:1.1;
+}
+.sec-rule{
+  height:2px;margin:12px 0 20px;
+  background:linear-gradient(90deg,var(--rust),var(--rule),transparent);
+}
+h3{
+  font-family:'Fira Code',monospace;
+  font-size:10px;font-weight:500;letter-spacing:2px;text-transform:uppercase;
+  color:var(--teal);margin:26px 0 10px;
+  display:flex;align-items:center;gap:10px;
+}
+h3::after{content:'';flex:1;height:1px;background:var(--rule);}
+h4{font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;color:var(--ink);margin:0 0 5px;}
+p{color:var(--ink2);margin-bottom:11px;font-size:14.5px;line-height:1.7;}
+
+/* ── CARDS ── */
+.card{background:#fff;border:1px solid var(--rule);border-radius:4px;padding:18px;margin-bottom:12px;}
+.cr{border-left:3px solid var(--rust);background:var(--rust-bg);}
+.ct{border-left:3px solid var(--teal);background:var(--teal-bg);}
+.cn{border-left:3px solid var(--navy);background:var(--navy-bg);}
+.cp{border-left:3px solid var(--plum);background:var(--plum-bg);}
+.cg{border-left:3px solid var(--gold);background:var(--gold-bg);}
+.cgr{border-left:3px solid var(--green);background:var(--green-bg);}
+
+/* ── CALLOUT ── */
+.co{
+  padding:13px 17px;border-radius:4px;margin:15px 0;
+  display:flex;gap:12px;align-items:flex-start;font-size:13.5px;
+}
+.co-r{background:var(--rust-bg);border:1px solid var(--rust-b);}
+.co-r p{color:#8a3018;margin:0;}
+.co-t{background:var(--teal-bg);border:1px solid var(--teal-b);}
+.co-t p{color:#14605a;margin:0;}
+.co-g{background:var(--gold-bg);border:1px solid var(--gold-b);}
+.co-g p{color:#6e4c00;margin:0;}
+.co-n{background:var(--navy-bg);border:1px solid var(--navy-b);}
+.co-n p{color:#173050;margin:0;}
+.co-p{background:var(--plum-bg);border:1px solid var(--plum-b);}
+.co-p p{color:#4e1e5e;margin:0;}
+.co-gr{background:var(--green-bg);border:1px solid var(--green-b);}
+.co-gr p{color:#1e4e2c;margin:0;}
+.co-i{font-size:14px;flex-shrink:0;margin-top:1px;}
+
+/* ── CODE ── */
+.cf{
+  background:var(--bg3);border:1px solid var(--rule2);
+  border-bottom:none;border-radius:4px 4px 0 0;
+  padding:7px 15px;display:flex;align-items:center;gap:9px;
+  font-family:'Fira Code',monospace;font-size:10px;color:var(--ink4);
+}
+.cf-d{width:7px;height:7px;border-radius:50%;background:var(--rust);flex-shrink:0;}
+.cf+pre{border-radius:0 0 4px 4px;margin-top:0;}
+pre{
+  background:var(--code-bg);border:1px solid rgba(255,255,255,0.06);
+  border-radius:4px;padding:18px 22px;overflow-x:auto;margin:12px 0;
+}
+pre code{
+  font-family:'Fira Code',monospace;
+  font-size:12px;line-height:1.9;color:var(--code-fg);
+}
+code{
+  font-family:'Fira Code',monospace;font-size:12px;
+  background:var(--bg3);color:var(--rust);
+  padding:1px 6px;border-radius:3px;border:1px solid var(--rule);
+}
+/* syntax */
+.sk{color:#f0a080;}
+.sv{color:#88d498;}
+.sc{color:#404050;font-style:italic;}
+.sn{color:#78b8e8;}
+.si{color:#e8c870;}
+.sb2{color:#c898f0;}
+.snum{color:#f0b860;}
+
+/* ── TABLE ── */
+.tw{overflow-x:auto;margin:14px 0;border:1px solid var(--rule);border-radius:4px;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead th{
+  background:var(--bg3);
+  font-family:'Fira Code',monospace;
+  font-size:9px;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--ink4);padding:9px 13px;text-align:left;
+  border-bottom:2px solid var(--rust-b);
+}
+td{
+  padding:9px 13px;border-bottom:1px solid var(--rule);
+  vertical-align:top;color:var(--ink2);font-size:13px;
+}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(0,0,0,0.015);}
+
+/* ── GRID ── */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px;margin:12px 0;}
+
+/* ── TAG ── */
+.tag{
+  display:inline-block;
+  font-family:'Fira Code',monospace;font-size:9.5px;
+  padding:2px 8px;border-radius:2px;font-weight:500;
+}
+.tr{background:var(--rust-bg);color:var(--rust);border:1px solid var(--rust-b);}
+.tt{background:var(--teal-bg);color:var(--teal);border:1px solid var(--teal-b);}
+.tn{background:var(--navy-bg);color:var(--navy);border:1px solid var(--navy-b);}
+.tp{background:var(--plum-bg);color:var(--plum);border:1px solid var(--plum-b);}
+.tg{background:var(--gold-bg);color:var(--gold);border:1px solid var(--gold-b);}
+.tgr{background:var(--green-bg);color:var(--green);border:1px solid var(--green-b);}
+
+/* ── STATE TYPE CARDS ── */
+.state-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0;}
+.state-card{
+  border:1px solid var(--rule);border-radius:4px;overflow:hidden;
+}
+.state-head{
+  padding:9px 13px;
+  font-family:'Fira Code',monospace;font-size:10px;font-weight:500;
+  letter-spacing:0.5px;border-bottom:1px solid var(--rule);
+}
+.state-body{padding:11px 13px;background:#fff;font-size:12px;color:var(--ink3);line-height:1.5;}
+.s-task .state-head{background:var(--rust-bg);color:var(--rust);}
+.s-choice .state-head{background:var(--teal-bg);color:var(--teal);}
+.s-wait .state-head{background:var(--gold-bg);color:var(--gold);}
+.s-parallel .state-head{background:var(--navy-bg);color:var(--navy);}
+.s-map .state-head{background:var(--plum-bg);color:var(--plum);}
+.s-pass .state-head{background:var(--bg3);color:var(--ink3);}
+.s-succeed .state-head{background:var(--green-bg);color:var(--green);}
+.s-fail .state-head{background:#fef0f0;color:#c03030;}
+
+/* ── WORKFLOW TYPE ── */
+.wf-compare{
+  display:grid;grid-template-columns:1fr 1fr;
+  border:1px solid var(--rule);border-radius:4px;
+  overflow:hidden;margin:14px 0;
+}
+.wf-col{padding:20px;}
+.wf-col:first-child{background:var(--rust-bg);border-right:1px solid var(--rule);}
+.wf-col:last-child{background:var(--teal-bg);}
+.wf-title{
+  font-family:'Fira Code',monospace;font-size:9px;
+  letter-spacing:1.5px;text-transform:uppercase;
+  margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--rule);
+}
+.wf-col:first-child .wf-title{color:var(--rust);}
+.wf-col:last-child  .wf-title{color:var(--teal);}
+.wf-col li{font-size:13px;color:var(--ink2);margin-bottom:4px;}
+.wf-col li::marker{color:var(--ink4);}
+
+/* ── EXAM BOX ── */
+.exam{
+  background:var(--ink);border-radius:4px;
+  padding:22px 26px;margin:22px 0;position:relative;overflow:hidden;
+}
+.exam::before{
+  content:'EXAM FOCUS';position:absolute;top:0;right:18px;
+  font-family:'Fira Code',monospace;font-size:8.5px;
+  letter-spacing:3px;color:var(--rust);
+  background:rgba(201,79,44,0.15);padding:3px 10px;
+  border-radius:0 0 3px 3px;
+}
+.exam::after{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--rust);}
+.exam-title{
+  font-family:'Outfit',sans-serif;font-size:17px;font-weight:800;
+  color:#fff;margin-bottom:13px;padding-top:4px;
+}
+.exam ul{padding-left:18px;}
+.exam li{color:rgba(255,255,255,0.68);font-size:13.5px;margin-bottom:5px;}
+.exam li::marker{color:var(--rust);}
+.exam strong{color:#fff;}
+.exam p{color:rgba(255,255,255,0.65);font-size:13.5px;}
+
+/* ── PIPELINE (flow) ── */
+.flow{
+  display:flex;align-items:stretch;
+  border:1px solid var(--rule);border-radius:4px;
+  overflow:hidden;margin:14px 0;
+}
+.f-step{
+  flex:1;padding:14px 13px;background:#fff;
+  border-right:1px solid var(--rule);
+}
+.f-step:last-child{border-right:none;}
+.f-num{font-family:'Fira Code',monospace;font-size:9px;color:var(--ink4);margin-bottom:3px;}
+.f-icon{font-size:18px;margin-bottom:4px;}
+.f-name{font-size:12px;font-weight:700;color:var(--ink);margin-bottom:2px;}
+.f-sub{font-size:11px;color:var(--ink4);line-height:1.4;}
+.f-arr{
+  display:flex;align-items:center;justify-content:center;
+  min-width:24px;background:var(--bg3);
+  color:var(--ink4);font-size:13px;border-right:1px solid var(--rule);
+}
+
+/* ── UL OL ── */
+ul,ol{padding-left:18px;margin:9px 0;}
+li{margin-bottom:4px;font-size:14px;color:var(--ink2);}
+li::marker{color:var(--rust);}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .sb{display:none;}
+  main{padding:26px 18px;}
+  .g2,.g3,.wf-compare{grid-template-columns:1fr;}
+  .state-grid{grid-template-columns:1fr 1fr;}
+  .flow{flex-direction:column;}
+  .f-step{border-right:none;border-bottom:1px solid var(--rule);}
+  .f-arr{display:none;}
+  .hdr-nav{display:none;}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="hdr">
+  <div class="hdr-brand">
+    <div class="hdr-icon">SF</div>
+    Step Functions
+  </div>
+  <div class="hdr-sep"></div>
+  <nav class="hdr-nav">
+    <a class="hdr-a" href="#overview">Overview</a>
+    <a class="hdr-a" href="#state-types">State Types</a>
+    <a class="hdr-a" href="#workflows">Workflows</a>
+    <a class="hdr-a" href="#asl">ASL &amp; I/O</a>
+    <a class="hdr-a" href="#error-handling">Error Handling</a>
+    <a class="hdr-a" href="#integrations">Integrations</a>
+    <a class="hdr-a" href="#exam-tips">Exam Tips</a>
+  </nav>
+  <div class="hdr-right">
+    <a class="hdr-home" href="../index.html">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M2 6.5L8 2l6 4.5V14H10v-3.5H6V14H2V6.5z"/>
+      </svg>
+      Home
+    </a>
+    DOP-C02
+  </div>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-mesh"></div>
+  <div class="hero-inner">
+    <div class="hero-badge">DOP-C02 · Serverless Orchestration</div>
+    <h1 class="htitle">AWS Step<br><span class="accent">Functions</span><span class="tiny">Serverless workflow orchestration as state machines</span></h1>
+    <p class="hero-desc">Coordinate distributed applications with visual workflows. Durable, auditable, automatic retry and error handling built in.</p>
+    <div class="hero-chips">
+      <span class="chip on">Amazon States Language</span>
+      <span class="chip on">8 State Types</span>
+      <span class="chip on">Standard &amp; Express</span>
+      <span class="chip on">Error Handling + Retry</span>
+      <span class="chip on">Parallel &amp; Map</span>
+      <span class="chip">200+ Integrations</span>
+    </div>
+  </div>
+</div>
+
+<!-- BODY -->
+<div class="wrap">
+<nav class="sb">
+  <div class="sb-grp">
+    <div class="sb-lbl">Core</div>
+    <a class="sb-a act" href="#overview"><span class="sb-n">01</span>Overview</a>
+    <a class="sb-a" href="#state-types"><span class="sb-n">02</span>State Types</a>
+    <a class="sb-a" href="#workflows"><span class="sb-n">03</span>Workflow Types</a>
+  </div>
+  <div class="sb-grp">
+    <div class="sb-lbl">Language</div>
+    <a class="sb-a" href="#asl"><span class="sb-n">04</span>ASL &amp; I/O Processing</a>
+    <a class="sb-a" href="#task-states"><span class="sb-n">05</span>Task State Examples</a>
+    <a class="sb-a" href="#parallel-map"><span class="sb-n">06</span>Parallel &amp; Map</a>
+  </div>
+  <div class="sb-grp">
+    <div class="sb-lbl">Operations</div>
+    <a class="sb-a" href="#error-handling"><span class="sb-n">07</span>Error Handling</a>
+    <a class="sb-a" href="#wait-callback"><span class="sb-n">08</span>Wait for Callback</a>
+    <a class="sb-a" href="#activities"><span class="sb-n">09</span>Activities</a>
+    <a class="sb-a" href="#integrations"><span class="sb-n">10</span>Service Integrations</a>
+  </div>
+  <div class="sb-grp">
+    <div class="sb-lbl">Advanced</div>
+    <a class="sb-a" href="#monitoring"><span class="sb-n">11</span>Monitoring &amp; Logging</a>
+    <a class="sb-a" href="#iam"><span class="sb-n">12</span>IAM Permissions</a>
+    <a class="sb-a" href="#exam-tips"><span class="sb-n">13</span>Exam Tips</a>
+  </div>
+</nav>
+
+<main>
+
+<!-- ══ 01 OVERVIEW ══ -->
+<section class="sec" id="overview">
+  <div class="sec-ey"><span class="sec-num">01</span><span class="sec-cat">Core</span></div>
+  <h2>Overview</h2><div class="sec-rule"></div>
+
+  <p>AWS Step Functions is a serverless <strong>workflow orchestration</strong> service. You model workflows as <strong>state machines</strong> written in Amazon States Language (ASL) — a JSON-based DSL. Step Functions manages state, handles retries, tracks execution history, and provides a visual workflow console.</p>
+
+  <div class="co co-r">
+    <span class="co-i">⚡</span>
+    <p><strong>Core mental model:</strong> Each execution moves through a graph of <em>states</em>. Each state receives JSON input, does something (or nothing), and produces JSON output. The output becomes the input of the next state. Step Functions durably tracks every state transition.</p>
+  </div>
+
+  <h3>When to Use Step Functions</h3>
+  <div class="g3">
+    <div class="card cr"><h4>Long-Running Workflows</h4><p style="font-size:13px;margin:0">Order fulfillment, data processing pipelines, human approval flows. Executions can run for up to 1 year (Standard).</p></div>
+    <div class="card ct"><h4>Error Handling &amp; Retry</h4><p style="font-size:13px;margin:0">Built-in retry with exponential backoff and catch blocks. Eliminates complex retry logic from application code.</p></div>
+    <div class="card cn"><h4>Parallel Coordination</h4><p style="font-size:13px;margin:0">Run branches simultaneously with Parallel state. Process arrays with Map state. Wait for all branches before continuing.</p></div>
+  </div>
+
+  <h3>How to Start a Workflow</h3>
+  <div class="tw"><table>
+    <thead><tr><th>Method</th><th>How</th><th>Use Case</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tag tr">AWS SDK</span></td><td><code>StartExecution</code> API call</td><td>From Lambda, EC2, any application code</td></tr>
+      <tr><td><span class="tag tt">API Gateway</span></td><td>HTTP POST → StartExecution</td><td>User-triggered workflows from web/mobile</td></tr>
+      <tr><td><span class="tag tn">EventBridge</span></td><td>Event pattern → StepFunctions target</td><td>Event-driven automation, scheduled workflows</td></tr>
+      <tr><td><span class="tag tp">Lambda</span></td><td>SDK call inside Lambda handler</td><td>Triggered by S3, SQS, DynamoDB Streams, etc.</td></tr>
+      <tr><td><span class="tag tg">Console</span></td><td>Start execution manually</td><td>Testing, manual triggers</td></tr>
+      <tr><td><span class="tag tgr">IoT Rules / SNS</span></td><td>Rule Action or subscription</td><td>Device events, notification-triggered workflows</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ══ 02 STATE TYPES ══ -->
+<section class="sec" id="state-types">
+  <div class="sec-ey"><span class="sec-num">02</span><span class="sec-cat">Core</span></div>
+  <h2>State Types</h2><div class="sec-rule"></div>
+
+  <p>Step Functions has <strong>8 state types</strong>. Every state in a state machine is one of these types. Each has specific required and optional fields.</p>
+
+  <div class="state-grid">
+    <div class="state-card s-task">
+      <div class="state-head">Task</div>
+      <div class="state-body">Invokes an AWS service or Activity. The workhorse — Lambda, ECS, SQS, DynamoDB, etc. Has timeout, heartbeat, retry, catch.</div>
+    </div>
+    <div class="state-card s-choice">
+      <div class="state-head">Choice</div>
+      <div class="state-body">Conditional branching. Evaluates rules against input. No <code>Next</code> — each rule has its own <code>Next</code>. Must have a <code>Default</code>.</div>
+    </div>
+    <div class="state-card s-wait">
+      <div class="state-head">Wait</div>
+      <div class="state-body">Pauses execution for a fixed duration or until a specific timestamp. Free — does not consume Lambda time.</div>
+    </div>
+    <div class="state-card s-parallel">
+      <div class="state-head">Parallel</div>
+      <div class="state-body">Runs <em>N</em> fixed branches simultaneously. Waits for ALL branches to complete. Output is an array of branch outputs.</div>
+    </div>
+    <div class="state-card s-map">
+      <div class="state-head">Map</div>
+      <div class="state-body">Iterates over an array, running a sub-workflow for each item. Configurable concurrency limit. Like <code>forEach</code> in parallel.</div>
+    </div>
+    <div class="state-card s-pass">
+      <div class="state-head">Pass</div>
+      <div class="state-body">Passes input to output unchanged, or injects static JSON. Useful for testing, debugging, injecting defaults.</div>
+    </div>
+    <div class="state-card s-succeed">
+      <div class="state-head">Succeed</div>
+      <div class="state-body">Terminates execution successfully. Often used as the target of a Choice branch. No <code>Next</code> needed.</div>
+    </div>
+    <div class="state-card s-fail">
+      <div class="state-head">Fail</div>
+      <div class="state-body">Terminates execution with an error. Requires <code>Error</code> and <code>Cause</code> fields. Cannot be retried or caught.</div>
+    </div>
+  </div>
+
+  <h3>State Common Fields</h3>
+  <div class="tw"><table>
+    <thead><tr><th>Field</th><th>Required?</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>Type</code></td><td>✅ Yes</td><td>State type: Task, Choice, Wait, Parallel, Map, Pass, Succeed, Fail</td></tr>
+      <tr><td><code>Comment</code></td><td>Optional</td><td>Human-readable description (ignored at runtime)</td></tr>
+      <tr><td><code>Next</code></td><td>Yes (unless End or Fail/Succeed)</td><td>Name of the next state to transition to</td></tr>
+      <tr><td><code>End</code></td><td>Yes (if terminal)</td><td>Set to <code>true</code> to mark as the last state</td></tr>
+      <tr><td><code>InputPath</code></td><td>Optional</td><td>JSONPath to filter/select input before processing (default: <code>$</code>)</td></tr>
+      <tr><td><code>OutputPath</code></td><td>Optional</td><td>JSONPath to filter/select output after processing (default: <code>$</code>)</td></tr>
+      <tr><td><code>ResultPath</code></td><td>Optional</td><td>Where to put the task result — merges into input (e.g., <code>$.taskResult</code>)</td></tr>
+      <tr><td><code>Parameters</code></td><td>Optional</td><td>Construct input payload; supports <code>.$</code> suffix for dynamic references</td></tr>
+      <tr><td><code>ResultSelector</code></td><td>Optional</td><td>Filter/reshape the raw task output before ResultPath merge</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ══ 03 WORKFLOW TYPES ══ -->
+<section class="sec" id="workflows">
+  <div class="sec-ey"><span class="sec-num">03</span><span class="sec-cat">Core</span></div>
+  <h2>Workflow Types: Standard vs Express</h2><div class="sec-rule"></div>
+
+  <div class="wf-compare">
+    <div class="wf-col">
+      <div class="wf-title">Standard Workflows</div>
+      <ul>
+        <li><strong>Max duration:</strong> 1 year</li>
+        <li><strong>Execution model:</strong> Exactly-once — each state runs exactly once</li>
+        <li><strong>Execution history:</strong> Full, queryable for 90 days</li>
+        <li><strong>Pricing:</strong> Per state transition ($0.025 per 1,000)</li>
+        <li><strong>Throughput:</strong> 2,000 executions/sec (default)</li>
+        <li><strong>Idempotency:</strong> Built-in — safe to use for critical workflows</li>
+        <li><strong>Use for:</strong> Order processing, human approvals, long ETL jobs</li>
+      </ul>
+    </div>
+    <div class="wf-col">
+      <div class="wf-title">Express Workflows</div>
+      <ul>
+        <li><strong>Max duration:</strong> 5 minutes</li>
+        <li><strong>Execution model:</strong> At-least-once (async) / At-most-once (sync)</li>
+        <li><strong>Execution history:</strong> CloudWatch Logs only (not Step Functions console)</li>
+        <li><strong>Pricing:</strong> Per execution + duration (much cheaper at high volume)</li>
+        <li><strong>Throughput:</strong> 100,000+ executions/sec</li>
+        <li><strong>Idempotency:</strong> Not guaranteed — must design for it</li>
+        <li><strong>Use for:</strong> IoT data ingestion, high-volume event processing, streaming</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Express Workflow Sub-Types</h3>
+  <div class="g2">
+    <div class="card ct">
+      <h4>Asynchronous Express</h4>
+      <ul style="font-size:13px">
+        <li>Fire-and-forget — caller does not wait for result</li>
+        <li>At-least-once execution semantics</li>
+        <li>Use when caller doesn't need the response</li>
+        <li>Result via CloudWatch Logs or EventBridge</li>
+      </ul>
+    </div>
+    <div class="card cn">
+      <h4>Synchronous Express</h4>
+      <ul style="font-size:13px">
+        <li>Caller <strong>waits for completion</strong> and gets the result back</li>
+        <li>At-most-once execution semantics</li>
+        <li>Can be called from API Gateway directly</li>
+        <li>Good for request-response patterns needing &lt;5min</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="co co-g">
+    <span class="co-i">💡</span>
+    <p><strong>Exam rule of thumb:</strong> If a question mentions <em>long-running</em>, <em>human approval</em>, <em>exactly-once</em>, or <em>audit trail</em> → <strong>Standard</strong>. If it mentions <em>high-volume</em>, <em>IoT</em>, <em>streaming</em>, <em>5 minutes max</em>, or <em>cost optimization at scale</em> → <strong>Express</strong>.</p>
+  </div>
+</section>
+
+<!-- ══ 04 ASL & I/O ══ -->
+<section class="sec" id="asl">
+  <div class="sec-ey"><span class="sec-num">04</span><span class="sec-cat">Language</span></div>
+  <h2>Amazon States Language &amp; I/O Processing</h2><div class="sec-rule"></div>
+
+  <p>The <strong>Amazon States Language (ASL)</strong> is a JSON-based structured language for defining state machines. Every state machine is a JSON document with a <code>States</code> object and mandatory <code>StartAt</code> field.</p>
+
+  <div class="cf"><div class="cf-d"></div>state-machine-skeleton.json</div>
+  <pre><code>{
+  <span class="sk">"Comment"</span>: <span class="sv">"A simple order processing workflow"</span>,
+  <span class="sk">"StartAt"</span>: <span class="sv">"ValidateOrder"</span>,        <span class="sc">// first state to execute</span>
+  <span class="sk">"TimeoutSeconds"</span>: <span class="snum">3600</span>,             <span class="sc">// overall execution timeout (optional)</span>
+  <span class="sk">"States"</span>: {
+    <span class="sk">"ValidateOrder"</span>: {
+      <span class="sk">"Type"</span>: <span class="sv">"Task"</span>,
+      <span class="sk">"Resource"</span>: <span class="sv">"arn:aws:lambda:us-east-1:123456789012:function:ValidateOrder"</span>,
+      <span class="sk">"Next"</span>: <span class="sv">"ProcessPayment"</span>
+    },
+    <span class="sk">"ProcessPayment"</span>: {
+      <span class="sk">"Type"</span>: <span class="sv">"Task"</span>,
+      <span class="sk">"Resource"</span>: <span class="sv">"arn:aws:lambda:us-east-1:123456789012:function:ProcessPayment"</span>,
+      <span class="sk">"End"</span>: <span class="sn">true</span>                    <span class="sc">// terminal state</span>
+    }
+  }
+}</code></pre>
+
+  <h3>I/O Processing Pipeline</h3>
+  <p>Each state processes input through a pipeline of transformations. Understanding the order is critical:</p>
+
+  <div class="flow">
+    <div class="f-step">
+      <div class="f-num">①</div><div class="f-icon">📥</div>
+      <div class="f-name">Raw Input</div>
+      <div class="f-sub">JSON from previous state or execution start</div>
+    </div>
+    <div class="f-arr">→</div>
+    <div class="f-step">
+      <div class="f-num">②</div><div class="f-icon">🔍</div>
+      <div class="f-name">InputPath</div>
+      <div class="f-sub">JSONPath filter on raw input. Default: <code>$</code> (all)</div>
+    </div>
+    <div class="f-arr">→</div>
+    <div class="f-step">
+      <div class="f-num">③</div><div class="f-icon">⚙️</div>
+      <div class="f-name">Parameters</div>
+      <div class="f-sub">Construct task payload from input + static values</div>
+    </div>
+    <div class="f-arr">→</div>
+    <div class="f-step">
+      <div class="f-num">④</div><div class="f-icon">▶️</div>
+      <div class="f-name">Task Executes</div>
+      <div class="f-sub">Lambda/service runs with Parameters as input</div>
+    </div>
+    <div class="f-arr">→</div>
+    <div class="f-step">
+      <div class="f-num">⑤</div><div class="f-icon">✂️</div>
+      <div class="f-name">ResultSelector</div>
+      <div class="f-sub">Reshape raw task output before merge</div>
+    </div>
+    <div class="f-arr">→</div>
+    <div class="f-step">
+      <div class="f-num">⑥</div><div class="f-icon">🔗</div>
+      <div class="f-name">ResultPath</div>
+      <div class="f-sub">Where to put result in input. <code>null</code>=discard, <code>$.x</code>=merge</div>
+    </div>
+    <div class="f-arr">→</div>
+    <div class="f-step">
+      <div class="f-num">⑦</div><div class="f-icon">📤</div>
+      <div class="f-name">OutputPath</div>
+      <div class="f-sub">Final filter on combined state output</div>
+    </div>
+  </div>
+
+  <div class="cf"><div class="cf-d"></div>io-processing-example.json — ResultPath to preserve original input</div>
+  <pre><code>{
+  <span class="sk">"ProcessOrder"</span>: {
+    <span class="sk">"Type"</span>: <span class="sv">"Task"</span>,
+    <span class="sk">"Resource"</span>: <span class="sv">"arn:aws:lambda:..."</span>,
+
+    <span class="sc">// ① Only send $.order to the task (not the whole input)</span>
+    <span class="sk">"InputPath"</span>: <span class="sv">"$.order"</span>,
+
+    <span class="sc">// ② Construct exact payload sent to Lambda</span>
+    <span class="sk">"Parameters"</span>: {
+      <span class="sk">"orderId.$"</span>: <span class="sv">"$.orderId"</span>,      <span class="sc">// .$ suffix means: take value from input</span>
+      <span class="sk">"timestamp.$"</span>: <span class="sv">"$$.Execution.StartTime"</span>,  <span class="sc">// $$ = context object</span>
+      <span class="sk">"environment"</span>: <span class="sv">"production"</span>    <span class="sc">// static value (no .$)</span>
+    },
+
+    <span class="sc">// ③ Merge result into $.processResult (preserves original input)</span>
+    <span class="sk">"ResultPath"</span>: <span class="sv">"$.processResult"</span>,
+
+    <span class="sc">// ④ Reshape raw Lambda response before ResultPath merge</span>
+    <span class="sk">"ResultSelector"</span>: {
+      <span class="sk">"status.$"</span>: <span class="sv">"$.Payload.status"</span>,
+      <span class="sk">"orderId.$"</span>: <span class="sv">"$.Payload.orderId"</span>
+    },
+
+    <span class="sc">// ⑤ Only output specific fields from the combined state</span>
+    <span class="sk">"OutputPath"</span>: <span class="sv">"$.processResult"</span>,
+
+    <span class="sk">"Next"</span>: <span class="sv">"SendConfirmation"</span>
+  }
+}</code></pre>
+
+  <div class="co co-n">
+    <span class="co-i">ℹ️</span>
+    <p><strong>Context Object (<code>$$</code>):</strong> Step Functions provides execution metadata via the context object. Access with <code>$$.</code> prefix in Parameters: <code>$$.Execution.Id</code>, <code>$$.Execution.Name</code>, <code>$$.Execution.StartTime</code>, <code>$$.StateMachine.Id</code>, <code>$$.State.Name</code>.</p>
+  </div>
+</section>
+
+<!-- ══ 05 TASK STATES ══ -->
+<section class="sec" id="task-states">
+  <div class="sec-ey"><span class="sec-num">05</span><span class="sec-cat">Language</span></div>
+  <h2>Task State Examples</h2><div class="sec-rule"></div>
+
+  <h3>Integration Patterns</h3>
+  <div class="tw"><table>
+    <thead><tr><th>Pattern</th><th>Resource ARN Format</th><th>Behavior</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tag tr">Request-Response</span></td><td><code>arn:aws:states:::lambda:invoke</code></td><td>Calls service, waits for HTTP 200. Does NOT wait for task completion. Default for most services.</td></tr>
+      <tr><td><span class="tag tt">Sync (waitForTaskToken omitted)</span></td><td><code>arn:aws:states:::ecs:runTask.sync</code></td><td>Calls service and waits for it to fully complete before moving to next state. Uses <code>.sync</code> suffix.</td></tr>
+      <tr><td><span class="tag tn">Callback (WaitForTaskToken)</span></td><td><code>arn:aws:states:::sqs:sendMessage.waitForTaskToken</code></td><td>Sends task token, pauses execution until <code>SendTaskSuccess</code> or <code>SendTaskFailure</code> called. Human approval, external systems.</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="cf"><div class="cf-d"></div>task-examples.json — common task state patterns</div>
+  <pre><code>{
+  <span class="sk">"States"</span>: {
+
+    <span class="sc">// ── Lambda (synchronous call, waits for response) ──</span>
+    <span class="sk">"InvokeLambda"</span>: {
+      <span class="sk">"Type"</span>: <span class="sv">"Task"</span>,
+      <span class="sk">"Resource"</span>: <span class="sv">"arn:aws:states:::lambda:invoke"</span>,
+      <span class="sk">"Parameters"</span>: {
+        <span class="sk">"FunctionName"</span>: <span class="sv">"arn:aws:lambda:us-east-1:123456789012:function:MyFn"</span>,
+        <span class="sk">"Payload.$"</span>: <span class="sv">"$"</span>           <span class="sc">// pass entire input as payload</span>
+      },
+      <span class="sk">"ResultSelector"</span>: { <span class="sk">"body.$"</span>: <span class="sv">"$.Payload"</span> },
+      <span class="sk">"TimeoutSeconds"</span>: <span class="snum">300</span>,
+      <span class="sk">"Next"</span>: <span class="sv">"NextState"</span>
+    },
+
+    <span class="sc">// ── ECS Task (sync — waits for container to finish) ──</span>
+    <span class="sk">"RunECSJob"</span>: {
+      <span class="sk">"Type"</span>: <span class="sv">"Task"</span>,
+      <span class="sk">"Resource"</span>: <span class="sv">"arn:aws:states:::ecs:runTask.sync"</span>,  <span class="sc">// .sync = wait for completion</span>
+      <span class="sk">"Parameters"</span>: {
+        <span class="sk">"Cluster"</span>: <span class="sv">"arn:aws:ecs:us-east-1:123456789012:cluster/MyCluster"</span>,
+        <span class="sk">"TaskDefinition"</span>: <span class="sv">"arn:aws:ecs:us-east-1:123456789012:task-definition/MyTask:1"</span>,
+        <span class="sk">"LaunchType"</span>: <span class="sv">"FARGATE"</span>,
+        <span class="sk">"Overrides"</span>: {
+          <span class="sk">"ContainerOverrides"</span>: [{
+            <span class="sk">"Name"</span>: <span class="sv">"my-container"</span>,
+            <span class="sk">"Environment"</span>: [{ <span class="sk">"Name"</span>: <span class="sv">"INPUT"</span>, <span class="sk">"Value.$"</span>: <span class="sv">"$.inputFile"</span> }]
+          }]
+        }
+      },
+      <span class="sk">"Next"</span>: <span class="sv">"NextState"</span>
+    },
+
+    <span class="sc">// ── DynamoDB PutItem directly (SDK integration) ──</span>
+    <span class="sk">"SaveToDynamoDB"</span>: {
+      <span class="sk">"Type"</span>: <span class="sv">"Task"</span>,
+      <span class="sk">"Resource"</span>: <span class="sv">"arn:aws:states:::dynamodb:putItem"</span>,
+      <span class="sk">"Parameters"</span>: {
+        <span class="sk">"TableName"</span>: <span class="sv">"OrdersTable"</span>,
+        <span class="sk">"Item"</span>: {
+          <span class="sk">"orderId"</span>: { <span class="sk">"S.$"</span>: <span class="sv">"$.orderId"</span> },
+          <span class="sk">"status"</span>:  { <span class="sk">"S"</span>: <span class="sv">"PROCESSING"</span> }
+        }
+      },
+      <span class="sk">"ResultPath"</span>: <span class="sn">null</span>,       <span class="sc">// discard result, keep original input</span>
+      <span class="sk">"Next"</span>: <span class="sv">"NextState"</span>
+    },
+
+    <span class="sc">// ── SNS Publish ──</span>
+    <span class="sk">"NotifyTeam"</span>: {
+      <span class="sk">"Type"</span>: <span class="sv">"Task"</span>,
+      <span class="sk">"Resource"</span>: <span class="sv">"arn:aws:states:::sns:publish"</span>,
+      <span class="sk">"Parameters"</span>: {
+        <span class="sk">"TopicArn"</span>: <span class="sv">"arn:aws:sns:us-east-1:123456789012:AlertTopic"</span>,
+        <span class="sk">"Message.$"</span>: <span class="sv">"States.Format('Order {} completed', $.orderId)"</span>
+      },
+      <span class="sk">"End"</span>: <span class="sn">true</span>
+    },
+
+    <span class="sc">// ── Choice State ──</span>
+    <span class="sk">"CheckOrderStatus"</span>: {
+      <span class="sk">"Type"</span>: <span class="sv">"Choice"</span>,
+      <span class="sk">"Choices"</span>: [
+        {
+          <span class="sk">"Variable"</span>: <span class="sv">"$.status"</span>,
+          <span class="sk">"StringEquals"</span>: <span class="sv">"APPROVED"</span>,
+          <span class="sk">"Next"</span>: <span class="sv">"ProcessPayment"</span>
+        },
+        {
+          <span class="sk">"Variable"</span>: <span class="sv">"$.amount"</span>,
+          <span class="sk">"NumericGreaterThan"</span>: <span class="snum">1000</span>,
+          <span class="sk">"Next"</span>: <span class="sv">"RequireManagerApproval"</span>
+        }
+      ],
+      <span class="sk">"Default"</span>: <span class="sv">"RejectOrder"</span>   <span class="sc">// required fallback</span>
+    },
+
+    <span class="sc">// ── Wait State ──</span>
+    <span class="sk">"WaitForShipping"</span>: {
+      <span class="sk">"Type"</span>: <span class="sv">"Wait"</span>,
+      <span class="sc">// Option 1: fixed duration</span>
+      <span class="sk">"Seconds"</span>: <span class="snum">86400</span>,           <span class="sc">// 24 hours</span>
+      <span class="sc">// Option 2: from input</span>
+      <span class="sc">// "SecondsPath": "$.waitSeconds",</span>
+      <span class="sc">// Option 3: absolute timestamp from input</span>
+      <span class="sc">// "TimestampPath": "$.shipByDate",</span>
+      <span class="sk">"Next"</span>: <span class="sv">"CheckDelivery"</span>
+    }
+  }
+}</code></pre>
+</section>
+
+<!-- ══ 06 PARALLEL & MAP ══ -->
+<section class="sec" id="parallel-map">
+  <div class="sec-ey"><span class="sec-num">06</span><span class="sec-cat">Language</span></div>
+  <h2>Parallel &amp; Map States</h2><div class="sec-rule"></div>
+
+  <div class="g2">
+    <div>
+      <div class="cf"><div class="cf-d"></div>parallel-state.json</div>
+      <pre><code>{
+  <span class="sk">"ProcessOrderInParallel"</span>: {
+    <span class="sk">"Type"</span>: <span class="sv">"Parallel"</span>,
+    <span class="sk">"Branches"</span>: [
+      {
+        <span class="sc">// Branch 1: charge card</span>
+        <span class="sk">"StartAt"</span>: <span class="sv">"ChargeCard"</span>,
+        <span class="sk">"States"</span>: {
+          <span class="sk">"ChargeCard"</span>: {
+            <span class="sk">"Type"</span>: <span class="sv">"Task"</span>,
+            <span class="sk">"Resource"</span>: <span class="sv">"arn:aws:lambda:..."</span>,
+            <span class="sk">"End"</span>: <span class="sn">true</span>
+          }
+        }
+      },
+      {
+        <span class="sc">// Branch 2: reserve inventory</span>
+        <span class="sk">"StartAt"</span>: <span class="sv">"ReserveInventory"</span>,
+        <span class="sk">"States"</span>: {
+          <span class="sk">"ReserveInventory"</span>: {
+            <span class="sk">"Type"</span>: <span class="sv">"Task"</span>,
+            <span class="sk">"Resource"</span>: <span class="sv">"arn:aws:lambda:..."</span>,
+            <span class="sk">"End"</span>: <span class="sn">true</span>
+          }
+        }
+      }
+    ],
+    <span class="sc">// Output = array of branch outputs: [chargeResult, inventoryResult]</span>
+    <span class="sk">"Next"</span>: <span class="sv">"ShipOrder"</span>
+  }
+}</code></pre>
+    </div>
+    <div>
+      <div class="cf"><div class="cf-d"></div>map-state.json</div>
+      <pre><code>{
+  <span class="sk">"ProcessItems"</span>: {
+    <span class="sk">"Type"</span>: <span class="sv">"Map"</span>,
+
+    <span class="sc">// Array to iterate over (from input)</span>
+    <span class="sk">"ItemsPath"</span>: <span class="sv">"$.orderItems"</span>,
+
+    <span class="sc">// Merge item + context into each iteration input</span>
+    <span class="sk">"Parameters"</span>: {
+      <span class="sk">"item.$"</span>: <span class="sv">"$$.Map.Item.Value"</span>,
+      <span class="sk">"index.$"</span>: <span class="sv">"$$.Map.Item.Index"</span>,
+      <span class="sk">"orderId.$"</span>: <span class="sv">"$.orderId"</span>
+    },
+
+    <span class="sc">// Max concurrent iterations (0 = unlimited)</span>
+    <span class="sk">"MaxConcurrency"</span>: <span class="snum">5</span>,
+
+    <span class="sc">// Sub-workflow run for each item</span>
+    <span class="sk">"Iterator"</span>: {
+      <span class="sk">"StartAt"</span>: <span class="sv">"ProcessSingleItem"</span>,
+      <span class="sk">"States"</span>: {
+        <span class="sk">"ProcessSingleItem"</span>: {
+          <span class="sk">"Type"</span>: <span class="sv">"Task"</span>,
+          <span class="sk">"Resource"</span>: <span class="sv">"arn:aws:lambda:..."</span>,
+          <span class="sk">"End"</span>: <span class="sn">true</span>
+        }
+      }
+    },
+
+    <span class="sc">// Output = array of each iteration's output</span>
+    <span class="sk">"ResultPath"</span>: <span class="sv">"$.processedItems"</span>,
+    <span class="sk">"Next"</span>: <span class="sv">"FinalizeOrder"</span>
+  }
+}</code></pre>
+    </div>
+  </div>
+
+  <div class="co co-t">
+    <span class="co-i">ℹ️</span>
+    <p><strong>Parallel vs Map:</strong> <code>Parallel</code> runs <em>fixed, predefined branches</em> simultaneously — you define each branch upfront. <code>Map</code> runs the <em>same sub-workflow</em> for each item in a dynamic array. Use Parallel for "do A and B at the same time"; use Map for "process each item in this list".</p>
+  </div>
+</section>
+
+<!-- ══ 07 ERROR HANDLING ══ -->
+<section class="sec" id="error-handling">
+  <div class="sec-ey"><span class="sec-num">07</span><span class="sec-cat">Operations</span></div>
+  <h2>Error Handling: Retry &amp; Catch</h2><div class="sec-rule"></div>
+
+  <p>Step Functions has <strong>built-in retry with exponential backoff</strong> and structured error catching. This eliminates retry logic from your application code entirely.</p>
+
+  <div class="cf"><div class="cf-d"></div>error-handling-complete.json</div>
+  <pre><code>{
+  <span class="sk">"ProcessPayment"</span>: {
+    <span class="sk">"Type"</span>: <span class="sv">"Task"</span>,
+    <span class="sk">"Resource"</span>: <span class="sv">"arn:aws:states:::lambda:invoke"</span>,
+    <span class="sk">"Parameters"</span>: { <span class="sk">"FunctionName"</span>: <span class="sv">"ProcessPaymentFn"</span>, <span class="sk">"Payload.$"</span>: <span class="sv">"$"</span> },
+
+    <span class="sc">// ── RETRY ── (applied before Catch)</span>
+    <span class="sk">"Retry"</span>: [
+      {
+        <span class="sc">// Retry transient Lambda errors with backoff</span>
+        <span class="sk">"ErrorEquals"</span>: [<span class="sv">"Lambda.ServiceException"</span>, <span class="sv">"Lambda.TooManyRequestsException"</span>],
+        <span class="sk">"IntervalSeconds"</span>: <span class="snum">2</span>,      <span class="sc">// first retry wait</span>
+        <span class="sk">"MaxAttempts"</span>: <span class="snum">3</span>,          <span class="sc">// number of retries (not including original)</span>
+        <span class="sk">"BackoffRate"</span>: <span class="snum">2.0</span>          <span class="sc">// multiply wait by 2 each retry: 2s, 4s, 8s</span>
+      },
+      {
+        <span class="sc">// Also retry custom app errors</span>
+        <span class="sk">"ErrorEquals"</span>: [<span class="sv">"PaymentTemporaryError"</span>],
+        <span class="sk">"IntervalSeconds"</span>: <span class="snum">5</span>,
+        <span class="sk">"MaxAttempts"</span>: <span class="snum">2</span>,
+        <span class="sk">"BackoffRate"</span>: <span class="snum">1.5</span>,
+        <span class="sk">"MaxDelaySeconds"</span>: <span class="snum">30</span>     <span class="sc">// cap the wait time</span>
+      }
+    ],
+
+    <span class="sc">// ── CATCH ── (runs after all retries exhausted)</span>
+    <span class="sk">"Catch"</span>: [
+      {
+        <span class="sc">// Catch specific payment error → send to refund flow</span>
+        <span class="sk">"ErrorEquals"</span>: [<span class="sv">"PaymentDeclinedError"</span>],
+        <span class="sk">"Next"</span>: <span class="sv">"HandleDecline"</span>,
+        <span class="sk">"ResultPath"</span>: <span class="sv">"$.error"</span>  <span class="sc">// save error info into $.error</span>
+      },
+      {
+        <span class="sc">// Catch ALL errors as fallback</span>
+        <span class="sk">"ErrorEquals"</span>: [<span class="sv">"States.ALL"</span>],
+        <span class="sk">"Next"</span>: <span class="sv">"NotifyFailure"</span>,
+        <span class="sk">"ResultPath"</span>: <span class="sv">"$.error"</span>
+      }
+    ],
+
+    <span class="sk">"TimeoutSeconds"</span>: <span class="snum">60</span>,
+    <span class="sk">"HeartbeatSeconds"</span>: <span class="snum">10</span>,     <span class="sc">// fail if no heartbeat in 10s (for long tasks)</span>
+    <span class="sk">"Next"</span>: <span class="sv">"ConfirmOrder"</span>
+  }
+}</code></pre>
+
+  <h3>Built-in Error Codes</h3>
+  <div class="tw"><table>
+    <thead><tr><th>Error Code</th><th>When it Triggers</th></tr></thead>
+    <tbody>
+      <tr><td><code>States.ALL</code></td><td>Matches <strong>any</strong> error — use as catch-all fallback (must be last in Catch array)</td></tr>
+      <tr><td><code>States.Timeout</code></td><td>Task exceeded <code>TimeoutSeconds</code> or heartbeat exceeded <code>HeartbeatSeconds</code></td></tr>
+      <tr><td><code>States.TaskFailed</code></td><td>Task threw an unhandled exception</td></tr>
+      <tr><td><code>States.Permissions</code></td><td>Insufficient IAM permissions to invoke the resource</td></tr>
+      <tr><td><code>States.ResultPathMatchFailure</code></td><td>ResultPath could not be applied to the input</td></tr>
+      <tr><td><code>States.HeartbeatTimeout</code></td><td>Activity or waitForTaskToken task didn't send heartbeat in time</td></tr>
+      <tr><td><code>Lambda.ServiceException</code></td><td>Lambda service error (transient, worth retrying)</td></tr>
+      <tr><td><code>Lambda.TooManyRequestsException</code></td><td>Lambda throttled — always add retry for this</td></tr>
+      <tr><td><code>Lambda.SdkClientException</code></td><td>Network error calling Lambda</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ══ 08 WAIT FOR CALLBACK ══ -->
+<section class="sec" id="wait-callback">
+  <div class="sec-ey"><span class="sec-num">08</span><span class="sec-cat">Operations</span></div>
+  <h2>Wait for Callback (Task Token)</h2><div class="sec-rule"></div>
+
+  <p>The <strong>waitForTaskToken</strong> integration pattern pauses a workflow execution until an external process calls back with <code>SendTaskSuccess</code> or <code>SendTaskFailure</code>. Perfect for human approval flows, external system integration, or long-running jobs.</p>
+
+  <div class="flow">
+    <div class="f-step">
+      <div class="f-num">01</div><div class="f-icon">🔑</div>
+      <div class="f-name">SF generates task token</div>
+      <div class="f-sub">Unique token for this execution + state</div>
+    </div>
+    <div class="f-arr">→</div>
+    <div class="f-step">
+      <div class="f-num">02</div><div class="f-icon">📨</div>
+      <div class="f-name">Sends token to external system</div>
+      <div class="f-sub">Via SQS, SNS, Lambda, EventBridge, etc.</div>
+    </div>
+    <div class="f-arr">→</div>
+    <div class="f-step">
+      <div class="f-num">03</div><div class="f-icon">⏳</div>
+      <div class="f-name">Execution pauses</div>
+      <div class="f-sub">No cost while waiting (Standard). Up to 1 year.</div>
+    </div>
+    <div class="f-arr">→</div>
+    <div class="f-step">
+      <div class="f-num">04</div><div class="f-icon">👤</div>
+      <div class="f-name">Human/system acts</div>
+      <div class="f-sub">Approves, rejects, or processes</div>
+    </div>
+    <div class="f-arr">→</div>
+    <div class="f-step">
+      <div class="f-num">05</div><div class="f-icon">📞</div>
+      <div class="f-name">Calls SendTaskSuccess/Failure</div>
+      <div class="f-sub">Uses the task token + output/error</div>
+    </div>
+    <div class="f-arr">→</div>
+    <div class="f-step">
+      <div class="f-num">06</div><div class="f-icon">▶️</div>
+      <div class="f-name">Execution resumes</div>
+      <div class="f-sub">Continues to Next state</div>
+    </div>
+  </div>
+
+  <div class="cf"><div class="cf-d"></div>wait-for-callback.json + callback-handler.py</div>
+  <pre><code><span class="sc">// State definition — send token via SQS, wait for callback</span>
+{
+  <span class="sk">"WaitForApproval"</span>: {
+    <span class="sk">"Type"</span>: <span class="sv">"Task"</span>,
+    <span class="sk">"Resource"</span>: <span class="sv">"arn:aws:states:::sqs:sendMessage.waitForTaskToken"</span>,
+    <span class="sk">"Parameters"</span>: {
+      <span class="sk">"QueueUrl"</span>: <span class="sv">"https://sqs.us-east-1.amazonaws.com/123456789012/ApprovalQueue"</span>,
+      <span class="sk">"MessageBody"</span>: {
+        <span class="sk">"taskToken.$"</span>: <span class="sv">"$$.Task.Token"</span>,    <span class="sc">// $$.Task.Token = the unique token</span>
+        <span class="sk">"orderId.$"</span>:   <span class="sv">"$.orderId"</span>,
+        <span class="sk">"amount.$"</span>:    <span class="sv">"$.amount"</span>
+      }
+    },
+    <span class="sk">"HeartbeatSeconds"</span>: <span class="snum">3600</span>,              <span class="sc">// fail if no heartbeat in 1 hour</span>
+    <span class="sk">"Next"</span>: <span class="sv">"ProcessApprovedOrder"</span>
+  }
+}
+
+<span class="sc">// Approval Lambda — called when human approves/rejects</span>
+<span class="sk">import boto3</span>
+
+<span class="sk">def</span> <span class="sn">handler</span>(event, context):
+    sf = boto3.client(<span class="sv">'stepfunctions'</span>)
+    task_token = event[<span class="sv">'taskToken'</span>]
+    approved = event[<span class="sv">'approved'</span>]
+
+    <span class="sk">if</span> approved:
+        sf.send_task_success(
+            taskToken=task_token,
+            output=<span class="sv">'{"approvedBy": "manager@company.com"}'</span>
+        )
+    <span class="sk">else</span>:
+        sf.send_task_failure(
+            taskToken=task_token,
+            error=<span class="sv">'ApprovalRejected'</span>,
+            cause=<span class="sv">'Manager rejected the order'</span>
+        )
+</code></pre>
+</section>
+
+<!-- ══ 09 ACTIVITIES ══ -->
+<section class="sec" id="activities">
+  <div class="sec-ey"><span class="sec-num">09</span><span class="sec-cat">Operations</span></div>
+  <h2>Activities (Worker Polling)</h2><div class="sec-rule"></div>
+
+  <p>Activities allow <strong>on-premises servers, EC2 instances, or any external worker</strong> to participate in a Step Functions workflow. The worker <em>polls</em> Step Functions for tasks, processes them, and sends results back. No inbound connectivity required from AWS.</p>
+
+  <div class="g2">
+    <div class="card cr">
+      <h4>Activity vs waitForTaskToken</h4>
+      <ul style="font-size:13px">
+        <li><strong>Activities:</strong> Worker actively <em>polls</em> for tasks. Good for existing workers, on-premises systems.</li>
+        <li><strong>waitForTaskToken:</strong> Step Functions <em>pushes</em> the token outward. Caller decides when to respond. More flexible.</li>
+        <li>Both pause execution waiting for an external process.</li>
+      </ul>
+    </div>
+    <div>
+      <div class="cf"><div class="cf-d"></div>activity-worker.py</div>
+      <pre><code><span class="sk">import boto3, json, time</span>
+
+sf = boto3.client(<span class="sv">'stepfunctions'</span>)
+ACTIVITY_ARN = <span class="sv">'arn:aws:states:us-east-1:123456789012:activity:MyActivity'</span>
+
+<span class="sk">while True</span>:
+    <span class="sc"># Poll for available tasks (long-poll, up to 60s)</span>
+    response = sf.get_activity_task(
+        activityArn=ACTIVITY_ARN,
+        workerName=<span class="sv">'my-worker-1'</span>
+    )
+
+    <span class="sk">if</span> response.get(<span class="sv">'taskToken'</span>):
+        token  = response[<span class="sv">'taskToken'</span>]
+        input_ = json.loads(response[<span class="sv">'input'</span>])
+
+        <span class="sk">try</span>:
+            result = process_work(input_)          <span class="sc"># do the actual work</span>
+
+            <span class="sc"># Send heartbeat every 30s while working</span>
+            sf.send_task_heartbeat(taskToken=token)
+
+            sf.send_task_success(
+                taskToken=token,
+                output=json.dumps(result)
+            )
+        <span class="sk">except Exception as</span> e:
+            sf.send_task_failure(
+                taskToken=token,
+                error=<span class="sv">'ProcessingError'</span>,
+                cause=str(e)
+            )
+    <span class="sk">else</span>:
+        time.sleep(<span class="snum">1</span>)  <span class="sc"># no task available, wait a bit</span>
+</code></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 10 INTEGRATIONS ══ -->
+<section class="sec" id="integrations">
+  <div class="sec-ey"><span class="sec-num">10</span><span class="sec-cat">Operations</span></div>
+  <h2>Service Integrations</h2><div class="sec-rule"></div>
+
+  <p>Step Functions can integrate with over <strong>200 AWS services</strong> directly — no Lambda needed as a proxy. Optimized integrations reduce latency and cost.</p>
+
+  <div class="tw"><table>
+    <thead><tr><th>Service</th><th>Resource ARN Pattern</th><th>Common Actions</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tag tr">Lambda</span></td><td><code>arn:aws:states:::lambda:invoke</code></td><td>invoke</td></tr>
+      <tr><td><span class="tag tt">DynamoDB</span></td><td><code>arn:aws:states:::dynamodb:*</code></td><td>getItem, putItem, updateItem, deleteItem, query</td></tr>
+      <tr><td><span class="tag tn">SQS</span></td><td><code>arn:aws:states:::sqs:sendMessage</code></td><td>sendMessage (.waitForTaskToken)</td></tr>
+      <tr><td><span class="tag tp">SNS</span></td><td><code>arn:aws:states:::sns:publish</code></td><td>publish</td></tr>
+      <tr><td><span class="tag tg">ECS/Fargate</span></td><td><code>arn:aws:states:::ecs:runTask</code></td><td>runTask (.sync) — waits for container exit</td></tr>
+      <tr><td><span class="tag tgr">Batch</span></td><td><code>arn:aws:states:::batch:submitJob</code></td><td>submitJob (.sync) — waits for job completion</td></tr>
+      <tr><td><span class="tag tr">Glue</span></td><td><code>arn:aws:states:::glue:startJobRun</code></td><td>startJobRun (.sync)</td></tr>
+      <tr><td><span class="tag tt">EMR</span></td><td><code>arn:aws:states:::elasticmapreduce:*</code></td><td>createCluster (.sync), addStep (.sync)</td></tr>
+      <tr><td><span class="tag tn">Athena</span></td><td><code>arn:aws:states:::athena:startQueryExecution</code></td><td>startQueryExecution (.sync)</td></tr>
+      <tr><td><span class="tag tp">S3</span></td><td><code>arn:aws:states:::s3:*</code></td><td>getObject, putObject, listObjectsV2</td></tr>
+      <tr><td><span class="tag tg">Step Functions</span></td><td><code>arn:aws:states:::states:startExecution</code></td><td>startExecution (.sync) — nested workflows</td></tr>
+      <tr><td><span class="tag tgr">EventBridge</span></td><td><code>arn:aws:states:::events:putEvents</code></td><td>putEvents</td></tr>
+      <tr><td><span class="tag tr">API Gateway</span></td><td><code>arn:aws:states:::apigateway:invoke</code></td><td>invoke REST/HTTP API</td></tr>
+      <tr><td><span class="tag tt">SageMaker</span></td><td><code>arn:aws:states:::sagemaker:*</code></td><td>createTrainingJob (.sync), createEndpoint (.sync)</td></tr>
+      <tr><td><span class="tag tn">Bedrock</span></td><td><code>arn:aws:states:::bedrock:invokeModel</code></td><td>invokeModel</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ══ 11 MONITORING ══ -->
+<section class="sec" id="monitoring">
+  <div class="sec-ey"><span class="sec-num">11</span><span class="sec-cat">Advanced</span></div>
+  <h2>Monitoring &amp; Logging</h2><div class="sec-rule"></div>
+
+  <h3>Execution Status Values</h3>
+  <div class="tw"><table>
+    <thead><tr><th>Status</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tag tgr">RUNNING</span></td><td>Execution is in progress</td></tr>
+      <tr><td><span class="tag tt">SUCCEEDED</span></td><td>Completed successfully — reached End state or Succeed state</td></tr>
+      <tr><td><span class="tag tr">FAILED</span></td><td>Reached a Fail state or unhandled error after all retries</td></tr>
+      <tr><td><span class="tag tg">TIMED_OUT</span></td><td>Overall execution timeout reached (<code>TimeoutSeconds</code> at state machine level)</td></tr>
+      <tr><td><span class="tag tn">ABORTED</span></td><td>Manually stopped via <code>StopExecution</code> API</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>CloudWatch Integration</h3>
+  <div class="g2">
+    <div class="card ct">
+      <h4>CloudWatch Metrics</h4>
+      <ul style="font-size:13px">
+        <li><code>ExecutionsStarted</code>, <code>ExecutionsSucceeded</code>, <code>ExecutionsFailed</code></li>
+        <li><code>ExecutionsTimedOut</code>, <code>ExecutionsAborted</code></li>
+        <li><code>ExecutionThrottled</code> — create alarm on this</li>
+        <li><code>ExecutionTime</code> — duration of executions</li>
+      </ul>
+    </div>
+    <div class="card cg">
+      <h4>CloudWatch Logs (required for Express)</h4>
+      <ul style="font-size:13px">
+        <li>Standard: execution history in SF console (90 days)</li>
+        <li>Express: <strong>must enable CW Logs</strong> — no execution history in SF console</li>
+        <li>Log levels: OFF, ERROR, FATAL, ALL</li>
+        <li>Enable <code>includeExecutionData</code> to log I/O</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="cf"><div class="cf-d"></div>cloudformation — enable logging for Express workflow</div>
+  <pre><code>{
+  <span class="sk">"MyStateMachine"</span>: {
+    <span class="sk">"Type"</span>: <span class="sv">"AWS::StepFunctions::StateMachine"</span>,
+    <span class="sk">"Properties"</span>: {
+      <span class="sk">"StateMachineType"</span>: <span class="sv">"EXPRESS"</span>,
+      <span class="sk">"LoggingConfiguration"</span>: {
+        <span class="sk">"Level"</span>: <span class="sv">"ALL"</span>,
+        <span class="sk">"IncludeExecutionData"</span>: <span class="sn">true</span>,
+        <span class="sk">"Destinations"</span>: [{
+          <span class="sk">"CloudWatchLogsLogGroup"</span>: {
+            <span class="sk">"LogGroupArn"</span>: { <span class="sn">"Fn::GetAtt"</span>: [<span class="sv">"StateMachineLogGroup"</span>, <span class="sv">"Arn"</span>] }
+          }
+        }]
+      },
+      <span class="sk">"TracingConfiguration"</span>: { <span class="sk">"Enabled"</span>: <span class="sn">true</span> }  <span class="sc">// X-Ray</span>
+    }
+  }
+}</code></pre>
+</section>
+
+<!-- ══ 12 IAM ══ -->
+<section class="sec" id="iam">
+  <div class="sec-ey"><span class="sec-num">12</span><span class="sec-cat">Advanced</span></div>
+  <h2>IAM Permissions</h2><div class="sec-rule"></div>
+
+  <p>Step Functions needs an IAM execution role to call other AWS services from Task states. The role must trust <code>states.amazonaws.com</code>.</p>
+
+  <div class="g2">
+    <div>
+      <div class="cf"><div class="cf-d"></div>trust-policy.json</div>
+      <pre><code>{
+  <span class="sk">"Principal"</span>: {
+    <span class="sk">"Service"</span>: <span class="sv">"states.amazonaws.com"</span>
+  },
+  <span class="sk">"Action"</span>: <span class="sv">"sts:AssumeRole"</span>
+}</code></pre>
+    </div>
+    <div>
+      <div class="cf"><div class="cf-d"></div>execution-role-policy.json</div>
+      <pre><code>{
+  <span class="sc">// Lambda invocation</span>
+  <span class="sk">"Action"</span>: <span class="sv">"lambda:InvokeFunction"</span>,
+  <span class="sk">"Resource"</span>: <span class="sv">"arn:aws:lambda:*:*:function:*"</span>
+}
+<span class="sc">// DynamoDB access</span>
+{ <span class="sk">"Action"</span>: [<span class="sv">"dynamodb:PutItem"</span>, <span class="sv">"dynamodb:GetItem"</span>], <span class="sk">"Resource"</span>: <span class="sv">"*"</span> }
+<span class="sc">// SNS publish</span>
+{ <span class="sk">"Action"</span>: <span class="sv">"sns:Publish"</span>, <span class="sk">"Resource"</span>: <span class="sv">"*"</span> }
+<span class="sc">// ECS tasks + pass role</span>
+{ <span class="sk">"Action"</span>: [<span class="sv">"ecs:RunTask"</span>, <span class="sv">"iam:PassRole"</span>], <span class="sk">"Resource"</span>: <span class="sv">"*"</span> }
+<span class="sc">// CW Logs (required for Express)</span>
+{ <span class="sk">"Action"</span>: [<span class="sv">"logs:CreateLogDelivery"</span>, <span class="sv">"logs:PutLogEvents"</span>], <span class="sk">"Resource"</span>: <span class="sv">"*"</span> }
+</code></pre>
+    </div>
+  </div>
+
+  <div class="co co-r">
+    <span class="co-i">⚠️</span>
+    <p><strong>ECS requires <code>iam:PassRole</code>.</strong> When a Step Functions task runs an ECS task, it must pass the ECS task execution role and task role to ECS. The Step Functions execution role needs <code>iam:PassRole</code> on those ECS roles.</p>
+  </div>
+</section>
+
+<!-- ══ 13 EXAM TIPS ══ -->
+<section class="sec" id="exam-tips">
+  <div class="sec-ey"><span class="sec-num">13</span><span class="sec-cat">Exam Focus</span></div>
+  <h2>DOP-C02 Exam Tips</h2><div class="sec-rule"></div>
+
+  <div class="exam">
+    <div class="exam-title">Must-Know Facts</div>
+    <ul>
+      <li><strong>Standard Workflow:</strong> Exactly-once, up to 1 year, full execution history (90 days), priced per state transition. Use for critical/long-running workflows.</li>
+      <li><strong>Express Workflow:</strong> At-least-once (async) or at-most-once (sync), up to 5 minutes, CloudWatch Logs only, priced per duration. Use for high-volume/IoT/streaming.</li>
+      <li><strong>Express Workflows REQUIRE CloudWatch Logs</strong> — they have no execution history in the SF console. Always configure logging.</li>
+      <li><strong>waitForTaskToken</strong> pauses execution until an external system calls <code>SendTaskSuccess/Failure</code>. Used for human approvals, external systems, long-running jobs.</li>
+      <li><strong>Activities</strong> = worker-polling pattern. Worker calls <code>GetActivityTask</code>, does work, calls <code>SendTaskSuccess</code>. Good for on-premises workers.</li>
+      <li><strong>Parallel</strong> = fixed branches run simultaneously. Output = array of branch outputs. <strong>Map</strong> = same sub-workflow for each array item. MaxConcurrency controls parallelism.</li>
+      <li><strong>Retry</strong> runs before Catch. BackoffRate multiplies IntervalSeconds each attempt. <code>States.ALL</code> in Catch = catch everything (must be last).</li>
+      <li><strong>ResultPath: null</strong> discards task output and passes original input unchanged. Critical for "pass-through" tasks.</li>
+      <li><strong><code>.$</code> suffix</strong> in Parameters means "evaluate as JSONPath from input". Without it, value is treated as a static string.</li>
+      <li>Step Functions execution role must trust <code>states.amazonaws.com</code>. ECS tasks require <code>iam:PassRole</code> in the execution role.</li>
+      <li>State machines are defined in <strong>Amazon States Language (ASL) — JSON format</strong>. The <code>StartAt</code> field is mandatory.</li>
+    </ul>
+  </div>
+
+  <h3>Common Exam Scenarios</h3>
+  <div class="tw"><table>
+    <thead><tr><th>Scenario</th><th>Answer</th></tr></thead>
+    <tbody>
+      <tr><td><em>"Process 1 million IoT events per second through a workflow"</em></td><td><strong>Express Workflow (Async)</strong> — high throughput, cost-effective, up to 100K+ exec/sec</td></tr>
+      <tr><td><em>"Order workflow needs manager approval before shipping — can wait days"</em></td><td><strong>Standard Workflow</strong> + <strong>waitForTaskToken</strong> via SQS/email — pauses indefinitely</td></tr>
+      <tr><td><em>"Run 3 validation checks simultaneously and continue when all pass"</em></td><td><strong>Parallel state</strong> with 3 branches — waits for all to complete</td></tr>
+      <tr><td><em>"Process each item in a DynamoDB scan result with the same Lambda function"</em></td><td><strong>Map state</strong> with <code>MaxConcurrency</code> limit to avoid Lambda throttling</td></tr>
+      <tr><td><em>"Lambda keeps hitting throttle errors — how to handle?"</em></td><td>Add <strong>Retry</strong> on <code>Lambda.TooManyRequestsException</code> with <code>BackoffRate: 2</code></td></tr>
+      <tr><td><em>"On-premises server needs to participate in the workflow"</em></td><td><strong>Activity</strong> — worker polls <code>GetActivityTask</code>, no inbound connection needed</td></tr>
+      <tr><td><em>"Need to run a Glue ETL job and wait for it to finish before next step"</em></td><td>Task state with <code>arn:aws:states:::glue:startJobRun.sync</code> — the <code>.sync</code> suffix waits</td></tr>
+      <tr><td><em>"Task result should be added to input without losing original data"</em></td><td>Set <code>"ResultPath": "$.taskResult"</code> — merges result into <code>$.taskResult</code>, preserving original</td></tr>
+      <tr><td><em>"Express workflow has no execution history visible in console"</em></td><td>Expected behavior — enable <strong>CloudWatch Logs</strong> at level ALL to capture execution data</td></tr>
+      <tr><td><em>"Need to stop workflow if payment takes more than 5 minutes"</em></td><td>Set <code>"TimeoutSeconds": 300</code> on the Task state + Catch <code>States.Timeout</code></td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Choice State Comparison Operators</h3>
+  <div class="tw"><table>
+    <thead><tr><th>Operator</th><th>Data Type</th><th>Example</th></tr></thead>
+    <tbody>
+      <tr><td><code>StringEquals</code>, <code>StringLessThan</code>, <code>StringGreaterThan</code></td><td>String</td><td><code>"StringEquals": "APPROVED"</code></td></tr>
+      <tr><td><code>NumericEquals</code>, <code>NumericLessThan</code>, <code>NumericGreaterThan</code></td><td>Number</td><td><code>"NumericGreaterThan": 1000</code></td></tr>
+      <tr><td><code>BooleanEquals</code></td><td>Boolean</td><td><code>"BooleanEquals": true</code></td></tr>
+      <tr><td><code>TimestampEquals</code>, <code>TimestampLessThan</code>, <code>TimestampGreaterThan</code></td><td>ISO 8601 timestamp</td><td><code>"TimestampGreaterThan": "2024-01-01T00:00:00Z"</code></td></tr>
+      <tr><td><code>StringMatches</code></td><td>String with wildcards</td><td><code>"StringMatches": "order-*"</code></td></tr>
+      <tr><td><code>IsPresent</code></td><td>Any</td><td><code>"IsPresent": true</code> — checks if field exists</td></tr>
+      <tr><td><code>IsNull</code></td><td>Any</td><td><code>"IsNull": false</code></td></tr>
+      <tr><td><code>And</code>, <code>Or</code>, <code>Not</code></td><td>Compound</td><td>Wrap array of conditions</td></tr>
+    </tbody>
+  </table></div>
+
+</section>
+</main>
+</div>
+
+<script>
+const secs  = document.querySelectorAll('.sec');
+const links = document.querySelectorAll('.sb-a');
+const obs   = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      links.forEach(l => l.classList.remove('act'));
+      const a = document.querySelector(`.sb-a[href="#${e.target.id}"]`);
+      if (a) a.classList.add('act');
+    }
+  });
+}, { rootMargin: '-15% 0px -70% 0px' });
+secs.forEach(s => obs.observe(s));
+</script>
+</body>
+</html>
