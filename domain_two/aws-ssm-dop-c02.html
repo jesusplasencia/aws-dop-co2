@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS Systems Manager — DOP-C02 Exam Prep</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e17;
+    --surface: #111827;
+    --surface2: #1a2235;
+    --border: #1f2d45;
+    --accent: #f5a623;
+    --accent2: #3b82f6;
+    --accent3: #10b981;
+    --danger: #ef4444;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --tag-bg: #1e3a5f;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  /* Header */
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 2.5rem 0 2rem;
+    background: linear-gradient(180deg, #0d1526 0%, var(--bg) 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: 'SSM';
+    position: absolute;
+    right: 2rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9rem;
+    font-weight: 600;
+    color: rgba(245,166,35,0.04);
+    letter-spacing: -4px;
+    pointer-events: none;
+  }
+  .header-inner {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
+  .service-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 0.6rem;
+  }
+  h1 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.5px;
+  }
+  .cert-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 0.8rem;
+    background: rgba(59,130,246,0.15);
+    border: 1px solid rgba(59,130,246,0.3);
+    color: var(--accent2);
+    padding: 3px 12px;
+    border-radius: 2px;
+    font-size: 12px;
+    font-family: 'IBM Plex Mono', monospace;
+    letter-spacing: 1px;
+  }
+
+  /* Layout */
+  main {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 2.5rem 2rem 4rem;
+  }
+
+  /* Exam Weight Banner */
+  .weight-bar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-bottom: 2.5rem;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .weight-item {
+    background: var(--surface);
+    padding: 0.9rem 1.2rem;
+    text-align: center;
+  }
+  .weight-item .label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+  .weight-item .value { font-family: 'IBM Plex Mono', monospace; font-size: 1.1rem; color: var(--accent); font-weight: 600; margin-top: 2px; }
+
+  /* Section */
+  section { margin-bottom: 3rem; }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    min-width: 24px;
+  }
+  h2 {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: -0.2px;
+  }
+  .exam-tag {
+    margin-left: auto;
+    font-size: 10px;
+    font-family: 'IBM Plex Mono', monospace;
+    padding: 2px 8px;
+    border-radius: 2px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .tag-high { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.25); }
+  .tag-med  { background: rgba(245,166,35,0.12); color: var(--accent); border: 1px solid rgba(245,166,35,0.25); }
+  .tag-low  { background: rgba(100,116,139,0.15); color: var(--muted); border: 1px solid rgba(100,116,139,0.2); }
+
+  /* Card */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1rem;
+  }
+  .card-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 0.75rem;
+  }
+
+  /* Key-value rows */
+  .kv-grid {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+  }
+  .kv-row {
+    display: contents;
+  }
+  .kv-row:not(:last-child) .kv-key,
+  .kv-row:not(:last-child) .kv-val {
+    border-bottom: 1px solid var(--border);
+  }
+  .kv-key {
+    background: var(--surface2);
+    padding: 0.6rem 1rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  .kv-val {
+    background: var(--surface);
+    padding: 0.6rem 1rem;
+    font-size: 13.5px;
+    color: var(--text);
+  }
+
+  /* Bullets */
+  ul.items {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+  ul.items li {
+    display: flex;
+    gap: 0.7rem;
+    font-size: 14px;
+    color: var(--text);
+  }
+  ul.items li::before {
+    content: '›';
+    color: var(--accent);
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* Alert / exam tip */
+  .exam-tip {
+    display: flex;
+    gap: 1rem;
+    background: rgba(245,166,35,0.07);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 4px 4px 0;
+    padding: 0.85rem 1.2rem;
+    margin-top: 1rem;
+    font-size: 13.5px;
+  }
+  .exam-tip-icon {
+    color: var(--accent);
+    font-size: 14px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .info-tip {
+    display: flex;
+    gap: 1rem;
+    background: rgba(59,130,246,0.07);
+    border-left: 3px solid var(--accent2);
+    border-radius: 0 4px 4px 0;
+    padding: 0.85rem 1.2rem;
+    margin-top: 1rem;
+    font-size: 13.5px;
+  }
+  .info-tip-icon {
+    color: var(--accent2);
+    font-size: 14px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* Comparison table */
+  table.compare {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+    margin-top: 0.5rem;
+  }
+  table.compare th {
+    background: var(--surface2);
+    padding: 0.6rem 1rem;
+    text-align: left;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+  }
+  table.compare td {
+    padding: 0.6rem 1rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    vertical-align: top;
+  }
+  table.compare tr:last-child td { border-bottom: none; }
+  table.compare tr:nth-child(even) td { background: rgba(26,34,53,0.4); }
+
+  /* Code block */
+  .code-block {
+    background: #080c14;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1rem 1.25rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    color: #94a3b8;
+    overflow-x: auto;
+    line-height: 1.7;
+    margin-top: 0.75rem;
+  }
+  .code-block .k { color: #7dd3fc; }
+  .code-block .v { color: #86efac; }
+  .code-block .c { color: #475569; }
+  .code-block .p { color: var(--accent); }
+
+  /* Two-col grid */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  @media (max-width: 640px) { .two-col { grid-template-columns: 1fr; } }
+
+  /* Inline highlight */
+  code {
+    background: var(--surface2);
+    color: #7dd3fc;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    padding: 1px 6px;
+    border-radius: 2px;
+    border: 1px solid var(--border);
+  }
+
+  /* Divider */
+  hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+
+  /* Footer */
+  footer {
+    text-align: center;
+    padding: 1.5rem;
+    font-size: 12px;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  /* Fade-in animation */
+  section {
+    animation: fadeUp 0.4s ease both;
+  }
+  section:nth-child(1) { animation-delay: 0.05s; }
+  section:nth-child(2) { animation-delay: 0.1s; }
+  section:nth-child(3) { animation-delay: 0.15s; }
+  section:nth-child(4) { animation-delay: 0.2s; }
+  section:nth-child(5) { animation-delay: 0.25s; }
+  section:nth-child(6) { animation-delay: 0.3s; }
+  section:nth-child(7) { animation-delay: 0.35s; }
+  section:nth-child(8) { animation-delay: 0.4s; }
+  section:nth-child(9) { animation-delay: 0.45s; }
+  section:nth-child(10) { animation-delay: 0.5s; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="../index.html" style="display:inline-flex;align-items:center;gap:0.4rem;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);text-decoration:none;letter-spacing:1px;margin-bottom:1rem;transition:color 0.2s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'">&#8592; Home</a>
+    <div class="service-label">AWS Certification Study</div>
+    <h1>Systems Manager (SSM)</h1>
+    <span class="cert-badge">DOP-C02 · DevOps Professional</span>
+  </div>
+</header>
+
+<main>
+
+  <!-- Exam Weight Overview -->
+  <div class="weight-bar">
+    <div class="weight-item">
+      <div class="label">Domain</div>
+      <div class="value">Domain 2</div>
+    </div>
+    <div class="weight-item">
+      <div class="label">Topic Weight</div>
+      <div class="value">~High</div>
+    </div>
+    <div class="weight-item">
+      <div class="label">Focus Areas</div>
+      <div class="value">Patch · Session · Param</div>
+    </div>
+    <div class="weight-item">
+      <div class="label">Key Integrations</div>
+      <div class="value">EventBridge · Config</div>
+    </div>
+  </div>
+
+  <!-- 1. Overview -->
+  <section>
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <h2>Overview &amp; How It Works</h2>
+      <span class="exam-tag tag-med">Know Well</span>
+    </div>
+    <div class="kv-grid">
+      <div class="kv-row"><div class="kv-key">Purpose</div><div class="kv-val">Manage EC2 and on-premises servers at scale — patching, configuration, secrets, remote access</div></div>
+      <div class="kv-row"><div class="kv-key">SSM Agent</div><div class="kv-val">Must be installed on every managed node. Pre-installed on Amazon Linux 2023 and some Ubuntu AMIs</div></div>
+      <div class="kv-row"><div class="kv-key">Prerequisites</div><div class="kv-val">SSM Agent running + correct IAM Instance Profile attached to EC2</div></div>
+      <div class="kv-row"><div class="kv-key">Node Prefixes</div><div class="kv-val"><code>i-</code> for EC2 instances · <code>mi-</code> for hybrid/on-premises managed nodes</div></div>
+      <div class="kv-row"><div class="kv-key">Integrations</div><div class="kv-val">CloudWatch Metrics / Dashboards, AWS Config, EventBridge, CloudTrail, S3, SNS</div></div>
+    </div>
+    <div class="exam-tip"><span class="exam-tip-icon">★</span><div>If an instance is not showing up in SSM, it's always either the <strong>SSM Agent not running</strong> or a <strong>missing IAM permissions</strong> (missing <code>AmazonSSMManagedInstanceCore</code> policy on the instance role).</div></div>
+  </section>
+
+  <!-- 2. Documents -->
+  <section>
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <h2>Documents</h2>
+      <span class="exam-tag tag-med">Know Well</span>
+    </div>
+    <div class="card">
+      <div class="card-title">What is a Document?</div>
+      <ul class="items">
+        <li>JSON or YAML definition of actions (scripts) to execute on managed nodes</li>
+        <li>Support parameterization via <code>{{PARAM_NAME}}</code> placeholders</li>
+        <li>AWS provides pre-built documents; you can create custom ones</li>
+        <li>Schema version <code>2.2</code> for Command documents, <code>0.3</code> for Automation runbooks</li>
+      </ul>
+    </div>
+    <div class="kv-grid">
+      <div class="kv-row"><div class="kv-key">Run Command</div><div class="kv-val">Command documents — run shell/PowerShell scripts on instances</div></div>
+      <div class="kv-row"><div class="kv-key">Automation</div><div class="kv-val">Automation documents — act on AWS resources (restart EC2, create AMI…)</div></div>
+      <div class="kv-row"><div class="kv-key">State Manager</div><div class="kv-val">Command/Policy documents — keep instances in desired state on a schedule</div></div>
+      <div class="kv-row"><div class="kv-key">Patch Manager</div><div class="kv-val">Uses <code>AWS-RunPatchBaseline</code> document under the hood</div></div>
+    </div>
+  </section>
+
+  <!-- 3. Run Command -->
+  <section>
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <h2>Run Command</h2>
+      <span class="exam-tag tag-med">Know Well</span>
+    </div>
+    <div class="card">
+      <ul class="items">
+        <li>Execute a Command document or ad-hoc shell command on one or many instances</li>
+        <li>Target by instance ID, tag, or Resource Group</li>
+        <li>Controls: <strong>Rate Control</strong> (concurrency/error thresholds), Timeout</li>
+        <li>Output: optional S3 bucket or CloudWatch Logs</li>
+        <li>Notifications via SNS on command state changes</li>
+        <li>Can be invoked programmatically via <strong>EventBridge</strong> — key exam scenario</li>
+        <li>Full audit trail via <strong>CloudTrail</strong></li>
+      </ul>
+    </div>
+    <div class="exam-tip"><span class="exam-tip-icon">★</span><div>Common exam scenario: "Run a script on all EC2 instances tagged <em>Env=Prod</em> at once" → <strong>Run Command</strong> using tag-based targeting, not SSH/Ansible.</div></div>
+  </section>
+
+  <!-- 4. Automation -->
+  <section>
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <h2>Automation (Runbooks)</h2>
+      <span class="exam-tag tag-high">High Priority</span>
+    </div>
+    <div class="two-col">
+      <div class="card">
+        <div class="card-title">What it Does</div>
+        <ul class="items">
+          <li>Automates tasks against <strong>AWS resources</strong> (not just inside an OS)</li>
+          <li>Uses Automation Runbook documents (type: Automation)</li>
+          <li>Pre-built AWS runbooks available (e.g. <code>AWS-RestartEC2Instance</code>)</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-title">Trigger Methods</div>
+        <ul class="items">
+          <li>Manually — Console, CLI, SDK</li>
+          <li>Amazon <strong>EventBridge</strong> schedule or event</li>
+          <li><strong>Maintenance Windows</strong></li>
+          <li><strong>AWS Config</strong> rules remediation</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Exam-Relevant Use Cases</div>
+      <ul class="items">
+        <li>Auto start/stop EC2 and RDS to reduce costs (scheduled via EventBridge or Maintenance Windows)</li>
+        <li>Build a <strong>Golden AMI</strong> pipeline</li>
+        <li>Downsize underutilized instances automatically</li>
+        <li>Auto-remediate AWS Config rule violations</li>
+      </ul>
+    </div>
+    <div class="exam-tip"><span class="exam-tip-icon">★</span><div><strong>Run Command vs Automation:</strong> Run Command = actions <em>inside</em> OS on managed nodes. Automation = actions on <em>AWS resources</em> (EC2 API level, AMI creation, RDS, etc.).</div></div>
+  </section>
+
+  <!-- 5. Parameter Store -->
+  <section>
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <h2>Parameter Store</h2>
+      <span class="exam-tag tag-high">High Priority</span>
+    </div>
+    <div class="kv-grid">
+      <div class="kv-row"><div class="kv-key">Purpose</div><div class="kv-val">Secure, hierarchical storage for configuration values and secrets</div></div>
+      <div class="kv-row"><div class="kv-key">Encryption</div><div class="kv-val">SecureString type encrypted via <strong>KMS</strong>; String / StringList are plaintext</div></div>
+      <div class="kv-row"><div class="kv-key">Standard tier</div><div class="kv-val">10,000 parameters, no cost, no parameter policies, max 4KB value</div></div>
+      <div class="kv-row"><div class="kv-key">Advanced tier</div><div class="kv-val">100,000 parameters, $0.05/parameter/month, supports <strong>Parameter Policies</strong>, max 8KB</div></div>
+      <div class="kv-row"><div class="kv-key">Versioning</div><div class="kv-val">Every update creates a new version; retrieve specific version by appending <code>:N</code></div></div>
+      <div class="kv-row"><div class="kv-key">Notifications</div><div class="kv-val">Via <strong>EventBridge</strong> — trigger on put, delete, expiration events</div></div>
+      <div class="kv-row"><div class="kv-key">CloudFormation</div><div class="kv-val">Reference parameters directly in CF templates with SSM dynamic references</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Parameter Policies (Advanced only)</div>
+      <ul class="items">
+        <li><strong>Expiration</strong> — automatically delete a parameter at a timestamp</li>
+        <li><strong>ExpirationNotification</strong> — EventBridge alert N days before expiry</li>
+        <li><strong>NoChangeNotification</strong> — alert if parameter hasn't changed in N days</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title">Special Built-in Paths</div>
+      <div class="code-block">
+<span class="c"># Access Secrets Manager secrets via Parameter Store</span>
+<span class="p">/aws/reference/secretsmanager/</span><span class="v">&lt;secret-name&gt;</span>
+
+<span class="c"># Latest Amazon Linux 2 AMI ID (per region)</span>
+<span class="p">/aws/service/ami-amazon-linux-latest/</span><span class="v">amzn2-ami-hvm-x86_64-gp2</span>
+      </div>
+    </div>
+    <div class="exam-tip"><span class="exam-tip-icon">★</span><div>Parameter Store vs Secrets Manager: Parameter Store is free for standard params and great for config. Secrets Manager adds <strong>automatic rotation</strong>, cross-account sharing, and costs more. The exam tests knowing when each is appropriate.</div></div>
+  </section>
+
+  <!-- 6. Patch Manager -->
+  <section>
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <h2>Patch Manager</h2>
+      <span class="exam-tag tag-high">High Priority</span>
+    </div>
+    <div class="two-col">
+      <div class="card">
+        <div class="card-title">Patch Baseline</div>
+        <ul class="items">
+          <li>Defines <strong>which patches</strong> are approved/rejected for installation</li>
+          <li>AWS managed baselines per OS (e.g. <code>AWS-AmazonLinux2DefaultPatchBaseline</code>)</li>
+          <li>Default: only <strong>Critical + Security</strong> patches auto-approved</li>
+          <li>Auto-approval delay: N days after release</li>
+          <li>Custom baselines can specify: OS, allowed patches, rejected patches, custom repos</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-title">Patch Group</div>
+        <ul class="items">
+          <li>Groups instances to a specific Patch Baseline</li>
+          <li>Instance must have tag key <strong><code>Patch Group</code></strong></li>
+          <li>One instance can belong to only <strong>one Patch Group</strong></li>
+          <li>One Patch Group can be registered with only one baseline</li>
+        </ul>
+      </div>
+    </div>
+    <div class="kv-grid">
+      <div class="kv-row"><div class="kv-key">SSM Document</div><div class="kv-val"><code>AWS-RunPatchBaseline</code> — applies OS and application patches</div></div>
+      <div class="kv-row"><div class="kv-key">Supported OS</div><div class="kv-val">Linux, macOS, Windows Server — both EC2 and on-premises</div></div>
+      <div class="kv-row"><div class="kv-key">Scheduling</div><div class="kv-val">On-demand or via <strong>Maintenance Windows</strong></div></div>
+      <div class="kv-row"><div class="kv-key">Reporting</div><div class="kv-val">Compliance scan reports — exportable to <strong>S3</strong></div></div>
+    </div>
+    <div class="exam-tip"><span class="exam-tip-icon">★</span><div>Exam scenario: "Ensure dev instances get all patches but prod only gets critical patches" → create <strong>two Patch Baselines</strong>, two <strong>Patch Groups</strong>, tag instances accordingly, schedule with Maintenance Windows.</div></div>
+  </section>
+
+  <!-- 7. Session Manager -->
+  <section>
+    <div class="section-header">
+      <span class="section-num">07</span>
+      <h2>Session Manager</h2>
+      <span class="exam-tag tag-high">High Priority</span>
+    </div>
+    <div class="card">
+      <ul class="items">
+        <li>Secure shell access to EC2 instances and on-premises servers — <strong>no SSH, no open ports, no bastion host needed</strong></li>
+        <li>Access via: AWS Console, AWS CLI (<code>aws ssm start-session</code>), Session Manager SDK</li>
+        <li>All session activity (commands + output) logged to <strong>S3</strong> and/or <strong>CloudWatch Logs</strong></li>
+        <li><strong>CloudTrail</strong> records <code>StartSession</code> API calls for audit</li>
+        <li>IAM controls which users/roles can start sessions to which instances (tag-based restrictions supported)</li>
+        <li>Works with <strong>VPC Interface Endpoints</strong> for instances with no internet access</li>
+      </ul>
+    </div>
+    <div class="exam-tip"><span class="exam-tip-icon">★</span><div>The exam loves this: "How to provide shell access to private EC2 instances without opening port 22 or maintaining a bastion host?" → <strong>Session Manager</strong> + VPC Endpoint.</div></div>
+    <div class="info-tip"><span class="info-tip-icon">i</span><div>For <strong>port forwarding</strong> through Session Manager (e.g. RDP to Windows, access internal web UI), use <code>aws ssm start-session --document-name AWS-StartPortForwardingSession</code>.</div></div>
+  </section>
+
+  <!-- 8. Maintenance Windows -->
+  <section>
+    <div class="section-header">
+      <span class="section-num">08</span>
+      <h2>Maintenance Windows</h2>
+      <span class="exam-tag tag-med">Know Well</span>
+    </div>
+    <div class="kv-grid">
+      <div class="kv-row"><div class="kv-key">Purpose</div><div class="kv-val">Schedule when patching, updates, and automation tasks run on instances</div></div>
+      <div class="kv-row"><div class="kv-key">Components</div><div class="kv-val">Schedule (cron/rate) · Duration · Registered Instances · Registered Tasks</div></div>
+      <div class="kv-row"><div class="kv-key">Supported Tasks</div><div class="kv-val">Run Command, Automation runbooks, Lambda functions, Step Functions</div></div>
+      <div class="kv-row"><div class="kv-key">Typical Use</div><div class="kv-val">OS patching during low-traffic hours, driver updates, software installs, scheduled AMI creation</div></div>
+    </div>
+  </section>
+
+  <!-- 9. DHMC -->
+  <section>
+    <div class="section-header">
+      <span class="section-num">09</span>
+      <h2>Default Host Management Config (DHMC)</h2>
+      <span class="exam-tag tag-med">Know Well</span>
+    </div>
+    <div class="card">
+      <ul class="items">
+        <li>Automatically registers new EC2 instances as SSM managed nodes — <strong>no Instance Profile required</strong></li>
+        <li>Uses an <strong>Instance Identity Role</strong> (minimal IAM role that only identifies the instance to AWS)</li>
+        <li>Automatically passes <code>AWSSystemsManagerDefaultEC2InstanceManagementRole</code> to the instance</li>
+        <li>Requirements: <strong>IMDSv2 enabled</strong> + SSM Agent installed</li>
+        <li>Automatically enables: <strong>Session Manager, Patch Manager, Inventory</strong></li>
+      </ul>
+    </div>
+    <div class="exam-tip"><span class="exam-tip-icon">★</span><div>DHMC eliminates the need to manually attach an instance profile for SSM. If a question describes "automatically managed without instance profiles", the answer is DHMC.</div></div>
+  </section>
+
+  <!-- 10. Compliance & OpsCenter -->
+  <section>
+    <div class="section-header">
+      <span class="section-num">10</span>
+      <h2>Compliance &amp; OpsCenter</h2>
+      <span class="exam-tag tag-low">Awareness</span>
+    </div>
+    <div class="two-col">
+      <div class="card">
+        <div class="card-title">Compliance</div>
+        <ul class="items">
+          <li>Aggregates patch and State Manager association compliance data</li>
+          <li>Sync to S3 via <strong>Resource Data Sync</strong> → analyze with Athena / QuickSight</li>
+          <li>Can forward data to <strong>Security Hub</strong></li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-title">OpsCenter</div>
+        <ul class="items">
+          <li>Central place to view, investigate, and remediate operational issues (<strong>OpsItems</strong>)</li>
+          <li>Sources: EventBridge, Config, CloudTrail, Security Hub, DevOps Guru</li>
+          <li>Suggests relevant Runbooks to resolve each issue</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Quick-Reference Comparison -->
+  <section>
+    <div class="section-header">
+      <span class="section-num">→</span>
+      <h2>Quick-Reference: Run Command vs Automation</h2>
+      <span class="exam-tag tag-high">Exam Differentiator</span>
+    </div>
+    <table class="compare">
+      <thead>
+        <tr>
+          <th>Dimension</th>
+          <th>Run Command</th>
+          <th>Automation</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Scope</td><td>Inside OS of managed nodes</td><td>AWS resource-level API actions</td></tr>
+        <tr><td>Document Type</td><td>Command documents</td><td>Automation runbooks</td></tr>
+        <tr><td>Targets</td><td>EC2 / on-prem via SSM Agent</td><td>EC2, RDS, S3, any AWS resource</td></tr>
+        <tr><td>Example Tasks</td><td>Install package, run script, patch OS</td><td>Restart instance, create AMI, enable versioning</td></tr>
+        <tr><td>Trigger via EventBridge</td><td>Yes</td><td>Yes</td></tr>
+        <tr><td>Complex Logic</td><td>Fire-and-forget / batch</td><td>Multi-step, conditional, approvals</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Exam Scenarios Cheatsheet -->
+  <section>
+    <div class="section-header">
+      <span class="section-num">→</span>
+      <h2>Exam Scenario Cheatsheet</h2>
+      <span class="exam-tag tag-high">Must Know</span>
+    </div>
+    <div class="kv-grid">
+      <div class="kv-row"><div class="kv-key">No bastion / no SSH port</div><div class="kv-val"><strong>Session Manager</strong> (+ VPC endpoint for private subnets)</div></div>
+      <div class="kv-row"><div class="kv-key">Run script on 500 EC2s</div><div class="kv-val"><strong>Run Command</strong> with tag-based targeting + rate control</div></div>
+      <div class="kv-row"><div class="kv-key">Stop EC2 every night</div><div class="kv-val"><strong>Automation Runbook</strong> triggered by EventBridge schedule</div></div>
+      <div class="kv-row"><div class="kv-key">Patch only critical CVEs</div><div class="kv-val"><strong>Patch Manager</strong> custom Patch Baseline → Patch Group → Maintenance Window</div></div>
+      <div class="kv-row"><div class="kv-key">Rotate DB password</div><div class="kv-val"><strong>Secrets Manager</strong> (auto-rotation). Parameter Store if rotation is manual.</div></div>
+      <div class="kv-row"><div class="kv-key">Store DB URL per env</div><div class="kv-val"><strong>Parameter Store</strong> hierarchy: <code>/app/dev/dburl</code>, <code>/app/prod/dburl</code></div></div>
+      <div class="kv-row"><div class="kv-key">AMI not in CFN template</div><div class="kv-val">Parameter Store SSM dynamic reference <code>{{resolve:ssm:/aws/service/ami-amazon-linux-latest/...}}</code></div></div>
+      <div class="kv-row"><div class="kv-key">Config rule auto-remediate</div><div class="kv-val"><strong>Automation Runbook</strong> as Config remediation action</div></div>
+      <div class="kv-row"><div class="kv-key">Instance not visible in SSM</div><div class="kv-val">Check SSM Agent status + IAM Instance Profile (needs <code>AmazonSSMManagedInstanceCore</code>)</div></div>
+      <div class="kv-row"><div class="kv-key">On-premises servers in SSM</div><div class="kv-val">Hybrid Activation → install SSM Agent → appears as <code>mi-</code> prefix</div></div>
+    </div>
+  </section>
+
+</main>
+
+<footer>AWS Systems Manager · DOP-C02 Exam Prep · Study Reference</footer>
+
+</body>
+</html>
