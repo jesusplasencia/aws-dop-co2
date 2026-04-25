@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS Lambda — DOP-C02 Exam Notes</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f14;
+    --surface: #13161e;
+    --surface2: #1a1e28;
+    --border: #252a38;
+    --aws-orange: #FF9900;
+    --aws-orange-dim: rgba(255,153,0,0.12);
+    --aws-orange-border: rgba(255,153,0,0.35);
+    --blue: #4d9eff;
+    --blue-dim: rgba(77,158,255,0.1);
+    --green: #3ddc97;
+    --green-dim: rgba(61,220,151,0.1);
+    --red: #ff5f6d;
+    --red-dim: rgba(255,95,109,0.1);
+    --yellow: #ffd166;
+    --yellow-dim: rgba(255,209,102,0.1);
+    --text: #e2e8f0;
+    --text-muted: #7a8499;
+    --text-dim: #4a5568;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* Header */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 28px 48px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(10px);
+  }
+
+  .badge {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    padding: 4px 10px;
+    border-radius: 4px;
+    text-transform: uppercase;
+  }
+
+  .badge-exam {
+    background: var(--aws-orange-dim);
+    border: 1px solid var(--aws-orange-border);
+    color: var(--aws-orange);
+  }
+
+  .badge-service {
+    background: var(--blue-dim);
+    border: 1px solid rgba(77,158,255,0.3);
+    color: var(--blue);
+  }
+
+  header h1 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text);
+    flex: 1;
+  }
+
+  header .exam-label {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  /* Layout */
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 40px 32px 80px;
+  }
+
+  /* Section */
+  .section {
+    margin-bottom: 48px;
+    animation: fadeUp 0.4s ease both;
+  }
+
+  .section:nth-child(1) { animation-delay: 0.05s; }
+  .section:nth-child(2) { animation-delay: 0.1s; }
+  .section:nth-child(3) { animation-delay: 0.15s; }
+  .section:nth-child(4) { animation-delay: 0.2s; }
+  .section:nth-child(5) { animation-delay: 0.25s; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-number {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-dim);
+    min-width: 28px;
+  }
+
+  .section-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+
+  .weight-pill {
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 20px;
+    margin-left: auto;
+  }
+
+  .weight-high {
+    background: rgba(255,95,109,0.15);
+    border: 1px solid rgba(255,95,109,0.3);
+    color: var(--red);
+  }
+
+  .weight-med {
+    background: var(--yellow-dim);
+    border: 1px solid rgba(255,209,102,0.3);
+    color: var(--yellow);
+  }
+
+  .weight-low {
+    background: var(--green-dim);
+    border: 1px solid rgba(61,220,151,0.3);
+    color: var(--green);
+  }
+
+  /* Cards grid */
+  .cards {
+    display: grid;
+    gap: 12px;
+  }
+
+  .cards-2 { grid-template-columns: 1fr 1fr; }
+  .cards-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+
+  .card:hover {
+    border-color: rgba(255,153,0,0.25);
+    transform: translateY(-1px);
+  }
+
+  .card-title {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--aws-orange);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 10px;
+  }
+
+  .card p {
+    color: var(--text-muted);
+    font-size: 14px;
+    line-height: 1.65;
+  }
+
+  .card p + p { margin-top: 8px; }
+
+  /* Key-value list */
+  .kv-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .kv-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 14px;
+    background: var(--surface2);
+    border-radius: 6px;
+    border-left: 3px solid transparent;
+  }
+
+  .kv-item.orange { border-left-color: var(--aws-orange); }
+  .kv-item.blue   { border-left-color: var(--blue); }
+  .kv-item.green  { border-left-color: var(--green); }
+  .kv-item.red    { border-left-color: var(--red); }
+  .kv-item.yellow { border-left-color: var(--yellow); }
+
+  .kv-key {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    min-width: 190px;
+    color: var(--text);
+    padding-top: 1px;
+  }
+
+  .kv-val {
+    font-size: 13.5px;
+    color: var(--text-muted);
+    flex: 1;
+  }
+
+  /* Flow diagram */
+  .flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .flow-node {
+    flex: 1;
+    padding: 16px 18px;
+    text-align: center;
+    border-right: 1px solid var(--border);
+    position: relative;
+  }
+
+  .flow-node:last-child { border-right: none; }
+
+  .flow-node::after {
+    content: '→';
+    position: absolute;
+    right: -10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-dim);
+    font-size: 14px;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .flow-node:last-child::after { display: none; }
+
+  .flow-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .flow-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  /* Alert / exam tip */
+  .tip {
+    background: var(--aws-orange-dim);
+    border: 1px solid var(--aws-orange-border);
+    border-radius: 8px;
+    padding: 14px 18px;
+    font-size: 13.5px;
+    color: var(--text);
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .tip-icon {
+    color: var(--aws-orange);
+    font-size: 15px;
+    margin-top: 1px;
+    flex-shrink: 0;
+  }
+
+  .tip strong { color: var(--aws-orange); }
+
+  /* Table */
+  .table-wrap {
+    overflow-x: auto;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  thead tr {
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+
+  th {
+    padding: 10px 14px;
+    text-align: left;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-muted);
+    vertical-align: top;
+  }
+
+  tr:last-child td { border-bottom: none; }
+
+  tbody tr:hover { background: var(--surface2); }
+
+  td.highlight { color: var(--text); font-weight: 600; }
+
+  td .tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-weight: 600;
+  }
+
+  .tag-orange { background: var(--aws-orange-dim); color: var(--aws-orange); border: 1px solid var(--aws-orange-border); }
+  .tag-blue   { background: var(--blue-dim); color: var(--blue); border: 1px solid rgba(77,158,255,0.3); }
+  .tag-green  { background: var(--green-dim); color: var(--green); border: 1px solid rgba(61,220,151,0.3); }
+
+  /* Two-column layout */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .full-col { grid-column: 1 / -1; }
+
+  /* Code snippet */
+  .code-block {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 16px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: #a8b5c8;
+    line-height: 1.7;
+    overflow-x: auto;
+  }
+
+  .code-block .kw { color: var(--blue); }
+  .code-block .str { color: var(--green); }
+  .code-block .num { color: var(--aws-orange); }
+  .code-block .cmt { color: var(--text-dim); font-style: italic; }
+
+  /* Separator */
+  .sep { height: 1px; background: var(--border); margin: 8px 0 20px; }
+
+  /* Responsive */
+  @media (max-width: 700px) {
+    header { padding: 18px 20px; }
+    .container { padding: 24px 16px 60px; }
+    .cards-2, .cards-3, .two-col { grid-template-columns: 1fr; }
+    .kv-key { min-width: 140px; }
+    .flow { flex-direction: column; }
+    .flow-node { border-right: none; border-bottom: 1px solid var(--border); width: 100%; }
+    .flow-node::after { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="../index.html" style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:12px;color:var(--text-muted);text-decoration:none;padding:5px 10px;border:1px solid var(--border);border-radius:4px;transition:color 0.2s,border-color 0.2s;" onmouseover="this.style.color='#FF9900';this.style.borderColor='rgba(255,153,0,0.35)'" onmouseout="this.style.color='';this.style.borderColor=''">&#8592; Home</a>
+  <span class="badge badge-service">AWS Lambda</span>
+  <h1>Advanced Concepts — Study Notes</h1>
+  <span class="badge badge-exam">DOP-C02</span>
+</header>
+
+<div class="container">
+
+  <!-- ─── 1. ALIASES & VERSIONS ─── -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-number">01</span>
+      <span class="section-title">Aliases &amp; Versions</span>
+      <span class="weight-pill weight-high">High Weight</span>
+    </div>
+
+    <div class="cards cards-2" style="margin-bottom:12px">
+      <div class="card">
+        <div class="card-title">Versions</div>
+        <p>Working code lives on <strong style="color:var(--text)">$LATEST</strong> (mutable). Publishing creates an immutable snapshot with its own ARN — code + configuration are frozen.</p>
+        <p>You cannot edit a published version. Increment by publishing again.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">Aliases</div>
+        <p>A named pointer (DEV / PROD / TEST) that maps to one or two versions. Aliases are <strong style="color:var(--text)">mutable</strong> — you can reroute them at any time.</p>
+        <p>Aliases <strong style="color:var(--red)">cannot point to other aliases</strong> (no chaining).</p>
+      </div>
+    </div>
+
+    <div class="kv-list" style="margin-bottom:12px">
+      <div class="kv-item orange">
+        <span class="kv-key">Canary Deployment</span>
+        <span class="kv-val">Assign weighted traffic split on an alias (e.g. 95% → V1, 5% → V2). Enables gradual rollouts without DNS changes.</span>
+      </div>
+      <div class="kv-item blue">
+        <span class="kv-key">ARN format</span>
+        <span class="kv-val"><span style="font-family:var(--mono);font-size:12px;color:var(--text)">arn:aws:lambda:region:account:function:name:QUALIFIER</span> — qualifier can be a version number or alias name.</span>
+      </div>
+    </div>
+
+    <div class="tip">
+      <span class="tip-icon">★</span>
+      <span><strong>Exam focus:</strong> Weighted alias routing IS the mechanism for blue/green and canary releases in Lambda. Know that only aliases support weights — versions do not. Also remember: aliases are mutable, versions are immutable.</span>
+    </div>
+  </div>
+
+  <!-- ─── 2. ENVIRONMENT VARIABLES ─── -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-number">02</span>
+      <span class="section-title">Environment Variables</span>
+      <span class="weight-pill weight-med">Medium Weight</span>
+    </div>
+
+    <div class="kv-list">
+      <div class="kv-item orange">
+        <span class="kv-key">Format</span>
+        <span class="kv-val">Key/value pairs — String type only. Injected at runtime, accessible without code changes.</span>
+      </div>
+      <div class="kv-item red">
+        <span class="kv-key">Size limit</span>
+        <span class="kv-val"><strong style="color:var(--red)">4 KB total</strong> across all keys + values combined. Exceeding this limit causes deployment failure.</span>
+      </div>
+      <div class="kv-item blue">
+        <span class="kv-key">Encryption at rest</span>
+        <span class="kv-val">Encrypted by default with Lambda-managed key. Use <strong style="color:var(--text)">AWS KMS CMK</strong> for custom key control (required for cross-account scenarios).</span>
+      </div>
+      <div class="kv-item green">
+        <span class="kv-key">Encryption in transit</span>
+        <span class="kv-val">Use KMS + <code style="font-family:var(--mono);font-size:12px">Decrypt</code> API in function code before use, combined with console encryption helpers.</span>
+      </div>
+      <div class="kv-item yellow">
+        <span class="kv-key">Scope</span>
+        <span class="kv-val">Env vars are <strong style="color:var(--text)">version-specific</strong> — stored with each published version. Changing them on $LATEST doesn't affect published versions.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── 3. CONCURRENCY & THROTTLING ─── -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-number">03</span>
+      <span class="section-title">Concurrency &amp; Throttling</span>
+      <span class="weight-pill weight-high">High Weight</span>
+    </div>
+
+    <div class="two-col" style="margin-bottom:12px">
+      <div class="card">
+        <div class="card-title">Account Default</div>
+        <p>1,000 concurrent executions <strong style="color:var(--text)">shared across all functions in the region</strong>. Can be increased via AWS Support.</p>
+        <p>Unreserved pool is shared by all functions without reserved concurrency.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">Reserved Concurrency</div>
+        <p>Set a <strong style="color:var(--text)">hard cap</strong> on a specific function. Guarantees it won't be starved <em>and</em> won't exceed the limit.</p>
+        <p>Setting to <strong style="color:var(--red)">0</strong> effectively disables the function (all invocations throttled).</p>
+      </div>
+    </div>
+
+    <div class="kv-list" style="margin-bottom:12px">
+      <div class="kv-item red">
+        <span class="kv-key">Throttle — Sync</span>
+        <span class="kv-val">Returns <strong style="color:var(--red)">HTTP 429 TooManyRequestsException</strong> to the caller immediately. Caller must implement retry logic.</span>
+      </div>
+      <div class="kv-item yellow">
+        <span class="kv-key">Throttle — Async</span>
+        <span class="kv-val">Lambda retries automatically (up to 6 hours with exponential backoff). After retries exhausted → message goes to <strong style="color:var(--text)">Dead Letter Queue (DLQ)</strong> or Event Bridge on failure destination.</span>
+      </div>
+      <div class="kv-item blue">
+        <span class="kv-key">Provisioned Concurrency</span>
+        <span class="kv-val">Pre-warms execution environments <em>before</em> invocations arrive. Eliminates cold starts. <strong style="color:var(--text)">Application Auto Scaling</strong> can adjust it on schedule or by utilization metric.</span>
+      </div>
+    </div>
+
+    <div class="tip">
+      <span class="tip-icon">★</span>
+      <span><strong>Exam focus:</strong> Know the difference between Reserved Concurrency (cap/guarantee) and Provisioned Concurrency (pre-warm/no cold start). DOP-C02 tests throttle behavior — sync vs async responses are a common distractor question.</span>
+    </div>
+  </div>
+
+  <!-- ─── 4. COLD STARTS & PROVISIONED CONCURRENCY ─── -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-number">04</span>
+      <span class="section-title">Cold Starts &amp; Provisioned Concurrency</span>
+      <span class="weight-pill weight-med">Medium Weight</span>
+    </div>
+
+    <div class="flow" style="margin-bottom:12px">
+      <div class="flow-node">
+        <div class="flow-label">New Instance</div>
+        <div class="flow-value">Environment Init</div>
+      </div>
+      <div class="flow-node">
+        <div class="flow-label">Cold Start</div>
+        <div class="flow-value">Code Download + Runtime Init</div>
+      </div>
+      <div class="flow-node">
+        <div class="flow-label">Handler Init</div>
+        <div class="flow-value">Code outside handler runs</div>
+      </div>
+      <div class="flow-node" style="background:var(--aws-orange-dim)">
+        <div class="flow-label">Invocation</div>
+        <div class="flow-value" style="color:var(--aws-orange)">Handler executes</div>
+      </div>
+    </div>
+
+    <div class="kv-list">
+      <div class="kv-item orange">
+        <span class="kv-key">Cold Start cause</span>
+        <span class="kv-val">First invocation on a new execution environment, or after idle timeout. Larger deployment packages = longer cold starts.</span>
+      </div>
+      <div class="kv-item green">
+        <span class="kv-key">Mitigation strategies</span>
+        <span class="kv-val">Provisioned Concurrency (best), keep packages small, use SnapStart (Java), avoid large initialization outside handler for infrequent functions.</span>
+      </div>
+      <div class="kv-item blue">
+        <span class="kv-key">Auto Scaling integration</span>
+        <span class="kv-val">Target tracking on <code style="font-family:var(--mono);font-size:12px">LambdaProvisionedConcurrencyUtilization</code> or scheduled scaling to match traffic patterns.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── 5. FILE SYSTEMS MOUNTING ─── -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-number">05</span>
+      <span class="section-title">File Systems Mounting (EFS)</span>
+      <span class="weight-pill weight-low">Lower Weight</span>
+    </div>
+
+    <div class="kv-list" style="margin-bottom:14px">
+      <div class="kv-item orange">
+        <span class="kv-key">Prerequisite</span>
+        <span class="kv-val">Lambda <strong style="color:var(--text)">must run inside a VPC</strong> that has network access to the EFS mount targets.</span>
+      </div>
+      <div class="kv-item blue">
+        <span class="kv-key">Access mechanism</span>
+        <span class="kv-val">Configure an <strong style="color:var(--text)">EFS Access Point</strong>. Lambda mounts it to a local directory path during init time — before handler runs.</span>
+      </div>
+      <div class="kv-item red">
+        <span class="kv-key">Connection limit risk</span>
+        <span class="kv-val">Each function <em>instance</em> holds an open NFS connection. High concurrency = connection burst to EFS. Monitor and set reserved concurrency to cap this.</span>
+      </div>
+      <div class="kv-item yellow">
+        <span class="kv-key">Cross-account EFS</span>
+        <span class="kv-val">Requires VPC Peering between accounts + EFS File System Policy granting the Lambda execution role permissions in the remote account.</span>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Storage</th>
+            <th>Max Size</th>
+            <th>Persistence</th>
+            <th>Sharing</th>
+            <th>Speed</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="highlight">/tmp (Ephemeral)</td>
+            <td>10,240 MB</td>
+            <td><span class="tag tag-orange">Ephemeral</span></td>
+            <td>Function instance only</td>
+            <td>Fastest</td>
+          </tr>
+          <tr>
+            <td class="highlight">Lambda Layers</td>
+            <td>5 layers / 250 MB total</td>
+            <td><span class="tag tag-blue">Durable</span></td>
+            <td>IAM-controlled, shared</td>
+            <td>Fastest (bundled)</td>
+          </tr>
+          <tr>
+            <td class="highlight">Amazon S3</td>
+            <td>Elastic</td>
+            <td><span class="tag tag-blue">Durable</span></td>
+            <td>IAM-controlled</td>
+            <td>Fast</td>
+          </tr>
+          <tr>
+            <td class="highlight">Amazon EFS</td>
+            <td>Elastic</td>
+            <td><span class="tag tag-green">Durable</span></td>
+            <td>IAM + NFS (shared across invocations)</td>
+            <td>Very Fast</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ─── Quick Reference ─── -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-number">⚡</span>
+      <span class="section-title">Quick Reference — Exam Traps</span>
+    </div>
+    <div class="kv-list">
+      <div class="kv-item red">
+        <span class="kv-key">Alias ≠ Version</span>
+        <span class="kv-val">Only <strong style="color:var(--text)">aliases</strong> can have weighted routing. You cannot assign traffic weights directly to versions.</span>
+      </div>
+      <div class="kv-item red">
+        <span class="kv-key">No alias → alias</span>
+        <span class="kv-val">Aliases cannot point to other aliases — they point only to versions or $LATEST.</span>
+      </div>
+      <div class="kv-item yellow">
+        <span class="kv-key">Sync throttle = 429</span>
+        <span class="kv-val">Synchronous invocations return 429 immediately. The <em>caller</em> is responsible for retry — Lambda does NOT auto-retry sync calls.</span>
+      </div>
+      <div class="kv-item yellow">
+        <span class="kv-key">Async throttle = DLQ</span>
+        <span class="kv-val">Lambda retries async throttled invocations internally. Only after all retries fail does it send to DLQ / failure destination.</span>
+      </div>
+      <div class="kv-item blue">
+        <span class="kv-key">Env vars 4 KB limit</span>
+        <span class="kv-val">Combined across ALL keys and values. Store large config in SSM Parameter Store or Secrets Manager instead.</span>
+      </div>
+      <div class="kv-item orange">
+        <span class="kv-key">Reserved vs Provisioned</span>
+        <span class="kv-val">Reserved = cap on max concurrency. Provisioned = pre-warmed instances (no cold start, billed even when idle).</span>
+      </div>
+      <div class="kv-item green">
+        <span class="kv-key">EFS requires VPC</span>
+        <span class="kv-val">Lambda must be VPC-attached to use EFS. VPC Lambda also loses default internet access — needs NAT Gateway or VPC endpoints.</span>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+</body>
+</html>

@@ -663,15 +663,29 @@ body::before {
       </div>
     </div>
 
-    <!-- Domain 3: Resilient Cloud Solutions — DISABLED -->
-    <div class="domain-card disabled" style="--i:2">
+    <!-- Domain 3: Resilient Cloud Solutions — ACTIVE -->
+    <div class="domain-card active" style="--i:2" onclick="toggleDomain(this)">
       <div class="domain-header">
         <span class="domain-num">03</span>
         <div class="domain-info">
           <h2>Resilient Cloud Solutions</h2>
           <span class="domain-weight">15% of exam</span>
         </div>
-        <span class="badge-soon">Coming Soon</span>
+        <span class="domain-chevron">&#9662;</span>
+      </div>
+      <div class="domain-body">
+        <hr class="domain-divider">
+        <div class="service-grid">
+
+          <a href="domain_three/lambda-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
+            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M8 28L16 8l4 10 4-6 4 16"/>
+              <path d="M4 28h28"/>
+            </svg>
+            <span class="svc-label">Lambda</span>
+          </a>
+
+        </div>
       </div>
     </div>
 
