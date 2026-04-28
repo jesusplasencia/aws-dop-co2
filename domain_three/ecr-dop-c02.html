@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS ECR — DOP-C02</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e14;
+    --surface: #111720;
+    --surface2: #192030;
+    --border: #1e2d40;
+    --accent: #f59e0b;
+    --accent2: #38bdf8;
+    --accent3: #34d399;
+    --accent4: #f87171;
+    --text: #cdd6e0;
+    --text-dim: #6b7f94;
+    --text-bright: #eaf2f8;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.7;
+    padding: 40px 20px 80px;
+  }
+  .home-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    background: rgba(245,158,11,.08);
+    border: 1px solid rgba(245,158,11,.25);
+    padding: 6px 14px;
+    text-decoration: none;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    margin-bottom: 32px;
+    transition: background .2s, border-color .2s;
+  }
+  .home-btn:hover { background: rgba(245,158,11,.15); border-color: rgba(245,158,11,.5); }
+  .page { max-width: 900px; margin: 0 auto; }
+
+  header {
+    border-left: 4px solid var(--accent);
+    padding-left: 20px;
+    margin-bottom: 48px;
+    animation: fadeIn 0.5s ease;
+  }
+  header .badge { font-family:var(--mono); font-size:11px; color:var(--accent); letter-spacing:3px; text-transform:uppercase; margin-bottom:8px; }
+  header h1 { font-size:36px; font-weight:600; color:var(--text-bright); letter-spacing:-1px; }
+  header p { color:var(--text-dim); font-size:13px; margin-top:6px; }
+
+  .section { margin-bottom:36px; animation:fadeUp 0.4s ease both; }
+  .section:nth-child(2){animation-delay:.05s}
+  .section:nth-child(3){animation-delay:.10s}
+  .section:nth-child(4){animation-delay:.15s}
+  .section:nth-child(5){animation-delay:.20s}
+  .section:nth-child(6){animation-delay:.25s}
+  .section:nth-child(7){animation-delay:.30s}
+
+  .section-header { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+  .section-header .tag { font-family:var(--mono); font-size:10px; color:var(--accent); background:rgba(245,158,11,.1); border:1px solid rgba(245,158,11,.2); padding:2px 8px; letter-spacing:2px; text-transform:uppercase; }
+  .section-header h2 { font-size:17px; font-weight:600; color:var(--text-bright); }
+  .weight { margin-left:auto; font-family:var(--mono); font-size:10px; }
+  .weight.high { color:var(--accent4); }
+  .weight.med  { color:var(--accent); }
+  .weight.low  { color:var(--accent3); }
+
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:12px; }
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  @media(max-width:600px){ .grid-2{grid-template-columns:1fr} }
+
+  .card { background:var(--surface); border:1px solid var(--border); padding:16px 18px; position:relative; }
+  .card::before { content:''; position:absolute; top:0;left:0; width:3px; height:100%; }
+  .card.blue::before  { background:var(--accent2); }
+  .card.green::before { background:var(--accent3); }
+  .card.yellow::before{ background:var(--accent); }
+  .card.red::before   { background:var(--accent4); }
+  .card h3 { font-family:var(--mono); font-size:12px; color:var(--text-bright); margin-bottom:8px; letter-spacing:.5px; }
+  .card p, .card li { font-size:13px; color:var(--text); line-height:1.6; }
+  .card ul { padding-left:16px; }
+  .card li { margin-bottom:3px; }
+
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th { background:var(--surface2); color:var(--accent); font-family:var(--mono); font-size:11px; letter-spacing:1.5px; text-transform:uppercase; padding:10px 14px; text-align:left; border-bottom:1px solid var(--border); }
+  td { padding:9px 14px; border-bottom:1px solid var(--border); vertical-align:top; color:var(--text); }
+  tr:last-child td { border-bottom:none; }
+  tr:hover td { background:var(--surface); }
+  td strong { color:var(--text-bright); }
+  td code, .card code { font-family:var(--mono); font-size:12px; color:var(--accent2); background:rgba(56,189,248,.08); padding:1px 5px; }
+
+  .callout { background:rgba(245,158,11,.06); border:1px solid rgba(245,158,11,.2); border-left:3px solid var(--accent); padding:12px 16px; font-size:13px; margin-bottom:12px; }
+  .callout strong { color:var(--accent); }
+
+  .exam-tip { background:rgba(248,113,113,.06); border:1px solid rgba(248,113,113,.2); border-left:3px solid var(--accent4); padding:12px 16px; font-size:13px; margin-top:12px; }
+  .exam-tip .label { font-family:var(--mono); font-size:10px; color:var(--accent4); letter-spacing:2px; text-transform:uppercase; margin-bottom:4px; }
+
+  /* CI/CD pipeline visual */
+  .pipeline { display:flex; align-items:center; gap:0; margin:16px 0; flex-wrap:wrap; }
+  .pipe-step { background:var(--surface); border:1px solid var(--border); padding:10px 16px; font-family:var(--mono); font-size:12px; color:var(--text-bright); white-space:nowrap; }
+  .pipe-step span { display:block; font-size:10px; color:var(--text-dim); margin-top:2px; font-family:var(--sans); }
+  .pipe-arrow { color:var(--accent); font-size:18px; padding:0 6px; }
+  .pipe-step.src  { border-left:3px solid var(--accent2); }
+  .pipe-step.build{ border-left:3px solid var(--accent); }
+  .pipe-step.reg  { border-left:3px solid var(--accent3); }
+  .pipe-step.dep  { border-left:3px solid var(--accent4); }
+
+  .pill-list { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+  .pill { font-family:var(--mono); font-size:11px; padding:3px 10px; border:1px solid var(--border); color:var(--text-dim); background:var(--surface); }
+  .pill.hi { border-color:rgba(56,189,248,.3); color:var(--accent2); background:rgba(56,189,248,.06); }
+
+  hr { border:none; border-top:1px solid var(--border); margin:40px 0; }
+
+  @keyframes fadeIn { from{opacity:0}to{opacity:1} }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)} }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <a href="../index.html" class="home-btn">&#8592; Home</a>
+
+  <header>
+    <div class="badge">DOP-C02 · AWS DevOps Professional</div>
+    <h1>Elastic Container Registry</h1>
+    <p>Fully managed Docker image registry — the storage layer of every AWS container CI/CD pipeline.</p>
+  </header>
+
+  <!-- 01 CORE CONCEPTS -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">01</span>
+      <h2>Core Concepts</h2>
+      <span class="weight med">◈ MEDIUM</span>
+    </div>
+    <div class="grid-2">
+      <div class="card blue">
+        <h3>Repository Types</h3>
+        <ul>
+          <li><strong>Private</strong> — IAM-controlled, per-account/region</li>
+          <li><strong>Public</strong> — gallery.ecr.aws, read by anyone</li>
+          <li>Storage backed by <strong>Amazon S3</strong></li>
+          <li>Images are immutable once pushed (optional setting)</li>
+          <li>Supports multi-arch image manifests (OCI)</li>
+        </ul>
+      </div>
+      <div class="card yellow">
+        <h3>Access Control</h3>
+        <ul>
+          <li>All access governed by <strong>IAM</strong></li>
+          <li><strong>Resource-based policy</strong> — grant cross-account or cross-region pull</li>
+          <li>ECS/Fargate pulls via <strong>Task Execution Role</strong></li>
+          <li>EC2 pulls via <strong>Instance Profile</strong></li>
+          <li>CodeBuild pulls/pushes via its <strong>Service Role</strong></li>
+        </ul>
+      </div>
+    </div>
+    <div class="exam-tip">
+      <div class="label">Exam Tip</div>
+      If an ECS task can't pull an image → check the <strong>Task Execution Role</strong> (Fargate) or <strong>EC2 Instance Profile</strong> for <code>ecr:GetAuthorizationToken</code> and <code>ecr:BatchGetImage</code> permissions.
+    </div>
+  </div>
+
+  <!-- 02 IMAGE SECURITY -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">02</span>
+      <h2>Image Security & Compliance</h2>
+      <span class="weight high">◈◈ HIGH</span>
+    </div>
+    <div class="grid">
+      <div class="card green">
+        <h3>Image Scanning</h3>
+        <ul>
+          <li><strong>Basic Scanning</strong> — on push, uses CVE database (OS packages)</li>
+          <li><strong>Enhanced Scanning</strong> — continuous, powered by Amazon Inspector; covers OS + application dependencies</li>
+          <li>Findings sent to <strong>EventBridge</strong> and Security Hub</li>
+          <li>Automate: trigger Lambda or SNS on <code>CRITICAL</code> finding</li>
+        </ul>
+      </div>
+      <div class="card blue">
+        <h3>Encryption</h3>
+        <ul>
+          <li>Images encrypted at rest by default (<strong>AES-256</strong>)</li>
+          <li>Optional <strong>KMS</strong> encryption for customer-managed keys</li>
+          <li>In-transit always via HTTPS/TLS</li>
+        </ul>
+      </div>
+      <div class="card yellow">
+        <h3>Image Tag Immutability</h3>
+        <ul>
+          <li>Enable per repository</li>
+          <li>Prevents overwriting an existing tag (e.g. <code>:latest</code>)</li>
+          <li>Enforces traceability — every tag maps to exactly one digest</li>
+          <li>Best practice for production pipelines</li>
+        </ul>
+      </div>
+    </div>
+    <div class="exam-tip">
+      <div class="label">Exam Tip</div>
+      Enhanced Scanning + EventBridge = automated vulnerability response pipeline. Tag Immutability prevents the "<code>:latest</code> overwrite" anti-pattern. Both are common DOP-C02 security architecture questions.
+    </div>
+  </div>
+
+  <!-- 03 LIFECYCLE POLICIES -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">03</span>
+      <h2>Lifecycle Policies</h2>
+      <span class="weight med">◈ MEDIUM</span>
+    </div>
+    <div class="callout">
+      <strong>Purpose:</strong> Automatically clean up old images to control storage costs. Rules are evaluated in priority order (lowest number first).
+    </div>
+    <table>
+      <tr>
+        <th>Rule Type</th>
+        <th>Filter By</th>
+        <th>Example</th>
+      </tr>
+      <tr>
+        <td><strong>sinceImagePushed</strong></td>
+        <td>Age (days)</td>
+        <td>Expire untagged images older than 14 days</td>
+      </tr>
+      <tr>
+        <td><strong>imageCountMoreThan</strong></td>
+        <td>Count</td>
+        <td>Keep only the 5 most recent tagged images matching <code>prod-*</code></td>
+      </tr>
+      <tr>
+        <td><strong>Untagged only</strong></td>
+        <td>Tag status</td>
+        <td>Keep 1 untagged image, expire all others</td>
+      </tr>
+    </table>
+    <div class="exam-tip">
+      <div class="label">Exam Tip</div>
+      Lifecycle policies only <em>expire</em> images — they don't delete layers from S3 until no image references them. Use <strong>dry-run</strong> (test rules) before applying. Rules apply per repository, not account-wide.
+    </div>
+  </div>
+
+  <!-- 04 CI/CD PIPELINE -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">04</span>
+      <h2>CI/CD Pipeline Integration</h2>
+      <span class="weight high">◈◈ HIGH</span>
+    </div>
+    <div class="callout">
+      <strong>Standard pattern:</strong> Code commit → CodeBuild builds & pushes image to ECR → ECS/Fargate pulls and deploys.
+    </div>
+    <div class="pipeline">
+      <div class="pipe-step src">CodeCommit / GitHub<span>Source trigger</span></div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step build">CodeBuild<span>docker build + push</span></div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step reg">ECR<span>image stored</span></div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step dep">ECS / Fargate<span>pull & deploy</span></div>
+    </div>
+    <div class="grid-2" style="margin-top:12px">
+      <div class="card blue">
+        <h3>CodeBuild Permissions Required</h3>
+        <ul>
+          <li><code>ecr:GetAuthorizationToken</code></li>
+          <li><code>ecr:BatchCheckLayerAvailability</code></li>
+          <li><code>ecr:PutImage</code></li>
+          <li><code>ecr:InitiateLayerUpload</code></li>
+          <li><code>ecr:UploadLayerPart</code></li>
+          <li><code>ecr:CompleteLayerUpload</code></li>
+          <li>All on CodeBuild <strong>Service Role</strong></li>
+        </ul>
+      </div>
+      <div class="card green">
+        <h3>Tagging Strategy (Best Practice)</h3>
+        <ul>
+          <li>Tag with <strong>Git commit SHA</strong> for traceability</li>
+          <li>Tag with <strong>semantic version</strong> (e.g. <code>v1.2.3</code>)</li>
+          <li>Use <code>:latest</code> only for dev/testing</li>
+          <li>Never use <code>:latest</code> in production Task Definitions</li>
+          <li>Enable Tag Immutability in prod repos</li>
+        </ul>
+      </div>
+    </div>
+    <div class="exam-tip">
+      <div class="label">Exam Tip</div>
+      CodePipeline triggers CodeBuild on source change → CodeBuild authenticates to ECR using <code>aws ecr get-login-password</code> piped to <code>docker login</code>. The authorization token is valid for <strong>12 hours</strong>.
+    </div>
+  </div>
+
+  <!-- 05 CROSS-ACCOUNT & REPLICATION -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">05</span>
+      <h2>Cross-Account Access & Replication</h2>
+      <span class="weight med">◈ MEDIUM</span>
+    </div>
+    <div class="grid-2">
+      <div class="card yellow">
+        <h3>Cross-Account Pull</h3>
+        <ul>
+          <li>Attach a <strong>Resource-based Policy</strong> to the ECR repository</li>
+          <li>Grant <code>ecr:BatchGetImage</code> + <code>ecr:GetDownloadUrlForLayer</code> to target account principal</li>
+          <li>No need to copy images — just share access</li>
+          <li>Common in multi-account CI/CD (build account → deploy account)</li>
+        </ul>
+      </div>
+      <div class="card blue">
+        <h3>Replication</h3>
+        <ul>
+          <li><strong>Cross-region replication</strong> — automatically mirror images to other regions</li>
+          <li><strong>Cross-account replication</strong> — push to another AWS account's ECR</li>
+          <li>Configured at registry level (not per repo)</li>
+          <li>Used for DR, latency reduction, multi-region deployments</li>
+        </ul>
+      </div>
+    </div>
+    <div class="exam-tip">
+      <div class="label">Exam Tip</div>
+      Multi-account pipeline pattern: central build account pushes to ECR → resource-based policy allows dev/staging/prod accounts to pull. Replication is for geo-distribution or DR — not the primary access pattern.
+    </div>
+  </div>
+
+  <!-- 06 MONITORING -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">06</span>
+      <h2>Monitoring & Events</h2>
+      <span class="weight low">◈ LOW–MED</span>
+    </div>
+    <div class="grid">
+      <div class="card green">
+        <h3>EventBridge Events</h3>
+        <ul>
+          <li><code>ECR Image Action</code> — fires on push, delete, replicate</li>
+          <li><code>ECR Scan Action</code> — fires when scan completes with findings</li>
+          <li>Route to SNS, Lambda, SQS for automation</li>
+        </ul>
+      </div>
+      <div class="card blue">
+        <h3>CloudTrail</h3>
+        <ul>
+          <li>All ECR API calls logged automatically</li>
+          <li>Audit who pushed/pulled/deleted images</li>
+          <li>Key for compliance & forensics</li>
+        </ul>
+      </div>
+      <div class="card yellow">
+        <h3>CloudWatch Metrics</h3>
+        <ul>
+          <li><code>RepositoryPullCount</code> — track pull volume</li>
+          <li>Storage metrics via S3 (underlying)</li>
+          <li>Scan finding severity counts</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- QUICK REFERENCE -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">✦</span>
+      <h2>Exam Quick Reference</h2>
+    </div>
+    <div class="pill-list">
+      <span class="pill hi">IAM controls all ECR access</span>
+      <span class="pill hi">Fargate pull → Task Execution Role</span>
+      <span class="pill hi">EC2 pull → Instance Profile</span>
+      <span class="pill hi">CodeBuild push → Service Role</span>
+      <span class="pill hi">Tag Immutability = no overwrite</span>
+      <span class="pill hi">Enhanced Scan → Inspector + EventBridge</span>
+      <span class="pill hi">Auth token valid 12 hours</span>
+      <span class="pill hi">Cross-account → resource policy</span>
+      <span class="pill hi">Replication = cross-region/account mirror</span>
+      <span class="pill hi">Lifecycle policy → cost control</span>
+      <span class="pill hi">Never :latest in prod Task Def</span>
+      <span class="pill hi">KMS = customer-managed encryption</span>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

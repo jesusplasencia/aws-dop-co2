@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS EKS — DOP-C02</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e14;
+    --surface: #111720;
+    --surface2: #192030;
+    --border: #1e2d40;
+    --accent: #f59e0b;
+    --accent2: #38bdf8;
+    --accent3: #34d399;
+    --accent4: #f87171;
+    --text: #cdd6e0;
+    --text-dim: #6b7f94;
+    --text-bright: #eaf2f8;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.7;
+    padding: 40px 20px 80px;
+  }
+  .home-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    background: rgba(245,158,11,.08);
+    border: 1px solid rgba(245,158,11,.25);
+    padding: 6px 14px;
+    text-decoration: none;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    margin-bottom: 32px;
+    transition: background .2s, border-color .2s;
+  }
+  .home-btn:hover { background: rgba(245,158,11,.15); border-color: rgba(245,158,11,.5); }
+  .page { max-width: 900px; margin: 0 auto; }
+
+  header {
+    border-left: 4px solid var(--accent);
+    padding-left: 20px;
+    margin-bottom: 48px;
+    animation: fadeIn 0.5s ease;
+  }
+  header .badge { font-family:var(--mono); font-size:11px; color:var(--accent); letter-spacing:3px; text-transform:uppercase; margin-bottom:8px; }
+  header h1 { font-size:36px; font-weight:600; color:var(--text-bright); letter-spacing:-1px; }
+  header p { color:var(--text-dim); font-size:13px; margin-top:6px; }
+
+  .section { margin-bottom:36px; animation:fadeUp 0.4s ease both; }
+  .section:nth-child(2){animation-delay:.05s}
+  .section:nth-child(3){animation-delay:.10s}
+  .section:nth-child(4){animation-delay:.15s}
+  .section:nth-child(5){animation-delay:.20s}
+  .section:nth-child(6){animation-delay:.25s}
+  .section:nth-child(7){animation-delay:.30s}
+  .section:nth-child(8){animation-delay:.35s}
+  .section:nth-child(9){animation-delay:.40s}
+
+  .section-header { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+  .section-header .tag { font-family:var(--mono); font-size:10px; color:var(--accent); background:rgba(245,158,11,.1); border:1px solid rgba(245,158,11,.2); padding:2px 8px; letter-spacing:2px; text-transform:uppercase; }
+  .section-header h2 { font-size:17px; font-weight:600; color:var(--text-bright); }
+  .weight { margin-left:auto; font-family:var(--mono); font-size:10px; }
+  .weight.high { color:var(--accent4); }
+  .weight.med  { color:var(--accent); }
+  .weight.low  { color:var(--accent3); }
+
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:12px; }
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+  @media(max-width:640px){ .grid-2,.grid-3{grid-template-columns:1fr} }
+
+  .card { background:var(--surface); border:1px solid var(--border); padding:16px 18px; position:relative; }
+  .card::before { content:''; position:absolute; top:0;left:0; width:3px; height:100%; }
+  .card.blue::before  { background:var(--accent2); }
+  .card.green::before { background:var(--accent3); }
+  .card.yellow::before{ background:var(--accent); }
+  .card.red::before   { background:var(--accent4); }
+  .card.purple::before{ background:#a78bfa; }
+  .card h3 { font-family:var(--mono); font-size:12px; color:var(--text-bright); margin-bottom:8px; letter-spacing:.5px; }
+  .card p, .card li { font-size:13px; color:var(--text); line-height:1.6; }
+  .card ul { padding-left:16px; }
+  .card li { margin-bottom:3px; }
+
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th { background:var(--surface2); color:var(--accent); font-family:var(--mono); font-size:11px; letter-spacing:1.5px; text-transform:uppercase; padding:10px 14px; text-align:left; border-bottom:1px solid var(--border); }
+  td { padding:9px 14px; border-bottom:1px solid var(--border); vertical-align:top; color:var(--text); }
+  tr:last-child td { border-bottom:none; }
+  tr:hover td { background:var(--surface); }
+  td strong { color:var(--text-bright); }
+  td code, .card code, li code {
+    font-family:var(--mono); font-size:12px; color:var(--accent2);
+    background:rgba(56,189,248,.08); padding:1px 5px;
+  }
+
+  .callout { background:rgba(245,158,11,.06); border:1px solid rgba(245,158,11,.2); border-left:3px solid var(--accent); padding:12px 16px; font-size:13px; margin-bottom:12px; }
+  .callout strong { color:var(--accent); }
+
+  .exam-tip { background:rgba(248,113,113,.06); border:1px solid rgba(248,113,113,.2); border-left:3px solid var(--accent4); padding:12px 16px; font-size:13px; margin-top:12px; }
+  .exam-tip .label { font-family:var(--mono); font-size:10px; color:var(--accent4); letter-spacing:2px; text-transform:uppercase; margin-bottom:4px; }
+
+  .pill-list { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+  .pill { font-family:var(--mono); font-size:11px; padding:3px 10px; border:1px solid var(--border); color:var(--text-dim); background:var(--surface); }
+  .pill.hi { border-color:rgba(56,189,248,.3); color:var(--accent2); background:rgba(56,189,248,.06); }
+
+  /* vocab glossary */
+  .vocab { display:grid; grid-template-columns:140px 1fr; gap:0; }
+  .vocab-row { display:contents; }
+  .vocab-row .k { font-family:var(--mono); font-size:12px; color:var(--accent2); padding:7px 12px 7px 0; border-bottom:1px solid var(--border); }
+  .vocab-row .v { font-size:13px; color:var(--text); padding:7px 0; border-bottom:1px solid var(--border); }
+  .vocab-row:last-child .k,
+  .vocab-row:last-child .v { border-bottom:none; }
+
+  hr { border:none; border-top:1px solid var(--border); margin:40px 0; }
+  @keyframes fadeIn { from{opacity:0}to{opacity:1} }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)} }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <a href="../index.html" class="home-btn">&#8592; Home</a>
+
+  <header>
+    <div class="badge">DOP-C02 · AWS DevOps Professional</div>
+    <h1>Elastic Kubernetes Service</h1>
+    <p>Managed Kubernetes control plane on AWS — ECS alternative for teams already using Kubernetes.</p>
+  </header>
+
+  <!-- 01 EKS vs ECS -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">01</span>
+      <h2>EKS vs ECS — Know the Difference</h2>
+      <span class="weight high">◈◈ HIGH</span>
+    </div>
+    <table>
+      <tr>
+        <th>Attribute</th>
+        <th>ECS</th>
+        <th>EKS</th>
+      </tr>
+      <tr>
+        <td><strong>Orchestrator</strong></td>
+        <td>AWS proprietary</td>
+        <td>Kubernetes (open-source, CNCF)</td>
+      </tr>
+      <tr>
+        <td><strong>Portability</strong></td>
+        <td>AWS-only</td>
+        <td>Runs anywhere Kubernetes runs</td>
+      </tr>
+      <tr>
+        <td><strong>Unit of work</strong></td>
+        <td>Task</td>
+        <td>Pod</td>
+      </tr>
+      <tr>
+        <td><strong>Config format</strong></td>
+        <td>Task Definition (JSON)</td>
+        <td>YAML manifests (Deployment, Service…)</td>
+      </tr>
+      <tr>
+        <td><strong>Learning curve</strong></td>
+        <td>Lower</td>
+        <td>Higher — requires Kubernetes knowledge</td>
+      </tr>
+      <tr>
+        <td><strong>When to choose</strong></td>
+        <td>AWS-first, simpler workloads</td>
+        <td>Existing K8s workloads, multi-cloud, advanced scheduling</td>
+      </tr>
+    </table>
+    <div class="exam-tip">
+      <div class="label">Exam Tip</div>
+      If the scenario mentions <strong>"already using Kubernetes"</strong> or <strong>"multi-cloud portability"</strong> → choose EKS. If it asks for <strong>"least operational overhead on AWS"</strong> → ECS Fargate wins.
+    </div>
+  </div>
+
+  <!-- 02 KUBERNETES CONCEPTS -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">02</span>
+      <h2>Key Kubernetes Concepts (EKS Context)</h2>
+      <span class="weight med">◈ MEDIUM</span>
+    </div>
+    <div class="callout">
+      <strong>You don't need deep Kubernetes expertise for DOP-C02</strong> — but you must map these terms to AWS components.
+    </div>
+    <div class="vocab">
+      <div class="vocab-row"><div class="k">Pod</div><div class="v">Smallest deployable unit. One or more containers sharing network/storage. Equivalent to ECS Task.</div></div>
+      <div class="vocab-row"><div class="k">Node</div><div class="v">EC2 instance (or Fargate) running pods. Equivalent to ECS container instance.</div></div>
+      <div class="vocab-row"><div class="k">Deployment</div><div class="v">Manages desired replica count of pods. Handles rolling updates and rollbacks.</div></div>
+      <div class="vocab-row"><div class="k">Service</div><div class="v">Stable network endpoint for a set of pods. Maps to a Load Balancer or ClusterIP.</div></div>
+      <div class="vocab-row"><div class="k">Namespace</div><div class="v">Logical isolation within a cluster. Used for multi-team or multi-env separation.</div></div>
+      <div class="vocab-row"><div class="k">ConfigMap</div><div class="v">Key-value config injected into pods (non-secret data).</div></div>
+      <div class="vocab-row"><div class="k">Secret</div><div class="v">Base64-encoded sensitive data in K8s. Best paired with AWS Secrets Manager via CSI driver.</div></div>
+      <div class="vocab-row"><div class="k">Control Plane</div><div class="v">Managed by AWS in EKS — API Server, etcd, scheduler, controller manager. You don't manage it.</div></div>
+    </div>
+  </div>
+
+  <!-- 03 NODE TYPES -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">03</span>
+      <h2>Node Types</h2>
+      <span class="weight high">◈◈ HIGH</span>
+    </div>
+    <div class="grid-3">
+      <div class="card blue">
+        <h3>Managed Node Groups</h3>
+        <ul>
+          <li>AWS creates &amp; manages EC2 nodes for you</li>
+          <li>Nodes part of an <strong>ASG managed by EKS</strong></li>
+          <li>Supports On-Demand or Spot Instances</li>
+          <li>Automatic node updates &amp; draining</li>
+          <li><strong>Recommended for most workloads</strong></li>
+        </ul>
+      </div>
+      <div class="card yellow">
+        <h3>Self-Managed Nodes</h3>
+        <ul>
+          <li>You create EC2s &amp; register to cluster</li>
+          <li>Managed by your own ASG</li>
+          <li>Use <strong>Amazon EKS Optimized AMI</strong></li>
+          <li>Full control over instance config</li>
+          <li>More operational overhead</li>
+        </ul>
+      </div>
+      <div class="card green">
+        <h3>AWS Fargate</h3>
+        <ul>
+          <li>No nodes to manage at all</li>
+          <li>Each pod runs in its own isolated compute</li>
+          <li>Requires a <strong>Fargate Profile</strong> (namespace + label selector)</li>
+          <li>No DaemonSets support</li>
+          <li>Best for serverless K8s</li>
+        </ul>
+      </div>
+    </div>
+    <div class="exam-tip">
+      <div class="label">Exam Tip</div>
+      Managed Node Groups = least overhead for EC2-backed EKS. Fargate on EKS = no nodes but requires Fargate Profiles and doesn't support DaemonSets (e.g., can't run node-level log agents this way).
+    </div>
+  </div>
+
+  <!-- 04 IAM & ACCESS CONTROL -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">04</span>
+      <h2>IAM & Access Control</h2>
+      <span class="weight high">◈◈ HIGH</span>
+    </div>
+    <div class="grid-2">
+      <div class="card blue">
+        <h3>IAM Roles for Service Accounts (IRSA)</h3>
+        <ul>
+          <li>Assigns an IAM Role to a Kubernetes <strong>Service Account</strong></li>
+          <li>Pods using that service account assume the role</li>
+          <li>Fine-grained pod-level AWS permissions (like ECS Task Role)</li>
+          <li>Uses <strong>OIDC provider</strong> on the EKS cluster</li>
+          <li>Replaces the need for node-level instance profiles</li>
+        </ul>
+      </div>
+      <div class="card yellow">
+        <h3>aws-auth ConfigMap</h3>
+        <ul>
+          <li>Maps IAM users/roles → Kubernetes RBAC</li>
+          <li>Required to grant kubectl access to cluster</li>
+          <li>Stored in <code>kube-system</code> namespace</li>
+          <li>Misconfiguration = locked out of cluster</li>
+          <li>EKS Access Entries (newer) replace this pattern</li>
+        </ul>
+      </div>
+    </div>
+    <div class="exam-tip">
+      <div class="label">Exam Tip</div>
+      <strong>IRSA</strong> is the EKS equivalent of ECS Task Role — always prefer it over instance profile-based permissions for pods. Know that it requires an OIDC identity provider to be associated with the cluster.
+    </div>
+  </div>
+
+  <!-- 05 AUTO-SCALING -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">05</span>
+      <h2>Auto-Scaling</h2>
+      <span class="weight high">◈◈ HIGH</span>
+    </div>
+    <div class="grid">
+      <div class="card green">
+        <h3>Horizontal Pod Autoscaler (HPA)</h3>
+        <ul>
+          <li>Scales <strong>pod count</strong> based on CPU/memory or custom metrics</li>
+          <li>Built into Kubernetes</li>
+          <li>Equivalent to ECS Service Auto Scaling</li>
+        </ul>
+      </div>
+      <div class="card blue">
+        <h3>Cluster Autoscaler</h3>
+        <ul>
+          <li>Scales <strong>EC2 node count</strong> in the ASG</li>
+          <li>Adds nodes when pods are unschedulable</li>
+          <li>Removes underutilized nodes</li>
+          <li>Requires proper IAM permissions on node role</li>
+        </ul>
+      </div>
+      <div class="card yellow">
+        <h3>Karpenter (AWS-native)</h3>
+        <ul>
+          <li>Next-gen node provisioner — faster than Cluster Autoscaler</li>
+          <li>Provisions right-sized nodes directly (no ASG required)</li>
+          <li>Supports diverse instance types &amp; Spot automatically</li>
+          <li><strong>Preferred for EKS on AWS</strong></li>
+        </ul>
+      </div>
+    </div>
+    <div class="exam-tip">
+      <div class="label">Exam Tip</div>
+      HPA = scale pods. Cluster Autoscaler / Karpenter = scale nodes. For Fargate, only HPA applies — no nodes to scale. Karpenter may appear in newer exam questions as the recommended scaler.
+    </div>
+  </div>
+
+  <!-- 06 NETWORKING -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">06</span>
+      <h2>Networking</h2>
+      <span class="weight med">◈ MEDIUM</span>
+    </div>
+    <div class="grid-2">
+      <div class="card blue">
+        <h3>VPC CNI Plugin</h3>
+        <ul>
+          <li>Each pod gets a <strong>real VPC IP address</strong></li>
+          <li>Native VPC routing — no overlay network</li>
+          <li>Security Groups can be applied <strong>per pod</strong></li>
+          <li>Must size subnets for pod IP density</li>
+        </ul>
+      </div>
+      <div class="card green">
+        <h3>Load Balancer Controller</h3>
+        <ul>
+          <li>Kubernetes <code>Service</code> (type LoadBalancer) → provisions <strong>NLB</strong></li>
+          <li>Kubernetes <code>Ingress</code> → provisions <strong>ALB</strong></li>
+          <li>Requires AWS Load Balancer Controller add-on</li>
+          <li>Annotations control LB behaviour (internal, SSL, etc.)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="exam-tip">
+      <div class="label">Exam Tip</div>
+      Ingress → ALB. Service LoadBalancer → NLB. Security Groups for Pods allow pod-level network isolation without relying on node-level SGs.
+    </div>
+  </div>
+
+  <!-- 07 DATA VOLUMES -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">07</span>
+      <h2>Data Volumes (Storage)</h2>
+      <span class="weight med">◈ MEDIUM</span>
+    </div>
+    <div class="callout">
+      <strong>Key concept:</strong> EKS uses <strong>Container Storage Interface (CSI)</strong> drivers. You define a <code>StorageClass</code> manifest pointing to the driver — Kubernetes handles the rest.
+    </div>
+    <table>
+      <tr>
+        <th>Storage</th>
+        <th>Access Mode</th>
+        <th>Fargate?</th>
+        <th>Use Case</th>
+      </tr>
+      <tr>
+        <td><strong>EBS</strong></td>
+        <td>Single node (ReadWriteOnce)</td>
+        <td>No</td>
+        <td>Databases, stateful single-pod workloads</td>
+      </tr>
+      <tr>
+        <td><strong>EFS</strong></td>
+        <td>Multi-node (ReadWriteMany)</td>
+        <td>Yes</td>
+        <td>Shared storage across pods/AZs</td>
+      </tr>
+      <tr>
+        <td><strong>FSx for Lustre</strong></td>
+        <td>Multi-node</td>
+        <td>No</td>
+        <td>HPC, ML training, high-throughput workloads</td>
+      </tr>
+      <tr>
+        <td><strong>FSx for NetApp ONTAP</strong></td>
+        <td>Multi-protocol</td>
+        <td>No</td>
+        <td>Enterprise NFS/SMB workloads</td>
+      </tr>
+    </table>
+    <div class="exam-tip">
+      <div class="label">Exam Tip</div>
+      EFS = only CSI storage that works with Fargate. EBS requires EC2 nodes and is AZ-bound. Multi-pod shared storage → always EFS for EKS.
+    </div>
+  </div>
+
+  <!-- 08 LOGGING -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">08</span>
+      <h2>Logging & Observability</h2>
+      <span class="weight high">◈◈ HIGH</span>
+    </div>
+    <div class="grid-2">
+      <div class="card blue">
+        <h3>Control Plane Logs → CloudWatch</h3>
+        <ul>
+          <li>Disabled by default — must enable per log type</li>
+          <li>Log types: <code>api</code>, <code>audit</code>, <code>authenticator</code>, <code>controllerManager</code>, <code>scheduler</code></li>
+          <li><code>audit</code> logs → who did what via kubectl</li>
+          <li>Sent to <code>/aws/eks/&lt;cluster&gt;/cluster</code> log group</li>
+        </ul>
+      </div>
+      <div class="card yellow">
+        <h3>Node / Pod / Container Logs</h3>
+        <ul>
+          <li>Container logs stored at <code>/var/log/containers</code> on node</li>
+          <li>Use <strong>Fluent Bit</strong> (recommended) or Fluentd as DaemonSet</li>
+          <li>Ships logs to CloudWatch Logs</li>
+          <li>CloudWatch Agent collects node-level metrics</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card green" style="margin-top:12px">
+      <h3>CloudWatch Container Insights</h3>
+      <p>Full observability dashboard for nodes, pods, tasks, and services. Collects metrics + logs. Enable as an add-on. Provides CPU, memory, disk, and network metrics per pod/namespace. Use for cluster-wide performance monitoring.</p>
+    </div>
+    <div class="exam-tip">
+      <div class="label">Exam Tip</div>
+      Control plane logs (especially <code>audit</code>) → security/compliance questions. Fluent Bit DaemonSet → application log shipping. Container Insights → monitoring dashboard. On Fargate, DaemonSets don't work — use <strong>Fluent Bit sidecar</strong> pattern instead.
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- QUICK REFERENCE -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">✦</span>
+      <h2>Exam Quick Reference</h2>
+    </div>
+    <div class="pill-list">
+      <span class="pill hi">Multi-cloud / existing K8s → EKS</span>
+      <span class="pill hi">Least overhead → ECS Fargate</span>
+      <span class="pill hi">IRSA = pod-level IAM role</span>
+      <span class="pill hi">IRSA requires OIDC provider</span>
+      <span class="pill hi">HPA = scale pods</span>
+      <span class="pill hi">Karpenter = scale nodes (preferred)</span>
+      <span class="pill hi">Fargate → no DaemonSets</span>
+      <span class="pill hi">Fargate storage → EFS only</span>
+      <span class="pill hi">Ingress → ALB</span>
+      <span class="pill hi">Service LB → NLB</span>
+      <span class="pill hi">Audit log → who used kubectl</span>
+      <span class="pill hi">Fluent Bit = log shipping agent</span>
+      <span class="pill hi">Container Insights = monitoring</span>
+      <span class="pill hi">Control plane logs off by default</span>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
