@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS API Gateway — DOP-C02</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e14;
+    --surface: #111720;
+    --surface2: #192030;
+    --border: #1e2d40;
+    --accent: #f59e0b;
+    --accent2: #38bdf8;
+    --accent3: #34d399;
+    --accent4: #f87171;
+    --text: #cdd6e0;
+    --text-dim: #6b7f94;
+    --text-bright: #eaf2f8;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.7;
+    padding: 40px 20px 80px;
+  }
+
+  .page {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  /* Header */
+  header {
+    border-left: 4px solid var(--accent);
+    padding-left: 20px;
+    margin-bottom: 48px;
+    animation: fadeIn 0.5s ease;
+  }
+  header .badge {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  header h1 {
+    font-size: 36px;
+    font-weight: 600;
+    color: var(--text-bright);
+    letter-spacing: -1px;
+  }
+  header p {
+    color: var(--text-dim);
+    font-size: 13px;
+    margin-top: 6px;
+  }
+
+  /* Section */
+  .section {
+    margin-bottom: 36px;
+    animation: fadeUp 0.4s ease both;
+  }
+  .section:nth-child(2) { animation-delay: 0.05s; }
+  .section:nth-child(3) { animation-delay: 0.10s; }
+  .section:nth-child(4) { animation-delay: 0.15s; }
+  .section:nth-child(5) { animation-delay: 0.20s; }
+  .section:nth-child(6) { animation-delay: 0.25s; }
+  .section:nth-child(7) { animation-delay: 0.30s; }
+  .section:nth-child(8) { animation-delay: 0.35s; }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .section-header .tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--accent);
+    background: rgba(245,158,11,0.1);
+    border: 1px solid rgba(245,158,11,0.2);
+    padding: 2px 8px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .section-header h2 {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--text-bright);
+  }
+  .weight {
+    margin-left: auto;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-dim);
+  }
+  .weight.high { color: var(--accent4); }
+  .weight.med { color: var(--accent); }
+  .weight.low { color: var(--accent3); }
+
+  /* Card grid */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 12px;
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 16px 18px;
+    position: relative;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+  }
+  .card.blue::before { background: var(--accent2); }
+  .card.green::before { background: var(--accent3); }
+  .card.yellow::before { background: var(--accent); }
+  .card.red::before { background: var(--accent4); }
+
+  .card h3 {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-bright);
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+  }
+  .card p, .card li {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.6;
+  }
+  .card ul { padding-left: 16px; }
+  .card li { margin-bottom: 3px; }
+
+  /* Table */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  th {
+    background: var(--surface2);
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    color: var(--text);
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface); }
+  td strong { color: var(--text-bright); }
+  td code {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent2);
+    background: rgba(56,189,248,0.08);
+    padding: 1px 5px;
+  }
+
+  /* Callout */
+  .callout {
+    background: rgba(245,158,11,0.06);
+    border: 1px solid rgba(245,158,11,0.2);
+    border-left: 3px solid var(--accent);
+    padding: 12px 16px;
+    font-size: 13px;
+    margin-bottom: 12px;
+  }
+  .callout strong { color: var(--accent); }
+
+  /* Exam tip */
+  .exam-tip {
+    background: rgba(248,113,113,0.06);
+    border: 1px solid rgba(248,113,113,0.2);
+    border-left: 3px solid var(--accent4);
+    padding: 12px 16px;
+    font-size: 13px;
+    margin-top: 12px;
+  }
+  .exam-tip .label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--accent4);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  /* Inline list */
+  .pill-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .pill {
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 3px 10px;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    background: var(--surface);
+  }
+  .pill.hi { border-color: rgba(56,189,248,0.3); color: var(--accent2); background: rgba(56,189,248,0.06); }
+
+  /* Divider */
+  hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+
+  .home-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    text-decoration: none;
+    border: 1px solid var(--border);
+    padding: 6px 14px;
+    margin-bottom: 32px;
+    transition: color 0.2s ease, border-color 0.2s ease;
+  }
+  .home-btn:hover { color: var(--accent); border-color: rgba(245,158,11,0.4); }
+  .home-btn svg { width: 14px; height: 14px; }
+
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <a href="../index.html" class="home-btn">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M10 12L6 8l4-4"/>
+    </svg>
+    Home
+  </a>
+
+  <header>
+    <div class="badge">DOP-C02 · AWS DevOps Professional</div>
+    <h1>API Gateway</h1>
+    <p>Serverless proxy service to expose Lambda, HTTP backends, and AWS services via managed APIs.</p>
+  </header>
+
+  <!-- 1. ENDPOINT TYPES -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">01</span>
+      <h2>Endpoint Types</h2>
+      <span class="weight med">◈ MEDIUM</span>
+    </div>
+    <table>
+      <tr>
+        <th>Type</th>
+        <th>Use Case</th>
+        <th>Key Detail</th>
+      </tr>
+      <tr>
+        <td><strong>Edge-Optimized</strong> <em>(default)</em></td>
+        <td>Global clients</td>
+        <td>Routes via CloudFront edges. Gateway still in one region. TLS cert must be <code>us-east-1</code>.</td>
+      </tr>
+      <tr>
+        <td><strong>Regional</strong></td>
+        <td>Clients in same region</td>
+        <td>Can pair with CloudFront manually. TLS cert must match gateway region.</td>
+      </tr>
+      <tr>
+        <td><strong>Private</strong></td>
+        <td>Internal VPC access only</td>
+        <td>Accessed via Interface VPC Endpoint (ENI). Requires resource policy.</td>
+      </tr>
+    </table>
+    <div class="exam-tip">
+      <div class="label">Exam Tip</div>
+      Certificate location rule: <strong>Edge-Optimized → us-east-1</strong>. Regional → same region as API Gateway. Route53 CNAME or A-alias is required for custom domains.
+    </div>
+  </div>
+
+  <!-- 2. DEPLOYMENT STAGES -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">02</span>
+      <h2>Deployment Stages & Stage Variables</h2>
+      <span class="weight high">◈◈ HIGH</span>
+    </div>
+    <div class="callout">
+      <strong>Key rule:</strong> Changes to an API take effect only after a <strong>deployment</strong> to a stage. Nothing is live until deployed.
+    </div>
+    <div class="grid">
+      <div class="card yellow">
+        <h3>Stages</h3>
+        <ul>
+          <li>Each stage is an independent environment (dev, staging, prod)</li>
+          <li>Each stage has its own config, throttling, caching, logging settings</li>
+          <li>Rollback is possible — deployment history is kept</li>
+        </ul>
+      </div>
+      <div class="card blue">
+        <h3>Stage Variables</h3>
+        <ul>
+          <li>Act like environment variables per stage</li>
+          <li>Can point to different Lambda ARNs, HTTP endpoints, or mapping templates</li>
+          <li>Syntax: <code>${stageVariables.varName}</code></li>
+          <li>Enables one API definition across environments</li>
+        </ul>
+      </div>
+    </div>
+    <div class="exam-tip">
+      <div class="label">Exam Tip</div>
+      Stage Variables are the standard way to avoid duplicating API configs per environment. Know that they can point to different Lambda aliases.
+    </div>
+  </div>
+
+  <!-- 3. CANARY DEPLOYMENTS -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">03</span>
+      <h2>Canary Deployments</h2>
+      <span class="weight high">◈◈ HIGH</span>
+    </div>
+    <div class="grid">
+      <div class="card green">
+        <h3>How it works</h3>
+        <ul>
+          <li>Enable on any stage (typically prod)</li>
+          <li>Split traffic: configure % to canary channel</li>
+          <li>Canary gets new deployment; base stage keeps current</li>
+          <li>Metrics & logs are <strong>separate</strong> per channel</li>
+        </ul>
+      </div>
+      <div class="card blue">
+        <h3>Key Properties</h3>
+        <ul>
+          <li>This is <strong>blue/green deployment</strong> for API Gateway + Lambda</li>
+          <li>Can override stage variables for the canary</li>
+          <li>Promote canary → becomes the new prod stage</li>
+          <li>Rollback by disabling canary or setting traffic to 0%</li>
+        </ul>
+      </div>
+    </div>
+    <div class="exam-tip">
+      <div class="label">Exam Tip</div>
+      Canary = blue/green at the API Gateway level. Questions often pair this with Lambda aliases and weighted routing for progressive delivery.
+    </div>
+  </div>
+
+  <!-- 4. SECURITY -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">04</span>
+      <h2>Security & Authentication</h2>
+      <span class="weight high">◈◈ HIGH</span>
+    </div>
+    <table>
+      <tr>
+        <th>Method</th>
+        <th>How</th>
+        <th>When to use</th>
+      </tr>
+      <tr>
+        <td><strong>IAM Roles/Policies</strong></td>
+        <td>SigV4 signed request headers</td>
+        <td>Internal AWS services, cross-account access</td>
+      </tr>
+      <tr>
+        <td><strong>Cognito User Pools</strong></td>
+        <td>JWT token validated by API Gateway</td>
+        <td>Web/mobile apps with user identities</td>
+      </tr>
+      <tr>
+        <td><strong>Lambda Authorizer</strong></td>
+        <td>Custom Lambda validates token/header; returns IAM policy</td>
+        <td>Third-party auth (OAuth, SAML, custom logic)</td>
+      </tr>
+      <tr>
+        <td><strong>Resource Policy</strong></td>
+        <td>JSON policy on the API itself</td>
+        <td>Restrict by IP, VPC endpoint, or AWS account</td>
+      </tr>
+    </table>
+    <div class="exam-tip">
+      <div class="label">Exam Tip</div>
+      Lambda Authorizer result is <strong>cached by default</strong> (TTL configurable). Cognito handles authentication; IAM handles authorization. Know which layer does what.
+    </div>
+  </div>
+
+  <!-- 5. CACHING -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">05</span>
+      <h2>Caching</h2>
+      <span class="weight med">◈ MEDIUM</span>
+    </div>
+    <div class="grid">
+      <div class="card yellow">
+        <h3>Configuration</h3>
+        <ul>
+          <li>Defined at <strong>stage level</strong></li>
+          <li>Default TTL: <strong>300s</strong> (max 3600s, min 0s)</li>
+          <li>Capacity: 0.5 GB → 237 GB</li>
+          <li>Can override per method</li>
+          <li>Recommended for PROD only (has cost)</li>
+        </ul>
+      </div>
+      <div class="card red">
+        <h3>Cache Invalidation</h3>
+        <ul>
+          <li>Flush entire cache immediately from console</li>
+          <li>Client can invalidate via header: <code>Cache-Control: max-age=0</code></li>
+          <li>Requires <code>execute-api:InvalidateCache</code> IAM permission</li>
+          <li>Without policy: any client can invalidate — security risk</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. THROTTLING -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">06</span>
+      <h2>Throttling</h2>
+      <span class="weight med">◈ MEDIUM</span>
+    </div>
+    <table>
+      <tr>
+        <th>Level</th>
+        <th>Default</th>
+        <th>Notes</th>
+      </tr>
+      <tr>
+        <td><strong>Account-level</strong></td>
+        <td>10,000 req/s</td>
+        <td>Shared across all APIs. Can be increased via support request.</td>
+      </tr>
+      <tr>
+        <td><strong>Stage / Method</strong></td>
+        <td>Configurable</td>
+        <td>Set lower limits per stage or per method to protect backend.</td>
+      </tr>
+      <tr>
+        <td><strong>Usage Plans</strong></td>
+        <td>Per API key</td>
+        <td>Throttle and quota individual customers/clients.</td>
+      </tr>
+    </table>
+    <div class="callout">
+      <strong>429 Too Many Requests</strong> — returned when throttle limit is exceeded. Clients should implement exponential backoff.
+    </div>
+  </div>
+
+  <!-- 7. LOGGING & METRICS -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">07</span>
+      <h2>Logging, Tracing & Metrics</h2>
+      <span class="weight med">◈ MEDIUM</span>
+    </div>
+    <div class="grid">
+      <div class="card blue">
+        <h3>CloudWatch Logs</h3>
+        <ul>
+          <li>Enabled at stage level</li>
+          <li>Log levels: ERROR, DEBUG, INFO</li>
+          <li>Logs request/response body (careful with sensitive data)</li>
+        </ul>
+      </div>
+      <div class="card green">
+        <h3>X-Ray Tracing</h3>
+        <ul>
+          <li>Enable at stage level</li>
+          <li>API Gateway + Lambda = full end-to-end trace</li>
+          <li>Identifies latency bottlenecks</li>
+        </ul>
+      </div>
+      <div class="card yellow">
+        <h3>Key Metrics</h3>
+        <ul>
+          <li><code>CacheHitCount</code> / <code>CacheMissCount</code></li>
+          <li><code>Count</code> — total API requests</li>
+          <li><code>IntegrationLatency</code> — GW → backend roundtrip</li>
+          <li><code>Latency</code> — full client roundtrip (includes GW overhead)</li>
+          <li><code>4XXError</code> (client) / <code>5XXError</code> (server)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. OPEN API / REQUEST VALIDATION -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">08</span>
+      <h2>OpenAPI & Request Validation</h2>
+      <span class="weight low">◈ LOW–MED</span>
+    </div>
+    <div class="grid">
+      <div class="card blue">
+        <h3>OpenAPI</h3>
+        <ul>
+          <li>Import OpenAPI 3.0 spec (YAML or JSON) to create APIs</li>
+          <li>Export existing API as OpenAPI spec</li>
+          <li>AWS extensions available for Gateway-specific config</li>
+          <li>Infrastructure as code for API definitions</li>
+        </ul>
+      </div>
+      <div class="card green">
+        <h3>Request Validation</h3>
+        <ul>
+          <li>Validates before forwarding to backend</li>
+          <li>Returns <code>400 Bad Request</code> on failure</li>
+          <li>Validate: request body, query params, headers</li>
+          <li>Saves Lambda invocations on invalid requests</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- QUICK REFERENCE -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">✦</span>
+      <h2>Exam Quick Reference</h2>
+    </div>
+    <div class="pill-list">
+      <span class="pill hi">Canary = Blue/Green</span>
+      <span class="pill hi">Edge cert → us-east-1</span>
+      <span class="pill hi">Stage vars → Lambda alias routing</span>
+      <span class="pill hi">429 = throttled</span>
+      <span class="pill hi">Lambda Authorizer caches policy</span>
+      <span class="pill hi">Cache TTL default 300s</span>
+      <span class="pill hi">Deploy to make changes live</span>
+      <span class="pill hi">X-Ray = end-to-end trace</span>
+      <span class="pill hi">Private EP → VPC Endpoint (ENI)</span>
+      <span class="pill hi">Usage Plans = per-customer quotas</span>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

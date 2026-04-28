@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS ECS — DOP-C02</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e14;
+    --surface: #111720;
+    --surface2: #192030;
+    --border: #1e2d40;
+    --accent: #f59e0b;
+    --accent2: #38bdf8;
+    --accent3: #34d399;
+    --accent4: #f87171;
+    --text: #cdd6e0;
+    --text-dim: #6b7f94;
+    --text-bright: #eaf2f8;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.7;
+    padding: 40px 20px 80px;
+  }
+  .page { max-width: 900px; margin: 0 auto; }
+
+  .home-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 6px 14px;
+    text-decoration: none;
+    margin-bottom: 32px;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .home-btn:hover { color: var(--accent); border-color: var(--accent); }
+  .home-btn svg { width: 14px; height: 14px; }
+
+  header {
+    border-left: 4px solid var(--accent);
+    padding-left: 20px;
+    margin-bottom: 48px;
+    animation: fadeIn 0.5s ease;
+  }
+  header .badge {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  header h1 { font-size: 36px; font-weight: 600; color: var(--text-bright); letter-spacing: -1px; }
+  header p { color: var(--text-dim); font-size: 13px; margin-top: 6px; }
+
+  .section { margin-bottom: 36px; animation: fadeUp 0.4s ease both; }
+  .section:nth-child(2) { animation-delay:.05s }
+  .section:nth-child(3) { animation-delay:.10s }
+  .section:nth-child(4) { animation-delay:.15s }
+  .section:nth-child(5) { animation-delay:.20s }
+  .section:nth-child(6) { animation-delay:.25s }
+  .section:nth-child(7) { animation-delay:.30s }
+  .section:nth-child(8) { animation-delay:.35s }
+  .section:nth-child(9) { animation-delay:.40s }
+
+  .section-header { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+  .section-header .tag {
+    font-family: var(--mono); font-size:10px; color:var(--accent);
+    background:rgba(245,158,11,.1); border:1px solid rgba(245,158,11,.2);
+    padding:2px 8px; letter-spacing:2px; text-transform:uppercase;
+  }
+  .section-header h2 { font-size:17px; font-weight:600; color:var(--text-bright); }
+  .weight { margin-left:auto; font-family:var(--mono); font-size:10px; color:var(--text-dim); }
+  .weight.high { color:var(--accent4); }
+  .weight.med  { color:var(--accent); }
+  .weight.low  { color:var(--accent3); }
+
+  .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(260px,1fr)); gap:12px; }
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  @media(max-width:600px){ .grid-2 { grid-template-columns:1fr; } }
+
+  .card { background:var(--surface); border:1px solid var(--border); padding:16px 18px; position:relative; }
+  .card::before { content:''; position:absolute; top:0;left:0; width:3px; height:100%; }
+  .card.blue::before  { background:var(--accent2); }
+  .card.green::before { background:var(--accent3); }
+  .card.yellow::before{ background:var(--accent); }
+  .card.red::before   { background:var(--accent4); }
+  .card h3 { font-family:var(--mono); font-size:12px; color:var(--text-bright); margin-bottom:8px; letter-spacing:.5px; }
+  .card p, .card li { font-size:13px; color:var(--text); line-height:1.6; }
+  .card ul { padding-left:16px; }
+  .card li { margin-bottom:3px; }
+
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th {
+    background:var(--surface2); color:var(--accent);
+    font-family:var(--mono); font-size:11px; letter-spacing:1.5px;
+    text-transform:uppercase; padding:10px 14px; text-align:left;
+    border-bottom:1px solid var(--border);
+  }
+  td { padding:9px 14px; border-bottom:1px solid var(--border); vertical-align:top; color:var(--text); }
+  tr:last-child td { border-bottom:none; }
+  tr:hover td { background:var(--surface); }
+  td strong { color:var(--text-bright); }
+  td code, .card code {
+    font-family:var(--mono); font-size:12px; color:var(--accent2);
+    background:rgba(56,189,248,.08); padding:1px 5px;
+  }
+
+  .callout {
+    background:rgba(245,158,11,.06); border:1px solid rgba(245,158,11,.2);
+    border-left:3px solid var(--accent); padding:12px 16px; font-size:13px; margin-bottom:12px;
+  }
+  .callout strong { color:var(--accent); }
+
+  .exam-tip {
+    background:rgba(248,113,113,.06); border:1px solid rgba(248,113,113,.2);
+    border-left:3px solid var(--accent4); padding:12px 16px; font-size:13px; margin-top:12px;
+  }
+  .exam-tip .label {
+    font-family:var(--mono); font-size:10px; color:var(--accent4);
+    letter-spacing:2px; text-transform:uppercase; margin-bottom:4px;
+  }
+
+  .pill-list { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+  .pill {
+    font-family:var(--mono); font-size:11px; padding:3px 10px;
+    border:1px solid var(--border); color:var(--text-dim); background:var(--surface);
+  }
+  .pill.hi { border-color:rgba(56,189,248,.3); color:var(--accent2); background:rgba(56,189,248,.06); }
+
+  hr { border:none; border-top:1px solid var(--border); margin:40px 0; }
+
+  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <a href="../index.html" class="home-btn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M19 12H5M12 5l-7 7 7 7"/>
+    </svg>
+    Home
+  </a>
+
+  <header>
+    <div class="badge">DOP-C02 · AWS DevOps Professional</div>
+    <h1>Elastic Container Service</h1>
+    <p>Managed container orchestration — run Docker containers on EC2 or serverless via Fargate.</p>
+  </header>
+
+  <!-- 01 LAUNCH TYPES -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">01</span>
+      <h2>Launch Types: EC2 vs Fargate</h2>
+      <span class="weight high">◈◈ HIGH</span>
+    </div>
+    <table>
+      <tr>
+        <th>Attribute</th>
+        <th>EC2 Launch Type</th>
+        <th>Fargate</th>
+      </tr>
+      <tr>
+        <td><strong>Infrastructure</strong></td>
+        <td>You provision & manage EC2 instances</td>
+        <td>Serverless — AWS manages everything</td>
+      </tr>
+      <tr>
+        <td><strong>ECS Agent</strong></td>
+        <td>Must run on every EC2 instance to register with cluster</td>
+        <td>Not needed — AWS handles it</td>
+      </tr>
+      <tr>
+        <td><strong>Scaling</strong></td>
+        <td>Scale tasks + scale EC2 fleet separately</td>
+        <td>Scale by increasing task count only</td>
+      </tr>
+      <tr>
+        <td><strong>Cost model</strong></td>
+        <td>Pay for EC2 instances (always on)</td>
+        <td>Pay per vCPU + memory per second</td>
+      </tr>
+      <tr>
+        <td><strong>Best for</strong></td>
+        <td>Cost optimization at scale, GPU workloads</td>
+        <td>Simplicity, variable workloads, microservices</td>
+      </tr>
+    </table>
+    <div class="exam-tip">
+      <div class="label">Exam Tip</div>
+      If a question asks for the <strong>least operational overhead</strong> → choose Fargate. EC2 Launch Type requires managing the ECS Agent, instance profile permissions, and capacity separately.
+    </div>
+  </div>
+
+  <!-- 02 IAM ROLES -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">02</span>
+      <h2>IAM Roles for ECS</h2>
+      <span class="weight high">◈◈ HIGH</span>
+    </div>
+    <div class="callout">
+      <strong>Critical distinction:</strong> Two separate roles serve two separate purposes. Confusing them is a common exam trap.
+    </div>
+    <div class="grid-2">
+      <div class="card yellow">
+        <h3>EC2 Instance Profile</h3>
+        <ul>
+          <li>EC2 Launch Type <strong>only</strong></li>
+          <li>Used by the <strong>ECS Agent</strong> itself</li>
+          <li>Pulls Docker images from ECR</li>
+          <li>Sends container logs to CloudWatch</li>
+          <li>Makes API calls to ECS service</li>
+          <li>Reads secrets from SSM / Secrets Manager</li>
+        </ul>
+      </div>
+      <div class="card blue">
+        <h3>ECS Task Role</h3>
+        <ul>
+          <li>Applies to <strong>both</strong> EC2 and Fargate</li>
+          <li>Defined per task in the <strong>Task Definition</strong></li>
+          <li>Grants the container permissions to AWS services (S3, DynamoDB…)</li>
+          <li>Different tasks can have different roles</li>
+          <li>Principle of least privilege per service</li>
+        </ul>
+      </div>
+    </div>
+    <div class="exam-tip">
+      <div class="label">Exam Tip</div>
+      Task Role = what the <em>application inside the container</em> can do. Instance Profile = what the <em>ECS Agent on the EC2 host</em> can do. On Fargate, only Task Role exists.
+    </div>
+  </div>
+
+  <!-- 03 AUTO-SCALING -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">03</span>
+      <h2>Auto-Scaling</h2>
+      <span class="weight high">◈◈ HIGH</span>
+    </div>
+    <div class="callout">
+      <strong>ECS Service Auto Scaling</strong> (task count) ≠ <strong>EC2 Auto Scaling</strong> (instance count). On EC2 launch type you may need <em>both</em>.
+    </div>
+    <div class="grid">
+      <div class="card green">
+        <h3>Scaling Policies</h3>
+        <ul>
+          <li><strong>Target Tracking</strong> — maintain a CloudWatch metric at target value (e.g. CPU 70%)</li>
+          <li><strong>Step Scaling</strong> — trigger on a CloudWatch Alarm threshold</li>
+          <li><strong>Scheduled Scaling</strong> — scale at a specific date/time for predictable load</li>
+        </ul>
+      </div>
+      <div class="card blue">
+        <h3>Key Metrics for Scaling</h3>
+        <ul>
+          <li><code>ECSServiceAverageCPUUtilization</code></li>
+          <li><code>ECSServiceAverageMemoryUtilization</code></li>
+          <li><code>ALBRequestCountPerTarget</code> (from ALB)</li>
+        </ul>
+      </div>
+      <div class="card yellow">
+        <h3>EC2 Cluster Capacity</h3>
+        <ul>
+          <li><strong>Auto Scaling Group</strong> — scale based on CPU, add instances over time</li>
+          <li><strong>ECS Cluster Capacity Provider</strong> (recommended) — automatically provisions EC2s when tasks can't be placed due to insufficient CPU/RAM</li>
+        </ul>
+      </div>
+    </div>
+    <div class="exam-tip">
+      <div class="label">Exam Tip</div>
+      Fargate Auto Scaling is simpler — no EC2 capacity to manage. For EC2, <strong>Capacity Provider</strong> is the recommended approach to automatically add instances when cluster is full.
+    </div>
+  </div>
+
+  <!-- 04 LOAD BALANCERS -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">04</span>
+      <h2>Load Balancer Integrations</h2>
+      <span class="weight med">◈ MEDIUM</span>
+    </div>
+    <table>
+      <tr>
+        <th>LB Type</th>
+        <th>Use Case</th>
+        <th>Notes</th>
+      </tr>
+      <tr>
+        <td><strong>ALB</strong></td>
+        <td>Most use cases (recommended)</td>
+        <td>Dynamic port mapping, path-based routing, supports Fargate</td>
+      </tr>
+      <tr>
+        <td><strong>NLB</strong></td>
+        <td>High throughput / high performance, AWS PrivateLink</td>
+        <td>TCP/UDP, static IP, ultra-low latency</td>
+      </tr>
+      <tr>
+        <td><strong>CLB</strong></td>
+        <td>Legacy only</td>
+        <td>Not recommended — no Fargate support, no advanced features</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- 05 DATA VOLUMES -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">05</span>
+      <h2>Data Volumes (EFS)</h2>
+      <span class="weight med">◈ MEDIUM</span>
+    </div>
+    <div class="grid-2">
+      <div class="card green">
+        <h3>EFS with ECS</h3>
+        <ul>
+          <li>Mount EFS onto ECS tasks</li>
+          <li>Works with <strong>both EC2 and Fargate</strong></li>
+          <li>Tasks in any AZ share the same data</li>
+          <li>Persistent storage that survives task restarts</li>
+          <li>Recommended for shared/stateful workloads</li>
+        </ul>
+      </div>
+      <div class="card red">
+        <h3>What NOT to use</h3>
+        <ul>
+          <li><strong>EBS</strong> — bound to a single AZ/instance, not shareable across tasks</li>
+          <li>EC2 local storage — ephemeral, lost when container stops</li>
+          <li>Fargate ephemeral storage — 20GB default, not shared</li>
+        </ul>
+      </div>
+    </div>
+    <div class="exam-tip">
+      <div class="label">Exam Tip</div>
+      EFS = multi-AZ shared persistent storage for ECS. If the question mentions "shared data between containers across AZs" → EFS is the answer.
+    </div>
+  </div>
+
+  <!-- 06 LOGGING -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">06</span>
+      <h2>Logging</h2>
+      <span class="weight high">◈◈ HIGH</span>
+    </div>
+    <div class="grid-2">
+      <div class="card blue">
+        <h3>Fargate Logging</h3>
+        <ul>
+          <li>Configure <code>logConfiguration</code> in Task Definition</li>
+          <li>Supported drivers: <code>awslogs</code>, <code>splunk</code>, <code>awsfirelens</code></li>
+          <li>Permissions on the <strong>Task Role</strong></li>
+          <li><code>awsfirelens</code> = Fluent Bit/Fluentd for advanced routing</li>
+        </ul>
+      </div>
+      <div class="card yellow">
+        <h3>EC2 Launch Type Logging</h3>
+        <ul>
+          <li>Uses CloudWatch Unified Agent + ECS Container Agent</li>
+          <li>Config at <code>/etc/ecs/ecs.config</code></li>
+          <li>Permissions on <strong>EC2 Instance Profile</strong></li>
+          <li>Must enable <code>ECS_AVAILABLE_LOGGING_DRIVERS</code> in config</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card green" style="margin-top:12px">
+      <h3>Sidecar Container Pattern</h3>
+      <p>Deploy a dedicated logging container alongside your app container in the same task. It collects logs from other containers and the filesystem, then forwards to CloudWatch or other destinations. Common with <code>awsfirelens</code> / Fluent Bit.</p>
+    </div>
+    <div class="exam-tip">
+      <div class="label">Exam Tip</div>
+      Fargate → permissions on Task Role. EC2 → permissions on Instance Profile. The <code>awslogs</code> driver sends directly to CloudWatch. <code>awsfirelens</code> enables routing logs to multiple destinations (S3, Kinesis, third-party).
+    </div>
+  </div>
+
+  <!-- 07 INTEGRATIONS -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">07</span>
+      <h2>Key Integrations</h2>
+      <span class="weight high">◈◈ HIGH</span>
+    </div>
+    <div class="grid">
+      <div class="card blue">
+        <h3>EventBridge → ECS</h3>
+        <ul>
+          <li>Trigger an ECS task in response to an AWS event</li>
+          <li>Example: S3 upload → EventBridge Rule → Run Fargate task to process file</li>
+          <li>Task uses Task Role to access S3, DynamoDB, etc.</li>
+          <li>Replaces need for always-running worker processes</li>
+        </ul>
+      </div>
+      <div class="card yellow">
+        <h3>EventBridge Scheduler</h3>
+        <ul>
+          <li>Run ECS tasks on a cron/rate schedule</li>
+          <li>Example: batch job every hour on Fargate</li>
+          <li>Serverless alternative to cron on EC2</li>
+        </ul>
+      </div>
+      <div class="card green">
+        <h3>SQS → ECS Auto Scaling</h3>
+        <ul>
+          <li>ECS tasks poll SQS queue for work</li>
+          <li>Scale ECS service based on <code>ApproximateNumberOfMessages</code></li>
+          <li>Classic worker pattern — more messages = more tasks</li>
+          <li>Tasks scale in when queue drains</li>
+        </ul>
+      </div>
+    </div>
+    <div class="exam-tip">
+      <div class="label">Exam Tip</div>
+      EventBridge + Fargate = serverless event-driven container execution. SQS + ECS Auto Scaling = scalable async worker pattern. Both are very common DOP-C02 architecture scenarios.
+    </div>
+  </div>
+
+  <!-- 08 TASK DEFINITIONS -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">08</span>
+      <h2>Task Definitions — Key Exam Points</h2>
+      <span class="weight med">◈ MEDIUM</span>
+    </div>
+    <div class="grid">
+      <div class="card blue">
+        <h3>What's Defined</h3>
+        <ul>
+          <li>Docker image (from ECR or Docker Hub)</li>
+          <li>CPU &amp; memory requirements</li>
+          <li>Environment variables (or from SSM/Secrets Manager)</li>
+          <li>Log configuration (<code>logConfiguration</code>)</li>
+          <li>Task Role + Task Execution Role</li>
+          <li>Port mappings</li>
+        </ul>
+      </div>
+      <div class="card green">
+        <h3>Task Execution Role vs Task Role</h3>
+        <ul>
+          <li><strong>Task Execution Role</strong> — used by ECS agent to pull image, write logs (needed on Fargate)</li>
+          <li><strong>Task Role</strong> — used by the app inside the container to call AWS services</li>
+          <li>Both must be set in the Task Definition</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- QUICK REFERENCE -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">✦</span>
+      <h2>Exam Quick Reference</h2>
+    </div>
+    <div class="pill-list">
+      <span class="pill hi">Fargate = no infra mgmt</span>
+      <span class="pill hi">Task Role ≠ Instance Profile</span>
+      <span class="pill hi">EFS = shared persistent storage</span>
+      <span class="pill hi">Capacity Provider (recommended)</span>
+      <span class="pill hi">SQS → scale tasks on queue depth</span>
+      <span class="pill hi">EventBridge → trigger ECS task</span>
+      <span class="pill hi">awsfirelens = log routing</span>
+      <span class="pill hi">Fargate logs → Task Role perms</span>
+      <span class="pill hi">EC2 logs → Instance Profile perms</span>
+      <span class="pill hi">ALB = default LB for ECS</span>
+      <span class="pill hi">Sidecar = separate logging container</span>
+      <span class="pill hi">Task Execution Role pulls images</span>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
