@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS Route 53 — DOP-C02</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e14;
+    --surface: #111720;
+    --surface2: #192030;
+    --border: #1e2d40;
+    --accent: #f59e0b;
+    --accent2: #38bdf8;
+    --accent3: #34d399;
+    --accent4: #f87171;
+    --text: #cdd6e0;
+    --text-dim: #6b7f94;
+    --text-bright: #eaf2f8;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.7;
+    padding: 40px 20px 80px;
+  }
+  .page { max-width: 900px; margin: 0 auto; }
+
+  header { border-left: 4px solid var(--accent); padding-left: 20px; margin-bottom: 48px; animation: fadeIn 0.5s ease; }
+  header .badge { font-family:var(--mono); font-size:11px; color:var(--accent); letter-spacing:3px; text-transform:uppercase; margin-bottom:8px; }
+  header h1 { font-size:36px; font-weight:600; color:var(--text-bright); letter-spacing:-1px; }
+  header p { color:var(--text-dim); font-size:13px; margin-top:6px; }
+
+  .section { margin-bottom:36px; animation:fadeUp 0.4s ease both; }
+  .section:nth-child(2){animation-delay:.05s} .section:nth-child(3){animation-delay:.10s}
+  .section:nth-child(4){animation-delay:.15s} .section:nth-child(5){animation-delay:.20s}
+  .section:nth-child(6){animation-delay:.25s} .section:nth-child(7){animation-delay:.30s}
+  .section:nth-child(8){animation-delay:.35s} .section:nth-child(9){animation-delay:.40s}
+  .section:nth-child(10){animation-delay:.45s}
+
+  .section-header { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+  .section-header .tag { font-family:var(--mono); font-size:10px; color:var(--accent); background:rgba(245,158,11,.1); border:1px solid rgba(245,158,11,.2); padding:2px 8px; letter-spacing:2px; text-transform:uppercase; }
+  .section-header h2 { font-size:17px; font-weight:600; color:var(--text-bright); }
+  .weight { margin-left:auto; font-family:var(--mono); font-size:10px; }
+  .weight.high { color:var(--accent4); }
+  .weight.med  { color:var(--accent); }
+  .weight.low  { color:var(--accent3); }
+
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+  .grid   { display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:12px; }
+  @media(max-width:640px){ .grid-2,.grid-3{grid-template-columns:1fr} }
+
+  .card { background:var(--surface); border:1px solid var(--border); padding:16px 18px; position:relative; }
+  .card::before { content:''; position:absolute; top:0;left:0; width:3px; height:100%; }
+  .card.blue::before  { background:var(--accent2); }
+  .card.green::before { background:var(--accent3); }
+  .card.yellow::before{ background:var(--accent); }
+  .card.red::before   { background:var(--accent4); }
+  .card.purple::before{ background:#a78bfa; }
+  .card h3 { font-family:var(--mono); font-size:12px; color:var(--text-bright); margin-bottom:8px; letter-spacing:.5px; }
+  .card p, .card li { font-size:13px; color:var(--text); line-height:1.6; }
+  .card ul { padding-left:16px; }
+  .card li { margin-bottom:3px; }
+
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th { background:var(--surface2); color:var(--accent); font-family:var(--mono); font-size:11px; letter-spacing:1.5px; text-transform:uppercase; padding:10px 14px; text-align:left; border-bottom:1px solid var(--border); }
+  td { padding:9px 14px; border-bottom:1px solid var(--border); vertical-align:top; color:var(--text); }
+  tr:last-child td { border-bottom:none; }
+  tr:hover td { background:var(--surface); }
+  td strong { color:var(--text-bright); }
+  td code, .card code, li code { font-family:var(--mono); font-size:12px; color:var(--accent2); background:rgba(56,189,248,.08); padding:1px 5px; }
+
+  .callout { background:rgba(245,158,11,.06); border:1px solid rgba(245,158,11,.2); border-left:3px solid var(--accent); padding:12px 16px; font-size:13px; margin-bottom:12px; }
+  .callout strong { color:var(--accent); }
+  .exam-tip { background:rgba(248,113,113,.06); border:1px solid rgba(248,113,113,.2); border-left:3px solid var(--accent4); padding:12px 16px; font-size:13px; margin-top:12px; }
+  .exam-tip .label { font-family:var(--mono); font-size:10px; color:var(--accent4); letter-spacing:2px; text-transform:uppercase; margin-bottom:4px; }
+
+  /* routing policy cards */
+  .policy-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:12px; }
+  .policy { background:var(--surface); border:1px solid var(--border); padding:14px 16px; }
+  .policy-name { font-family:var(--mono); font-size:12px; color:var(--text-bright); margin-bottom:6px; display:flex; align-items:center; gap:8px; }
+  .policy-name .dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+  .policy li { font-size:12px; color:var(--text); line-height:1.5; margin-bottom:2px; }
+  .policy ul { padding-left:14px; }
+  .policy .use { font-size:11px; font-family:var(--mono); color:var(--text-dim); margin-top:6px; border-top:1px solid var(--border); padding-top:6px; }
+  .policy .use span { color:var(--accent3); }
+
+  .pill-list { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+  .pill { font-family:var(--mono); font-size:11px; padding:3px 10px; border:1px solid var(--border); color:var(--text-dim); background:var(--surface); }
+  .pill.hi { border-color:rgba(56,189,248,.3); color:var(--accent2); background:rgba(56,189,248,.06); }
+
+  hr { border:none; border-top:1px solid var(--border); margin:40px 0; }
+  @keyframes fadeIn { from{opacity:0}to{opacity:1} }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)} }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <a href="../index.html" style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--text-dim);text-decoration:none;margin-bottom:16px;letter-spacing:.05em;transition:color .2s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-dim)'">&#8592; Home</a>
+    <div class="badge">DOP-C02 · AWS DevOps Professional</div>
+    <h1>Route 53</h1>
+    <p>Authoritative DNS + Domain Registrar + Health Checks. The traffic manager for multi-region and DR architectures.</p>
+  </header>
+
+  <!-- 01 CORE CONCEPTS -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">01</span>
+      <h2>Records, Hosted Zones & Alias</h2>
+      <span class="weight high">◈◈ HIGH</span>
+    </div>
+    <div class="grid-2">
+      <div class="card blue">
+        <h3>Record Types (Must Know)</h3>
+        <ul>
+          <li><code>A</code> — hostname → IPv4</li>
+          <li><code>AAAA</code> — hostname → IPv6</li>
+          <li><code>CNAME</code> — hostname → another hostname. <strong>Cannot be used on zone apex</strong> (root domain)</li>
+          <li><code>NS</code> — name servers for the hosted zone</li>
+          <li><code>Alias</code> — AWS-only extension of A/AAAA. Points to AWS resources. <strong>Works on zone apex. Free.</strong></li>
+        </ul>
+      </div>
+      <div class="card yellow">
+        <h3>Hosted Zones</h3>
+        <ul>
+          <li><strong>Public</strong> — routes internet traffic (e.g. <code>example.com</code>)</li>
+          <li><strong>Private</strong> — routes within one or more VPCs (e.g. <code>db.internal</code>)</li>
+          <li>Cost: $0.50/month per hosted zone</li>
+          <li>Private zone must be associated with a VPC to resolve</li>
+          <li>Split-horizon DNS: same name → different answers for public vs private</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card green" style="margin-top:12px">
+      <h3>CNAME vs Alias — Critical Distinction</h3>
+      <ul>
+        <li><strong>CNAME</strong>: maps to any hostname. Cannot be at zone apex (<code>example.com</code>). Charged per query.</li>
+        <li><strong>Alias</strong>: AWS-native, maps to AWS resource (ALB, CloudFront, S3, API GW, Elastic Beanstalk, VPC endpoints). <strong>Works at zone apex. No extra charge.</strong></li>
+        <li>Alias target cannot be an EC2 DNS name</li>
+        <li>TTL is set automatically by Route 53 for Alias records</li>
+      </ul>
+    </div>
+    <div class="exam-tip">
+      <div class="label">Exam Tip</div>
+      "Route <code>example.com</code> to an ALB" → must use <strong>Alias</strong>, not CNAME. CNAME on zone apex is invalid. Alias to EC2 DNS → invalid. Alias to CloudFront, S3 website, ALB → valid.
+    </div>
+  </div>
+
+  <!-- 02 HEALTH CHECKS -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">02</span>
+      <h2>Health Checks</h2>
+      <span class="weight high">◈◈ HIGH</span>
+    </div>
+    <div class="callout">
+      <strong>Health checks are the engine behind Route 53 automated failover.</strong> Without them, Route 53 cannot detect failures and reroute traffic automatically.
+    </div>
+    <div class="grid-3">
+      <div class="card blue">
+        <h3>Endpoint Health Checks</h3>
+        <ul>
+          <li>Monitor HTTP/HTTPS/TCP endpoints</li>
+          <li>~15 global health checkers send requests</li>
+          <li>Healthy if ≥18% report healthy</li>
+          <li>Interval: 30s (or 10s fast — extra cost)</li>
+          <li>Can check response body for a string (first 5120 bytes)</li>
+        </ul>
+      </div>
+      <div class="card yellow">
+        <h3>Calculated Health Checks</h3>
+        <ul>
+          <li>Aggregate multiple health checks into one</li>
+          <li>Use AND / OR / NOT logic</li>
+          <li>Up to 256 child health checks</li>
+          <li>Define how many must pass</li>
+          <li>Use to monitor overall system health</li>
+        </ul>
+      </div>
+      <div class="card green">
+        <h3>CloudWatch Alarm Health Checks</h3>
+        <ul>
+          <li>Monitor a CloudWatch Alarm state</li>
+          <li>Enables health checks on <strong>private resources</strong> (inside VPC)</li>
+          <li>Route 53 health checkers can't reach private IPs</li>
+          <li>Pattern: CW Metric → CW Alarm → R53 Health Check</li>
+        </ul>
+      </div>
+    </div>
+    <div class="exam-tip">
+      <div class="label">Exam Tip</div>
+      Route 53 health checkers are <strong>outside your VPC</strong> — they cannot directly check private endpoints. Use <strong>CloudWatch Alarm → Health Check</strong> for private resources. This is a very common exam pattern.
+    </div>
+  </div>
+
+  <!-- 03 ROUTING POLICIES -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">03</span>
+      <h2>Routing Policies</h2>
+      <span class="weight high">◈◈ HIGH</span>
+    </div>
+    <div class="policy-grid">
+
+      <div class="policy">
+        <div class="policy-name"><span class="dot" style="background:var(--accent2)"></span>Simple</div>
+        <ul>
+          <li>Route to a single resource</li>
+          <li>Can return multiple IPs (client picks randomly)</li>
+          <li>No health check association</li>
+          <li>No failover capability</li>
+        </ul>
+        <div class="use">Use when: <span>single backend, no HA needed</span></div>
+      </div>
+
+      <div class="policy">
+        <div class="policy-name"><span class="dot" style="background:var(--accent)"></span>Weighted</div>
+        <ul>
+          <li>Split traffic by % across multiple resources</li>
+          <li>Weight 0 = stop sending traffic</li>
+          <li>All weights 0 = distributed equally</li>
+          <li>Can combine with health checks</li>
+        </ul>
+        <div class="use">Use when: <span>A/B testing, blue/green, canary deployments</span></div>
+      </div>
+
+      <div class="policy">
+        <div class="policy-name"><span class="dot" style="background:var(--accent3)"></span>Latency</div>
+        <ul>
+          <li>Routes to region with lowest latency to user</li>
+          <li>Latency is AWS-measured, not geographic</li>
+          <li>Can combine with health checks for failover</li>
+          <li>Same record name across multiple regions</li>
+        </ul>
+        <div class="use">Use when: <span>multi-region, minimize response time</span></div>
+      </div>
+
+      <div class="policy">
+        <div class="policy-name"><span class="dot" style="background:var(--accent4)"></span>Failover (Active-Passive)</div>
+        <ul>
+          <li>Primary receives all traffic</li>
+          <li>Secondary only used when primary health check fails</li>
+          <li>Health check on primary is <strong>mandatory</strong></li>
+          <li>Secondary can be any endpoint (DR site)</li>
+        </ul>
+        <div class="use">Use when: <span>DR, active-passive HA</span></div>
+      </div>
+
+      <div class="policy">
+        <div class="policy-name"><span class="dot" style="background:#a78bfa"></span>Geolocation</div>
+        <ul>
+          <li>Routes based on user's <strong>geographic location</strong></li>
+          <li>Can define rules for continent, country, or US state</li>
+          <li>Must create a <strong>Default</strong> record for unmatched locations</li>
+          <li>Different from Latency — geo is location, not speed</li>
+        </ul>
+        <div class="use">Use when: <span>compliance, content localization, region locks</span></div>
+      </div>
+
+      <div class="policy">
+        <div class="policy-name"><span class="dot" style="background:#f472b6"></span>Geoproximity</div>
+        <ul>
+          <li>Routes based on geographic distance + bias</li>
+          <li><strong>Bias</strong>: positive = expand region, negative = shrink</li>
+          <li>Requires <strong>Traffic Flow</strong> feature</li>
+          <li>Shift traffic between regions by adjusting bias</li>
+        </ul>
+        <div class="use">Use when: <span>shift traffic to a region gradually</span></div>
+      </div>
+
+      <div class="policy">
+        <div class="policy-name"><span class="dot" style="background:var(--accent2)"></span>Multi-Value</div>
+        <ul>
+          <li>Returns up to 8 healthy records randomly</li>
+          <li>Each record can have a health check</li>
+          <li>Client-side load balancing (not a replacement for ALB)</li>
+          <li>Unhealthy records filtered out automatically</li>
+        </ul>
+        <div class="use">Use when: <span>client-side LB across healthy endpoints</span></div>
+      </div>
+
+      <div class="policy">
+        <div class="policy-name"><span class="dot" style="background:var(--accent3)"></span>IP-Based</div>
+        <ul>
+          <li>Routes based on client's IP CIDR block</li>
+          <li>Define CIDR → endpoint mapping</li>
+          <li>Useful for ISP-based routing optimization</li>
+        </ul>
+        <div class="use">Use when: <span>ISP-aware routing, known IP ranges</span></div>
+      </div>
+
+    </div>
+    <div class="exam-tip">
+      <div class="label">Exam Tip</div>
+      Weighted = blue/green at DNS level. Failover = DR active-passive. Latency ≠ Geolocation (latency is measured speed; geo is literal location). Geoproximity requires Traffic Flow and uses a bias dial. Multi-Value ≠ load balancer.
+    </div>
+  </div>
+
+  <!-- 04 TRAFFIC FLOW -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">04</span>
+      <h2>Traffic Flow & Policy Records</h2>
+      <span class="weight med">◈ MEDIUM</span>
+    </div>
+    <div class="grid-2">
+      <div class="card blue">
+        <h3>Traffic Flow</h3>
+        <ul>
+          <li>Visual editor to build complex routing decision trees</li>
+          <li>Combine multiple routing policies (e.g. Latency → Weighted → Failover)</li>
+          <li>Required for <strong>Geoproximity</strong> routing</li>
+          <li>Policies are versioned — roll back to previous version</li>
+          <li>Reuse same policy across multiple hosted zones</li>
+        </ul>
+      </div>
+      <div class="card yellow">
+        <h3>Common Multi-Policy Pattern</h3>
+        <ul>
+          <li>Latency-based → routes user to nearest region</li>
+          <li>Within region → Weighted between blue/green</li>
+          <li>Each endpoint → has a Health Check</li>
+          <li>Failover → fallback to another region if all unhealthy</li>
+          <li>Traffic Flow makes this composable without writing code</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 05 ROUTE 53 IN DEVOPS PATTERNS -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">05</span>
+      <h2>Route 53 in DevOps Deployment Patterns</h2>
+      <span class="weight high">◈◈ HIGH</span>
+    </div>
+    <table>
+      <tr>
+        <th>Pattern</th>
+        <th>Route 53 Policy</th>
+        <th>How</th>
+      </tr>
+      <tr>
+        <td><strong>Blue/Green</strong></td>
+        <td>Weighted</td>
+        <td>Blue = weight 100. Switch: Blue = 0, Green = 100. Or gradual shift.</td>
+      </tr>
+      <tr>
+        <td><strong>Canary Release</strong></td>
+        <td>Weighted</td>
+        <td>New version gets weight 5 (5% traffic). Monitor → increase gradually.</td>
+      </tr>
+      <tr>
+        <td><strong>Active-Passive DR</strong></td>
+        <td>Failover</td>
+        <td>Primary in us-east-1. Secondary in eu-west-1. Automatic failover on health check failure.</td>
+      </tr>
+      <tr>
+        <td><strong>Active-Active Multi-Region</strong></td>
+        <td>Latency + Health Checks</td>
+        <td>Each region serves traffic. Route 53 removes unhealthy regions automatically.</td>
+      </tr>
+      <tr>
+        <td><strong>Geo Compliance</strong></td>
+        <td>Geolocation</td>
+        <td>EU users → EU endpoint. US users → US endpoint. GDPR, data residency.</td>
+      </tr>
+    </table>
+    <div class="exam-tip">
+      <div class="label">Exam Tip</div>
+      Blue/green and canary at the DNS level = Weighted routing. Always pair with health checks so Route 53 can auto-remove unhealthy targets. TTL matters here — <strong>lower TTL before a deployment</strong> so clients pick up changes faster.
+    </div>
+  </div>
+
+  <!-- 06 TTL -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">06</span>
+      <h2>TTL (Time To Live)</h2>
+      <span class="weight med">◈ MEDIUM</span>
+    </div>
+    <div class="grid-2">
+      <div class="card blue">
+        <h3>How TTL Works</h3>
+        <ul>
+          <li>DNS resolvers cache the record for TTL seconds</li>
+          <li>Clients won't re-query until TTL expires</li>
+          <li>High TTL (e.g. 86400s / 24h) = fewer queries, stale risk</li>
+          <li>Low TTL (e.g. 60s) = more queries, faster propagation</li>
+          <li>Alias records: TTL set by Route 53, not configurable</li>
+        </ul>
+      </div>
+      <div class="card yellow">
+        <h3>TTL Strategy for Deployments</h3>
+        <ul>
+          <li>Before a planned change: <strong>lower TTL to 60s</strong> well in advance (wait for old TTL to expire)</li>
+          <li>Make DNS change — propagates in ~60s</li>
+          <li>After change is stable: <strong>restore high TTL</strong></li>
+          <li>Forgetting this = clients stuck on old IP for hours</li>
+        </ul>
+      </div>
+    </div>
+    <div class="exam-tip">
+      <div class="label">Exam Tip</div>
+      Lower TTL <strong>before</strong> the deployment window — not during. If TTL is 24h, you need to lower it 24h before the change or clients will be stuck. This is a common operational scenario in the exam.
+    </div>
+  </div>
+
+  <!-- 07 PRIVATE DNS & HYBRID -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">07</span>
+      <h2>Private DNS & Hybrid Architecture</h2>
+      <span class="weight med">◈ MEDIUM</span>
+    </div>
+    <div class="grid-2">
+      <div class="card green">
+        <h3>Private Hosted Zones</h3>
+        <ul>
+          <li>Resolve internal names (e.g. <code>db.internal</code>) within VPC</li>
+          <li>Must enable <code>enableDnsHostnames</code> and <code>enableDnsSupport</code> on VPC</li>
+          <li>Associate with multiple VPCs (even cross-account)</li>
+          <li>Overrides public DNS for same name (split-horizon)</li>
+        </ul>
+      </div>
+      <div class="card blue">
+        <h3>Resolver Endpoints (Hybrid DNS)</h3>
+        <ul>
+          <li><strong>Inbound Endpoint</strong> — on-prem DNS queries Route 53 private zones</li>
+          <li><strong>Outbound Endpoint</strong> — VPC resources query on-prem DNS servers</li>
+          <li>Forwarding rules define which domains go where</li>
+          <li>Used in Direct Connect / VPN hybrid architectures</li>
+        </ul>
+      </div>
+    </div>
+    <div class="exam-tip">
+      <div class="label">Exam Tip</div>
+      On-prem → resolve AWS private names = <strong>Inbound Resolver Endpoint</strong>. VPC → resolve on-prem names = <strong>Outbound Resolver Endpoint</strong>. Both require Resolver Rules. Common in hybrid architecture questions.
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- QUICK REFERENCE -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">✦</span>
+      <h2>Exam Quick Reference</h2>
+    </div>
+    <div class="pill-list">
+      <span class="pill hi">Zone apex → Alias not CNAME</span>
+      <span class="pill hi">Alias to EC2 DNS → invalid</span>
+      <span class="pill hi">Failover → health check mandatory</span>
+      <span class="pill hi">Private endpoints → CW Alarm HC</span>
+      <span class="pill hi">Weighted = blue/green / canary</span>
+      <span class="pill hi">Latency ≠ Geolocation</span>
+      <span class="pill hi">Geoproximity needs Traffic Flow</span>
+      <span class="pill hi">Lower TTL before deployment</span>
+      <span class="pill hi">Multi-Value ≠ load balancer</span>
+      <span class="pill hi">Private zone → VPC DNS settings on</span>
+      <span class="pill hi">Inbound EP = on-prem → R53</span>
+      <span class="pill hi">Outbound EP = VPC → on-prem DNS</span>
+      <span class="pill hi">100% SLA — only AWS service with it</span>
+      <span class="pill hi">Geolocation needs default record</span>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

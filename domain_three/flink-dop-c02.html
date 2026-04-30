@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS Managed Apache Flink — DOP-C02</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e14;
+    --surface: #111720;
+    --surface2: #192030;
+    --border: #1e2d40;
+    --accent: #f59e0b;
+    --accent2: #38bdf8;
+    --accent3: #34d399;
+    --accent4: #f87171;
+    --text: #cdd6e0;
+    --text-dim: #6b7f94;
+    --text-bright: #eaf2f8;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.7;
+    padding: 40px 20px 80px;
+  }
+  .page { max-width: 900px; margin: 0 auto; }
+
+  header {
+    border-left: 4px solid var(--accent);
+    padding-left: 20px;
+    margin-bottom: 48px;
+    animation: fadeIn 0.5s ease;
+  }
+  header .badge { font-family:var(--mono); font-size:11px; color:var(--accent); letter-spacing:3px; text-transform:uppercase; margin-bottom:8px; }
+  header h1 { font-size:34px; font-weight:600; color:var(--text-bright); letter-spacing:-1px; }
+  header p { color:var(--text-dim); font-size:13px; margin-top:6px; }
+
+  .section { margin-bottom:36px; animation:fadeUp 0.4s ease both; }
+  .section:nth-child(2){animation-delay:.05s}
+  .section:nth-child(3){animation-delay:.10s}
+  .section:nth-child(4){animation-delay:.15s}
+  .section:nth-child(5){animation-delay:.20s}
+  .section:nth-child(6){animation-delay:.25s}
+  .section:nth-child(7){animation-delay:.30s}
+
+  .section-header { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+  .section-header .tag { font-family:var(--mono); font-size:10px; color:var(--accent); background:rgba(245,158,11,.1); border:1px solid rgba(245,158,11,.2); padding:2px 8px; letter-spacing:2px; text-transform:uppercase; }
+  .section-header h2 { font-size:17px; font-weight:600; color:var(--text-bright); }
+  .weight { margin-left:auto; font-family:var(--mono); font-size:10px; }
+  .weight.high { color:var(--accent4); }
+  .weight.med  { color:var(--accent); }
+  .weight.low  { color:var(--accent3); }
+
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+  .grid   { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:12px; }
+  @media(max-width:640px){ .grid-2,.grid-3{grid-template-columns:1fr} }
+
+  .card { background:var(--surface); border:1px solid var(--border); padding:16px 18px; position:relative; }
+  .card::before { content:''; position:absolute; top:0;left:0; width:3px; height:100%; }
+  .card.blue::before  { background:var(--accent2); }
+  .card.green::before { background:var(--accent3); }
+  .card.yellow::before{ background:var(--accent); }
+  .card.red::before   { background:var(--accent4); }
+  .card.purple::before{ background:#a78bfa; }
+  .card h3 { font-family:var(--mono); font-size:12px; color:var(--text-bright); margin-bottom:8px; letter-spacing:.5px; }
+  .card p, .card li { font-size:13px; color:var(--text); line-height:1.6; }
+  .card ul { padding-left:16px; }
+  .card li { margin-bottom:3px; }
+
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th { background:var(--surface2); color:var(--accent); font-family:var(--mono); font-size:11px; letter-spacing:1.5px; text-transform:uppercase; padding:10px 14px; text-align:left; border-bottom:1px solid var(--border); }
+  td { padding:9px 14px; border-bottom:1px solid var(--border); vertical-align:top; color:var(--text); }
+  tr:last-child td { border-bottom:none; }
+  tr:hover td { background:var(--surface); }
+  td strong { color:var(--text-bright); }
+  td code, .card code, li code { font-family:var(--mono); font-size:12px; color:var(--accent2); background:rgba(56,189,248,.08); padding:1px 5px; }
+
+  .callout { background:rgba(245,158,11,.06); border:1px solid rgba(245,158,11,.2); border-left:3px solid var(--accent); padding:12px 16px; font-size:13px; margin-bottom:12px; }
+  .callout strong { color:var(--accent); }
+
+  .warn { background:rgba(248,113,113,.06); border:1px solid rgba(248,113,113,.2); border-left:3px solid var(--accent4); padding:12px 16px; font-size:13px; margin-bottom:12px; }
+  .warn strong { color:var(--accent4); }
+
+  .exam-tip { background:rgba(248,113,113,.06); border:1px solid rgba(248,113,113,.2); border-left:3px solid var(--accent4); padding:12px 16px; font-size:13px; margin-top:12px; }
+  .exam-tip .label { font-family:var(--mono); font-size:10px; color:var(--accent4); letter-spacing:2px; text-transform:uppercase; margin-bottom:4px; }
+
+  /* stream flow */
+  .flow { display:flex; align-items:stretch; gap:0; flex-wrap:wrap; margin:14px 0; }
+  .flow-step { background:var(--surface); border:1px solid var(--border); padding:10px 14px; font-size:12px; font-family:var(--mono); color:var(--text-bright); flex:1; min-width:90px; }
+  .flow-step span { display:block; font-size:11px; color:var(--text-dim); font-family:var(--sans); margin-top:2px; }
+  .flow-step.src   { border-top:3px solid var(--accent2); }
+  .flow-step.flink { border-top:3px solid #a78bfa; }
+  .flow-step.sink  { border-top:3px solid var(--accent3); }
+  .flow-arrow { display:flex; align-items:center; padding:0 4px; color:var(--accent); font-size:16px; }
+
+  .pill-list { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+  .pill { font-family:var(--mono); font-size:11px; padding:3px 10px; border:1px solid var(--border); color:var(--text-dim); background:var(--surface); }
+  .pill.hi { border-color:rgba(56,189,248,.3); color:var(--accent2); background:rgba(56,189,248,.06); }
+
+  hr { border:none; border-top:1px solid var(--border); margin:40px 0; }
+  @keyframes fadeIn { from{opacity:0}to{opacity:1} }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)} }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <a href="../index.html" style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--text-dim);text-decoration:none;margin-bottom:16px;letter-spacing:.05em;transition:color .2s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-dim)'">&#8592; Home</a>
+    <div class="badge">DOP-C02 · AWS DevOps Professional</div>
+    <h1>Amazon Managed Service for Apache Flink</h1>
+    <p>Run Apache Flink applications on a fully managed cluster — stateful real-time stream processing at scale.</p>
+  </header>
+
+  <!-- 01 WHAT IT IS -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">01</span>
+      <h2>What It Is & Exam Context</h2>
+      <span class="weight med">◈ MEDIUM</span>
+    </div>
+    <div class="callout">
+      <strong>DOP-C02 weight:</strong> Flink is a supporting service — you need to know <em>when to choose it</em> and how it fits in a streaming pipeline, not how to write Flink code.
+    </div>
+    <div class="grid-2">
+      <div class="card blue">
+        <h3>What It Does</h3>
+        <ul>
+          <li>Runs <strong>Apache Flink</strong> applications on AWS-managed infrastructure</li>
+          <li>Real-time <strong>stateful</strong> stream processing (not just filtering)</li>
+          <li>Write in Java, Scala, Python, or SQL (Flink SQL)</li>
+          <li>Managed cluster: auto-scaling, parallel computation</li>
+          <li>Application state backed by <strong>checkpoints &amp; snapshots</strong> to S3</li>
+          <li>Formerly: <em>Kinesis Data Analytics for Apache Flink</em></li>
+        </ul>
+      </div>
+      <div class="card yellow">
+        <h3>When to Choose Flink</h3>
+        <ul>
+          <li>Complex streaming logic: <strong>windows, joins, aggregations</strong></li>
+          <li>Stateful processing — maintain state across events</li>
+          <li>Pattern detection over a stream (CEP)</li>
+          <li>Need sub-second latency with custom business logic</li>
+          <li>Real-time dashboards, anomaly detection, fraud detection</li>
+        </ul>
+      </div>
+    </div>
+    <div class="exam-tip">
+      <div class="label">Exam Tip</div>
+      Flink = <strong>complex real-time processing with state</strong>. Lambda = simple per-event transform. Firehose = delivery only. If the scenario involves windowed aggregations, stream joins, or stateful logic → Flink is the answer.
+    </div>
+  </div>
+
+  <!-- 02 SOURCES & SINKS -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">02</span>
+      <h2>Sources & Sinks</h2>
+      <span class="weight high">◈◈ HIGH</span>
+    </div>
+    <div class="warn">
+      <strong>Critical:</strong> Flink does <strong>NOT</strong> read from Amazon Data Firehose. Firehose is a delivery service, not a readable stream source.
+    </div>
+    <div class="flow">
+      <div class="flow-step src">KDS<span>Kinesis Data Streams</span></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step flink">Apache Flink<span>Managed Service</span></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step sink">S3 / KDS<span>Redshift, OpenSearch</span></div>
+    </div>
+    <div class="flow">
+      <div class="flow-step src">MSK<span>Amazon Managed Kafka</span></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step flink">Apache Flink<span>Managed Service</span></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step sink">Custom sinks<span>Lambda, DynamoDB…</span></div>
+    </div>
+    <div class="grid-2" style="margin-top:12px">
+      <div class="card green">
+        <h3>Supported Sources</h3>
+        <ul>
+          <li><strong>Kinesis Data Streams</strong> — primary AWS source</li>
+          <li><strong>Amazon MSK</strong> (Managed Apache Kafka)</li>
+          <li>Custom sources via Flink connectors</li>
+          <li>NOT Firehose, NOT SQS natively</li>
+        </ul>
+      </div>
+      <div class="card blue">
+        <h3>Supported Sinks (Outputs)</h3>
+        <ul>
+          <li>Amazon S3</li>
+          <li>Kinesis Data Streams (back to KDS)</li>
+          <li>Amazon OpenSearch</li>
+          <li>Amazon Redshift</li>
+          <li>DynamoDB, Lambda, custom HTTP</li>
+        </ul>
+      </div>
+    </div>
+    <div class="exam-tip">
+      <div class="label">Exam Tip</div>
+      Sources = <strong>KDS</strong> or <strong>MSK</strong>. If a scenario shows Firehose as the Flink source → wrong answer. Firehose is a <em>destination</em>, not a source for Flink.
+    </div>
+  </div>
+
+  <!-- 03 CHECKPOINTS & STATE -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">03</span>
+      <h2>State, Checkpoints & Snapshots</h2>
+      <span class="weight med">◈ MEDIUM</span>
+    </div>
+    <div class="grid-2">
+      <div class="card yellow">
+        <h3>Checkpoints (Automatic)</h3>
+        <ul>
+          <li>Periodic snapshots of application state to <strong>S3</strong></li>
+          <li>Triggered automatically by Flink runtime</li>
+          <li>Used for <strong>automatic failure recovery</strong></li>
+          <li>If a task fails, Flink restarts from last checkpoint</li>
+          <li>Configurable interval — trade-off between recovery time and overhead</li>
+        </ul>
+      </div>
+      <div class="card blue">
+        <h3>Snapshots (Manual)</h3>
+        <ul>
+          <li>User-triggered full application state backup</li>
+          <li>Used for: version upgrades, code deployments, intentional restarts</li>
+          <li>Allows resume from exact point in stream</li>
+          <li>Stored in S3</li>
+          <li>Enables blue/green deployment of Flink apps</li>
+        </ul>
+      </div>
+    </div>
+    <div class="exam-tip">
+      <div class="label">Exam Tip</div>
+      Checkpoints = automatic recovery from failures. Snapshots = intentional save point for deployments or migrations. Both stored in S3. This is how Flink achieves <strong>exactly-once processing semantics</strong>.
+    </div>
+  </div>
+
+  <!-- 04 FLINK vs LAMBDA vs FIREHOSE -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">04</span>
+      <h2>Flink vs Lambda vs Firehose — Choose the Right Tool</h2>
+      <span class="weight high">◈◈ HIGH</span>
+    </div>
+    <table>
+      <tr>
+        <th>Scenario</th>
+        <th>Best Choice</th>
+        <th>Why</th>
+      </tr>
+      <tr>
+        <td>Simple per-record transform (CSV → JSON)</td>
+        <td><strong>Lambda</strong> (via KDS/Firehose)</td>
+        <td>Stateless, event-driven, low complexity</td>
+      </tr>
+      <tr>
+        <td>Load stream to S3/Redshift/OpenSearch</td>
+        <td><strong>Firehose</strong></td>
+        <td>No-code delivery, buffered batches</td>
+      </tr>
+      <tr>
+        <td>Count events per user over last 5 minutes</td>
+        <td><strong>Flink</strong></td>
+        <td>Requires time window + stateful aggregation</td>
+      </tr>
+      <tr>
+        <td>Detect fraud pattern across 3 events in sequence</td>
+        <td><strong>Flink</strong></td>
+        <td>Complex Event Processing (CEP) — stateful, ordered</td>
+      </tr>
+      <tr>
+        <td>Join two streams in real-time</td>
+        <td><strong>Flink</strong></td>
+        <td>Stream-to-stream join requires stateful processing</td>
+      </tr>
+      <tr>
+        <td>Real-time dashboard from IoT sensors</td>
+        <td><strong>Flink → OpenSearch / KDS</strong></td>
+        <td>Aggregations over time windows, low latency output</td>
+      </tr>
+      <tr>
+        <td>Archive logs with no processing</td>
+        <td><strong>Firehose</strong></td>
+        <td>Delivery only, no logic needed</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- 05 INFRASTRUCTURE -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">05</span>
+      <h2>Managed Infrastructure</h2>
+      <span class="weight low">◈ LOW</span>
+    </div>
+    <div class="grid-3">
+      <div class="card green">
+        <h3>Compute</h3>
+        <ul>
+          <li>Provisioned KPUs (Kinesis Processing Units)</li>
+          <li>1 KPU = 1 vCPU + 4 GB RAM</li>
+          <li>Auto-scaling based on CPU/memory</li>
+          <li>Parallel task execution across KPUs</li>
+        </ul>
+      </div>
+      <div class="card blue">
+        <h3>Availability</h3>
+        <ul>
+          <li>Runs across multiple AZs</li>
+          <li>Automatic failure detection &amp; restart</li>
+          <li>Recovers from last checkpoint</li>
+          <li>No manual cluster management</li>
+        </ul>
+      </div>
+      <div class="card yellow">
+        <h3>Deployment</h3>
+        <ul>
+          <li>Deploy Flink JAR or use Flink SQL (no-code)</li>
+          <li>Application code stored in S3</li>
+          <li>VPC support for private network access</li>
+          <li>IAM for access to KDS, S3, MSK</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 06 FULL STREAMING ARCHITECTURE -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">06</span>
+      <h2>Common Pipeline Architecture</h2>
+      <span class="weight high">◈◈ HIGH</span>
+    </div>
+    <div class="callout">
+      <strong>Pattern:</strong> KDS ingests raw events → Flink processes in real-time → multiple outputs simultaneously.
+    </div>
+    <div class="flow">
+      <div class="flow-step src">IoT / Apps<span>raw events</span></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step src">KDS<span>stream buffer</span></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step flink">Flink<span>aggregate / detect</span></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step sink">OpenSearch<span>live dashboard</span></div>
+    </div>
+    <div class="flow" style="margin-top:4px">
+      <div class="flow-step src" style="visibility:hidden">x</div>
+      <div class="flow-arrow" style="visibility:hidden">→</div>
+      <div class="flow-step src" style="visibility:hidden">x</div>
+      <div class="flow-arrow" style="visibility:hidden">→</div>
+      <div class="flow-step flink" style="visibility:hidden">x</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step sink">S3<span>archive results</span></div>
+    </div>
+    <div class="exam-tip">
+      <div class="label">Exam Tip</div>
+      KDS → Flink → multiple sinks is the canonical pattern. Flink can write results to KDS (for downstream consumers), to OpenSearch (for dashboards), and to S3 (for batch analysis) simultaneously. Firehose is never in the read path for Flink.
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- QUICK REFERENCE -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">✦</span>
+      <h2>Exam Quick Reference</h2>
+    </div>
+    <div class="pill-list">
+      <span class="pill hi">Stateful real-time processing → Flink</span>
+      <span class="pill hi">Sources: KDS or MSK only</span>
+      <span class="pill hi">NOT Firehose as source</span>
+      <span class="pill hi">Windowed aggregation → Flink</span>
+      <span class="pill hi">Stream joins → Flink</span>
+      <span class="pill hi">CEP / pattern detection → Flink</span>
+      <span class="pill hi">Checkpoints = auto failure recovery</span>
+      <span class="pill hi">Snapshots = manual save point</span>
+      <span class="pill hi">Both stored in S3</span>
+      <span class="pill hi">Flink SQL = no-code option</span>
+      <span class="pill hi">KPU = 1 vCPU + 4 GB RAM</span>
+      <span class="pill hi">Simple transform → Lambda</span>
+      <span class="pill hi">Delivery only → Firehose</span>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

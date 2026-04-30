@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS Kinesis Data Streams — DOP-C02</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e14;
+    --surface: #111720;
+    --surface2: #192030;
+    --border: #1e2d40;
+    --accent: #f59e0b;
+    --accent2: #38bdf8;
+    --accent3: #34d399;
+    --accent4: #f87171;
+    --text: #cdd6e0;
+    --text-dim: #6b7f94;
+    --text-bright: #eaf2f8;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.7;
+    padding: 40px 20px 80px;
+  }
+  .page { max-width: 900px; margin: 0 auto; }
+
+  header {
+    border-left: 4px solid var(--accent);
+    padding-left: 20px;
+    margin-bottom: 48px;
+    animation: fadeIn 0.5s ease;
+  }
+  header .badge { font-family:var(--mono); font-size:11px; color:var(--accent); letter-spacing:3px; text-transform:uppercase; margin-bottom:8px; }
+  header h1 { font-size:36px; font-weight:600; color:var(--text-bright); letter-spacing:-1px; }
+  header p { color:var(--text-dim); font-size:13px; margin-top:6px; }
+
+  .section { margin-bottom:36px; animation:fadeUp 0.4s ease both; }
+  .section:nth-child(2){animation-delay:.05s}
+  .section:nth-child(3){animation-delay:.10s}
+  .section:nth-child(4){animation-delay:.15s}
+  .section:nth-child(5){animation-delay:.20s}
+  .section:nth-child(6){animation-delay:.25s}
+  .section:nth-child(7){animation-delay:.30s}
+  .section:nth-child(8){animation-delay:.35s}
+  .section:nth-child(9){animation-delay:.40s}
+
+  .section-header { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+  .section-header .tag { font-family:var(--mono); font-size:10px; color:var(--accent); background:rgba(245,158,11,.1); border:1px solid rgba(245,158,11,.2); padding:2px 8px; letter-spacing:2px; text-transform:uppercase; }
+  .section-header h2 { font-size:17px; font-weight:600; color:var(--text-bright); }
+  .weight { margin-left:auto; font-family:var(--mono); font-size:10px; }
+  .weight.high { color:var(--accent4); }
+  .weight.med  { color:var(--accent); }
+  .weight.low  { color:var(--accent3); }
+
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:12px; }
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+  @media(max-width:640px){ .grid-2,.grid-3{grid-template-columns:1fr} }
+
+  .card { background:var(--surface); border:1px solid var(--border); padding:16px 18px; position:relative; }
+  .card::before { content:''; position:absolute; top:0;left:0; width:3px; height:100%; }
+  .card.blue::before  { background:var(--accent2); }
+  .card.green::before { background:var(--accent3); }
+  .card.yellow::before{ background:var(--accent); }
+  .card.red::before   { background:var(--accent4); }
+  .card h3 { font-family:var(--mono); font-size:12px; color:var(--text-bright); margin-bottom:8px; letter-spacing:.5px; }
+  .card p, .card li { font-size:13px; color:var(--text); line-height:1.6; }
+  .card ul { padding-left:16px; }
+  .card li { margin-bottom:3px; }
+
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th { background:var(--surface2); color:var(--accent); font-family:var(--mono); font-size:11px; letter-spacing:1.5px; text-transform:uppercase; padding:10px 14px; text-align:left; border-bottom:1px solid var(--border); }
+  td { padding:9px 14px; border-bottom:1px solid var(--border); vertical-align:top; color:var(--text); }
+  tr:last-child td { border-bottom:none; }
+  tr:hover td { background:var(--surface); }
+  td strong { color:var(--text-bright); }
+  td code, .card code, li code { font-family:var(--mono); font-size:12px; color:var(--accent2); background:rgba(56,189,248,.08); padding:1px 5px; }
+
+  .callout { background:rgba(245,158,11,.06); border:1px solid rgba(245,158,11,.2); border-left:3px solid var(--accent); padding:12px 16px; font-size:13px; margin-bottom:12px; }
+  .callout strong { color:var(--accent); }
+
+  .exam-tip { background:rgba(248,113,113,.06); border:1px solid rgba(248,113,113,.2); border-left:3px solid var(--accent4); padding:12px 16px; font-size:13px; margin-top:12px; }
+  .exam-tip .label { font-family:var(--mono); font-size:10px; color:var(--accent4); letter-spacing:2px; text-transform:uppercase; margin-bottom:4px; }
+
+  /* shard math visual */
+  .shard-box { display:flex; gap:10px; flex-wrap:wrap; margin:12px 0; }
+  .shard {
+    background:var(--surface2); border:1px solid var(--border);
+    border-top:3px solid var(--accent2);
+    padding:10px 14px; min-width:120px;
+    font-family:var(--mono); font-size:11px; color:var(--text-dim);
+  }
+  .shard strong { display:block; color:var(--text-bright); font-size:13px; margin-bottom:4px; }
+  .shard .in  { color:var(--accent3); }
+  .shard .out { color:var(--accent); }
+
+  /* KDS vs SQS vs SNS comparison */
+  .compare-header { display:grid; grid-template-columns:160px 1fr 1fr 1fr; gap:1px; }
+  
+  .pill-list { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+  .pill { font-family:var(--mono); font-size:11px; padding:3px 10px; border:1px solid var(--border); color:var(--text-dim); background:var(--surface); }
+  .pill.hi { border-color:rgba(56,189,248,.3); color:var(--accent2); background:rgba(56,189,248,.06); }
+
+  hr { border:none; border-top:1px solid var(--border); margin:40px 0; }
+  @keyframes fadeIn { from{opacity:0}to{opacity:1} }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)} }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <a href="../index.html" style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--text-dim);text-decoration:none;margin-bottom:16px;letter-spacing:.05em;transition:color .2s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-dim)'">&#8592; Home</a>
+    <div class="badge">DOP-C02 · AWS DevOps Professional</div>
+    <h1>Kinesis Data Streams</h1>
+    <p>Real-time data streaming — ingest, buffer, and replay ordered event data at scale.</p>
+  </header>
+
+  <!-- 01 CORE CONCEPTS -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">01</span>
+      <h2>Core Concepts</h2>
+      <span class="weight high">◈◈ HIGH</span>
+    </div>
+    <div class="grid-2">
+      <div class="card blue">
+        <h3>What It Is</h3>
+        <ul>
+          <li>Collect &amp; store streaming data in <strong>real-time</strong></li>
+          <li>Retention: <strong>1 day (default) → up to 365 days</strong></li>
+          <li>Data is <strong>immutable</strong> — cannot be deleted by consumers</li>
+          <li>Data expires automatically at retention end</li>
+          <li>Consumers can <strong>replay</strong> data within retention window</li>
+          <li>Max record size: <strong>1 MB</strong> (not 10 MiB — PDF error)</li>
+        </ul>
+      </div>
+      <div class="card yellow">
+        <h3>Producers &amp; Consumers</h3>
+        <ul>
+          <li><strong>Producers:</strong> SDK, KPL, Kinesis Agent, IoT, CloudWatch Logs</li>
+          <li><strong>Consumers:</strong> SDK, KCL, Lambda, Firehose, Managed Apache Flink</li>
+          <li><strong>KPL</strong> (Kinesis Producer Library) — batching, compression, retry logic</li>
+          <li><strong>KCL</strong> (Kinesis Client Library) — checkpointing, shard coordination via DynamoDB</li>
+          <li>Multiple consumers can read the same stream independently</li>
+        </ul>
+      </div>
+    </div>
+    <div class="exam-tip">
+      <div class="label">Exam Tip</div>
+      KCL uses a <strong>DynamoDB table</strong> to track shard checkpoints. If consumers fall behind, check DynamoDB throttling. Replay capability = key differentiator vs SQS (which deletes on consume).
+    </div>
+  </div>
+
+  <!-- 02 SHARDS & CAPACITY -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">02</span>
+      <h2>Shards & Capacity Modes</h2>
+      <span class="weight high">◈◈ HIGH</span>
+    </div>
+    <div class="callout">
+      <strong>A shard is the unit of capacity in KDS.</strong> All throughput limits are per shard. Partition key determines which shard a record goes to — same key = same shard = ordered delivery.
+    </div>
+
+    <div class="shard-box">
+      <div class="shard">
+        <strong>1 Shard</strong>
+        <span class="in">▲ 1 MB/s in</span>
+        <span class="in">▲ 1,000 rec/s in</span>
+        <span class="out">▼ 2 MB/s out</span>
+        <span class="out">▼ 5 reads/s</span>
+      </div>
+      <div class="shard">
+        <strong>5 Shards</strong>
+        <span class="in">▲ 5 MB/s in</span>
+        <span class="in">▲ 5,000 rec/s in</span>
+        <span class="out">▼ 10 MB/s out</span>
+        <span class="out">▼ 25 reads/s</span>
+      </div>
+      <div class="shard">
+        <strong>N Shards</strong>
+        <span class="in">▲ N MB/s in</span>
+        <span class="in">▲ N×1,000 rec/s</span>
+        <span class="out">▼ N×2 MB/s out</span>
+        <span class="out">▼ N×5 reads/s</span>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:12px">
+      <div class="card green">
+        <h3>Provisioned Mode</h3>
+        <ul>
+          <li>You choose number of shards manually</li>
+          <li>Scale: <strong>shard splitting</strong> (add) or <strong>merging</strong> (remove)</li>
+          <li>Splitting doubles a shard → <strong>can only double</strong> at a time</li>
+          <li>Pay per <strong>shard-hour</strong></li>
+          <li>Best when throughput is predictable</li>
+        </ul>
+      </div>
+      <div class="card blue">
+        <h3>On-Demand Mode</h3>
+        <ul>
+          <li>No capacity planning needed</li>
+          <li>Default: <strong>4 MB/s or 4,000 rec/s</strong></li>
+          <li>Auto-scales based on peak throughput of <strong>last 30 days</strong></li>
+          <li>Pay per stream/hour + data in/out per GB</li>
+          <li>Best for unpredictable or spiky traffic</li>
+        </ul>
+      </div>
+    </div>
+    <div class="exam-tip">
+      <div class="label">Exam Tip</div>
+      <strong>ProvisionedThroughputExceededException</strong> = producer writing too fast for the shard. Fix: increase shards, use partition key with better distribution, or enable KPL batching. Hot shard = too many records with the same partition key.
+    </div>
+  </div>
+
+  <!-- 03 ORDERING & PARTITION KEYS -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">03</span>
+      <h2>Ordering & Partition Keys</h2>
+      <span class="weight high">◈◈ HIGH</span>
+    </div>
+    <div class="grid-2">
+      <div class="card yellow">
+        <h3>How Ordering Works</h3>
+        <ul>
+          <li>Records with the <strong>same partition key</strong> always go to the same shard</li>
+          <li>Within a shard, records are <strong>strictly ordered</strong> by sequence number</li>
+          <li>Across shards, there is <strong>no global ordering</strong></li>
+          <li>Consumers read per-shard in order</li>
+        </ul>
+      </div>
+      <div class="card red">
+        <h3>Hot Shard Problem</h3>
+        <ul>
+          <li>All records share same partition key → all go to one shard</li>
+          <li>That shard gets throttled while others sit idle</li>
+          <li><strong>Fix:</strong> Use high-cardinality partition keys (e.g. user ID, device ID)</li>
+          <li>Or add a random suffix to distribute load</li>
+        </ul>
+      </div>
+    </div>
+    <div class="exam-tip">
+      <div class="label">Exam Tip</div>
+      Ordering guarantee is <strong>per shard only</strong>. If you need ordered processing of a user's events → use their user ID as the partition key. All their events land on one shard, consumed in order.
+    </div>
+  </div>
+
+  <!-- 04 CONSUMERS: STANDARD vs ENHANCED FAN-OUT -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">04</span>
+      <h2>Consumer Types: Standard vs Enhanced Fan-Out</h2>
+      <span class="weight high">◈◈ HIGH</span>
+    </div>
+    <table>
+      <tr>
+        <th>Attribute</th>
+        <th>Standard (Pull)</th>
+        <th>Enhanced Fan-Out (Push)</th>
+      </tr>
+      <tr>
+        <td><strong>Mechanism</strong></td>
+        <td>Consumer polls with <code>GetRecords</code></td>
+        <td>KDS pushes via HTTP/2 (<code>SubscribeToShard</code>)</td>
+      </tr>
+      <tr>
+        <td><strong>Throughput</strong></td>
+        <td>2 MB/s shared across ALL consumers per shard</td>
+        <td><strong>2 MB/s per consumer per shard</strong></td>
+      </tr>
+      <tr>
+        <td><strong>Latency</strong></td>
+        <td>~200ms avg</td>
+        <td>~70ms avg</td>
+      </tr>
+      <tr>
+        <td><strong>Max consumers</strong></td>
+        <td>5 reads/s per shard (shared)</td>
+        <td>Up to 20 registered consumers per stream</td>
+      </tr>
+      <tr>
+        <td><strong>Cost</strong></td>
+        <td>Included in shard cost</td>
+        <td>Additional cost per consumer-shard-hour + data retrieval</td>
+      </tr>
+      <tr>
+        <td><strong>Best for</strong></td>
+        <td>Low consumer count, cost-sensitive</td>
+        <td>Multiple independent consumers, low-latency pipelines</td>
+      </tr>
+    </table>
+    <div class="exam-tip">
+      <div class="label">Exam Tip</div>
+      If multiple apps (Lambda + Firehose + custom app) need to read the same stream without starving each other → use <strong>Enhanced Fan-Out</strong>. Standard throughput is shared; EFO gives each consumer its own dedicated 2 MB/s.
+    </div>
+  </div>
+
+  <!-- 05 LAMBDA INTEGRATION -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">05</span>
+      <h2>Lambda Integration</h2>
+      <span class="weight high">◈◈ HIGH</span>
+    </div>
+    <div class="grid-2">
+      <div class="card blue">
+        <h3>Event Source Mapping</h3>
+        <ul>
+          <li>Lambda polls KDS on your behalf</li>
+          <li>Batch size: 1–10,000 records configurable</li>
+          <li>Batching window: up to 300 seconds</li>
+          <li>One Lambda invocation per shard (in order)</li>
+          <li>On failure: retries until data expires or DLQ configured</li>
+          <li>Supports <strong>bisect on error</strong> — splits failed batch to isolate bad record</li>
+        </ul>
+      </div>
+      <div class="card yellow">
+        <h3>Error Handling</h3>
+        <ul>
+          <li><strong>On-failure destination</strong> → SQS or SNS for failed batches</li>
+          <li><code>BisectBatchOnFunctionError</code> — halves the batch to find the poison record</li>
+          <li><code>MaximumRetryAttempts</code> — limit retries before discarding</li>
+          <li><code>MaximumRecordAgeInSeconds</code> — skip records older than threshold</li>
+          <li>Without error handling, a stuck shard blocks all new records</li>
+        </ul>
+      </div>
+    </div>
+    <div class="exam-tip">
+      <div class="label">Exam Tip</div>
+      A single bad record in a shard can <strong>block all processing</strong> because Lambda retries indefinitely. Always configure <code>BisectBatchOnFunctionError</code> + <code>MaximumRetryAttempts</code> + an on-failure destination for production.
+    </div>
+  </div>
+
+  <!-- 06 KDS vs SQS vs SNS -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">06</span>
+      <h2>KDS vs SQS vs SNS — Decision Guide</h2>
+      <span class="weight high">◈◈ HIGH</span>
+    </div>
+    <table>
+      <tr>
+        <th>Feature</th>
+        <th>Kinesis Data Streams</th>
+        <th>SQS</th>
+        <th>SNS</th>
+      </tr>
+      <tr>
+        <td><strong>Pattern</strong></td>
+        <td>Streaming / replay</td>
+        <td>Queue / decouple</td>
+        <td>Pub/Sub fan-out</td>
+      </tr>
+      <tr>
+        <td><strong>Ordering</strong></td>
+        <td>Per shard (partition key)</td>
+        <td>FIFO queue only</td>
+        <td>No ordering</td>
+      </tr>
+      <tr>
+        <td><strong>Replay</strong></td>
+        <td><strong>Yes</strong> — up to 365 days</td>
+        <td>No</td>
+        <td>No</td>
+      </tr>
+      <tr>
+        <td><strong>Consumers</strong></td>
+        <td>Multiple, independent</td>
+        <td>Competing consumers</td>
+        <td>Multiple subscribers</td>
+      </tr>
+      <tr>
+        <td><strong>Retention</strong></td>
+        <td>1–365 days</td>
+        <td>Up to 14 days</td>
+        <td>No storage</td>
+      </tr>
+      <tr>
+        <td><strong>Throughput</strong></td>
+        <td>1 MB/s per shard (in)</td>
+        <td>Unlimited (standard)</td>
+        <td>Unlimited</td>
+      </tr>
+      <tr>
+        <td><strong>Use when</strong></td>
+        <td>Real-time analytics, log ingestion, replay needed</td>
+        <td>Task queues, decoupling, async workers</td>
+        <td>Notifications, fan-out to multiple targets</td>
+      </tr>
+    </table>
+    <div class="exam-tip">
+      <div class="label">Exam Tip</div>
+      <strong>Replay needed → KDS.</strong> Multiple independent consumers on same data → KDS or SNS+SQS fan-out. Simple worker queue → SQS. "Real-time analytics" in the scenario almost always means KDS → Firehose or Flink.
+    </div>
+  </div>
+
+  <!-- 07 SECURITY -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">07</span>
+      <h2>Security & Encryption</h2>
+      <span class="weight med">◈ MEDIUM</span>
+    </div>
+    <div class="grid-3">
+      <div class="card blue">
+        <h3>Encryption at Rest</h3>
+        <ul>
+          <li>Server-side encryption with <strong>KMS</strong></li>
+          <li>Enable per stream</li>
+          <li>Producers/consumers need KMS permissions</li>
+        </ul>
+      </div>
+      <div class="card green">
+        <h3>In Transit</h3>
+        <ul>
+          <li>HTTPS endpoints only</li>
+          <li>TLS enforced for all SDK calls</li>
+        </ul>
+      </div>
+      <div class="card yellow">
+        <h3>Access Control</h3>
+        <ul>
+          <li>IAM policies control who can <code>PutRecord</code> and <code>GetRecords</code></li>
+          <li>VPC Endpoints (PrivateLink) for private access</li>
+          <li>CloudTrail logs all KDS API calls</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 08 MONITORING -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">08</span>
+      <h2>Key Metrics to Know</h2>
+      <span class="weight med">◈ MEDIUM</span>
+    </div>
+    <table>
+      <tr>
+        <th>Metric</th>
+        <th>What It Means</th>
+        <th>Action if High</th>
+      </tr>
+      <tr>
+        <td><code>GetRecords.IteratorAgeMilliseconds</code></td>
+        <td>How far behind consumers are from the tip of the stream</td>
+        <td>Scale consumers or shards; consumers are lagging</td>
+      </tr>
+      <tr>
+        <td><code>WriteProvisionedThroughputExceeded</code></td>
+        <td>Producer throttled — shard write limit hit</td>
+        <td>Add shards or fix hot partition key</td>
+      </tr>
+      <tr>
+        <td><code>ReadProvisionedThroughputExceeded</code></td>
+        <td>Consumer throttled — shard read limit hit</td>
+        <td>Switch to Enhanced Fan-Out</td>
+      </tr>
+      <tr>
+        <td><code>IncomingRecords</code> / <code>IncomingBytes</code></td>
+        <td>Producer throughput per shard</td>
+        <td>Monitor for capacity planning</td>
+      </tr>
+    </table>
+    <div class="exam-tip">
+      <div class="label">Exam Tip</div>
+      <code>IteratorAgeMilliseconds</code> approaching your retention period = data at risk of expiring before being processed. Alarm on this metric in production. It's the primary indicator of consumer lag.
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- QUICK REFERENCE -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">✦</span>
+      <h2>Exam Quick Reference</h2>
+    </div>
+    <div class="pill-list">
+      <span class="pill hi">Replay = KDS differentiator</span>
+      <span class="pill hi">1 MB/s in per shard</span>
+      <span class="pill hi">2 MB/s out per shard</span>
+      <span class="pill hi">Same partition key = same shard = ordered</span>
+      <span class="pill hi">Hot shard = bad partition key</span>
+      <span class="pill hi">EFO = 2 MB/s per consumer</span>
+      <span class="pill hi">KCL uses DynamoDB for checkpoints</span>
+      <span class="pill hi">Lambda: bisect on error</span>
+      <span class="pill hi">Stuck shard blocks all records</span>
+      <span class="pill hi">On-Demand scales on last 30 days peak</span>
+      <span class="pill hi">Splitting = doubles shards only</span>
+      <span class="pill hi">IteratorAge = consumer lag metric</span>
+      <span class="pill hi">Retention default 24h, max 365 days</span>
+      <span class="pill hi">Real-time analytics → KDS + Firehose/Flink</span>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

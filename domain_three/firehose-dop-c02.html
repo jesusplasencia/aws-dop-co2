@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS Amazon Data Firehose — DOP-C02</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e14;
+    --surface: #111720;
+    --surface2: #192030;
+    --border: #1e2d40;
+    --accent: #f59e0b;
+    --accent2: #38bdf8;
+    --accent3: #34d399;
+    --accent4: #f87171;
+    --text: #cdd6e0;
+    --text-dim: #6b7f94;
+    --text-bright: #eaf2f8;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.7;
+    padding: 40px 20px 80px;
+  }
+  .page { max-width: 900px; margin: 0 auto; }
+
+  header {
+    border-left: 4px solid var(--accent);
+    padding-left: 20px;
+    margin-bottom: 48px;
+    animation: fadeIn 0.5s ease;
+  }
+  header .badge { font-family:var(--mono); font-size:11px; color:var(--accent); letter-spacing:3px; text-transform:uppercase; margin-bottom:8px; }
+  header h1 { font-size:36px; font-weight:600; color:var(--text-bright); letter-spacing:-1px; }
+  header p { color:var(--text-dim); font-size:13px; margin-top:6px; }
+
+  .section { margin-bottom:36px; animation:fadeUp 0.4s ease both; }
+  .section:nth-child(2){animation-delay:.05s}
+  .section:nth-child(3){animation-delay:.10s}
+  .section:nth-child(4){animation-delay:.15s}
+  .section:nth-child(5){animation-delay:.20s}
+  .section:nth-child(6){animation-delay:.25s}
+  .section:nth-child(7){animation-delay:.30s}
+  .section:nth-child(8){animation-delay:.35s}
+
+  .section-header { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+  .section-header .tag { font-family:var(--mono); font-size:10px; color:var(--accent); background:rgba(245,158,11,.1); border:1px solid rgba(245,158,11,.2); padding:2px 8px; letter-spacing:2px; text-transform:uppercase; }
+  .section-header h2 { font-size:17px; font-weight:600; color:var(--text-bright); }
+  .weight { margin-left:auto; font-family:var(--mono); font-size:10px; }
+  .weight.high { color:var(--accent4); }
+  .weight.med  { color:var(--accent); }
+  .weight.low  { color:var(--accent3); }
+
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+  .grid   { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:12px; }
+  @media(max-width:640px){ .grid-2,.grid-3{grid-template-columns:1fr} }
+
+  .card { background:var(--surface); border:1px solid var(--border); padding:16px 18px; position:relative; }
+  .card::before { content:''; position:absolute; top:0;left:0; width:3px; height:100%; }
+  .card.blue::before  { background:var(--accent2); }
+  .card.green::before { background:var(--accent3); }
+  .card.yellow::before{ background:var(--accent); }
+  .card.red::before   { background:var(--accent4); }
+  .card h3 { font-family:var(--mono); font-size:12px; color:var(--text-bright); margin-bottom:8px; letter-spacing:.5px; }
+  .card p, .card li { font-size:13px; color:var(--text); line-height:1.6; }
+  .card ul { padding-left:16px; }
+  .card li { margin-bottom:3px; }
+
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th { background:var(--surface2); color:var(--accent); font-family:var(--mono); font-size:11px; letter-spacing:1.5px; text-transform:uppercase; padding:10px 14px; text-align:left; border-bottom:1px solid var(--border); }
+  td { padding:9px 14px; border-bottom:1px solid var(--border); vertical-align:top; color:var(--text); }
+  tr:last-child td { border-bottom:none; }
+  tr:hover td { background:var(--surface); }
+  td strong { color:var(--text-bright); }
+  td code, .card code, li code { font-family:var(--mono); font-size:12px; color:var(--accent2); background:rgba(56,189,248,.08); padding:1px 5px; }
+
+  .callout { background:rgba(245,158,11,.06); border:1px solid rgba(245,158,11,.2); border-left:3px solid var(--accent); padding:12px 16px; font-size:13px; margin-bottom:12px; }
+  .callout strong { color:var(--accent); }
+
+  .exam-tip { background:rgba(248,113,113,.06); border:1px solid rgba(248,113,113,.2); border-left:3px solid var(--accent4); padding:12px 16px; font-size:13px; margin-top:12px; }
+  .exam-tip .label { font-family:var(--mono); font-size:10px; color:var(--accent4); letter-spacing:2px; text-transform:uppercase; margin-bottom:4px; }
+
+  /* pipeline flow */
+  .flow { display:flex; align-items:stretch; gap:0; flex-wrap:wrap; margin:14px 0; }
+  .flow-step { background:var(--surface); border:1px solid var(--border); padding:10px 14px; font-size:12px; font-family:var(--mono); color:var(--text-bright); flex:1; min-width:100px; }
+  .flow-step span { display:block; font-size:11px; color:var(--text-dim); font-family:var(--sans); margin-top:2px; }
+  .flow-step.src  { border-top:3px solid var(--accent2); }
+  .flow-step.xform{ border-top:3px solid var(--accent); }
+  .flow-step.buf  { border-top:3px solid #a78bfa; }
+  .flow-step.dst  { border-top:3px solid var(--accent3); }
+  .flow-arrow { display:flex; align-items:center; padding:0 4px; color:var(--accent); font-size:16px; }
+
+  .pill-list { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+  .pill { font-family:var(--mono); font-size:11px; padding:3px 10px; border:1px solid var(--border); color:var(--text-dim); background:var(--surface); }
+  .pill.hi { border-color:rgba(56,189,248,.3); color:var(--accent2); background:rgba(56,189,248,.06); }
+
+  hr { border:none; border-top:1px solid var(--border); margin:40px 0; }
+  @keyframes fadeIn { from{opacity:0}to{opacity:1} }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)} }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <a href="../index.html" style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--text-dim);text-decoration:none;margin-bottom:16px;letter-spacing:.05em;transition:color .2s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-dim)'">&#8592; Home</a>
+    <div class="badge">DOP-C02 · AWS DevOps Professional</div>
+    <h1>Amazon Data Firehose</h1>
+    <p>Fully managed delivery stream — load streaming data into storage and analytics destinations without writing consumer code.</p>
+  </header>
+
+  <!-- 01 WHAT IT IS -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">01</span>
+      <h2>What It Is & Core Characteristics</h2>
+      <span class="weight high">◈◈ HIGH</span>
+    </div>
+    <div class="callout">
+      <strong>Mental model:</strong> Firehose is a managed pipe between a data source and a destination. You don't write consumer code. It buffers, optionally transforms, then delivers in batches.
+    </div>
+    <div class="flow">
+      <div class="flow-step src">Producer<span>KDS, SDK, CW, IoT…</span></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step xform">Transform (optional)<span>Lambda function</span></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step buf">Buffer<span>size or time trigger</span></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step dst">Destination<span>S3, Redshift, OpenSearch…</span></div>
+    </div>
+    <div class="grid-2" style="margin-top:12px">
+      <div class="card blue">
+        <h3>Key Properties</h3>
+        <ul>
+          <li><strong>Fully managed &amp; serverless</strong> — no shards, no scaling config</li>
+          <li><strong>Near real-time</strong> — minimum buffer: 60s or 1 MB</li>
+          <li>Automatic scaling based on throughput</li>
+          <li>Pay only for data volume ingested (per GB)</li>
+          <li><strong>No data storage</strong> — not a streaming buffer like KDS</li>
+          <li><strong>No replay</strong> — once delivered, data is gone from Firehose</li>
+        </ul>
+      </div>
+      <div class="card yellow">
+        <h3>Supported Formats</h3>
+        <ul>
+          <li>Input: JSON, CSV, Parquet, Avro, Raw text, Binary</li>
+          <li>Format conversion: JSON → Parquet/ORC for S3 (columnar = cheaper Athena queries)</li>
+          <li>Compression: GZIP, Snappy, ZIP, HADOOP_SNAPPY (for S3)</li>
+          <li>Custom transform: any logic via <strong>Lambda</strong></li>
+        </ul>
+      </div>
+    </div>
+    <div class="exam-tip">
+      <div class="label">Exam Tip</div>
+      "Near real-time" = Firehose. "Real-time" = KDS. If the scenario says <strong>load into S3/Redshift/OpenSearch with no code</strong> → Firehose. If it says <strong>replay, custom consumers, or sub-second latency</strong> → KDS.
+    </div>
+  </div>
+
+  <!-- 02 SOURCES -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">02</span>
+      <h2>Sources (Producers)</h2>
+      <span class="weight med">◈ MEDIUM</span>
+    </div>
+    <table>
+      <tr>
+        <th>Source</th>
+        <th>How It Connects</th>
+        <th>Common Use Case</th>
+      </tr>
+      <tr>
+        <td><strong>Kinesis Data Streams</strong></td>
+        <td>Firehose reads from KDS as a consumer</td>
+        <td>KDS for real-time processing + Firehose for archiving to S3</td>
+      </tr>
+      <tr>
+        <td><strong>Direct PUT</strong> (SDK/Agent)</td>
+        <td><code>PutRecord</code> / <code>PutRecordBatch</code> API</td>
+        <td>App logs, clickstream directly to Firehose</td>
+      </tr>
+      <tr>
+        <td><strong>CloudWatch Logs</strong></td>
+        <td>Subscription filter → Firehose</td>
+        <td>Archive CW logs to S3 or OpenSearch</td>
+      </tr>
+      <tr>
+        <td><strong>CloudWatch Events / EventBridge</strong></td>
+        <td>Event rule target → Firehose</td>
+        <td>Audit event archiving</td>
+      </tr>
+      <tr>
+        <td><strong>AWS IoT</strong></td>
+        <td>IoT Rule action → Firehose</td>
+        <td>IoT sensor data → S3 data lake</td>
+      </tr>
+      <tr>
+        <td><strong>Kinesis Agent</strong></td>
+        <td>Installed on EC2, tails log files</td>
+        <td>Application log files → Firehose</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- 03 DESTINATIONS -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">03</span>
+      <h2>Destinations</h2>
+      <span class="weight high">◈◈ HIGH</span>
+    </div>
+    <div class="grid-3">
+      <div class="card green">
+        <h3>AWS Destinations</h3>
+        <ul>
+          <li><strong>Amazon S3</strong> — primary destination; supports prefix, partitioning, compression</li>
+          <li><strong>Amazon Redshift</strong> — via S3 COPY command (S3 is intermediate)</li>
+          <li><strong>Amazon OpenSearch</strong> — log/search indexing</li>
+        </ul>
+      </div>
+      <div class="card blue">
+        <h3>Third-Party</h3>
+        <ul>
+          <li>Splunk</li>
+          <li>Datadog</li>
+          <li>New Relic</li>
+          <li>MongoDB</li>
+          <li>Dynatrace, Coralogix, others</li>
+        </ul>
+      </div>
+      <div class="card yellow">
+        <h3>Custom</h3>
+        <ul>
+          <li><strong>HTTP Endpoint</strong> — any custom API receiver</li>
+          <li>Useful for custom data lakes or external systems</li>
+          <li>Must return 200 OK or Firehose retries</li>
+        </ul>
+      </div>
+    </div>
+    <div class="exam-tip">
+      <div class="label">Exam Tip</div>
+      <strong>Redshift is NOT a direct destination</strong> — Firehose writes to S3 first, then issues a <code>COPY</code> command to load into Redshift. If that intermediate S3 step matters in the question, it's Firehose → S3 → Redshift.
+    </div>
+  </div>
+
+  <!-- 04 BUFFERING -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">04</span>
+      <h2>Buffering & Delivery</h2>
+      <span class="weight high">◈◈ HIGH</span>
+    </div>
+    <div class="callout">
+      <strong>Firehose delivers when either threshold is hit first</strong> — size OR time, whichever comes first.
+    </div>
+    <table>
+      <tr>
+        <th>Parameter</th>
+        <th>Range</th>
+        <th>Default</th>
+        <th>Notes</th>
+      </tr>
+      <tr>
+        <td><strong>Buffer Size</strong></td>
+        <td>1 MB – 128 MB</td>
+        <td>5 MB</td>
+        <td>Lower = more frequent (smaller) deliveries</td>
+      </tr>
+      <tr>
+        <td><strong>Buffer Interval</strong></td>
+        <td>60s – 900s</td>
+        <td>300s</td>
+        <td>Minimum latency is 60 seconds</td>
+      </tr>
+    </table>
+    <div class="exam-tip">
+      <div class="label">Exam Tip</div>
+      Firehose minimum latency is <strong>60 seconds</strong> — this is why it's "near real-time" not "real-time." If a question requires sub-minute delivery, KDS + Lambda is the right answer, not Firehose.
+    </div>
+  </div>
+
+  <!-- 05 TRANSFORMATION -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">05</span>
+      <h2>Data Transformation with Lambda</h2>
+      <span class="weight med">◈ MEDIUM</span>
+    </div>
+    <div class="grid-2">
+      <div class="card blue">
+        <h3>How It Works</h3>
+        <ul>
+          <li>Firehose invokes a Lambda function <strong>synchronously</strong></li>
+          <li>Lambda receives a batch of records, returns transformed records</li>
+          <li>Each record must return: <code>Ok</code>, <code>Dropped</code>, or <code>ProcessingFailed</code></li>
+          <li>Failed records → separate S3 error bucket (configurable)</li>
+          <li>Transformation adds latency — account for Lambda timeout</li>
+        </ul>
+      </div>
+      <div class="card green">
+        <h3>Common Transformations</h3>
+        <ul>
+          <li>CSV → JSON, JSON → Parquet</li>
+          <li>Data enrichment (add fields, lookup)</li>
+          <li>Filtering (drop unwanted records → <code>Dropped</code>)</li>
+          <li>PII masking / scrubbing</li>
+          <li>Format normalization before S3 ingestion</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card yellow" style="margin-top:12px">
+      <h3>Dynamic Partitioning (S3)</h3>
+      <p>Extract fields from incoming records (e.g. <code>customer_id</code>, <code>event_date</code>) and use them to build <strong>custom S3 prefixes</strong>. Example: <code>s3://bucket/year=2024/month=04/customer=abc/</code>. Enables efficient Athena/Glue queries. Requires inline parsing or Lambda extraction.</p>
+    </div>
+  </div>
+
+  <!-- 06 ERROR HANDLING & BACKUP -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">06</span>
+      <h2>Error Handling & Backup</h2>
+      <span class="weight high">◈◈ HIGH</span>
+    </div>
+    <div class="grid-2">
+      <div class="card red">
+        <h3>Delivery Failures</h3>
+        <ul>
+          <li>Firehose retries delivery for a configurable duration</li>
+          <li>S3: retry up to 24 hours</li>
+          <li>Redshift: retry up to 7200s (2 hrs), then moves to S3 error prefix</li>
+          <li>OpenSearch: retry 0–7200s, then optional S3 backup</li>
+          <li>After max retry → data goes to S3 error bucket</li>
+        </ul>
+      </div>
+      <div class="card blue">
+        <h3>S3 Backup Bucket</h3>
+        <ul>
+          <li>Configure a <strong>source record backup</strong> to S3 alongside any destination</li>
+          <li>All records (or just failures) can be backed up</li>
+          <li>Useful for debugging transformation failures</li>
+          <li>Separate from the primary destination bucket</li>
+        </ul>
+      </div>
+    </div>
+    <div class="exam-tip">
+      <div class="label">Exam Tip</div>
+      Unlike KDS, there is <strong>no replay from Firehose itself</strong>. The S3 backup bucket is your only safety net. For replay, you'd need to re-ingest from the backup bucket. Design pipelines with backup enabled.
+    </div>
+  </div>
+
+  <!-- 07 KDS vs FIREHOSE -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">07</span>
+      <h2>KDS vs Firehose — Decision Table</h2>
+      <span class="weight high">◈◈ HIGH</span>
+    </div>
+    <table>
+      <tr>
+        <th>Attribute</th>
+        <th>Kinesis Data Streams</th>
+        <th>Amazon Data Firehose</th>
+      </tr>
+      <tr>
+        <td><strong>Latency</strong></td>
+        <td>Real-time (~200ms)</td>
+        <td>Near real-time (≥60s)</td>
+      </tr>
+      <tr>
+        <td><strong>Management</strong></td>
+        <td>Provisioned shards or On-Demand</td>
+        <td>Fully serverless, zero config</td>
+      </tr>
+      <tr>
+        <td><strong>Consumer code</strong></td>
+        <td>Required (SDK, KCL, Lambda)</td>
+        <td>None — Firehose handles delivery</td>
+      </tr>
+      <tr>
+        <td><strong>Data storage</strong></td>
+        <td>Up to 365 days</td>
+        <td>No storage (buffer only)</td>
+      </tr>
+      <tr>
+        <td><strong>Replay</strong></td>
+        <td>Yes</td>
+        <td>No</td>
+      </tr>
+      <tr>
+        <td><strong>Destinations</strong></td>
+        <td>Any custom consumer</td>
+        <td>S3, Redshift, OpenSearch, 3rd party, HTTP</td>
+      </tr>
+      <tr>
+        <td><strong>Transformation</strong></td>
+        <td>In consumer code</td>
+        <td>Via Lambda (managed)</td>
+      </tr>
+      <tr>
+        <td><strong>Choose when</strong></td>
+        <td>Real-time processing, replay, custom logic</td>
+        <td>Load to storage/analytics, no-code delivery</td>
+      </tr>
+    </table>
+    <div class="callout" style="margin-top:12px">
+      <strong>Common pattern:</strong> KDS (real-time processing + Lambda) → also fan out to Firehose (archiving to S3 data lake). Both can run simultaneously on the same stream.
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- QUICK REFERENCE -->
+  <div class="section">
+    <div class="section-header">
+      <span class="tag">✦</span>
+      <h2>Exam Quick Reference</h2>
+    </div>
+    <div class="pill-list">
+      <span class="pill hi">Near real-time = Firehose</span>
+      <span class="pill hi">Min latency = 60 seconds</span>
+      <span class="pill hi">No replay capability</span>
+      <span class="pill hi">No data storage in Firehose</span>
+      <span class="pill hi">Redshift → via S3 COPY</span>
+      <span class="pill hi">Lambda = optional transform</span>
+      <span class="pill hi">S3 backup = failure safety net</span>
+      <span class="pill hi">Dynamic partitioning → S3 prefix</span>
+      <span class="pill hi">Buffer: 60s–900s or 1–128 MB</span>
+      <span class="pill hi">Serverless, auto-scales</span>
+      <span class="pill hi">CW Logs → Firehose → S3/OpenSearch</span>
+      <span class="pill hi">KDS fan-out → Firehose for archiving</span>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
