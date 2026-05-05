@@ -176,6 +176,7 @@ body::before {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 16px;
+  align-items: start;
 }
 
 /* ── DOMAIN CARD ── */
@@ -789,6 +790,48 @@ body::before {
             <span class="svc-label">Route 53</span>
           </a>
 
+          <a href="domain_three/RDS_DOP-C02.html" class="svc-btn" onclick="event.stopPropagation()">
+            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <ellipse cx="18" cy="10" rx="12" ry="4"/>
+              <path d="M6 10v16c0 2.2 5.4 4 12 4s12-1.8 12-4V10"/>
+              <path d="M6 18c0 2.2 5.4 4 12 4s12-1.8 12-4"/>
+            </svg>
+            <span class="svc-label">RDS</span>
+          </a>
+
+          <a href="domain_three/Aurora_DOP-C02.html" class="svc-btn" onclick="event.stopPropagation()">
+            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <ellipse cx="18" cy="9" rx="12" ry="4"/>
+              <path d="M6 9v18c0 2.2 5.4 4 12 4s12-1.8 12-4V9"/>
+              <path d="M6 18c0 2.2 5.4 4 12 4s12-1.8 12-4"/>
+              <path d="M20 14l-4 5h4l-4 5"/>
+            </svg>
+            <span class="svc-label">Aurora</span>
+          </a>
+
+          <a href="domain_three/ElastiCache_DOP-C02.html" class="svc-btn" onclick="event.stopPropagation()">
+            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="5" y="7" width="26" height="7" rx="2"/>
+              <rect x="5" y="16" width="26" height="7" rx="2"/>
+              <rect x="5" y="25" width="26" height="6" rx="2"/>
+              <path d="M20 10.5h5"/>
+              <path d="M20 19.5h5"/>
+              <circle cx="10" cy="10.5" r="1.5" fill="currentColor" stroke="none"/>
+              <circle cx="10" cy="19.5" r="1.5" fill="currentColor" stroke="none"/>
+            </svg>
+            <span class="svc-label">ElastiCache</span>
+          </a>
+
+          <a href="domain_three/DynamoDB_DOP-C02.html" class="svc-btn" onclick="event.stopPropagation()">
+            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <ellipse cx="18" cy="8" rx="10" ry="3.5"/>
+              <path d="M8 8v20c0 1.9 4.5 3.5 10 3.5s10-1.6 10-3.5V8"/>
+              <path d="M8 15c0 1.9 4.5 3.5 10 3.5s10-1.6 10-3.5"/>
+              <path d="M8 22c0 1.9 4.5 3.5 10 3.5s10-1.6 10-3.5"/>
+            </svg>
+            <span class="svc-label">DynamoDB</span>
+          </a>
+
         </div>
       </div>
     </div>
@@ -840,11 +883,17 @@ function toggleDomain(card) {
   if (!body) return;
   var isOpen = card.classList.contains('open');
   if (isOpen) {
+    body.style.maxHeight = body.scrollHeight + 'px';
+    body.offsetHeight; // force reflow so transition fires
     body.style.maxHeight = '0';
     card.classList.remove('open');
   } else {
     body.style.maxHeight = body.scrollHeight + 'px';
     card.classList.add('open');
+    body.addEventListener('transitionend', function handler() {
+      body.style.maxHeight = 'none';
+      body.removeEventListener('transitionend', handler);
+    });
   }
 }
 </script>

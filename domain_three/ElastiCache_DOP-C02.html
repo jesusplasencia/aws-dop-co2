@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ElastiCache — DOP-C02 Study Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --surface2: #1a2236;
+    --border: #1e2d45;
+    --accent: #f59e0b;
+    --accent2: #38bdf8;
+    --accent3: #4ade80;
+    --accent4: #f87171;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --redis: #e05252;
+    --memcached: #6495ed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    padding: 40px 24px 80px;
+  }
+  .page { max-width: 960px; margin: 0 auto; }
+
+  header {
+    border-left: 4px solid #e05252;
+    padding-left: 20px;
+    margin-bottom: 48px;
+  }
+  header .service-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; letter-spacing: 0.2em;
+    color: #e05252; text-transform: uppercase; margin-bottom: 6px;
+  }
+  header h1 { font-size: 38px; font-weight: 700; letter-spacing: -1px; color: #fff; }
+  header p { color: var(--muted); margin-top: 8px; font-size: 13px; }
+
+  section { margin-bottom: 40px; }
+  .section-title { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+  .section-title h2 { font-size: 18px; font-weight: 700; color: #fff; }
+
+  .badge {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+    padding: 2px 8px; border-radius: 2px;
+    text-transform: uppercase; letter-spacing: 0.12em; font-weight: 600;
+  }
+  .b-red    { background: #2a1212; color: #e05252; }
+  .b-blue   { background: #0f2030; color: var(--accent2); }
+  .b-green  { background: #0f2515; color: var(--accent3); }
+  .b-amber  { background: #2a1e00; color: var(--accent); }
+  .b-purple { background: #1e1030; color: #a78bfa; }
+  .b-teal   { background: #0f2525; color: #2dd4bf; }
+  .b-pink   { background: #2a1020; color: #f472b6; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px; padding: 18px 20px;
+  }
+  .card.redis-card  { border-top: 2px solid var(--redis); }
+  .card.memcached-card { border-top: 2px solid var(--memcached); }
+  .card h3 {
+    font-size: 11px; font-weight: 700; color: var(--accent2);
+    margin-bottom: 10px; text-transform: uppercase;
+    letter-spacing: 0.1em; font-family: 'IBM Plex Mono', monospace;
+  }
+  .card h3.redis-h   { color: var(--redis); }
+  .card h3.memcached-h { color: var(--memcached); }
+  .card ul { list-style: none; padding: 0; }
+  .card ul li {
+    padding: 4px 0 4px 14px; position: relative;
+    color: var(--text); font-size: 13px;
+    border-bottom: 1px solid #1a2236;
+  }
+  .card ul li:last-child { border-bottom: none; }
+  .card ul li::before { content: '›'; position: absolute; left: 0; color: var(--muted); }
+
+  .card-full {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 6px; padding: 20px 24px; margin-bottom: 16px;
+  }
+
+  .compare-table { width: 100%; border-collapse: collapse; }
+  .compare-table thead tr { background: var(--surface2); }
+  .compare-table th {
+    padding: 10px 16px; text-align: left;
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted);
+    border-bottom: 1px solid var(--border);
+  }
+  .compare-table td {
+    padding: 10px 16px; font-size: 13px;
+    border-bottom: 1px solid var(--border); vertical-align: top;
+  }
+  .compare-table tr:last-child td { border-bottom: none; }
+  .compare-table tr:hover td { background: var(--surface2); }
+  .compare-table td:first-child {
+    font-weight: 600; color: var(--accent2); white-space: nowrap;
+    font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+  }
+
+  .chip {
+    display: inline-block; padding: 2px 8px; border-radius: 3px;
+    font-size: 11px; font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600; margin: 2px 2px 2px 0;
+  }
+  .chip-green  { background: #14291e; color: var(--accent3); border: 1px solid #1f4030; }
+  .chip-red    { background: #2a1212; color: var(--accent4); border: 1px solid #3a1e1e; }
+  .chip-blue   { background: #0f2030; color: var(--accent2); border: 1px solid #1a3050; }
+  .chip-amber  { background: #2a1e00; color: var(--accent);  border: 1px solid #3a2a00; }
+  .chip-purple { background: #1e1030; color: #a78bfa;        border: 1px solid #2e1a40; }
+  .chip-redis  { background: #2a1010; color: #e05252;        border: 1px solid #3a1818; }
+  .chip-memcached { background: #101828; color: #6495ed;     border: 1px solid #1a2840; }
+
+  .exam-box {
+    background: #1a1500; border: 1px solid #3a2e00;
+    border-left: 3px solid var(--accent); border-radius: 6px;
+    padding: 14px 18px; margin-top: 16px;
+  }
+  .exam-box .exam-label {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+    color: var(--accent); font-weight: 700;
+    letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 6px;
+  }
+  .exam-box p, .exam-box li { font-size: 13px; color: #d4b96a; }
+  .exam-box ul { padding-left: 16px; }
+  .exam-box ul li { margin-bottom: 4px; }
+
+  .yes { color: var(--accent3); font-weight: 600; }
+  .no  { color: var(--accent4); font-weight: 600; }
+
+  code {
+    background: #0f1e2e; padding: 1px 6px; border-radius: 3px;
+    color: #7dd3fc; font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+  }
+
+  /* Cache flow */
+  .flow-box {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 6px; padding: 18px 20px; margin-bottom: 16px;
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+  .flow-node {
+    border-radius: 4px; padding: 8px 14px;
+    font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+    font-weight: 600; text-align: center; min-width: 100px;
+  }
+  .fn-app   { background: #1a2a1a; border: 1px solid #2a4a2a; color: #86efac; }
+  .fn-cache { background: #2a1212; border: 1px solid #4a1a1a; color: #fca5a5; }
+  .fn-db    { background: #0f2030; border: 1px solid #1a3050; color: var(--accent2); }
+  .flow-arr { color: var(--muted); font-size: 18px; }
+  .flow-label { font-size: 10px; color: var(--muted); font-family: 'IBM Plex Mono', monospace; text-align: center; margin-top: 3px; }
+  .flow-col { display: flex; flex-direction: column; align-items: center; }
+
+  /* Cluster diagram */
+  .cluster-diagram {
+    display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 16px;
+  }
+  .cluster-box {
+    flex: 1; min-width: 280px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 6px; padding: 16px;
+  }
+  .cluster-box h4 {
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border);
+  }
+  .cluster-box h4.disabled-h { color: #fbbf24; }
+  .cluster-box h4.enabled-h  { color: #a78bfa; }
+  .shard-row { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+  .shard-node {
+    border-radius: 3px; padding: 5px 10px;
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px; text-align: center;
+  }
+  .sn-primary { background: #2a1e00; border: 1px solid #4a3a00; color: #fbbf24; }
+  .sn-replica { background: #0f2030; border: 1px solid #1a3050; color: #60a5fa; }
+  .sn-label   { font-size: 10px; color: var(--muted); margin-top: 3px; font-family: 'IBM Plex Mono', monospace; }
+
+  @media (max-width: 640px) {
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    header h1 { font-size: 28px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <a href="../index.html" style="display:inline-flex;align-items:center;gap:8px;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#94a3b8;background:#111827;border:1px solid #1e2d45;border-radius:6px;padding:7px 14px;text-decoration:none;margin-bottom:32px;transition:color 0.2s,border-color 0.2s;" onmouseover="this.style.color='#e2e8f0';this.style.borderColor='#f59e0b'" onmouseout="this.style.color='#94a3b8';this.style.borderColor='#1e2d45'">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+    Home
+  </a>
+
+  <header>
+    <div class="service-tag">AWS · DOP-C02 · Caching</div>
+    <h1>Amazon ElastiCache</h1>
+    <p>Managed in-memory caching — Redis & Memcached — DevOps Professional exam scope</p>
+  </header>
+
+  <!-- ═══════════════════ CORE CONCEPT -->
+  <section>
+    <div class="section-title">
+      <span class="badge b-red">Core</span>
+      <h2>What ElastiCache Does</h2>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:16px;">
+      <div class="card">
+        <h3>Purpose</h3>
+        <ul>
+          <li>Managed <strong>Redis</strong> or <strong>Memcached</strong> — AWS handles OS patching, backups, monitoring</li>
+          <li>In-memory key-value store — sub-millisecond latency</li>
+          <li>Offloads <strong>read-heavy</strong> workloads from RDS / Aurora</li>
+          <li>Requires <strong>application code changes</strong> — app must check cache before DB</li>
+          <li>Stateless architecture enabler — store sessions externally</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Cache Patterns</h3>
+        <ul>
+          <li><span class="chip chip-blue">Lazy Loading</span> Cache miss → read DB → write to cache. Stale data possible.</li>
+          <li><span class="chip chip-green">Write-Through</span> Write to DB + cache simultaneously. Fresh data, higher write cost.</li>
+          <li><span class="chip chip-amber">Session Store</span> Store user sessions with TTL. Enables stateless app tier (horizontal scaling).</li>
+          <li><span class="chip chip-purple">Cache-Aside</span> App manages cache manually — same as Lazy Loading terminology.</li>
+          <li>Set <strong>TTL</strong> (time-to-live) to avoid stale data buildup</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Cache flow -->
+    <div class="flow-box">
+      <div class="flow-col">
+        <div class="flow-node fn-app">Application</div>
+      </div>
+      <div class="flow-col">
+        <div class="flow-arr">→</div>
+        <div class="flow-label">1. check</div>
+      </div>
+      <div class="flow-col">
+        <div class="flow-node fn-cache">ElastiCache</div>
+        <div class="flow-label">Cache Hit ✓ → return data</div>
+      </div>
+      <div style="color:var(--muted);font-size:12px;padding:0 8px;">│ Cache Miss</div>
+      <div class="flow-col">
+        <div class="flow-arr">→</div>
+        <div class="flow-label">2. miss → read</div>
+      </div>
+      <div class="flow-col">
+        <div class="flow-node fn-db">RDS / Aurora</div>
+        <div class="flow-label">3. write result back to cache</div>
+      </div>
+    </div>
+
+    <div class="exam-box">
+      <div class="exam-label">⚑ Exam Note</div>
+      <ul>
+        <li><strong>ElastiCache does not automatically cache</strong> — your application code must implement the cache-check logic. This is a required code change.</li>
+        <li>Session handling pattern: user logs in → write session to ElastiCache → any app instance retrieves it → enables stateless EC2 fleet behind an ALB.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ REDIS vs MEMCACHED -->
+  <section>
+    <div class="section-title">
+      <span class="badge b-red">Engines</span>
+      <h2>Redis vs Memcached</h2>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:16px;">
+      <div class="card redis-card">
+        <h3 class="redis-h">Redis</h3>
+        <ul>
+          <li><strong>Multi-AZ</strong> with automatic failover</li>
+          <li>Read Replicas for scaling reads + HA</li>
+          <li>Data durability: <strong>AOF persistence</strong> (append-only file)</li>
+          <li><strong>RDB snapshots</strong> — periodic point-in-time backup</li>
+          <li>Backup and restore supported</li>
+          <li>Supports <strong>Sets, Sorted Sets, Lists, Hashes</strong> — rich data structures</li>
+          <li>Pub/Sub messaging</li>
+          <li>Single-threaded (mostly) — atomic operations</li>
+          <li>Supports <strong>Lua scripting</strong> and <strong>Transactions</strong></li>
+          <li>In-transit and at-rest encryption</li>
+          <li>HIPAA eligible, PCI DSS compliant</li>
+        </ul>
+      </div>
+      <div class="card memcached-card">
+        <h3 class="memcached-h">Memcached</h3>
+        <ul>
+          <li><strong>Multi-node</strong> sharding — horizontal data partitioning</li>
+          <li><span class="no">No replication</span> — no Multi-AZ, no HA</li>
+          <li><span class="no">Non-persistent</span> — data lost on restart/failure</li>
+          <li>Backup &amp; restore via <strong>Serverless</strong> tier only</li>
+          <li><strong>Multi-threaded</strong> — better CPU utilization on multi-core</li>
+          <li>Simple key-value only — no complex data types</li>
+          <li>Lower overhead per connection</li>
+          <li>Scales out by adding nodes (sharding)</li>
+          <li>No encryption support (standard)</li>
+          <li>Use when: pure caching, simple data, max throughput</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card-full">
+      <table class="compare-table">
+        <thead>
+          <tr><th>Feature</th><th><span style="color:var(--redis)">Redis</span></th><th><span style="color:var(--memcached)">Memcached</span></th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Persistence</td><td><span class="yes">AOF + RDB snapshots</span></td><td><span class="no">None</span></td></tr>
+          <tr><td>Replication / Multi-AZ</td><td><span class="yes">Yes (Auto-Failover)</span></td><td><span class="no">No</span></td></tr>
+          <tr><td>Data structures</td><td><span class="yes">Rich (Sets, Sorted Sets, Lists…)</span></td><td>Simple key-value only</td></tr>
+          <tr><td>Backup &amp; Restore</td><td><span class="yes">Yes</span></td><td>Serverless only</td></tr>
+          <tr><td>Pub/Sub</td><td><span class="yes">Yes</span></td><td><span class="no">No</span></td></tr>
+          <tr><td>Threads</td><td>Single-threaded (atomic)</td><td><span class="yes">Multi-threaded</span></td></tr>
+          <tr><td>Encryption</td><td><span class="yes">In-transit + at-rest</span></td><td><span class="no">No (standard)</span></td></tr>
+          <tr><td>Scaling</td><td>Replicas (reads) + Shards (writes)</td><td>Nodes (sharding only)</td></tr>
+          <tr><td>Use case</td><td>HA, persistence, leaderboards, sessions, pub/sub</td><td>Simple cache, max throughput, no HA needed</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="exam-box">
+      <div class="exam-label">⚑ Exam — Pick Redis When</div>
+      <ul>
+        <li>Need <strong>data durability / persistence</strong> (AOF)</li>
+        <li>Need <strong>Multi-AZ failover</strong></li>
+        <li>Need <strong>Sorted Sets</strong> (e.g. gaming leaderboards, real-time ranking)</li>
+        <li>Need <strong>Pub/Sub</strong> (real-time notifications)</li>
+        <li>Need <strong>backup and restore</strong></li>
+        <li>→ <strong>Pick Memcached</strong> only for pure horizontal sharding, no HA, multi-threaded throughput, simple cache</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ REDIS CLUSTER MODES -->
+  <section>
+    <div class="section-title">
+      <span class="badge b-purple">Cluster Modes</span>
+      <h2>Redis Cluster Modes</h2>
+    </div>
+
+    <div class="cluster-diagram">
+      <!-- Disabled -->
+      <div class="cluster-box">
+        <h4 class="disabled-h">Cluster Mode Disabled</h4>
+        <div class="shard-row">
+          <div>
+            <div class="shard-node sn-primary">Primary</div>
+            <div class="sn-label">R/W</div>
+          </div>
+          <div style="color:var(--muted);padding-top:8px;">→</div>
+          <div>
+            <div class="shard-node sn-replica">Replica 1</div>
+            <div class="sn-label">R only</div>
+          </div>
+          <div>
+            <div class="shard-node sn-replica">Replica 2</div>
+            <div class="sn-label">R only</div>
+          </div>
+          <div>
+            <div class="shard-node sn-replica">… up to 5</div>
+            <div class="sn-label">R only</div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:6px;font-family:'IBM Plex Mono',monospace;">Single shard — all data on one node set</div>
+        <ul style="list-style:none;margin-top:10px;">
+          <li style="font-size:12px;padding:3px 0;border-bottom:1px solid var(--border);">1 primary + up to 5 replicas</li>
+          <li style="font-size:12px;padding:3px 0;border-bottom:1px solid var(--border);">ASYNC replication</li>
+          <li style="font-size:12px;padding:3px 0;border-bottom:1px solid var(--border);">Multi-AZ enabled by default</li>
+          <li style="font-size:12px;padding:3px 0;border-bottom:1px solid var(--border);">Scale reads: add replicas (horizontal)</li>
+          <li style="font-size:12px;padding:3px 0;">Scale compute: resize node (vertical)</li>
+        </ul>
+      </div>
+
+      <!-- Enabled -->
+      <div class="cluster-box">
+        <h4 class="enabled-h">Cluster Mode Enabled</h4>
+        <div class="shard-row">
+          <div>
+            <div class="shard-node sn-primary" style="background:#1e1030;border-color:#3a1a60;color:#a78bfa;">Shard 1 P</div>
+            <div class="sn-label">+ replicas</div>
+          </div>
+          <div>
+            <div class="shard-node sn-primary" style="background:#1e1030;border-color:#3a1a60;color:#a78bfa;">Shard 2 P</div>
+            <div class="sn-label">+ replicas</div>
+          </div>
+          <div>
+            <div class="shard-node sn-primary" style="background:#1e1030;border-color:#3a1a60;color:#a78bfa;">Shard N P</div>
+            <div class="sn-label">+ replicas</div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:6px;font-family:'IBM Plex Mono',monospace;">Data partitioned across shards (hash slots)</div>
+        <ul style="list-style:none;margin-top:10px;">
+          <li style="font-size:12px;padding:3px 0;border-bottom:1px solid var(--border);">Each shard: 1 primary + up to 5 replicas</li>
+          <li style="font-size:12px;padding:3px 0;border-bottom:1px solid var(--border);">Multi-AZ by default</li>
+          <li style="font-size:12px;padding:3px 0;border-bottom:1px solid var(--border);">Scales <strong>writes</strong> (data spread across shards)</li>
+          <li style="font-size:12px;padding:3px 0;border-bottom:1px solid var(--border);">Auto-Scaling supported</li>
+          <li style="font-size:12px;padding:3px 0;">Resharding supported (online)</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Node limits table -->
+    <div class="card-full" style="margin-bottom:16px;">
+      <h3 style="font-family:'IBM Plex Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--accent2);margin-bottom:12px;">Cluster Mode Enabled — Max Node Configurations</h3>
+      <table class="compare-table">
+        <thead>
+          <tr><th>Configuration</th><th>Max Shards</th><th>Total Max Nodes</th><th>Notes</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1 master, 0 replicas</td><td>500</td><td>500</td><td>Max write throughput, no HA</td></tr>
+          <tr><td>1 master, 1 replica</td><td>250</td><td>500</td><td>Balanced HA + scale</td></tr>
+          <tr><td>1 master, 5 replicas</td><td>83</td><td>498</td><td>Max read replicas per shard</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="exam-box">
+      <div class="exam-label">⚑ Exam — Cluster Mode Decision</div>
+      <ul>
+        <li><strong>Need to scale writes</strong> → Cluster Mode Enabled (data partitioned across shards)</li>
+        <li><strong>Need to scale reads only</strong> → Cluster Mode Disabled (add replicas)</li>
+        <li><strong>Online resharding</strong>: Cluster Mode Enabled supports adding/removing shards without downtime</li>
+        <li>Cluster Mode Disabled: single shard — if node fails and no replicas, <strong>data is lost</strong></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ ENDPOINTS -->
+  <section>
+    <div class="section-title">
+      <span class="badge b-blue">Endpoints</span>
+      <h2>Connection Endpoints</h2>
+    </div>
+
+    <div class="card-full">
+      <table class="compare-table">
+        <thead>
+          <tr><th>Mode</th><th>Endpoint</th><th>Purpose</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Standalone Node</td>
+            <td><span class="chip chip-amber">Single Endpoint</span></td>
+            <td>Handles both reads and writes</td>
+          </tr>
+          <tr>
+            <td>Cluster Mode Disabled</td>
+            <td><span class="chip chip-redis">Primary Endpoint</span></td>
+            <td>All write operations — auto-updates on failover</td>
+          </tr>
+          <tr>
+            <td>Cluster Mode Disabled</td>
+            <td><span class="chip chip-blue">Reader Endpoint</span></td>
+            <td>Evenly distributes reads across all read replicas</td>
+          </tr>
+          <tr>
+            <td>Cluster Mode Disabled</td>
+            <td><span class="chip chip-purple">Node Endpoint</span></td>
+            <td>Direct connection to a specific node (rarely used)</td>
+          </tr>
+          <tr>
+            <td>Cluster Mode Enabled</td>
+            <td><span class="chip chip-green">Configuration Endpoint</span></td>
+            <td>Read/write — cluster-aware client uses this to route to correct shard</td>
+          </tr>
+          <tr>
+            <td>Cluster Mode Enabled</td>
+            <td><span class="chip chip-purple">Node Endpoint</span></td>
+            <td>Read operations on a specific node</td>
+          </tr>
+          <tr>
+            <td>Memcached</td>
+            <td><span class="chip chip-memcached">Configuration Endpoint</span></td>
+            <td>Auto-discovers all nodes in the cluster</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="exam-box">
+      <div class="exam-label">⚑ Exam Trap</div>
+      <ul>
+        <li>Cluster Mode Enabled requires a <strong>cluster-aware Redis client</strong> — standard clients won't work correctly (they don't understand hash slot routing).</li>
+        <li>Using the Configuration Endpoint with a non-cluster-aware client → <code>MOVED</code> errors.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ AUTO SCALING -->
+  <section>
+    <div class="section-title">
+      <span class="badge b-green">Scaling</span>
+      <h2>Scaling Strategies</h2>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:16px;">
+      <div class="card">
+        <h3>Redis — Cluster Mode Disabled</h3>
+        <ul>
+          <li><strong>Horizontal scaling</strong>: add/remove Read Replicas (up to 5)</li>
+          <li><strong>Vertical scaling</strong>: change node type (e.g. cache.r6g.large → xlarge)</li>
+          <li>Vertical scaling triggers a <strong>failover</strong> — plan for brief disruption</li>
+          <li>No data sharding — all data on single shard</li>
+          <li>Auto Scaling: scale replicas based on <code>CPUUtilization</code> or <code>DatabaseMemoryUsagePercentage</code></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Redis — Cluster Mode Enabled</h3>
+        <ul>
+          <li><strong>Online resharding</strong>: add/remove shards without downtime</li>
+          <li><strong>Shard rebalancing</strong>: redistributes hash slots across shards</li>
+          <li>Auto Scaling: scale shards (not just replicas) based on metrics</li>
+          <li>Target tracking policy: e.g. keep <code>ElastiCachePrimaryEngineCPUUtilization</code> at 60%</li>
+          <li>Scheduled scaling: predictable load patterns</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Memcached Scaling</h3>
+      <ul style="display:grid;grid-template-columns:1fr 1fr;gap:0;">
+        <li><strong>Horizontal</strong>: add/remove nodes (sharding — data spreads automatically)</li>
+        <li><strong>Vertical</strong>: change node type — requires <strong>new cluster + data re-population</strong></li>
+        <li>No replication — scaling out adds shards, not replicas</li>
+        <li>Auto Discovery: clients use config endpoint to find new nodes automatically</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ SECURITY -->
+  <section>
+    <div class="section-title">
+      <span class="badge b-pink">Security</span>
+      <h2>Security</h2>
+    </div>
+
+    <div class="grid-3">
+      <div class="card">
+        <h3>Redis AUTH &amp; Access</h3>
+        <ul>
+          <li><strong>Redis AUTH</strong>: password/token set at cluster creation</li>
+          <li><strong>RBAC</strong> (Redis 6+): user-level access control with ACLs</li>
+          <li>IAM Auth: <span class="no">Not supported</span> for Redis directly — use AUTH token</li>
+          <li>Secrets Manager: store Redis AUTH token</li>
+          <li>VPC Security Groups control network access</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Encryption</h3>
+        <ul>
+          <li><strong>In-transit</strong>: TLS/SSL (Redis only)</li>
+          <li><strong>At-rest</strong>: KMS encryption (Redis only)</li>
+          <li>Encryption must be enabled at creation — cannot change later</li>
+          <li>Memcached: no native encryption support (standard clusters)</li>
+          <li>ElastiCache Serverless: encryption enabled by default</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Network</h3>
+        <ul>
+          <li>Deployed inside a <strong>VPC</strong> — never public internet</li>
+          <li>Security Groups: control which EC2/Lambda can connect</li>
+          <li>Subnet Groups: define which subnets ElastiCache deploys into</li>
+          <li>No public endpoint — always private</li>
+          <li>Cross-VPC: VPC Peering or Transit Gateway</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ SERVERLESS -->
+  <section>
+    <div class="section-title">
+      <span class="badge b-teal">Serverless</span>
+      <h2>ElastiCache Serverless</h2>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>What It Is</h3>
+        <ul>
+          <li>No cluster or node management — fully managed capacity</li>
+          <li>Supports <strong>Redis and Memcached</strong></li>
+          <li>Scales compute and memory <strong>automatically</strong> based on demand</li>
+          <li>High availability built-in — data replicated across multiple AZs</li>
+          <li>Encryption at rest and in transit <strong>enabled by default</strong></li>
+          <li>Billed per ECU (ElastiCache Compute Unit) and GB stored</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>When to Use</h3>
+        <ul>
+          <li>Unpredictable or spiky cache workloads</li>
+          <li>Dev/test environments — no capacity planning needed</li>
+          <li>Variable cache sizes — avoid over-provisioning</li>
+          <li>New applications — start fast without sizing decisions</li>
+          <li><span class="chip chip-amber">DOP-C02</span> Serverless = operational simplicity, auto-scaling, no patching</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ MONITORING -->
+  <section>
+    <div class="section-title">
+      <span class="badge b-amber">Monitoring</span>
+      <h2>Key Metrics to Know</h2>
+    </div>
+
+    <div class="card-full">
+      <table class="compare-table">
+        <thead>
+          <tr><th>Metric</th><th>Engine</th><th>Meaning / Action</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Evictions</td><td>Both</td><td>Items evicted to make room → cache too small, scale up or increase TTL</td></tr>
+          <tr><td>CacheMisses</td><td>Both</td><td>High miss rate → cache not effective; review TTL / data loading strategy</td></tr>
+          <tr><td>CacheHits</td><td>Both</td><td>Higher = better; target &gt;80% hit ratio</td></tr>
+          <tr><td>CPUUtilization</td><td>Both</td><td>&gt;90% → scale out (add nodes/replicas)</td></tr>
+          <tr><td>DatabaseMemoryUsagePercentage</td><td>Redis</td><td>Approaching 100% → scale up or enable cluster mode</td></tr>
+          <tr><td>ReplicationLag</td><td>Redis</td><td>High → replica falling behind primary; check network/CPU</td></tr>
+          <tr><td>CurrConnections</td><td>Both</td><td>Monitor for connection exhaustion</td></tr>
+          <tr><td>SwapUsage</td><td>Memcached</td><td>Any swap → node undersized; scale up node type</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ CHEATSHEET -->
+  <section>
+    <div class="section-title">
+      <span class="badge b-amber">Cheatsheet</span>
+      <h2>DOP-C02 Key Decision Tree</h2>
+    </div>
+
+    <div class="card-full">
+      <table class="compare-table">
+        <thead>
+          <tr><th>Scenario / Keyword</th><th>Answer</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Need HA + automatic failover for cache</td><td>Redis with Multi-AZ (not Memcached)</td></tr>
+          <tr><td>Need to persist cache data across restarts</td><td>Redis with AOF persistence</td></tr>
+          <tr><td>Gaming leaderboard / real-time ranking</td><td>Redis Sorted Sets</td></tr>
+          <tr><td>Pub/Sub real-time notifications</td><td>Redis Pub/Sub</td></tr>
+          <tr><td>Max throughput, no HA, multi-threaded</td><td>Memcached</td></tr>
+          <tr><td>Stateless application — store user sessions</td><td>ElastiCache (Redis) Session Store pattern</td></tr>
+          <tr><td>Scale writes across cache</td><td>Redis Cluster Mode Enabled (sharding)</td></tr>
+          <tr><td>Scale reads for cache</td><td>Redis Cluster Mode Disabled + Read Replicas</td></tr>
+          <tr><td>Add cache nodes without downtime</td><td>Redis Cluster Mode Enabled (online resharding)</td></tr>
+          <tr><td>Cache + no capacity planning needed</td><td>ElastiCache Serverless</td></tr>
+          <tr><td>Cluster-aware client required</td><td>Redis Cluster Mode Enabled (uses Configuration Endpoint)</td></tr>
+          <tr><td>High evictions alarm</td><td>Cache undersized — scale up node type or increase cluster size</td></tr>
+          <tr><td>Reduce RDS load spikes on read-heavy app</td><td>ElastiCache (Lazy Loading / Write-Through pattern)</td></tr>
+          <tr><td>DB + cache write consistency</td><td>Write-Through pattern (write to both simultaneously)</td></tr>
+          <tr><td>Stale data acceptable, minimize DB calls</td><td>Lazy Loading with TTL</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

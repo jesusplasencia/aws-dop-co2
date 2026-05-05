@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Amazon Aurora — DOP-C02 Study Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --surface2: #1a2236;
+    --border: #1e2d45;
+    --accent: #f59e0b;
+    --accent2: #38bdf8;
+    --accent3: #4ade80;
+    --accent4: #f87171;
+    --text: #e2e8f0;
+    --muted: #64748b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    padding: 40px 24px 80px;
+  }
+  .page { max-width: 960px; margin: 0 auto; }
+
+  header {
+    border-left: 4px solid #a78bfa;
+    padding-left: 20px;
+    margin-bottom: 48px;
+  }
+  header .service-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: #a78bfa;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  header h1 { font-size: 38px; font-weight: 700; letter-spacing: -1px; color: #fff; line-height: 1.1; }
+  header p { color: var(--muted); margin-top: 8px; font-size: 13px; }
+
+  section { margin-bottom: 40px; }
+
+  .section-title { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+  .section-title h2 { font-size: 18px; font-weight: 700; color: #fff; }
+  .badge {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: 600;
+  }
+  .b-purple { background: #1e1030; color: #a78bfa; }
+  .b-blue   { background: #0f2030; color: var(--accent2); }
+  .b-green  { background: #0f2515; color: var(--accent3); }
+  .b-amber  { background: #2a1e00; color: var(--accent); }
+  .b-red    { background: #2a1212; color: var(--accent4); }
+  .b-pink   { background: #2a1020; color: #f472b6; }
+  .b-teal   { background: #0f2525; color: #2dd4bf; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 18px 20px;
+  }
+  .card h3 {
+    font-size: 11px; font-weight: 700; color: var(--accent2);
+    margin-bottom: 10px; text-transform: uppercase;
+    letter-spacing: 0.1em; font-family: 'IBM Plex Mono', monospace;
+  }
+  .card ul { list-style: none; padding: 0; }
+  .card ul li {
+    padding: 4px 0 4px 14px; position: relative;
+    color: var(--text); font-size: 13px;
+    border-bottom: 1px solid #1a2236;
+  }
+  .card ul li:last-child { border-bottom: none; }
+  .card ul li::before { content: '›'; position: absolute; left: 0; color: var(--muted); }
+
+  .card-full {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+  }
+
+  .compare-table { width: 100%; border-collapse: collapse; }
+  .compare-table thead tr { background: var(--surface2); }
+  .compare-table th {
+    padding: 10px 16px; text-align: left;
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted);
+    border-bottom: 1px solid var(--border);
+  }
+  .compare-table td {
+    padding: 10px 16px; font-size: 13px;
+    border-bottom: 1px solid var(--border); vertical-align: top;
+  }
+  .compare-table tr:last-child td { border-bottom: none; }
+  .compare-table tr:hover td { background: var(--surface2); }
+  .compare-table td:first-child {
+    font-weight: 600; color: var(--accent2); white-space: nowrap;
+    font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+  }
+
+  .chip {
+    display: inline-block; padding: 2px 8px; border-radius: 3px;
+    font-size: 11px; font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600; margin: 2px 2px 2px 0;
+  }
+  .chip-green  { background: #14291e; color: var(--accent3); border: 1px solid #1f4030; }
+  .chip-red    { background: #2a1212; color: var(--accent4); border: 1px solid #3a1e1e; }
+  .chip-blue   { background: #0f2030; color: var(--accent2); border: 1px solid #1a3050; }
+  .chip-amber  { background: #2a1e00; color: var(--accent);  border: 1px solid #3a2a00; }
+  .chip-purple { background: #1e1030; color: #a78bfa;        border: 1px solid #2e1a40; }
+  .chip-pink   { background: #2a1020; color: #f472b6;        border: 1px solid #3a1a30; }
+  .chip-teal   { background: #0f2525; color: #2dd4bf;        border: 1px solid #1a3535; }
+
+  .exam-box {
+    background: #1a1500; border: 1px solid #3a2e00;
+    border-left: 3px solid var(--accent); border-radius: 6px;
+    padding: 14px 18px; margin-top: 16px;
+  }
+  .exam-box .exam-label {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+    color: var(--accent); font-weight: 700; letter-spacing: 0.12em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .exam-box p, .exam-box li { font-size: 13px; color: #d4b96a; }
+  .exam-box ul { padding-left: 16px; }
+  .exam-box ul li { margin-bottom: 4px; }
+
+  .note-box {
+    background: #0f1e30; border: 1px solid #1a3050;
+    border-left: 3px solid var(--accent2); border-radius: 6px;
+    padding: 14px 18px; margin-top: 16px;
+  }
+  .note-box p { font-size: 13px; color: #7dd3fc; }
+
+  .yes { color: var(--accent3); font-weight: 600; }
+  .no  { color: var(--accent4); font-weight: 600; }
+
+  /* Endpoint diagram */
+  .ep-diagram {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .ep-row { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-bottom: 12px; }
+  .ep-node {
+    border-radius: 4px; padding: 8px 16px;
+    font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+    font-weight: 600; text-align: center; min-width: 130px;
+  }
+  .ep-writer  { background: #1a3a10; border: 1px solid #2a5a18; color: #86efac; }
+  .ep-reader  { background: #0f2030; border: 1px solid #1a3550; color: var(--accent2); }
+  .ep-custom  { background: #1e1030; border: 1px solid #2e1a50; color: #a78bfa; }
+  .ep-instance{ background: #1a2236; border: 1px solid var(--border); color: var(--muted); font-size: 11px; min-width: 80px; }
+  .ep-arrow { color: var(--muted); text-align: center; font-size: 18px; margin: 4px 0; }
+  .ep-label { font-size: 10px; color: var(--muted); font-family: 'IBM Plex Mono', monospace; text-align: center; margin-top: 3px; }
+
+  /* Global diagram */
+  .global-diagram {
+    display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 6px; padding: 20px; margin-bottom: 16px;
+  }
+  .region-box {
+    flex: 1; min-width: 200px; border-radius: 5px; padding: 14px;
+    border: 1px solid;
+  }
+  .region-primary { border-color: #2a5a18; background: #0d1e0a; }
+  .region-secondary { border-color: #1a3050; background: #090f1a; }
+  .region-label {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+    letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 10px;
+  }
+  .region-primary .region-label { color: var(--accent3); }
+  .region-secondary .region-label { color: var(--accent2); }
+  .region-arrow {
+    display: flex; align-items: center; color: var(--muted);
+    font-size: 22px; padding-top: 30px;
+  }
+  .region-stat {
+    font-size: 11px; color: var(--muted); margin-top: 6px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .region-stat span { color: var(--accent3); }
+
+  code {
+    background: #0f1e2e; padding: 1px 6px; border-radius: 3px;
+    color: #7dd3fc; font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+  }
+
+  @media (max-width: 640px) {
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    header h1 { font-size: 28px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <a href="../index.html" style="display:inline-flex;align-items:center;gap:8px;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#94a3b8;background:#111827;border:1px solid #1e2d45;border-radius:6px;padding:7px 14px;text-decoration:none;margin-bottom:32px;transition:color 0.2s,border-color 0.2s;" onmouseover="this.style.color='#e2e8f0';this.style.borderColor='#f59e0b'" onmouseout="this.style.color='#94a3b8';this.style.borderColor='#1e2d45'">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+    Home
+  </a>
+
+  <header>
+    <div class="service-tag">AWS · DOP-C02 · Database</div>
+    <h1>Amazon Aurora</h1>
+    <p>AWS-optimized relational database — MySQL & PostgreSQL compatible — DevOps Professional exam scope</p>
+  </header>
+
+  <!-- ═══════════════════════════════════════════════════════ CORE -->
+  <section>
+    <div class="section-title">
+      <span class="badge b-purple">Architecture</span>
+      <h2>Core Architecture</h2>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:16px;">
+      <div class="card">
+        <h3>What Makes Aurora Different</h3>
+        <ul>
+          <li>AWS-proprietary engine — <strong>MySQL</strong> and <strong>PostgreSQL</strong> compatible</li>
+          <li>Storage auto-grows in <strong>10 GB increments</strong>, up to <strong>128 TB</strong></li>
+          <li>Up to <strong>15 read replicas</strong> with <strong>&lt;10 ms replica lag</strong></li>
+          <li>Failover is <strong>instantaneous</strong> — faster than Multi-AZ RDS</li>
+          <li>Costs ~20% more than RDS — but more efficient at scale</li>
+          <li>Data replicated <strong>6 copies across 3 AZs</strong></li>
+          <li>Self-healing: peer-to-peer replication, auto-repairs bad blocks</li>
+          <li>Only one AZ handles writes; all data on a <strong>shared storage volume</strong></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Storage Layer</h3>
+        <ul>
+          <li><strong>6 copies</strong> of data, spread across 3 AZs automatically</li>
+          <li>Needs 4/6 for writes, 3/6 for reads — tolerates AZ failures</li>
+          <li>Storage is <strong>decoupled from compute</strong> — all instances share one volume</li>
+          <li>No performance impact when adding replicas (shared storage)</li>
+          <li>Replication is at the <strong>storage layer</strong>, not log-shipping</li>
+          <li>Backups are continuous to S3 — no I/O impact on DB</li>
+          <li>Restore to any point within backup retention window</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="exam-box">
+      <div class="exam-label">⚑ Exam Trap</div>
+      <ul>
+        <li>Aurora storage is <strong>not</strong> attached to any single instance — it's a distributed shared volume. Adding replicas does NOT increase storage cost proportionally.</li>
+        <li>Aurora replication is <strong>storage-layer replication</strong> — not ASYNC log-shipping like RDS Read Replicas. Replicas can serve reads with minimal lag (&lt;10ms).</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════ ENDPOINTS -->
+  <section>
+    <div class="section-title">
+      <span class="badge b-blue">Endpoints</span>
+      <h2>Endpoints & Connections</h2>
+    </div>
+
+    <!-- Diagram -->
+    <div class="ep-diagram">
+      <div class="ep-row">
+        <div style="text-align:center">
+          <div class="ep-node ep-writer">Writer Endpoint</div>
+          <div class="ep-label">→ always points to current primary</div>
+        </div>
+        <div style="text-align:center">
+          <div class="ep-node ep-reader">Reader Endpoint</div>
+          <div class="ep-label">→ load balances across all replicas</div>
+        </div>
+        <div style="text-align:center">
+          <div class="ep-node ep-custom">Custom Endpoint</div>
+          <div class="ep-label">→ subset of replicas (e.g. large instances)</div>
+        </div>
+      </div>
+      <div class="ep-arrow" style="text-align:center">↓</div>
+      <div class="ep-row">
+        <div class="ep-node ep-instance">Primary<br><span style="font-size:10px;color:#4ade80">R/W</span></div>
+        <div class="ep-node ep-instance">Replica 1<br><span style="font-size:10px;color:#38bdf8">R only</span></div>
+        <div class="ep-node ep-instance">Replica 2<br><span style="font-size:10px;color:#38bdf8">R only</span></div>
+        <div class="ep-node ep-instance">Replica N<br><span style="font-size:10px;color:#38bdf8">R only</span></div>
+      </div>
+      <div class="ep-arrow" style="text-align:center">↓</div>
+      <div style="text-align:center">
+        <div class="ep-node" style="background:#111827;border:1px solid #1e2d45;color:#94a3b8;max-width:400px;margin:0 auto;">Shared Storage Volume (6 copies, 3 AZs)</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>4 Endpoint Types</h3>
+        <ul>
+          <li><span class="chip chip-green">Writer</span> Single endpoint — auto-updates on failover. Always use for writes.</li>
+          <li><span class="chip chip-blue">Reader</span> Load-balances reads across all Read Replicas. Connection-level LB.</li>
+          <li><span class="chip chip-purple">Custom</span> Points to a user-defined subset of replicas. Use for analytics workloads on larger instance types.</li>
+          <li><span class="chip chip-amber">Instance</span> Direct connection to a specific instance. Rarely used in production.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Auto Scaling Replicas</h3>
+        <ul>
+          <li>Aurora can <strong>auto-add/remove replicas</strong> based on CPU or connections metric</li>
+          <li>Define min/max replica count in the Auto Scaling policy</li>
+          <li>New replicas are <strong>automatically added</strong> to the Reader Endpoint</li>
+          <li>When Custom Endpoint is defined, <strong>Reader Endpoint is typically not used</strong> — set this up carefully</li>
+          <li>Scaling out: ~minutes; scales in after cool-down period</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="exam-box" style="margin-top:16px;">
+      <div class="exam-label">⚑ Exam Note</div>
+      <ul>
+        <li>After creating Custom Endpoints, you should <strong>stop using the Reader Endpoint</strong> for that workload — it may route to instances not in the custom set.</li>
+        <li>Writer Endpoint stays the same DNS during a failover — your app connection string doesn't change.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════ GLOBAL -->
+  <section>
+    <div class="section-title">
+      <span class="badge b-green">Global</span>
+      <h2>Global Aurora</h2>
+    </div>
+
+    <div class="global-diagram">
+      <div class="region-box region-primary">
+        <div class="region-label">Primary Region</div>
+        <ul style="list-style:none;font-size:12px;">
+          <li style="padding:3px 0;border-bottom:1px solid #1a3010;">✦ Reads + Writes</li>
+          <li style="padding:3px 0;border-bottom:1px solid #1a3010;">1 Writer + up to 15 Replicas</li>
+          <li style="padding:3px 0;">Source of replication</li>
+        </ul>
+        <div class="region-stat">RTO on promote: <span>&lt; 1 min</span></div>
+      </div>
+      <div class="region-arrow">→</div>
+      <div class="region-box region-secondary" style="flex:2;">
+        <div class="region-label">Secondary Regions (up to 10)</div>
+        <ul style="list-style:none;font-size:12px;">
+          <li style="padding:3px 0;border-bottom:1px solid #1a2a40;">✦ Read-only</li>
+          <li style="padding:3px 0;border-bottom:1px solid #1a2a40;">Up to <strong>16 read replicas</strong> per region</li>
+          <li style="padding:3px 0;border-bottom:1px solid #1a2a40;">Replication lag <strong>&lt; 1 second</strong></li>
+          <li style="padding:3px 0;">Can be promoted to primary (DR)</li>
+        </ul>
+        <div class="region-stat">Cross-region replication: <span>&lt; 1 sec</span></div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:16px;">
+      <div class="card">
+        <h3>Aurora Global Database (Recommended)</h3>
+        <ul>
+          <li><strong>1 primary region</strong> (read/write)</li>
+          <li>Up to <strong>10 secondary regions</strong> (read-only)</li>
+          <li>Up to <strong>16 Read Replicas</strong> per secondary region</li>
+          <li>Replication via <strong>dedicated infrastructure</strong> — doesn't use DB compute</li>
+          <li>Replication lag: typically <strong>&lt; 1 second</strong></li>
+          <li>Promotes secondary region with <strong>RTO &lt; 1 minute</strong></li>
+          <li>Reduces read latency for globally distributed users</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Cross-Region Read Replicas (Alternative)</h3>
+        <ul>
+          <li>Uses <strong>Aurora's own replication</strong> (not storage-layer)</li>
+          <li>Simpler to set up — just like standard Read Replica</li>
+          <li>Higher replication lag than Global Database</li>
+          <li>Each cross-region replica is an <strong>independent Aurora cluster</strong></li>
+          <li>Useful for basic DR — promote manually</li>
+          <li><span class="chip chip-red">Not recommended</span> vs Global DB for low-latency global reads</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="exam-box">
+      <div class="exam-label">⚑ Exam — Global Aurora Key Numbers</div>
+      <ul>
+        <li>Secondary regions: <strong>up to 10</strong></li>
+        <li>Read replicas per secondary: <strong>up to 16</strong></li>
+        <li>Replication lag: <strong>&lt; 1 second</strong></li>
+        <li>RTO for region promotion (DR): <strong>&lt; 1 minute</strong></li>
+        <li>Cross-region replication: <strong>storage-level</strong> (not application-level)</li>
+        <li>Write Forwarding: secondary regions can forward writes to primary — enables read + limited write from secondary</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════ SERVERLESS -->
+  <section>
+    <div class="section-title">
+      <span class="badge b-teal">Serverless</span>
+      <h2>Aurora Serverless</h2>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:16px;">
+      <div class="card">
+        <h3>Aurora Serverless v2</h3>
+        <ul>
+          <li>Scales compute in <strong>fine-grained increments</strong> (0.5 ACU steps)</li>
+          <li>Scales from min to max ACU based on load — in <strong>seconds</strong></li>
+          <li>Supports <strong>Multi-AZ</strong> and <strong>Read Replicas</strong></li>
+          <li>Works with Aurora Global Database</li>
+          <li>Ideal for: unpredictable workloads, dev/test, multi-tenant apps</li>
+          <li>You pay per ACU-second used — no idle cost at minimum</li>
+          <li><span class="chip chip-green">v2 recommended</span> over v1 for most use cases</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Aurora Serverless v1 (legacy)</h3>
+        <ul>
+          <li>Scales in <strong>coarser increments</strong> — slower response to spikes</li>
+          <li>Can scale to <strong>zero</strong> (pause after inactivity) — cold start on resume</li>
+          <li>Does <strong>NOT</strong> support Multi-AZ or Read Replicas</li>
+          <li>Limited feature set compared to v2</li>
+          <li>Use case: infrequent, intermittent, unpredictable workloads</li>
+          <li><span class="chip chip-red">Avoid</span> for production / consistent workloads</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="note-box">
+      <p><strong>ACU (Aurora Capacity Unit):</strong> combination of ~2 GB RAM + corresponding CPU + networking. Set a min/max ACU range; Aurora handles the rest. v2 never scales to zero — minimum is 0.5 ACU.</p>
+    </div>
+
+    <div class="exam-box">
+      <div class="exam-label">⚑ Exam Scenario</div>
+      <ul>
+        <li>Unpredictable DB workload with cost optimization requirement → <strong>Aurora Serverless v2</strong></li>
+        <li>Application needs to pause DB when no traffic (overnight) → <strong>Aurora Serverless v1</strong> (scales to zero)</li>
+        <li>v2 does NOT scale to zero — if zero cost at idle is needed, v1 or a different approach is required</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════ HA & FAILOVER -->
+  <section>
+    <div class="section-title">
+      <span class="badge b-red">High Availability</span>
+      <h2>Failover & HA Behavior</h2>
+    </div>
+
+    <div class="card-full" style="margin-bottom:16px;">
+      <table class="compare-table">
+        <thead>
+          <tr><th>Scenario</th><th>Aurora Behavior</th><th>Time</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Primary instance fails</td>
+            <td>Aurora auto-promotes a Read Replica — uses Writer Endpoint (no DNS change needed)</td>
+            <td>&lt; 30 sec</td>
+          </tr>
+          <tr>
+            <td>No Read Replicas exist</td>
+            <td>Aurora creates a new primary instance in another AZ</td>
+            <td>~minutes</td>
+          </tr>
+          <tr>
+            <td>Entire region fails</td>
+            <td>Global Aurora promotes a secondary region — manual or automated</td>
+            <td>RTO &lt; 1 min</td>
+          </tr>
+          <tr>
+            <td>AZ failure</td>
+            <td>Storage 6-copy redundancy absorbs it; replica in another AZ takes over writes</td>
+            <td>Seconds</td>
+          </tr>
+          <tr>
+            <td>Failover priority</td>
+            <td>Replica with <strong>highest priority tier (0)</strong> is promoted first; then largest instance size</td>
+            <td>—</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>Failover Tiers</h3>
+        <ul>
+          <li>Each replica has a <strong>priority tier (0–15)</strong></li>
+          <li>Tier 0 = highest priority → promoted first</li>
+          <li>Same tier → largest instance size wins</li>
+          <li>Same tier + same size → arbitrary selection</li>
+          <li>Set tiers explicitly in production for predictable failover</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Aurora vs RDS Failover Speed</h3>
+        <ul>
+          <li>Aurora failover: <strong>&lt;30 sec</strong> (storage-layer, no data re-sync needed)</li>
+          <li>RDS Multi-AZ failover: <strong>60–120 sec</strong></li>
+          <li>Aurora uses <strong>same Writer Endpoint DNS</strong> — no connection string change</li>
+          <li>RDS Multi-AZ uses same DNS too — but takes longer to re-point</li>
+          <li>Aurora replicas share storage — instant promotion, no catch-up needed</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="exam-box" style="margin-top:16px;">
+      <div class="exam-label">⚑ Exam Trap</div>
+      <ul>
+        <li>If Aurora has <strong>no Read Replicas</strong> at time of failure, it must <strong>create a new instance</strong> — takes minutes, not seconds. Always maintain at least one replica for fast failover.</li>
+        <li>The Writer Endpoint is a DNS CNAME — Aurora updates it on failover. Apps using the writer endpoint don't need to change config.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════ SECURITY -->
+  <section>
+    <div class="section-title">
+      <span class="badge b-pink">Security</span>
+      <h2>Security & Encryption</h2>
+    </div>
+
+    <div class="grid-3">
+      <div class="card">
+        <h3>Encryption At-Rest</h3>
+        <ul>
+          <li>Uses <strong>AWS KMS</strong> (AES-256)</li>
+          <li>Enabled at cluster creation — cannot enable later</li>
+          <li>Encrypts: storage volume, backups, snapshots, replicas</li>
+          <li>To encrypt existing cluster: snapshot → copy encrypted → restore</li>
+          <li>All replicas in an encrypted cluster are automatically encrypted</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Encryption In-Transit</h3>
+        <ul>
+          <li>TLS/SSL by default for all connections</li>
+          <li>Enforce with parameter: <code>require_secure_transport=ON</code></li>
+          <li>Download AWS Aurora CA cert for client verification</li>
+          <li>IAM DB Authentication supported (MySQL + PostgreSQL)</li>
+          <li>Token-based, 15-minute TTL — no password in connection string</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Network & Access</h3>
+        <ul>
+          <li>Deployed inside a <strong>VPC</strong> — private by default</li>
+          <li>Security Groups control inbound DB traffic</li>
+          <li>Credentials stored in <strong>Secrets Manager</strong> (recommended)</li>
+          <li>Audit logs → <strong>CloudWatch Logs</strong></li>
+          <li>VPC Peering / Transit Gateway for cross-VPC access</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════ BACKUPS -->
+  <section>
+    <div class="section-title">
+      <span class="badge b-amber">Backups</span>
+      <h2>Backups, Cloning & Restore</h2>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:16px;">
+      <div class="card">
+        <h3>Automated Backups</h3>
+        <ul>
+          <li>Continuous backup to S3 — <strong>no I/O suspension</strong></li>
+          <li>Retention: <strong>1–35 days</strong></li>
+          <li>Point-in-time recovery to any second in retention window</li>
+          <li>Cannot be disabled (unlike RDS — minimum is 1 day for Aurora)</li>
+          <li>Backups taken from shared storage — zero performance impact</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Aurora Cloning</h3>
+        <ul>
+          <li>Creates a new Aurora cluster from existing one — <strong>copy-on-write</strong></li>
+          <li>Faster and cheaper than snapshot restore</li>
+          <li>No data is copied initially — shares the same storage pages</li>
+          <li>New writes diverge — original cluster unaffected</li>
+          <li>Use case: create staging/test env from production data instantly</li>
+          <li><span class="chip chip-green">Recommended</span> over snapshot for dev/test cloning</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="exam-box">
+      <div class="exam-label">⚑ Exam Scenario</div>
+      <ul>
+        <li>Need a test environment with production data immediately → <strong>Aurora Cloning</strong> (not snapshot restore — faster, cheaper)</li>
+        <li>Aurora automated backups <strong>cannot be disabled</strong> — minimum 1 day. This differentiates it from RDS where you can set retention to 0.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════ AURORA vs RDS -->
+  <section>
+    <div class="section-title">
+      <span class="badge b-purple">Comparison</span>
+      <h2>Aurora vs RDS — When to Choose</h2>
+    </div>
+
+    <div class="card-full">
+      <table class="compare-table">
+        <thead>
+          <tr><th>Feature</th><th>Aurora</th><th>RDS</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Replication lag</td><td><span class="yes">&lt;10 ms</span> (storage-layer)</td><td>~seconds (ASYNC log-shipping)</td></tr>
+          <tr><td>Max read replicas</td><td><span class="yes">15</span></td><td>15</td></tr>
+          <tr><td>Failover time</td><td><span class="yes">&lt;30 sec</span></td><td>60–120 sec</td></tr>
+          <tr><td>Storage scaling</td><td><span class="yes">Auto (up to 128 TB)</span></td><td>Manual or Auto Scaling (up to 64 TB)</td></tr>
+          <tr><td>Multi-AZ</td><td><span class="yes">Built-in (6-copy)</span></td><td>Separate standby (SYNC replication)</td></tr>
+          <tr><td>Backups</td><td><span class="yes">Continuous, no I/O impact</span></td><td>Daily window (I/O suspended briefly on single-AZ)</td></tr>
+          <tr><td>Global DR (cross-region)</td><td><span class="yes">Global Database (&lt;1s lag, RTO &lt;1 min)</span></td><td>Cross-region Read Replica (higher lag)</td></tr>
+          <tr><td>Serverless option</td><td><span class="yes">Aurora Serverless v2</span></td><td><span class="no">No</span></td></tr>
+          <tr><td>Cost</td><td>~20% higher</td><td>Lower baseline</td></tr>
+          <tr><td>Engine support</td><td>MySQL, PostgreSQL only</td><td>MySQL, PG, MariaDB, Oracle, MSSQL, MariaDB</td></tr>
+          <tr><td>Cloning</td><td><span class="yes">Fast copy-on-write</span></td><td>Snapshot restore only</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════ CHEATSHEET -->
+  <section>
+    <div class="section-title">
+      <span class="badge b-amber">Cheatsheet</span>
+      <h2>DOP-C02 Key Decision Tree</h2>
+    </div>
+
+    <div class="card-full">
+      <table class="compare-table">
+        <thead>
+          <tr><th>Scenario / Keyword</th><th>Answer</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Globally distributed app, low-latency reads worldwide</td><td>Aurora Global Database</td></tr>
+          <tr><td>Cross-region DR with RTO &lt; 1 minute</td><td>Aurora Global Database (promote secondary)</td></tr>
+          <tr><td>Replication lag &lt; 1 second cross-region</td><td>Aurora Global Database</td></tr>
+          <tr><td>DB for analytics workload (large instance subset)</td><td>Aurora Custom Endpoint</td></tr>
+          <tr><td>Scale reads automatically based on CPU</td><td>Aurora Auto Scaling (replicas) + Reader Endpoint</td></tr>
+          <tr><td>Unpredictable workload, variable traffic, cost optimize</td><td>Aurora Serverless v2</td></tr>
+          <tr><td>Infrequent workload — DB can go idle (scale to zero)</td><td>Aurora Serverless v1</td></tr>
+          <tr><td>Create test environment from production instantly</td><td>Aurora Cloning</td></tr>
+          <tr><td>Fastest possible failover for relational DB</td><td>Aurora (vs RDS Multi-AZ)</td></tr>
+          <tr><td>No Read Replicas + primary fails</td><td>Aurora creates new instance (~minutes, not seconds)</td></tr>
+          <tr><td>Prioritize which replica becomes primary on failover</td><td>Set Failover Priority Tier (0 = highest)</td></tr>
+          <tr><td>Encrypt existing unencrypted Aurora cluster</td><td>Snapshot → copy encrypted → restore new cluster</td></tr>
+          <tr><td>Lambda + Aurora — too many connections</td><td>RDS Proxy (works with Aurora too)</td></tr>
+          <tr><td>Aurora backups disabled?</td><td>Impossible — minimum retention is 1 day</td></tr>
+          <tr><td>Secondary region needs to accept writes (Global Aurora)</td><td>Enable Write Forwarding to primary region</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

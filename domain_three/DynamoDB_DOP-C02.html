@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DynamoDB — DOP-C02 Study Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --surface2: #1a2236;
+    --border: #1e2d45;
+    --accent: #f59e0b;
+    --accent2: #38bdf8;
+    --accent3: #4ade80;
+    --accent4: #f87171;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --ddb: #7c5cbf;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    padding: 40px 24px 80px;
+  }
+  .page { max-width: 960px; margin: 0 auto; }
+
+  header {
+    border-left: 4px solid var(--ddb);
+    padding-left: 20px;
+    margin-bottom: 48px;
+  }
+  header .service-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; letter-spacing: 0.2em;
+    color: var(--ddb); text-transform: uppercase; margin-bottom: 6px;
+  }
+  header h1 { font-size: 38px; font-weight: 700; letter-spacing: -1px; color: #fff; }
+  header p { color: var(--muted); margin-top: 8px; font-size: 13px; }
+
+  section { margin-bottom: 40px; }
+  .section-title { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+  .section-title h2 { font-size: 18px; font-weight: 700; color: #fff; }
+
+  .badge {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+    padding: 2px 8px; border-radius: 2px;
+    text-transform: uppercase; letter-spacing: 0.12em; font-weight: 600;
+  }
+  .b-ddb    { background: #1a1030; color: var(--ddb); }
+  .b-blue   { background: #0f2030; color: var(--accent2); }
+  .b-green  { background: #0f2515; color: var(--accent3); }
+  .b-amber  { background: #2a1e00; color: var(--accent); }
+  .b-red    { background: #2a1212; color: var(--accent4); }
+  .b-pink   { background: #2a1020; color: #f472b6; }
+  .b-teal   { background: #0f2525; color: #2dd4bf; }
+  .b-purple { background: #1e1030; color: #a78bfa; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px; padding: 18px 20px;
+  }
+  .card h3 {
+    font-size: 11px; font-weight: 700; color: var(--accent2);
+    margin-bottom: 10px; text-transform: uppercase;
+    letter-spacing: 0.1em; font-family: 'IBM Plex Mono', monospace;
+  }
+  .card ul { list-style: none; padding: 0; }
+  .card ul li {
+    padding: 4px 0 4px 14px; position: relative;
+    color: var(--text); font-size: 13px;
+    border-bottom: 1px solid #1a2236;
+  }
+  .card ul li:last-child { border-bottom: none; }
+  .card ul li::before { content: '›'; position: absolute; left: 0; color: var(--muted); }
+
+  .card-full {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 6px; padding: 20px 24px; margin-bottom: 16px;
+  }
+
+  .compare-table { width: 100%; border-collapse: collapse; }
+  .compare-table thead tr { background: var(--surface2); }
+  .compare-table th {
+    padding: 10px 16px; text-align: left;
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted);
+    border-bottom: 1px solid var(--border);
+  }
+  .compare-table td {
+    padding: 10px 16px; font-size: 13px;
+    border-bottom: 1px solid var(--border); vertical-align: top;
+  }
+  .compare-table tr:last-child td { border-bottom: none; }
+  .compare-table tr:hover td { background: var(--surface2); }
+  .compare-table td:first-child {
+    font-weight: 600; color: var(--accent2); white-space: nowrap;
+    font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+  }
+
+  .chip {
+    display: inline-block; padding: 2px 8px; border-radius: 3px;
+    font-size: 11px; font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600; margin: 2px 2px 2px 0;
+  }
+  .chip-green  { background: #14291e; color: var(--accent3); border: 1px solid #1f4030; }
+  .chip-red    { background: #2a1212; color: var(--accent4); border: 1px solid #3a1e1e; }
+  .chip-blue   { background: #0f2030; color: var(--accent2); border: 1px solid #1a3050; }
+  .chip-amber  { background: #2a1e00; color: var(--accent);  border: 1px solid #3a2a00; }
+  .chip-purple { background: #1e1030; color: #a78bfa;        border: 1px solid #2e1a40; }
+  .chip-ddb    { background: #1a1030; color: var(--ddb);     border: 1px solid #2a1848; }
+  .chip-teal   { background: #0f2525; color: #2dd4bf;        border: 1px solid #1a3535; }
+
+  .exam-box {
+    background: #1a1500; border: 1px solid #3a2e00;
+    border-left: 3px solid var(--accent); border-radius: 6px;
+    padding: 14px 18px; margin-top: 16px;
+  }
+  .exam-box .exam-label {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+    color: var(--accent); font-weight: 700;
+    letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 6px;
+  }
+  .exam-box p, .exam-box li { font-size: 13px; color: #d4b96a; }
+  .exam-box ul { padding-left: 16px; }
+  .exam-box ul li { margin-bottom: 4px; }
+
+  .note-box {
+    background: #0f1e30; border: 1px solid #1a3050;
+    border-left: 3px solid var(--accent2); border-radius: 6px;
+    padding: 14px 18px; margin-top: 16px;
+  }
+  .note-box p { font-size: 13px; color: #7dd3fc; }
+
+  .yes { color: var(--accent3); font-weight: 600; }
+  .no  { color: var(--accent4); font-weight: 600; }
+
+  code {
+    background: #0f1e2e; padding: 1px 6px; border-radius: 3px;
+    color: #7dd3fc; font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+  }
+
+  /* Key anatomy diagram */
+  .key-diagram {
+    display: flex; gap: 0; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 6px;
+    overflow: hidden; margin-bottom: 16px;
+  }
+  .key-col {
+    flex: 1; padding: 14px;
+    border-right: 1px solid var(--border);
+  }
+  .key-col:last-child { border-right: none; }
+  .key-col-title {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    margin-bottom: 8px; font-weight: 600;
+  }
+  .key-col-title.pk-color  { color: #fbbf24; }
+  .key-col-title.sk-color  { color: #f472b6; }
+  .key-col-title.lsi-color { color: #2dd4bf; }
+  .key-col-title.gsi-color { color: #a78bfa; }
+  .key-col ul { list-style: none; }
+  .key-col ul li { font-size: 12px; color: var(--text); padding: 3px 0; border-bottom: 1px solid var(--border); }
+  .key-col ul li:last-child { border-bottom: none; }
+
+  /* Capacity units visual */
+  .capacity-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .cap-box {
+    background: var(--surface2); border-radius: 5px;
+    padding: 14px; border: 1px solid var(--border);
+  }
+  .cap-box h4 {
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;
+  }
+  .cap-box h4.rcu { color: var(--accent2); }
+  .cap-box h4.wcu { color: #f472b6; }
+  .cap-formula {
+    background: #0f1a2a; border-radius: 4px; padding: 8px 12px;
+    font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+    color: #e2e8f0; margin: 8px 0; line-height: 1.7;
+  }
+
+  @media (max-width: 640px) {
+    .grid-2, .grid-3, .capacity-grid { grid-template-columns: 1fr; }
+    header h1 { font-size: 28px; }
+    .key-diagram { flex-direction: column; }
+    .key-col { border-right: none; border-bottom: 1px solid var(--border); }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <a href="../index.html" style="display:inline-flex;align-items:center;gap:8px;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#94a3b8;background:#111827;border:1px solid #1e2d45;border-radius:6px;padding:7px 14px;text-decoration:none;margin-bottom:32px;transition:color 0.2s,border-color 0.2s;" onmouseover="this.style.color='#e2e8f0';this.style.borderColor='#f59e0b'" onmouseout="this.style.color='#94a3b8';this.style.borderColor='#1e2d45'">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+    Home
+  </a>
+
+  <header>
+    <div class="service-tag">AWS · DOP-C02 · Database</div>
+    <h1>Amazon DynamoDB</h1>
+    <p>Serverless NoSQL key-value &amp; document database — DevOps Professional exam scope</p>
+  </header>
+
+  <!-- ═══════════════════ CORE CHARACTERISTICS -->
+  <section>
+    <div class="section-title">
+      <span class="badge b-ddb">Architecture</span>
+      <h2>Core Characteristics</h2>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:16px;">
+      <div class="card">
+        <h3>Fundamentals</h3>
+        <ul>
+          <li>Fully managed — <strong>serverless</strong>, no cluster or patching</li>
+          <li>Multi-AZ replication by default — <strong>3 AZs</strong></li>
+          <li>Single-digit millisecond performance at any scale</li>
+          <li>Max item size: <strong>400 KB</strong></li>
+          <li>Schema-less — attributes can vary per item</li>
+          <li>All access control via <strong>IAM</strong> (no DB-level users)</li>
+          <li>Table classes: <span class="chip chip-green">Standard</span> <span class="chip chip-amber">Infrequent Access (IA)</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Primary Keys — Two Options</h3>
+        <ul>
+          <li><strong>Option 1 — Partition Key only</strong> (Simple PK): must be unique per item. e.g. <code>user_id</code></li>
+          <li><strong>Option 2 — Partition Key + Sort Key</strong> (Composite PK): combination must be unique. e.g. <code>user_id + game_id</code></li>
+          <li>Partition Key determines which internal partition stores the item (hash function)</li>
+          <li>Sort Key enables range queries within a partition</li>
+          <li>Primary Key <strong>cannot be changed</strong> after table creation</li>
+          <li>Choose high-cardinality Partition Keys to avoid hot partitions</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Key anatomy -->
+    <div class="key-diagram">
+      <div class="key-col">
+        <div class="key-col-title pk-color">Partition Key (PK)</div>
+        <ul>
+          <li>Determines storage partition</li>
+          <li>Hash function applied</li>
+          <li>Must be unique (simple PK)</li>
+          <li>High cardinality = even distribution</li>
+        </ul>
+      </div>
+      <div class="key-col">
+        <div class="key-col-title sk-color">Sort Key (SK)</div>
+        <ul>
+          <li>Optional — composite PK only</li>
+          <li>Items sorted within partition</li>
+          <li>Enables range queries (<code>begins_with</code>, <code>between</code>)</li>
+          <li>PK+SK combo must be unique</li>
+        </ul>
+      </div>
+      <div class="key-col">
+        <div class="key-col-title lsi-color">LSI — Local Secondary Index</div>
+        <ul>
+          <li>Same PK, different Sort Key</li>
+          <li>Must be defined <strong>at table creation</strong></li>
+          <li>Up to <strong>5 LSIs</strong> per table</li>
+          <li>Shares provisioned throughput with base table</li>
+        </ul>
+      </div>
+      <div class="key-col">
+        <div class="key-col-title gsi-color">GSI — Global Secondary Index</div>
+        <ul>
+          <li>Different PK and SK — query any attribute</li>
+          <li>Can add/delete GSIs anytime</li>
+          <li>Up to <strong>20 GSIs</strong> per table</li>
+          <li>Has its <strong>own RCU/WCU</strong> — provision separately</li>
+          <li>Eventual consistency only</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="exam-box">
+      <div class="exam-label">⚑ Exam Traps — Indexes</div>
+      <ul>
+        <li><strong>LSI</strong>: must be created at table creation — cannot add later. Throttling on the base table affects LSI reads.</li>
+        <li><strong>GSI</strong>: if GSI WCU is undersized, writes to the base table will be <strong>throttled</strong> even if base table has capacity — GSI is a bottleneck.</li>
+        <li>GSI only supports <strong>eventual consistency</strong> reads — never strongly consistent.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ CAPACITY MODES -->
+  <section>
+    <div class="section-title">
+      <span class="badge b-blue">Capacity</span>
+      <h2>Read/Write Capacity Modes &amp; Units</h2>
+    </div>
+
+    <div class="capacity-grid">
+      <div class="cap-box">
+        <h4 class="rcu">RCU — Read Capacity Unit</h4>
+        <div class="cap-formula">
+          1 RCU = 1 Strongly Consistent Read/sec (up to 4 KB)<br>
+          1 RCU = 2 Eventually Consistent Reads/sec (up to 4 KB)<br>
+          2 RCU = 1 Transactional Read/sec (up to 4 KB)
+        </div>
+        <ul style="list-style:none;">
+          <li style="font-size:12px;padding:3px 0;">Items &gt;4 KB → ceil(size/4KB) × RCU</li>
+          <li style="font-size:12px;padding:3px 0;">Example: 10 KB item, strongly consistent = 3 RCU</li>
+          <li style="font-size:12px;padding:3px 0;">Scan consumes RCU for every item read (even filtered)</li>
+        </ul>
+      </div>
+      <div class="cap-box">
+        <h4 class="wcu">WCU — Write Capacity Unit</h4>
+        <div class="cap-formula">
+          1 WCU = 1 Write/sec (up to 1 KB)<br>
+          2 WCU = 1 Transactional Write/sec (up to 1 KB)<br>
+          Items &gt;1 KB → ceil(size/1KB) × WCU
+        </div>
+        <ul style="list-style:none;">
+          <li style="font-size:12px;padding:3px 0;">Example: 2.5 KB item = 3 WCU per write</li>
+          <li style="font-size:12px;padding:3px 0;">Conditional writes still consume WCU even if they fail</li>
+          <li style="font-size:12px;padding:3px 0;">GSI WCU must be provisioned separately</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:16px;">
+      <div class="card">
+        <h3>Provisioned Mode</h3>
+        <ul>
+          <li>Specify RCU + WCU in advance</li>
+          <li>Pay for <strong>provisioned capacity</strong> whether used or not</li>
+          <li><strong>Auto Scaling</strong>: set min/max RCU/WCU + target utilization % — DynamoDB adjusts automatically</li>
+          <li>Exceeding provisioned capacity → <code>ProvisionedThroughputExceededException</code></li>
+          <li>Burst capacity: unused RCU/WCU saved for up to 300 seconds</li>
+          <li>Best for: predictable, steady workloads</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>On-Demand Mode</h3>
+        <ul>
+          <li>No capacity planning — scales instantly to any load</li>
+          <li>Pay per <strong>request</strong> (RRU / WRU)</li>
+          <li>~2.5× more expensive per request than provisioned</li>
+          <li>No throttling — accommodates unlimited throughput</li>
+          <li>Can switch between modes <strong>twice per day</strong></li>
+          <li>Best for: unpredictable, spiky, new apps with unknown traffic</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="exam-box">
+      <div class="exam-label">⚑ Exam — Throttling</div>
+      <ul>
+        <li><code>ProvisionedThroughputExceededException</code>: caused by hot partition (poor PK design), or exceeding table RCU/WCU.</li>
+        <li>Fix: <strong>exponential backoff</strong> (built into SDK), improve PK distribution, switch to On-Demand, or increase provisioned capacity.</li>
+        <li><strong>Adaptive capacity</strong>: DynamoDB automatically shifts capacity to hot partitions — but this has limits. Good PK design is always the root fix.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ API OPERATIONS -->
+  <section>
+    <div class="section-title">
+      <span class="badge b-teal">API</span>
+      <h2>Key API Operations</h2>
+    </div>
+
+    <div class="card-full">
+      <table class="compare-table">
+        <thead>
+          <tr><th>Operation</th><th>Description</th><th>Capacity Used</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>PutItem</td><td>Create or replace item by PK</td><td>WCU (full item size)</td></tr>
+          <tr><td>UpdateItem</td><td>Modify specific attributes — item need not exist (creates it)</td><td>WCU (full item size)</td></tr>
+          <tr><td>DeleteItem</td><td>Delete one item by PK</td><td>WCU</td></tr>
+          <tr><td>GetItem</td><td>Read one item by PK — eventually or strongly consistent</td><td>RCU</td></tr>
+          <tr><td>Query</td><td>Reads items with same PK + optional SK condition. Returns up to 1 MB. Efficient.</td><td>RCU (items returned + filtered)</td></tr>
+          <tr><td>Scan</td><td>Reads <strong>entire table</strong> — expensive. Filters applied after read.</td><td>RCU (all items scanned)</td></tr>
+          <tr><td>BatchGetItem</td><td>Up to 100 items, up to 16 MB. Parallel reads.</td><td>RCU per item</td></tr>
+          <tr><td>BatchWriteItem</td><td>Up to 25 PutItem/DeleteItem, up to 16 MB. No UpdateItem in batch.</td><td>WCU per item</td></tr>
+          <tr><td>TransactGetItems</td><td>Atomic read of up to 25 items across tables</td><td>2× RCU</td></tr>
+          <tr><td>TransactWriteItems</td><td>Atomic write of up to 25 items across tables</td><td>2× WCU</td></tr>
+          <tr><td>ConditionalWrite</td><td>Write only if condition is met — optimistic locking. Consumes WCU even on failure.</td><td>WCU</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="exam-box">
+      <div class="exam-label">⚑ Exam — Query vs Scan</div>
+      <ul>
+        <li><strong>Always use Query</strong> over Scan when possible — Scan reads every item before filtering → wastes RCU and is slow on large tables.</li>
+        <li>Use <strong>Parallel Scan</strong> to speed up large table scans — but throttling risk increases.</li>
+        <li>Use <strong>ProjectionExpression</strong> to return only needed attributes — reduces response size but does NOT reduce RCU consumed on Scan.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ DAX -->
+  <section>
+    <div class="section-title">
+      <span class="badge b-purple">DAX</span>
+      <h2>DynamoDB Accelerator (DAX)</h2>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:16px;">
+      <div class="card">
+        <h3>What DAX Does</h3>
+        <ul>
+          <li>Fully managed in-memory cache <strong>for DynamoDB only</strong></li>
+          <li><strong>Microsecond</strong> read latency (vs single-digit ms DDB)</li>
+          <li><strong>No application code change</strong> — DAX is API-compatible with DynamoDB</li>
+          <li>Default TTL: <strong>5 minutes</strong> (configurable)</li>
+          <li>Deployed as a multi-node <strong>cluster</strong> inside your VPC</li>
+          <li>Caches individual item reads + Query/Scan results</li>
+          <li>Write-through: writes go to DAX + DynamoDB simultaneously</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>DAX vs ElastiCache</h3>
+        <ul>
+          <li><span class="chip chip-ddb">DAX</span> DynamoDB-specific, no code changes, item + query cache</li>
+          <li><span class="chip chip-green">ElastiCache</span> General purpose, requires code changes, stores aggregations/computed results</li>
+          <li>DAX sits between your app and DynamoDB — transparent</li>
+          <li>ElastiCache stores <strong>aggregation results</strong> — e.g. sum/count queries already processed</li>
+          <li>Both can be used together: DAX for DDB item cache, ElastiCache for computed results</li>
+          <li>DAX: <span class="no">Not for write-heavy workloads</span> — cache invalidation overhead</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="exam-box">
+      <div class="exam-label">⚑ Exam — DAX</div>
+      <ul>
+        <li>DAX reduces <strong>read load</strong> on DynamoDB — useful when hot-key reads are causing throttling.</li>
+        <li>DAX does <strong>not</strong> help with write throttling — writes still go directly to DynamoDB.</li>
+        <li>If app needs microsecond reads from DynamoDB with <strong>no code change</strong> → DAX. If it's a custom aggregation result → ElastiCache.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ STREAMS -->
+  <section>
+    <div class="section-title">
+      <span class="badge b-pink">Streams</span>
+      <h2>Stream Processing</h2>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:16px;">
+      <div class="card">
+        <h3>DynamoDB Streams</h3>
+        <ul>
+          <li>Ordered stream of item-level changes: <strong>create, update, delete</strong></li>
+          <li>Retention: <strong>24 hours</strong></li>
+          <li>Limited consumers (2 simultaneously)</li>
+          <li>Process with: <strong>Lambda Triggers</strong> or <strong>KCL Adapter</strong></li>
+          <li>Stream records contain: KEYS_ONLY / NEW_IMAGE / OLD_IMAGE / NEW_AND_OLD_IMAGES</li>
+          <li>Required for <strong>Global Tables</strong> (cross-region replication uses streams)</li>
+          <li>Use cases: react to DB changes, send notifications, analytics, cross-region replication</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Kinesis Data Streams (for DynamoDB)</h3>
+        <ul>
+          <li>Alternative to DynamoDB Streams — sends changes to Kinesis</li>
+          <li>Retention: up to <strong>1 year</strong></li>
+          <li><strong>Higher number of consumers</strong> — fan-out</li>
+          <li>Process with: Lambda, Kinesis Data Analytics, Firehose, AWS Glue</li>
+          <li>Firehose destinations: <strong>S3, Redshift, OpenSearch</strong></li>
+          <li>Better for long-term event processing pipelines</li>
+          <li>Enabled separately per table — does not replace DynamoDB Streams</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card-full" style="margin-bottom:0;">
+      <table class="compare-table">
+        <thead>
+          <tr><th>Feature</th><th>DynamoDB Streams</th><th>Kinesis Data Streams</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Retention</td><td>24 hours</td><td>Up to 1 year</td></tr>
+          <tr><td>Consumers</td><td>2 (limited)</td><td>Many (fan-out)</td></tr>
+          <tr><td>Lambda trigger</td><td><span class="yes">Native</span></td><td><span class="yes">Via event source mapping</span></td></tr>
+          <tr><td>Firehose / Glue</td><td><span class="no">No</span></td><td><span class="yes">Yes</span></td></tr>
+          <tr><td>Required for Global Tables</td><td><span class="yes">Yes</span></td><td><span class="no">No</span></td></tr>
+          <tr><td>Use case</td><td>React to changes, cross-region sync</td><td>Long-term analytics pipelines</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ GLOBAL TABLES -->
+  <section>
+    <div class="section-title">
+      <span class="badge b-green">Global</span>
+      <h2>Global Tables</h2>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:16px;">
+      <div class="card">
+        <h3>How It Works</h3>
+        <ul>
+          <li>Multi-region, <strong>multi-active</strong> replication (read AND write in any region)</li>
+          <li>Requires <strong>DynamoDB Streams enabled</strong> — streams power the replication</li>
+          <li>Changes replicate to all regions automatically</li>
+          <li>Replication latency: typically <strong>under 1 second</strong></li>
+          <li>Conflict resolution: <strong>last-writer-wins</strong> (by timestamp)</li>
+          <li>Active-active — no concept of primary region</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Use Cases &amp; Caveats</h3>
+        <ul>
+          <li>Low-latency access for globally distributed users</li>
+          <li>Disaster recovery — another region available instantly</li>
+          <li>Must use <strong>On-Demand mode</strong> OR Provisioned with Auto Scaling enabled</li>
+          <li>Avoid writing to the <strong>same item</strong> from multiple regions simultaneously — conflict risk</li>
+          <li>LSIs/GSIs replicated to all regions automatically</li>
+          <li>TTL deletions replicated across regions</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="exam-box">
+      <div class="exam-label">⚑ Exam Note</div>
+      <ul>
+        <li>Global Tables = <strong>multi-active</strong> (every region accepts writes). This is different from Aurora Global (one primary writer region).</li>
+        <li>Prerequisite: DynamoDB Streams <strong>must be enabled</strong> before adding replicas.</li>
+        <li>Conflict resolution is always <strong>last-writer-wins</strong> — design your app to avoid concurrent conflicting writes.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ TTL -->
+  <section>
+    <div class="section-title">
+      <span class="badge b-amber">TTL</span>
+      <h2>Time-To-Live (TTL)</h2>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>How TTL Works</h3>
+        <ul>
+          <li>Define an attribute that holds a <strong>Unix timestamp (epoch seconds)</strong></li>
+          <li>DynamoDB automatically deletes items after expiry — no WCU consumed</li>
+          <li>Deletion is not immediate — items expire within <strong>~48 hours</strong> of TTL</li>
+          <li>Expired items still visible in reads until physically deleted</li>
+          <li>Expired item deletions appear in <strong>DynamoDB Streams</strong> — can trigger Lambda</li>
+          <li>TTL attribute must be <strong>Number</strong> type</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Use Cases</h3>
+        <ul>
+          <li>Web session store (expire inactive sessions)</li>
+          <li>Temporary data / one-time tokens</li>
+          <li>Regulatory data retention (delete after X days)</li>
+          <li>Event/log data with rolling window</li>
+          <li>Shopping cart expiry</li>
+          <li>Combine with Streams: on TTL delete → trigger Lambda → archive to S3</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="exam-box" style="margin-top:16px;">
+      <div class="exam-label">⚑ Exam Trap</div>
+      <ul>
+        <li>TTL deletions do <strong>not consume WCU</strong> — they are free.</li>
+        <li>Items past their TTL are <strong>not immediately removed</strong> — can still be returned in reads for up to 48 hours. Filter in your app if exact expiry matters.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ BACKUPS & S3 -->
+  <section>
+    <div class="section-title">
+      <span class="badge b-teal">Backups</span>
+      <h2>Backups, DR &amp; S3 Integration</h2>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:16px;">
+      <div class="card">
+        <h3>PITR — Point-in-Time Recovery</h3>
+        <ul>
+          <li>Must be <strong>explicitly enabled</strong> — not on by default</li>
+          <li>Continuous backups for up to <strong>35 days</strong></li>
+          <li>Restore to any second in the retention window</li>
+          <li>Restore creates a <strong>new table</strong> — does not overwrite existing</li>
+          <li>No performance impact on the source table</li>
+          <li>Required to enable <strong>Export to S3</strong></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>On-Demand Backups</h3>
+        <ul>
+          <li>Full backup at any point — <strong>persists until manually deleted</strong></li>
+          <li>Zero performance or latency impact</li>
+          <li>Managed via <strong>AWS Backup</strong> for cross-region copy and lifecycle policies</li>
+          <li>Restore always creates a <strong>new table</strong></li>
+          <li>Can restore to same or different region / account</li>
+          <li>Does not count toward PITR retention</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card-full" style="margin-bottom:16px;">
+      <h3 style="font-family:'IBM Plex Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--accent2);margin-bottom:12px;">S3 Integration</h3>
+      <table class="compare-table">
+        <thead>
+          <tr><th>Direction</th><th>Requirement</th><th>Details</th><th>Capacity Impact</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Export → S3</td>
+            <td>PITR must be enabled</td>
+            <td>Export any point in last 35 days. Formats: DynamoDB JSON, ION. Use Athena to query S3 data.</td>
+            <td><span class="yes">No RCU consumed</span></td>
+          </tr>
+          <tr>
+            <td>Import from S3</td>
+            <td>None</td>
+            <td>Formats: CSV, DynamoDB JSON, ION. Creates a new table. Errors logged to CloudWatch Logs.</td>
+            <td><span class="yes">No WCU consumed</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="exam-box">
+      <div class="exam-label">⚑ Exam Notes</div>
+      <ul>
+        <li>Export to S3 does <strong>not affect table read capacity</strong> — uses a separate export process.</li>
+        <li>Import from S3 does <strong>not consume WCU</strong> — creates a new table, not an incremental load.</li>
+        <li>PITR restore and on-demand backup restore both create a <strong>new table</strong> — the original is untouched.</li>
+        <li>Use <strong>AWS Backup</strong> with DynamoDB for cross-account and cross-region backup policies with retention rules.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ SECURITY -->
+  <section>
+    <div class="section-title">
+      <span class="badge b-red">Security</span>
+      <h2>Security &amp; Access Control</h2>
+    </div>
+
+    <div class="grid-3">
+      <div class="card">
+        <h3>IAM Access Control</h3>
+        <ul>
+          <li>All access via <strong>IAM policies</strong> — no DB-level users</li>
+          <li>Fine-grained access: restrict by table, item, or attribute</li>
+          <li><code>dynamodb:LeadingKeys</code> condition: users can only access their own items (e.g. restrict by <code>cognito-identity.amazonaws.com:sub</code>)</li>
+          <li>IAM roles for EC2/Lambda accessing DynamoDB</li>
+          <li>VPC Endpoint: access DynamoDB without internet</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Encryption</h3>
+        <ul>
+          <li><strong>At-rest</strong>: AWS owned key (free), AWS managed KMS key, Customer managed KMS key</li>
+          <li><strong>In-transit</strong>: TLS/HTTPS — always enforced</li>
+          <li>Encryption enabled by default — cannot disable</li>
+          <li>Customer managed keys: full audit trail in CloudTrail</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>VPC &amp; Networking</h3>
+        <ul>
+          <li>DynamoDB is a <strong>public AWS service</strong> (not in your VPC)</li>
+          <li>Use <strong>VPC Gateway Endpoint</strong> for private access from VPC (no NAT, no internet)</li>
+          <li>Traffic stays within AWS network via endpoint</li>
+          <li>Access logs: <strong>CloudTrail</strong> for API-level audit</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ CHEATSHEET -->
+  <section>
+    <div class="section-title">
+      <span class="badge b-amber">Cheatsheet</span>
+      <h2>DOP-C02 Key Decision Tree</h2>
+    </div>
+
+    <div class="card-full">
+      <table class="compare-table">
+        <thead>
+          <tr><th>Scenario / Keyword</th><th>Answer</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Unpredictable / spiky traffic, new app</td><td>On-Demand Mode</td></tr>
+          <tr><td>Steady, predictable traffic + cost optimization</td><td>Provisioned Mode + Auto Scaling</td></tr>
+          <tr><td>ProvisionedThroughputExceededException</td><td>Hot partition → improve PK design; exponential backoff; increase capacity</td></tr>
+          <tr><td>Query any attribute (not just PK/SK)</td><td>Global Secondary Index (GSI)</td></tr>
+          <tr><td>Range queries on non-sort-key attribute, same table PK</td><td>Local Secondary Index (LSI) — must create at table creation</td></tr>
+          <tr><td>GSI write throttling impacts base table</td><td>Increase GSI WCU — GSI has its own capacity</td></tr>
+          <tr><td>Microsecond latency reads, no code change</td><td>DAX (DynamoDB Accelerator)</td></tr>
+          <tr><td>Cache computed/aggregated query results</td><td>ElastiCache (not DAX)</td></tr>
+          <tr><td>React to DynamoDB item changes in real time</td><td>DynamoDB Streams + Lambda</td></tr>
+          <tr><td>Long-term change processing pipeline (Firehose, Glue)</td><td>Kinesis Data Streams integration</td></tr>
+          <tr><td>Multi-region, multi-active (read + write anywhere)</td><td>Global Tables (requires DynamoDB Streams)</td></tr>
+          <tr><td>Conflict resolution on simultaneous writes (Global Table)</td><td>Last-writer-wins (timestamp)</td></tr>
+          <tr><td>Auto-expire items, no WCU cost</td><td>TTL attribute (Number type, epoch seconds)</td></tr>
+          <tr><td>Recover table to 5 minutes ago</td><td>PITR (must be enabled, up to 35 days)</td></tr>
+          <tr><td>Query DynamoDB data in S3 with SQL</td><td>Export to S3 (PITR required) → query with Athena</td></tr>
+          <tr><td>Import data to DynamoDB from S3, no WCU</td><td>Import from S3 (CSV/JSON/ION) → new table</td></tr>
+          <tr><td>Cross-region / cross-account backup policy</td><td>AWS Backup with DynamoDB</td></tr>
+          <tr><td>Restrict user to only their own DynamoDB items</td><td>IAM condition <code>dynamodb:LeadingKeys</code> with Cognito identity</td></tr>
+          <tr><td>Access DynamoDB from VPC without internet/NAT</td><td>VPC Gateway Endpoint for DynamoDB</td></tr>
+          <tr><td>Scan entire table efficiently for batch processing</td><td>Parallel Scan — but watch for throttling</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>
