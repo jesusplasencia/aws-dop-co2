@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS Storage Gateway — DOP-C02 Study Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --surface2: #1a2236;
+    --border: #1e2d45;
+    --accent: #f59e0b;
+    --accent2: #38bdf8;
+    --accent3: #4ade80;
+    --accent4: #f87171;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --sgw: #e8760a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14px; line-height: 1.6;
+    padding: 40px 24px 80px;
+  }
+  .page { max-width: 960px; margin: 0 auto; }
+
+  header { border-left: 4px solid var(--sgw); padding-left: 20px; margin-bottom: 48px; }
+  header .service-tag {
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+    letter-spacing: 0.2em; color: var(--sgw); text-transform: uppercase; margin-bottom: 6px;
+  }
+  header h1 { font-size: 38px; font-weight: 700; letter-spacing: -1px; color: #fff; }
+  header p { color: var(--muted); margin-top: 8px; font-size: 13px; }
+
+  section { margin-bottom: 40px; }
+  .section-title { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+  .section-title h2 { font-size: 18px; font-weight: 700; color: #fff; }
+
+  .badge {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+    padding: 2px 8px; border-radius: 2px;
+    text-transform: uppercase; letter-spacing: 0.12em; font-weight: 600;
+  }
+  .b-sgw    { background: #2a1600; color: var(--sgw); }
+  .b-blue   { background: #0f2030; color: var(--accent2); }
+  .b-green  { background: #0f2515; color: var(--accent3); }
+  .b-amber  { background: #2a1e00; color: var(--accent); }
+  .b-red    { background: #2a1212; color: var(--accent4); }
+  .b-purple { background: #1e1030; color: #a78bfa; }
+  .b-teal   { background: #0f2525; color: #2dd4bf; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 6px; padding: 18px 20px;
+  }
+  .card h3 {
+    font-size: 11px; font-weight: 700; color: var(--accent2);
+    margin-bottom: 10px; text-transform: uppercase;
+    letter-spacing: 0.1em; font-family: 'IBM Plex Mono', monospace;
+  }
+  .card ul { list-style: none; padding: 0; }
+  .card ul li {
+    padding: 4px 0 4px 14px; position: relative;
+    color: var(--text); font-size: 13px; border-bottom: 1px solid #1a2236;
+  }
+  .card ul li:last-child { border-bottom: none; }
+  .card ul li::before { content: '›'; position: absolute; left: 0; color: var(--muted); }
+
+  .card-full {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 6px; padding: 20px 24px; margin-bottom: 16px;
+  }
+
+  .compare-table { width: 100%; border-collapse: collapse; }
+  .compare-table thead tr { background: var(--surface2); }
+  .compare-table th {
+    padding: 10px 16px; text-align: left;
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted);
+    border-bottom: 1px solid var(--border);
+  }
+  .compare-table td {
+    padding: 10px 16px; font-size: 13px;
+    border-bottom: 1px solid var(--border); vertical-align: top;
+  }
+  .compare-table tr:last-child td { border-bottom: none; }
+  .compare-table tr:hover td { background: var(--surface2); }
+  .compare-table td:first-child {
+    font-weight: 600; color: var(--accent2); white-space: nowrap;
+    font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+  }
+
+  .chip {
+    display: inline-block; padding: 2px 8px; border-radius: 3px;
+    font-size: 11px; font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600; margin: 2px 2px 2px 0;
+  }
+  .chip-green  { background: #14291e; color: var(--accent3); border: 1px solid #1f4030; }
+  .chip-red    { background: #2a1212; color: var(--accent4); border: 1px solid #3a1e1e; }
+  .chip-blue   { background: #0f2030; color: var(--accent2); border: 1px solid #1a3050; }
+  .chip-amber  { background: #2a1e00; color: var(--accent);  border: 1px solid #3a2a00; }
+  .chip-purple { background: #1e1030; color: #a78bfa;        border: 1px solid #2e1a40; }
+  .chip-sgw    { background: #2a1600; color: var(--sgw);     border: 1px solid #4a2800; }
+  .chip-teal   { background: #0f2525; color: #2dd4bf;        border: 1px solid #1a3535; }
+
+  .exam-box {
+    background: #1a1500; border: 1px solid #3a2e00;
+    border-left: 3px solid var(--accent); border-radius: 6px;
+    padding: 14px 18px; margin-top: 16px;
+  }
+  .exam-box .exam-label {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+    color: var(--accent); font-weight: 700;
+    letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 6px;
+  }
+  .exam-box p, .exam-box li { font-size: 13px; color: #d4b96a; }
+  .exam-box ul { padding-left: 16px; }
+  .exam-box ul li { margin-bottom: 4px; }
+
+  .yes { color: var(--accent3); font-weight: 600; }
+  .no  { color: var(--accent4); font-weight: 600; }
+
+  code {
+    background: #0f1e2e; padding: 1px 6px; border-radius: 3px;
+    color: #7dd3fc; font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+  }
+
+  /* Gateway type cards */
+  .gw-cards { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .gw-card {
+    border-radius: 6px; padding: 18px;
+    border: 1px solid; position: relative; overflow: hidden;
+  }
+  .gw-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  }
+  .gw-file   { background: #0d1e10; border-color: #1a3a20; }
+  .gw-file::before { background: var(--accent3); }
+  .gw-volume { background: #0d1520; border-color: #1a2a40; }
+  .gw-volume::before { background: var(--accent2); }
+  .gw-tape   { background: #1a1030; border-color: #2e1a50; }
+  .gw-tape::before { background: #a78bfa; }
+
+  .gw-icon { font-size: 22px; margin-bottom: 8px; }
+  .gw-title {
+    font-family: 'IBM Plex Mono', monospace; font-size: 13px;
+    font-weight: 700; margin-bottom: 6px;
+  }
+  .gw-file .gw-title   { color: var(--accent3); }
+  .gw-volume .gw-title { color: var(--accent2); }
+  .gw-tape .gw-title   { color: #a78bfa; }
+
+  .gw-proto {
+    display: inline-block; padding: 1px 7px; border-radius: 3px;
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+    font-weight: 600; margin-bottom: 8px;
+  }
+  .proto-file   { background: #1a4020; color: #86efac; }
+  .proto-volume { background: #0f2a40; color: #7dd3fc; }
+  .proto-tape   { background: #251040; color: #c4b5fd; }
+
+  .gw-ul { list-style: none; padding: 0; }
+  .gw-ul li {
+    font-size: 12px; color: #94a3b8; padding: 3px 0 3px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.05); position: relative;
+  }
+  .gw-ul li:last-child { border-bottom: none; }
+  .gw-ul li::before { content: '›'; position: absolute; left: 0; color: var(--muted); }
+
+  /* Arch flow */
+  .arch-row {
+    display: flex; align-items: center; gap: 0;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 6px; padding: 18px 20px; margin-bottom: 16px; flex-wrap: wrap; row-gap: 10px;
+  }
+  .arch-node {
+    border-radius: 4px; padding: 9px 14px; min-width: 100px;
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+    font-weight: 600; text-align: center;
+  }
+  .an-onprem { background: #1a1a10; border: 1px solid #3a3a20; color: #fde68a; }
+  .an-gw     { background: #1a1600; border: 1px solid #4a3a00; color: var(--sgw); }
+  .an-aws    { background: #0d1520; border: 1px solid #1a3050; color: var(--accent2); }
+  .an-s3     { background: #0d1e10; border: 1px solid #1a3a20; color: var(--accent3); }
+  .arch-arr  { color: var(--muted); font-size: 18px; padding: 0 8px; }
+  .arch-col  { display: flex; flex-direction: column; align-items: center; }
+  .arch-sub  { font-size: 10px; color: var(--muted); font-family: 'IBM Plex Mono', monospace; margin-top: 3px; }
+
+  @media (max-width: 640px) {
+    .grid-2, .grid-3, .gw-cards { grid-template-columns: 1fr; }
+    header h1 { font-size: 28px; }
+  }
+  .home-btn { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); text-decoration: none; font-size: 12px; font-family: 'IBM Plex Mono', monospace; padding: 6px 12px; border: 1px solid var(--border); border-radius: 4px; margin-bottom: 32px; transition: color 0.15s; }
+  .home-btn:hover { color: var(--text); }
+</style>
+</head>
+<body>
+<div class="page">
+<a href="../index.html" class="home-btn">← DOP-C02 Home</a>
+
+  <header>
+    <div class="service-tag">AWS · DOP-C02 · Hybrid Storage</div>
+    <h1>AWS Storage Gateway</h1>
+    <p>Bridge between on-premises storage and AWS cloud — hybrid storage service — DevOps Professional exam scope</p>
+  </header>
+
+  <!-- ═══════════════════ CORE CONCEPT -->
+  <section>
+    <div class="section-title">
+      <span class="badge b-sgw">Core</span>
+      <h2>What Storage Gateway Does</h2>
+    </div>
+
+    <div class="arch-row">
+      <div class="arch-col">
+        <div class="arch-node an-onprem">On-Premises<br>Applications</div>
+        <div class="arch-sub">NFS / SMB / iSCSI / VTL</div>
+      </div>
+      <div class="arch-arr">→</div>
+      <div class="arch-col">
+        <div class="arch-node an-gw">Storage Gateway<br>(VM or Hardware)</div>
+        <div class="arch-sub">local cache + upload</div>
+      </div>
+      <div class="arch-arr">→</div>
+      <div class="arch-col">
+        <div class="arch-node an-aws">AWS Cloud<br>(encrypted, TLS)</div>
+        <div class="arch-sub">Direct Connect or Internet</div>
+      </div>
+      <div class="arch-arr">→</div>
+      <div class="arch-col">
+        <div class="arch-node an-s3">S3 / EBS / FSx /<br>Glacier / Tape</div>
+        <div class="arch-sub">durable cloud storage</div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:16px;">
+      <div class="card">
+        <h3>Core Purpose</h3>
+        <ul>
+          <li>Hybrid cloud storage — bridges on-premises apps to AWS storage</li>
+          <li>Exposes <strong>AWS storage as familiar protocols</strong>: NFS, SMB, iSCSI, VTL</li>
+          <li>On-premises apps need <strong>no code changes</strong> — use existing interfaces</li>
+          <li>Data transferred over <strong>TLS</strong> (encrypted in transit)</li>
+          <li>Data stored encrypted at rest in S3, EBS, Glacier</li>
+          <li>Gateway runs as a <strong>VM appliance</strong> (VMware/Hyper-V/KVM) or <strong>hardware appliance</strong></li>
+          <li>Hardware Appliance: physical device for sites without virtualization</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Native AWS Storage (Reference)</h3>
+        <ul>
+          <li><span class="chip chip-blue">BLOCK</span> Amazon EBS, EC2 Instance Store</li>
+          <li><span class="chip chip-green">FILE</span> Amazon EFS</li>
+          <li><span class="chip chip-amber">OBJECT</span> Amazon S3, Glacier</li>
+          <li>Storage Gateway extends these to on-premises via standard protocols</li>
+          <li>Use case: data center extension, cloud bursting, backup to cloud, disaster recovery</li>
+          <li>All three gateway types use a <strong>local cache</strong> for low-latency on-prem access to frequently used data</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ GATEWAY TYPES -->
+  <section>
+    <div class="section-title">
+      <span class="badge b-green">Gateway Types</span>
+      <h2>Three Types of Storage Gateway</h2>
+    </div>
+
+    <div class="gw-cards">
+      <!-- File Gateway -->
+      <div class="gw-card gw-file">
+        <div class="gw-icon">📁</div>
+        <div class="gw-title">S3 File Gateway</div>
+        <div class="gw-proto proto-file">NFS v3/v4 · SMB</div>
+        <ul class="gw-ul">
+          <li>Files stored as <strong>objects in S3</strong></li>
+          <li>Most recently used data cached on gateway</li>
+          <li>Access via NFS or SMB from on-prem</li>
+          <li>Supports S3 Standard, Standard-IA, One Zone-IA, Intelligent-Tiering</li>
+          <li>Lifecycle policies apply to objects in S3</li>
+          <li>SMB integrates with <strong>Active Directory</strong> for auth</li>
+          <li>Bucket access via IAM role on gateway</li>
+        </ul>
+      </div>
+      <!-- Volume Gateway -->
+      <div class="gw-card gw-volume">
+        <div class="gw-icon">💾</div>
+        <div class="gw-title">Volume Gateway</div>
+        <div class="gw-proto proto-volume">iSCSI block storage</div>
+        <ul class="gw-ul">
+          <li>Presents iSCSI block volumes to on-prem apps</li>
+          <li><strong>Cached Mode</strong>: primary data in S3, frequently accessed data cached locally</li>
+          <li><strong>Stored Mode</strong>: primary data on-prem, async backup snapshots to S3 as EBS snapshots</li>
+          <li>Snapshots stored as EBS snapshots in AWS — can restore to EBS volume</li>
+          <li>Low-latency for recently accessed data (cached mode)</li>
+          <li>Use case: extend on-prem block storage to cloud with DR snapshots</li>
+        </ul>
+      </div>
+      <!-- Tape Gateway -->
+      <div class="gw-card gw-tape">
+        <div class="gw-icon">📼</div>
+        <div class="gw-title">Tape Gateway</div>
+        <div class="gw-proto proto-tape">iSCSI VTL (Virtual Tape Library)</div>
+        <ul class="gw-ul">
+          <li>Presents a virtual tape library (VTL) to on-prem backup software</li>
+          <li>Compatible with: Veeam, NetBackup, Backup Exec, Commvault, etc.</li>
+          <li>Virtual tapes stored in <strong>S3</strong> (active) or archived to <strong>S3 Glacier / Deep Archive</strong></li>
+          <li>No physical tape infrastructure needed</li>
+          <li>Tapes in Glacier: retrieved on demand, minutes to hours</li>
+          <li>Use case: replace physical tape backup with cloud-backed VTL</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Detailed comparison table -->
+    <div class="card-full" style="margin-bottom:16px;">
+      <table class="compare-table">
+        <thead>
+          <tr><th>Feature</th><th style="color:var(--accent3)">S3 File Gateway</th><th style="color:var(--accent2)">Volume Gateway</th><th style="color:#a78bfa">Tape Gateway</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Protocol</td><td>NFS v3/v4, SMB</td><td>iSCSI</td><td>iSCSI VTL</td></tr>
+          <tr><td>Backend Storage</td><td>Amazon S3</td><td>S3 (EBS snapshots)</td><td>S3 → Glacier / Deep Archive</td></tr>
+          <tr><td>Data type</td><td>Files (stored as objects)</td><td>Block volumes</td><td>Virtual tapes</td></tr>
+          <tr><td>Local cache</td><td><span class="yes">Yes</span> — recently accessed files</td><td><span class="yes">Yes</span> — Cached Mode</td><td><span class="yes">Yes</span> — recently accessed tapes</td></tr>
+          <tr><td>Use case</td><td>File share, NAS replacement, cloud tiering</td><td>Backup/DR for block workloads</td><td>Tape backup modernization</td></tr>
+          <tr><td>Authentication</td><td>IAM + optional AD (SMB)</td><td>CHAP (iSCSI)</td><td>CHAP (iSCSI)</td></tr>
+          <tr><td>Encryption at rest</td><td>SSE-S3 / SSE-KMS on S3</td><td>EBS snapshot encryption (KMS)</td><td>SSE-S3 / SSE-KMS on S3</td></tr>
+          <tr><td>DR restore path</td><td>Access objects directly from S3</td><td>Create EBS volume from snapshot</td><td>Retrieve tape from Glacier</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="exam-box">
+      <div class="exam-label">⚑ Exam — Pick the Right Gateway</div>
+      <ul>
+        <li>On-prem NFS/SMB file share backed by S3 → <strong>S3 File Gateway</strong></li>
+        <li>On-prem app needs block storage (iSCSI), with cloud backups → <strong>Volume Gateway (Stored Mode)</strong></li>
+        <li>On-prem app needs block storage with cloud as primary + local cache → <strong>Volume Gateway (Cached Mode)</strong></li>
+        <li>Replace physical tape backup infrastructure → <strong>Tape Gateway</strong></li>
+        <li>Backup software like Veeam/Commvault connecting to cloud → <strong>Tape Gateway VTL</strong></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ FILE GATEWAY DEEP DIVE -->
+  <section>
+    <div class="section-title">
+      <span class="badge b-green">File Gateway</span>
+      <h2>S3 File Gateway — Deep Dive</h2>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:16px;">
+      <div class="card">
+        <h3>How Files Become S3 Objects</h3>
+        <ul>
+          <li>Each NFS/SMB file share is mapped to an <strong>S3 bucket</strong></li>
+          <li>Files written to the gateway → stored as S3 objects with same key structure</li>
+          <li>File metadata preserved as S3 object metadata</li>
+          <li>Objects visible directly in S3 — can be accessed via S3 API too</li>
+          <li>Supports <strong>S3 Lifecycle policies</strong> on the target bucket — auto-tier to Glacier</li>
+          <li>Multiple gateways / file shares can point to the same S3 bucket</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Cache Refresh — Stale Data Problem</h3>
+        <ul>
+          <li>If S3 is updated directly (bypass gateway) → gateway cache becomes stale</li>
+          <li>Other gateway clients won't see updates made by other gateways automatically</li>
+          <li>Fix option 1: <code>RefreshCache</code> API — manually trigger a cache sync</li>
+          <li>Fix option 2: <strong>Automated Cache Refresh</strong> — periodic automatic refresh</li>
+          <li>Fix option 3: invoke <code>RefreshCache</code> via <strong>Lambda</strong> on S3 event (e.g. S3 PUT notification → Lambda → RefreshCache)</li>
+          <li>Notify all clients of updates via <strong>S3 Event Notifications</strong></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:16px;">
+      <div class="card">
+        <h3>FSx File Gateway</h3>
+        <ul>
+          <li>Alternative to S3 File Gateway for <strong>Windows workloads</strong></li>
+          <li>Provides local cache for <strong>Amazon FSx for Windows File Server</strong></li>
+          <li>Protocol: <strong>SMB + NTFS</strong> — full Windows compatibility</li>
+          <li>AD integration, ACLs, DFS (Distributed File System) support</li>
+          <li>Use case: migrate Windows file servers to FSx with on-prem cache</li>
+          <li>Gateway caches frequently accessed data — reduces WAN latency</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>File Gateway Security</h3>
+        <ul>
+          <li>SMB auth: <strong>Active Directory</strong> or guest access</li>
+          <li>NFS auth: IP-based access control (POSIX)</li>
+          <li>Data encrypted in transit: <strong>TLS 1.2</strong></li>
+          <li>Data encrypted at rest: S3-SSE (SSE-S3 or SSE-KMS)</li>
+          <li>Gateway IAM role controls which S3 bucket it can write to</li>
+          <li>VPC endpoint available for private connectivity to S3</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="exam-box">
+      <div class="exam-label">⚑ Exam — RefreshCache Pattern</div>
+      <ul>
+        <li>Multiple offices use separate File Gateways pointing to the same S3 bucket. Office A uploads a file — Office B won't see it until cache refresh.</li>
+        <li>Solution: S3 Object Created notification → SNS/Lambda → <code>RefreshCache</code> API on all other gateways → near-real-time consistency.</li>
+        <li>This is a high-frequency DOP-C02 architecture question — know the exact flow.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ VOLUME GATEWAY DEEP DIVE -->
+  <section>
+    <div class="section-title">
+      <span class="badge b-blue">Volume Gateway</span>
+      <h2>Volume Gateway — Cached vs Stored Mode</h2>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:16px;">
+      <div class="card">
+        <h3>Cached Volume Mode</h3>
+        <ul>
+          <li><strong>Primary data stored in S3</strong> (not on-prem)</li>
+          <li>Only recently accessed data cached locally</li>
+          <li>Minimizes on-prem storage footprint</li>
+          <li>Low latency for hot data (cache hit)</li>
+          <li>Cache miss = data fetched from S3 (higher latency)</li>
+          <li>Volumes up to <strong>32 TB each</strong>, 32 volumes = 1 PB total</li>
+          <li>Snapshots incremental, stored as EBS snapshots</li>
+          <li>Use case: large datasets, limited on-prem capacity, cloud as primary</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Stored Volume Mode</h3>
+        <ul>
+          <li><strong>Primary data stored on-premises</strong></li>
+          <li>Entire dataset on-prem — low latency always</li>
+          <li>Async snapshots uploaded to S3 as <strong>EBS snapshots</strong></li>
+          <li>EBS snapshots can be restored as EBS volumes in AWS</li>
+          <li>Volumes up to <strong>16 TB each</strong>, 32 volumes per gateway</li>
+          <li>Requires on-prem storage capacity for full dataset</li>
+          <li>Use case: apps needing entire dataset locally with cloud DR</li>
+          <li>Classic hybrid DR pattern: on-prem primary, AWS failover</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="exam-box">
+      <div class="exam-label">⚑ Exam — Cached vs Stored</div>
+      <ul>
+        <li>"Minimize on-premises storage footprint while keeping low latency for hot data" → <strong>Cached Mode</strong>.</li>
+        <li>"Full dataset must be available locally at all times, cloud backup only" → <strong>Stored Mode</strong>.</li>
+        <li>In both modes: EBS snapshots in S3 → restore to EBS volume in AWS → attach to EC2 → cloud DR achieved without RDS or separate backup tool.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ TAPE GATEWAY DEEP DIVE -->
+  <section>
+    <div class="section-title">
+      <span class="badge b-purple">Tape Gateway</span>
+      <h2>Tape Gateway — VTL Deep Dive</h2>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:16px;">
+      <div class="card">
+        <h3>Virtual Tape Library (VTL)</h3>
+        <ul>
+          <li>Gateway presents a VTL — backup software sees it as physical tape hardware</li>
+          <li>Virtual Tape Drive: simulates a tape drive</li>
+          <li>Virtual Tape Shelf (VTS): archived tapes in Glacier</li>
+          <li>Active tapes: stored in S3 (accessible within minutes)</li>
+          <li>Archived tapes: moved to <strong>Glacier</strong> or <strong>Glacier Deep Archive</strong></li>
+          <li>Max virtual tape size: <strong>5 TB</strong></li>
+          <li>VTL capacity: up to 1,500 virtual tapes, up to 150 TB</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Tape Lifecycle</h3>
+        <ul>
+          <li>Backup software writes to virtual tape in VTL (S3)</li>
+          <li>Eject tape in backup software → tape archived to Glacier / Deep Archive</li>
+          <li>Retrieve archived tape: initiate retrieval from Glacier → returns to VTL in S3</li>
+          <li>Glacier retrieval: minutes to hours (Expedited/Standard/Bulk)</li>
+          <li>Deep Archive retrieval: up to 12 hours</li>
+          <li>Compatible backup apps: Veeam, Veritas NetBackup, Backup Exec, Commvault, IBM Spectrum, Quest NetVault</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ DEPLOYMENT -->
+  <section>
+    <div class="section-title">
+      <span class="badge b-teal">Deployment</span>
+      <h2>Deployment Options &amp; Connectivity</h2>
+    </div>
+
+    <div class="grid-3" style="margin-bottom:16px;">
+      <div class="card">
+        <h3>VM Appliance</h3>
+        <ul>
+          <li>Download OVA image from AWS console</li>
+          <li>Deploy on: VMware ESXi, Microsoft Hyper-V, Linux KVM</li>
+          <li>Minimum: 4 vCPUs, 16 GB RAM, 80 GB root disk</li>
+          <li>Separate cache disk and upload buffer</li>
+          <li>Most common deployment option</li>
+          <li>Activate via AWS console with activation key</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Hardware Appliance</h3>
+        <ul>
+          <li>Physical AWS-provided device — order from AWS</li>
+          <li>For environments without virtualization infrastructure</li>
+          <li>Pre-installed gateway software</li>
+          <li>Rack-mounted 1U device</li>
+          <li>Supports all three gateway types</li>
+          <li>Same activation process as VM appliance</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Connectivity Options</h3>
+        <ul>
+          <li><strong>Internet</strong>: gateway uploads over public internet (TLS)</li>
+          <li><strong>AWS Direct Connect</strong>: private dedicated link — consistent bandwidth</li>
+          <li><strong>VPN</strong>: IPsec VPN over internet — encrypted tunnel</li>
+          <li><strong>VPC Endpoint</strong>: gateway in VPC communicates privately with S3</li>
+          <li>Direct Connect recommended for large data transfers and consistent latency</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="exam-box">
+      <div class="exam-label">⚑ Exam — Connectivity Choice</div>
+      <ul>
+        <li>Large volume of data, consistent low-latency uploads → <strong>Direct Connect</strong> + Storage Gateway.</li>
+        <li>High bandwidth requirement but budget constraints → <strong>VPN</strong>.</li>
+        <li>All traffic must stay private, no internet exposure → <strong>VPC Endpoint</strong> + Direct Connect.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ CHEATSHEET -->
+  <section>
+    <div class="section-title">
+      <span class="badge b-amber">Cheatsheet</span>
+      <h2>DOP-C02 Key Decision Tree</h2>
+    </div>
+    <div class="card-full">
+      <table class="compare-table">
+        <thead>
+          <tr><th>Scenario / Keyword</th><th>Answer</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>On-prem NFS/SMB share backed by S3</td><td>S3 File Gateway</td></tr>
+          <tr><td>Windows file server with SMB + AD on prem → cloud</td><td>FSx File Gateway (SMB + NTFS + AD)</td></tr>
+          <tr><td>On-prem cache stale after direct S3 write</td><td>RefreshCache API or AutomatedCache; or S3 event → Lambda → RefreshCache</td></tr>
+          <tr><td>Two offices share same S3 bucket via File Gateways</td><td>S3 event notification → Lambda → RefreshCache on both gateways</td></tr>
+          <tr><td>Block storage on-prem, cloud as primary + local hot cache</td><td>Volume Gateway — Cached Mode</td></tr>
+          <tr><td>Block storage on-prem primary, cloud DR snapshots only</td><td>Volume Gateway — Stored Mode</td></tr>
+          <tr><td>Restore block data from cloud to EC2</td><td>Create EBS volume from EBS snapshot (from Volume Gateway)</td></tr>
+          <tr><td>Replace physical tape backup with cloud</td><td>Tape Gateway (VTL) → Glacier / Deep Archive</td></tr>
+          <tr><td>Backup software (Veeam, Commvault) needs tape target</td><td>Tape Gateway — presents iSCSI VTL interface</td></tr>
+          <tr><td>No virtualization platform on-prem</td><td>Storage Gateway Hardware Appliance (physical device)</td></tr>
+          <tr><td>Consistent low-latency upload to Storage Gateway</td><td>AWS Direct Connect</td></tr>
+          <tr><td>On-prem data tiering to Glacier via file share</td><td>S3 File Gateway → S3 bucket → S3 Lifecycle policy → Glacier</td></tr>
+          <tr><td>Minimal on-prem storage, large dataset in cloud</td><td>Volume Gateway Cached Mode OR S3 File Gateway</td></tr>
+          <tr><td>Files written by on-prem app need to be processed by Lambda</td><td>S3 File Gateway → S3 → S3 Event Notification → Lambda</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Auto Scaling Groups — DOP-C02 Study Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10;
+    --bg2: #10131a;
+    --bg3: #161b24;
+    --bg4: #1c2230;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.14);
+    --text: #e8eaf0;
+    --text2: #9ba3b4;
+    --text3: #5d6475;
+    --orange: #ff6b35;
+    --orange-dim: rgba(255,107,53,0.12);
+    --orange-border: rgba(255,107,53,0.3);
+    --blue: #4a9eff;
+    --blue-dim: rgba(74,158,255,0.1);
+    --blue-border: rgba(74,158,255,0.25);
+    --green: #3ecf8e;
+    --green-dim: rgba(62,207,142,0.1);
+    --green-border: rgba(62,207,142,0.25);
+    --yellow: #f5c842;
+    --yellow-dim: rgba(245,200,66,0.1);
+    --yellow-border: rgba(245,200,66,0.25);
+    --red: #ff4d4d;
+    --red-dim: rgba(255,77,77,0.1);
+    --red-border: rgba(255,77,77,0.25);
+    --purple: #a78bfa;
+    --purple-dim: rgba(167,139,250,0.1);
+    --font: 'Syne', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 15px; line-height: 1.65; }
+  
+  /* Layout */
+  .page { max-width: 960px; margin: 0 auto; padding: 48px 32px 80px; }
+  
+  /* Header */
+  .header { margin-bottom: 48px; padding-bottom: 32px; border-bottom: 1px solid var(--border2); }
+  .badge { display: inline-flex; align-items: center; gap: 6px; background: var(--orange-dim); border: 1px solid var(--orange-border); color: var(--orange); font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; padding: 4px 10px; border-radius: 4px; margin-bottom: 16px; }
+  .header h1 { font-size: 42px; font-weight: 800; line-height: 1.1; letter-spacing: -0.02em; color: #fff; }
+  .header h1 span { color: var(--orange); }
+  .header p { margin-top: 10px; color: var(--text2); font-size: 14px; }
+  
+  /* TOC */
+  .toc { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 20px 24px; margin-bottom: 48px; display: grid; grid-template-columns: 1fr 1fr; gap: 4px 24px; }
+  .toc-title { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); margin-bottom: 12px; grid-column: 1 / -1; }
+  .toc a { color: var(--text2); text-decoration: none; font-size: 13px; padding: 3px 0; display: block; transition: color 0.15s; }
+  .toc a:hover { color: var(--orange); }
+  .toc a::before { content: '→ '; color: var(--text3); }
+  
+  /* Section */
+  .section { margin-bottom: 56px; scroll-margin-top: 24px; }
+  .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+  .section-num { font-family: var(--mono); font-size: 12px; color: var(--orange); background: var(--orange-dim); border: 1px solid var(--orange-border); border-radius: 4px; padding: 2px 8px; }
+  .section h2 { font-size: 22px; font-weight: 700; color: #fff; letter-spacing: -0.01em; }
+  .section h3 { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 12px; margin-top: 24px; text-transform: uppercase; letter-spacing: 0.06em; }
+  
+  /* Cards grid */
+  .grid { display: grid; gap: 12px; }
+  .grid-2 { grid-template-columns: 1fr 1fr; }
+  .grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .grid-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+  
+  /* Card */
+  .card { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; }
+  .card.orange { border-color: var(--orange-border); background: var(--orange-dim); }
+  .card.blue { border-color: var(--blue-border); background: var(--blue-dim); }
+  .card.green { border-color: var(--green-border); background: var(--green-dim); }
+  .card.yellow { border-color: var(--yellow-border); background: var(--yellow-dim); }
+  .card.red { border-color: var(--red-border); background: var(--red-dim); }
+  .card.purple { border-color: rgba(167,139,250,0.3); background: var(--purple-dim); }
+  .card-label { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 6px; }
+  .orange .card-label { color: var(--orange); }
+  .blue .card-label { color: var(--blue); }
+  .green .card-label { color: var(--green); }
+  .yellow .card-label { color: var(--yellow); }
+  .red .card-label { color: var(--red); }
+  .purple .card-label { color: var(--purple); }
+  .card h4 { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+  .card p { font-size: 14px; color: var(--text2); line-height: 1.55; }
+  .card ul { list-style: none; padding: 0; }
+  .card ul li { font-size: 13.5px; color: var(--text2); padding: 3px 0; display: flex; gap: 8px; align-items: flex-start; }
+  .card ul li::before { content: '·'; color: var(--text3); flex-shrink: 0; margin-top: 1px; }
+  
+  /* Mono tag */
+  .mono { font-family: var(--mono); font-size: 12px; background: var(--bg4); border: 1px solid var(--border); border-radius: 4px; padding: 2px 7px; color: var(--text); }
+  
+  /* Alert / Exam tip */
+  .tip { background: linear-gradient(90deg, rgba(245,200,66,0.08) 0%, rgba(245,200,66,0.04) 100%); border-left: 3px solid var(--yellow); border-radius: 0 8px 8px 0; padding: 12px 16px; margin: 16px 0; }
+  .tip strong { color: var(--yellow); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; display: block; margin-bottom: 4px; }
+  .tip p { font-size: 13.5px; color: var(--text2); }
+  
+  /* Flow diagram */
+  .flow { display: flex; align-items: center; flex-wrap: wrap; gap: 0; margin: 16px 0; }
+  .flow-box { background: var(--bg3); border: 1px solid var(--border2); border-radius: 8px; padding: 8px 14px; font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; }
+  .flow-box.active { background: var(--orange-dim); border-color: var(--orange-border); color: var(--orange); }
+  .flow-box.wait { background: rgba(245,200,66,0.08); border-color: var(--yellow-border); color: var(--yellow); }
+  .flow-box.done { background: var(--green-dim); border-color: var(--green-border); color: var(--green); }
+  .flow-box.term { background: var(--red-dim); border-color: var(--red-border); color: var(--red); }
+  .flow-arrow { color: var(--text3); padding: 0 6px; font-size: 16px; }
+  
+  /* State table */
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th { text-align: left; padding: 8px 12px; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); border-bottom: 1px solid var(--border2); }
+  td { padding: 9px 12px; border-bottom: 1px solid var(--border); color: var(--text2); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  td:first-child { color: var(--text); font-weight: 600; font-family: var(--mono); font-size: 12px; }
+  .table-wrap { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  
+  /* Policy comparison */
+  .policy-row { display: flex; align-items: flex-start; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--border); }
+  .policy-row:last-child { border-bottom: none; }
+  .policy-tag { flex-shrink: 0; width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+  .policy-name { font-weight: 700; font-size: 14px; color: #fff; margin-bottom: 3px; }
+  .policy-desc { font-size: 13px; color: var(--text2); }
+  .policy-detail { font-family: var(--mono); font-size: 11px; color: var(--text3); margin-top: 4px; }
+  
+  /* Lifecycle timeline */
+  .timeline { display: flex; gap: 0; align-items: stretch; margin: 20px 0; }
+  .timeline-col { flex: 1; }
+  .timeline-col-label { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); text-align: center; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  .timeline-states { display: flex; flex-direction: column; gap: 4px; padding: 0 6px; }
+  .t-state { border-radius: 6px; padding: 6px 10px; font-size: 12px; font-weight: 600; text-align: center; font-family: var(--mono); }
+  .t-state.gray { background: var(--bg3); color: var(--text2); border: 1px solid var(--border); }
+  .t-state.orange { background: var(--orange-dim); color: var(--orange); border: 1px solid var(--orange-border); }
+  .t-state.yellow { background: rgba(245,200,66,0.08); color: var(--yellow); border: 1px solid var(--yellow-border); }
+  .t-state.green { background: var(--green-dim); color: var(--green); border: 1px solid var(--green-border); }
+  .t-state.red { background: var(--red-dim); color: var(--red); border: 1px solid var(--red-border); }
+  .t-state.blue { background: var(--blue-dim); color: var(--blue); border: 1px solid var(--blue-border); }
+  .t-col-divider { width: 1px; background: var(--border2); margin: 24px 0; }
+  
+  /* SNS events */
+  .event-list { display: flex; flex-direction: column; gap: 6px; }
+  .event-item { background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; padding: 8px 14px; font-family: var(--mono); font-size: 12px; color: var(--text); display: flex; align-items: center; gap: 10px; }
+  .event-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .dot-green { background: var(--green); }
+  .dot-red { background: var(--red); }
+  
+  /* Warm pool visual */
+  .wp-diagram { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 24px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .wp-asg { flex: 1; min-width: 180px; background: var(--bg3); border: 1px dashed var(--orange-border); border-radius: 10px; padding: 16px; }
+  .wp-pool { flex: 0 0 160px; background: var(--bg3); border: 1px dashed var(--blue-border); border-radius: 10px; padding: 16px; }
+  .wp-label { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px; }
+  .wp-asg .wp-label { color: var(--orange); }
+  .wp-pool .wp-label { color: var(--blue); }
+  .instances { display: flex; gap: 6px; flex-wrap: wrap; }
+  .inst { width: 28px; height: 28px; background: var(--orange-dim); border: 1px solid var(--orange-border); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--orange); }
+  .inst.warm { background: var(--blue-dim); border-color: var(--blue-border); color: var(--blue); }
+  .wp-arrow { font-size: 22px; color: var(--text3); flex-shrink: 0; }
+  .wp-formula { background: var(--bg4); border: 1px solid var(--border); border-radius: 6px; padding: 8px 14px; font-family: var(--mono); font-size: 12px; color: var(--text2); margin-top: 12px; }
+  
+  /* Footer */
+  .footer { border-top: 1px solid var(--border); padding-top: 24px; margin-top: 56px; display: flex; justify-content: space-between; align-items: center; }
+  .footer p { font-size: 12px; color: var(--text3); }
+  
+  @media (max-width: 680px) {
+    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+    .timeline { flex-direction: column; }
+    .t-col-divider { width: 100%; height: 1px; margin: 0; }
+    .header h1 { font-size: 28px; }
+  }
+  .home-btn{display:inline-flex;align-items:center;gap:6px;color:var(--text2);text-decoration:none;font-size:13px;font-family:var(--mono);padding:6px 12px;border:1px solid var(--border);border-radius:6px;margin-bottom:32px;transition:color .15s,border-color .15s;}
+  .home-btn:hover{color:var(--text);border-color:var(--border2);}
+</style>
+</head>
+<body>
+<div class="page">
+<a href="../index.html" class="home-btn">← DOP-C02 Home</a>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="badge">DOP-C02 · AWS DevOps Professional</div>
+    <h1>Auto Scaling <span>Groups</span></h1>
+    <p>Complete exam-level reference — Scaling Policies · Lifecycle Hooks · Termination Policies · Warm Pools · SNS/EventBridge</p>
+  </div>
+
+  <!-- TOC -->
+  <div class="toc">
+    <div class="toc-title">Contents</div>
+    <a href="#s1">01 · ASG Core Concepts</a>
+    <a href="#s5">05 · Termination Policies</a>
+    <a href="#s2">02 · Scaling Policies</a>
+    <a href="#s6">06 · Warm Pools</a>
+    <a href="#s3">03 · Lifecycle Hooks</a>
+    <a href="#s7">07 · SNS Notifications</a>
+    <a href="#s4">04 · Scaling Cooldowns</a>
+    <a href="#s8">08 · EventBridge Integration</a>
+  </div>
+
+  <!-- S1: Core Concepts -->
+  <div class="section" id="s1">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <h2>ASG Core Concepts</h2>
+    </div>
+
+    <div class="grid grid-3" style="margin-bottom:12px;">
+      <div class="card blue">
+        <div class="card-label">Min Capacity</div>
+        <h4>Minimum</h4>
+        <p>Floor — ASG never terminates below this count. Scale-in stops here.</p>
+      </div>
+      <div class="card orange">
+        <div class="card-label">Desired Capacity</div>
+        <h4>Target</h4>
+        <p>The count ASG actively tries to maintain. Adjustable by policies at runtime.</p>
+      </div>
+      <div class="card green">
+        <div class="card-label">Max Capacity</div>
+        <h4>Maximum</h4>
+        <p>Ceiling — ASG never launches beyond this count regardless of load.</p>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>Exam tip</strong>
+      <p>ASG requires a <strong>Launch Template</strong> (preferred) or <strong>Launch Configuration</strong> (legacy, no versioning). Launch Templates support multiple instance types, Spot + On-Demand mix, and T2/T3 Unlimited credits. Launch Configurations cannot be modified — you must create a new one.</p>
+    </div>
+
+    <h3>Key Integrations</h3>
+    <div class="grid grid-3">
+      <div class="card">
+        <div class="card-label" style="color:var(--blue)">ELB / ALB / NLB</div>
+        <p>Register instances automatically; ALB health checks replace EC2 health checks for app-level detection.</p>
+      </div>
+      <div class="card">
+        <div class="card-label" style="color:var(--green)">CloudWatch</div>
+        <p>Source of all alarm-based scaling triggers. Metrics published every 1 min (detailed) or 5 min (basic).</p>
+      </div>
+      <div class="card">
+        <div class="card-label" style="color:var(--orange)">EC2 Health Checks</div>
+        <p>Default check. Instance is Unhealthy if EC2 reports status other than <span class="mono">running</span>. ELB check is stricter.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- S2: Scaling Policies -->
+  <div class="section" id="s2">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <h2>Scaling Policies</h2>
+    </div>
+
+    <div class="table-wrap" style="margin-bottom:16px;">
+      <table>
+        <thead>
+          <tr>
+            <th>Policy Type</th>
+            <th>How it works</th>
+            <th>Best for</th>
+            <th>Key constraint</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Target Tracking</td>
+            <td style="color:var(--text2)">Maintains a CloudWatch metric at a defined target value (e.g. <em>CPU = 40%</em>). ASG calculates required capacity automatically.</td>
+            <td style="color:var(--text2)">Steady-state workloads. Simplest to configure.</td>
+            <td style="color:var(--text2)">Can't scale to zero. Needs metric data — cold starts delay reaction.</td>
+          </tr>
+          <tr>
+            <td>Simple Scaling</td>
+            <td style="color:var(--text2)">Single CloudWatch alarm triggers a fixed adjustment. Waits for cooldown before next action.</td>
+            <td style="color:var(--text2)">Simple on/off alarms where 1 step is enough.</td>
+            <td style="color:var(--text2)">Entire cooldown must expire between scaling actions — slow to react to rapid changes.</td>
+          </tr>
+          <tr>
+            <td>Step Scaling</td>
+            <td style="color:var(--text2)">CloudWatch alarm triggers; multiple step adjustments based on alarm breach magnitude. No cooldown wait between steps.</td>
+            <td style="color:var(--text2)">Variable load spikes needing proportional response.</td>
+            <td style="color:var(--text2)">More complex to configure than Target Tracking.</td>
+          </tr>
+          <tr>
+            <td>Scheduled Scaling</td>
+            <td style="color:var(--text2)">Changes min/max/desired at a cron-based schedule. Proactive — does not react to metrics.</td>
+            <td style="color:var(--text2)">Known recurring patterns (e.g. business hours, weekly peaks).</td>
+            <td style="color:var(--text2)">Requires accurate forecast. Over/under-provision if traffic varies.</td>
+          </tr>
+          <tr>
+            <td>Predictive Scaling</td>
+            <td style="color:var(--text2)">ML-driven forecast using historical CloudWatch data. Pre-scales <em>before</em> the load arrives. Requires at least 24 h of data for forecasting.</td>
+            <td style="color:var(--text2)">Cyclical patterns where reactive scaling causes latency.</td>
+            <td style="color:var(--text2)">Forecast mode (observation only) vs Forecast + Scale mode. Min 1-day data needed.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Good Metrics to Scale On</h3>
+    <div class="grid grid-4">
+      <div class="card orange">
+        <div class="card-label">CPU</div>
+        <h4>CPUUtilization</h4>
+        <p>Average across all instances. Target ~40–60% for headroom.</p>
+      </div>
+      <div class="card blue">
+        <div class="card-label">ALB</div>
+        <h4>RequestCountPerTarget</h4>
+        <p>Requests per instance behind ALB. Ideal for web tiers.</p>
+      </div>
+      <div class="card green">
+        <div class="card-label">Network</div>
+        <h4>NetworkIn / NetworkOut</h4>
+        <p>Average bytes in or out. Useful for upload/download-heavy apps.</p>
+      </div>
+      <div class="card purple">
+        <div class="card-label">Custom</div>
+        <h4>Custom Metric</h4>
+        <p>Publish any metric to CloudWatch via PutMetricData (e.g. queue depth from SQS).</p>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>Exam tip</strong>
+      <p><strong>Step Scaling</strong> does not wait for the cooldown to expire before evaluating new scaling actions — it continues processing alarms. <strong>Simple Scaling</strong> does wait. For fast-scaling workloads, prefer Step or Target Tracking.</p>
+    </div>
+  </div>
+
+  <!-- S3: Lifecycle Hooks -->
+  <div class="section" id="s3">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <h2>Lifecycle Hooks</h2>
+    </div>
+
+    <p style="color:var(--text2);margin-bottom:20px;font-size:14px;">Lifecycle hooks pause an instance at a transition state so you can run custom actions (install software, drain connections, collect logs) before the ASG proceeds. Maximum wait timeout: <span class="mono">7200s (2h)</span>, default <span class="mono">3600s (1h)</span>. Extend with <span class="mono">record-lifecycle-action-heartbeat</span> or complete with <span class="mono">complete-lifecycle-action</span>.</p>
+
+    <h3>Scale-Out (Launch) Flow</h3>
+    <div class="flow" style="margin-bottom:20px;flex-wrap:wrap;">
+      <div class="flow-box" style="background:var(--bg4);color:var(--text3);">ASG triggers scale-out</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box orange">Pending</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box wait">Pending:Wait <span style="font-size:10px;opacity:.7">← HOOK</span></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box" style="background:var(--green-dim);border-color:var(--green-border);color:var(--green);">Pending:Proceed</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box done">InService</div>
+    </div>
+
+    <h3>Scale-In (Terminate) Flow</h3>
+    <div class="flow" style="margin-bottom:24px;flex-wrap:wrap;">
+      <div class="flow-box done">InService</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box term">Terminating</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box wait">Terminating:Wait <span style="font-size:10px;opacity:.7">← HOOK</span></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box" style="background:var(--red-dim);border-color:var(--red-border);color:var(--red);">Terminating:Proceed</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box" style="background:var(--bg4);color:var(--text3);">Terminated</div>
+    </div>
+
+    <h3>Hook Events &amp; Use Cases</h3>
+    <div class="grid grid-2">
+      <div class="card orange">
+        <div class="card-label">EC2_INSTANCE_LAUNCHING</div>
+        <h4>Launch Hook actions</h4>
+        <ul>
+          <li>Install/configure application software</li>
+          <li>Pull config from Systems Manager Parameter Store</li>
+          <li>Run health/readiness checks before serving traffic</li>
+          <li>Register with external service discovery</li>
+        </ul>
+      </div>
+      <div class="card red">
+        <div class="card-label">EC2_INSTANCE_TERMINATING</div>
+        <h4>Terminate Hook actions</h4>
+        <ul>
+          <li>Drain active connections / finish in-flight requests</li>
+          <li>Collect and ship logs (SSM Run Command → EventBridge)</li>
+          <li>Deregister from service discovery or external LB</li>
+          <li>Snapshot EBS volumes before deletion</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>Exam tip — Triggering from hooks</strong>
+      <p>Hooks emit events that can trigger: <strong>EventBridge rule → Lambda</strong> (most common for automation), <strong>SNS</strong>, or <strong>SQS</strong>. The hook enters <em>Wait</em> state; your automation must call <span class="mono">complete-lifecycle-action CONTINUE</span> (or <span class="mono">ABANDON</span>) to proceed. If the heartbeat timeout expires, the default result (<span class="mono">CONTINUE</span> or <span class="mono">ABANDON</span>) is applied.</p>
+    </div>
+
+    <h3>Hook Timeout &amp; Heartbeat</h3>
+    <div class="grid grid-3">
+      <div class="card">
+        <div class="card-label" style="color:var(--blue)">HeartbeatTimeout</div>
+        <p>Max wait: <span class="mono">7200s</span>. Default: <span class="mono">3600s</span>. Extend with <span class="mono">record-lifecycle-action-heartbeat</span> before timeout.</p>
+      </div>
+      <div class="card">
+        <div class="card-label" style="color:var(--green)">DefaultResult</div>
+        <p>If timeout expires without <span class="mono">complete-lifecycle-action</span> call — either <span class="mono">CONTINUE</span> (default) or <span class="mono">ABANDON</span>.</p>
+      </div>
+      <div class="card">
+        <div class="card-label" style="color:var(--yellow)">ABANDON vs CONTINUE</div>
+        <p><span class="mono">ABANDON</span> on launch = instance terminated. <span class="mono">ABANDON</span> on terminate = instance terminated immediately without waiting.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- S4: Scaling Cooldowns -->
+  <div class="section" id="s4">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <h2>Scaling Cooldowns</h2>
+    </div>
+
+    <div class="grid grid-2" style="margin-bottom:16px;">
+      <div class="card orange">
+        <div class="card-label">Default Cooldown</div>
+        <h4>300 seconds (5 min)</h4>
+        <p>After any scaling activity (up or down), ASG waits this period before executing another scaling action. Applies to Simple Scaling only.</p>
+      </div>
+      <div class="card blue">
+        <div class="card-label">Scaling-Specific Cooldown</div>
+        <h4>Override per policy</h4>
+        <p>Set a shorter cooldown on scale-in policies to terminate instances faster. Set a longer cooldown on scale-out to avoid thrashing.</p>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>Exam tip — Reduce cooldown</strong>
+      <p>Use a <strong>pre-baked (golden) AMI</strong> that includes all dependencies. Faster boot → instance reaches InService faster → cooldown can be shorter → ASG responds to load changes more quickly. Target Tracking and Step Scaling are not subject to the default cooldown (they have their own instance warmup period).</p>
+    </div>
+
+    <h3>Instance Warmup (Step &amp; Target Tracking)</h3>
+    <div class="card" style="margin-top:8px;">
+      <p style="font-size:14px;color:var(--text2);">Separate from cooldown. Newly launched instances are not counted toward ASG metrics until the <strong>instance warmup</strong> period expires. This prevents premature scale-out decisions caused by high CPU on a booting instance. Configurable per ASG.</p>
+    </div>
+  </div>
+
+  <!-- S5: Termination Policies -->
+  <div class="section" id="s5">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <h2>Termination Policies</h2>
+    </div>
+
+    <p style="color:var(--text2);font-size:14px;margin-bottom:20px;">On scale-in, ASG first selects the AZ with the most instances to rebalance, then applies the termination policy to choose which instance within that AZ to terminate.</p>
+
+    <div class="table-wrap" style="margin-bottom:16px;">
+      <table>
+        <thead>
+          <tr>
+            <th>Policy</th>
+            <th>Terminates</th>
+            <th>Typical use case</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Default</td>
+            <td style="color:var(--text2)">AZ rebalance → oldest Launch Template/Config → closest billing hour</td>
+            <td style="color:var(--text2)">General purpose. Applied when no policy specified.</td>
+          </tr>
+          <tr>
+            <td>AllocationStrategy</td>
+            <td style="color:var(--text2)">Aligns remaining instances to allocation strategy (lowest-price Spot, lowest-priority On-Demand)</td>
+            <td style="color:var(--text2)">Mixed instance groups with Spot.</td>
+          </tr>
+          <tr>
+            <td>OldestLaunchTemplate</td>
+            <td style="color:var(--text2)">Instance using the oldest version of the Launch Template</td>
+            <td style="color:var(--text2)">Rolling out a new Launch Template version.</td>
+          </tr>
+          <tr>
+            <td>OldestLaunchConfiguration</td>
+            <td style="color:var(--text2)">Instance using the oldest Launch Configuration</td>
+            <td style="color:var(--text2)">Migrating from LC to LT.</td>
+          </tr>
+          <tr>
+            <td>ClosestToNextInstanceHour</td>
+            <td style="color:var(--text2)">Instance closest to the next billing hour boundary</td>
+            <td style="color:var(--text2)">Minimise cost — avoid paying for partial hours.</td>
+          </tr>
+          <tr>
+            <td>NewestInstance</td>
+            <td style="color:var(--text2)">Most recently launched instance</td>
+            <td style="color:var(--text2)">Testing a new launch template — keep stable instances.</td>
+          </tr>
+          <tr>
+            <td>OldestInstance</td>
+            <td style="color:var(--text2)">Oldest running instance (not based on template)</td>
+            <td style="color:var(--text2)">Refreshing instance size/type without changing template.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="tip">
+      <strong>Exam tip — Custom Termination Policy</strong>
+      <p>You can define a <strong>Custom Termination Policy backed by a Lambda function</strong>. ASG calls Lambda with candidate instances; Lambda returns the instance(s) to terminate. Useful for stateful workloads (e.g., drain queue consumers with lowest job count). You can also chain multiple built-in policies — ASG evaluates them in order until it narrows to one instance.</p>
+    </div>
+  </div>
+
+  <!-- S6: Warm Pools -->
+  <div class="section" id="s6">
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <h2>Warm Pools</h2>
+    </div>
+
+    <p style="color:var(--text2);font-size:14px;margin-bottom:20px;">Eliminates scale-out latency by keeping a set of pre-initialized instances ready. When scale-out occurs, instances move from Warm Pool → ASG instead of booting from scratch.</p>
+
+    <!-- Warm pool visual -->
+    <div class="wp-diagram" style="margin-bottom:20px;">
+      <div class="wp-pool">
+        <div class="wp-label">Warm Pool (pre-init)</div>
+        <div class="instances">
+          <div class="inst warm">W</div>
+          <div class="inst warm">W</div>
+          <div class="inst warm">W</div>
+        </div>
+        <div class="wp-formula" style="margin-top:10px;">Size = Max(Max − Desired, 0)</div>
+      </div>
+      <div class="wp-arrow">→</div>
+      <div class="wp-asg">
+        <div class="wp-label">Auto Scaling Group</div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:8px;">Max=6 · Desired=3</div>
+        <div class="instances">
+          <div class="inst">S</div>
+          <div class="inst">S</div>
+          <div class="inst">S</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-2" style="margin-bottom:16px;">
+      <div>
+        <h3>Pool Size Settings</h3>
+        <div class="card" style="margin-top:8px;">
+          <ul>
+            <li><strong style="color:var(--text)">Minimum Warm Pool Size</strong> — guaranteed number always kept warm, even when ASG is at max capacity.</li>
+            <li><strong style="color:var(--text)">Max Prepared Capacity</strong> — absolute cap on total instances (ASG + pool). Prevents over-provisioning.</li>
+          </ul>
+        </div>
+      </div>
+      <div>
+        <h3>Instance Reuse Policy</h3>
+        <div class="card" style="margin-top:8px;">
+          <p style="font-size:14px;color:var(--text2);">On scale-in, instead of terminating instances, ASG can return them to the Warm Pool. Saves boot time on next scale-out. Configured via <span class="mono">ReuseOnScaleIn: true</span>. Only valid if Warm Pool exists.</p>
+        </div>
+      </div>
+    </div>
+
+    <h3>Warm Pool Instance States</h3>
+    <div class="grid grid-3">
+      <div class="card green">
+        <div class="card-label">Running</div>
+        <h4>Fastest</h4>
+        <p>Instance is running but not in service. Zero boot delay. Higher cost — you pay for running EC2.</p>
+      </div>
+      <div class="card yellow">
+        <div class="card-label">Stopped</div>
+        <h4>Balanced</h4>
+        <p>Instance is stopped. Restart time ~30–60s. Pay only for EBS storage while stopped. <strong>Recommended</strong> for most workloads.</p>
+      </div>
+      <div class="card blue">
+        <div class="card-label">Hibernated</div>
+        <h4>Memory preserved</h4>
+        <p>Instance RAM saved to EBS. Resume restores in-memory state. Useful for apps with expensive warm-up (e.g. large in-memory caches).</p>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>Exam tip — Warm Pool Lifecycle States</strong>
+      <p>Warm Pool has its own lifecycle states: <span class="mono">Warmed:Pending</span> → <span class="mono">Warmed:Pending:Wait</span> (hook) → <span class="mono">Warmed:Pending:Proceed</span> → <span class="mono">Warmed:Stopped / Running / Hibernated</span>. When scaling out, instance re-enters: <span class="mono">Pending:Wait</span> (hook) → <span class="mono">Pending:Proceed</span> → <span class="mono">InService</span>. Lifecycle hooks apply at both the warm pool entry and the ASG entry transitions.</p>
+    </div>
+  </div>
+
+  <!-- S7: SNS Notifications -->
+  <div class="section" id="s7">
+    <div class="section-header">
+      <span class="section-num">07</span>
+      <h2>SNS Notifications</h2>
+    </div>
+
+    <p style="color:var(--text2);font-size:14px;margin-bottom:16px;">ASG can publish notifications to an SNS topic for 4 event types. Configure via <span class="mono">put-notification-configuration</span>. Each event generates an SNS message with <span class="mono">AutoScalingGroupName</span>, <span class="mono">EC2InstanceId</span>, and event details.</p>
+
+    <div class="event-list" style="margin-bottom:20px;">
+      <div class="event-item"><div class="event-dot dot-green"></div>autoscaling:EC2_INSTANCE_LAUNCH</div>
+      <div class="event-item"><div class="event-dot dot-red"></div>autoscaling:EC2_INSTANCE_LAUNCH_ERROR</div>
+      <div class="event-item"><div class="event-dot dot-green"></div>autoscaling:EC2_INSTANCE_TERMINATE</div>
+      <div class="event-item"><div class="event-dot dot-red"></div>autoscaling:EC2_INSTANCE_TERMINATE_ERROR</div>
+    </div>
+
+    <div class="tip">
+      <strong>Exam tip — SNS vs EventBridge</strong>
+      <p><strong>SNS notifications</strong> are limited to 4 basic events and configured directly on the ASG. <strong>EventBridge</strong> supports a richer set of events (Instance Refresh, Checkpoint Reached, etc.) and enables more complex routing to Lambda, SQS, SSM Run Command, Step Functions, etc. For automation tasks, prefer EventBridge over SNS.</p>
+    </div>
+  </div>
+
+  <!-- S8: EventBridge -->
+  <div class="section" id="s8">
+    <div class="section-header">
+      <span class="section-num">08</span>
+      <h2>EventBridge Integration</h2>
+    </div>
+
+    <p style="color:var(--text2);font-size:14px;margin-bottom:20px;">ASG automatically emits events to EventBridge (source: <span class="mono">aws.autoscaling</span>). Create rules to match event patterns and route to targets.</p>
+
+    <h3>Matchable Event Types</h3>
+    <div class="grid grid-2" style="margin-bottom:16px;">
+      <div class="card blue">
+        <div class="card-label">Instance Events</div>
+        <ul>
+          <li>EC2 Instance Launching</li>
+          <li>EC2 Instance Launch Successful</li>
+          <li>EC2 Instance Launch Unsuccessful</li>
+          <li>EC2 Instance Terminating</li>
+          <li>EC2 Instance Terminate Successful</li>
+          <li>EC2 Instance Terminate Unsuccessful</li>
+        </ul>
+      </div>
+      <div class="card purple">
+        <div class="card-label">Instance Refresh Events</div>
+        <ul>
+          <li>EC2 Auto Scaling Instance Refresh Started</li>
+          <li>EC2 Auto Scaling Instance Refresh Succeeded</li>
+          <li>EC2 Auto Scaling Instance Refresh Failed</li>
+          <li>EC2 Auto Scaling Instance Refresh Cancelled</li>
+          <li>EC2 Auto Scaling Instance Refresh Checkpoint Reached</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3>Common EventBridge Target Patterns</h3>
+    <div class="grid grid-3">
+      <div class="card orange">
+        <div class="card-label">Terminating:Wait → EventBridge → Lambda</div>
+        <h4>Log collection</h4>
+        <p>Collect logs / flush metrics before instance terminates. Lambda calls <span class="mono">complete-lifecycle-action</span> when done.</p>
+      </div>
+      <div class="card blue">
+        <div class="card-label">Terminating:Wait → EventBridge → SSM</div>
+        <h4>Run Command</h4>
+        <p>Execute SSM Run Command on the terminating instance (e.g. sync logs to S3). Integrated directly — no Lambda needed.</p>
+      </div>
+      <div class="card green">
+        <div class="card-label">Launch Success → EventBridge → Lambda</div>
+        <h4>Post-launch automation</h4>
+        <p>Trigger config management, register with DNS/CMDB, or send Slack notification on new instance InService.</p>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>Exam tip — EventBridge event payload</strong>
+      <p>EventBridge events include <span class="mono">"source": "aws.autoscaling"</span> and <span class="mono">"detail-type"</span> such as <em>"EC2 Instance Launch Successful"</em>. The <span class="mono">detail</span> object contains <span class="mono">AutoScalingGroupName</span>, <span class="mono">EC2InstanceId</span>, <span class="mono">StatusCode</span>, and <span class="mono">Description</span>. Use content-based filtering in EventBridge rules to match specific ASG names or status codes.</p>
+    </div>
+
+    <!-- Instance Refresh -->
+    <h3 style="margin-top:32px;">Instance Refresh (bonus — high exam weight)</h3>
+    <div class="card" style="margin-top:8px;margin-bottom:16px;">
+      <p style="font-size:14px;color:var(--text2);">Instance Refresh is the ASG-native way to <strong>roll out a new Launch Template version</strong> across all instances without manual intervention. It replaces instances incrementally, respecting health checks and configurable rollout parameters.</p>
+    </div>
+    <div class="grid grid-3">
+      <div class="card orange">
+        <div class="card-label">MinHealthyPercentage</div>
+        <p>% of instances that must remain healthy during refresh (e.g. <span class="mono">90%</span>). Controls how many are replaced in parallel.</p>
+      </div>
+      <div class="card blue">
+        <div class="card-label">Checkpoints</div>
+        <p>Pause refresh at defined percentages to run smoke tests. EventBridge emits <em>Checkpoint Reached</em>; you resume via API or Lambda.</p>
+      </div>
+      <div class="card green">
+        <div class="card-label">Rollback</div>
+        <p>If new instances fail health checks, Instance Refresh can automatically roll back to the previous Launch Template version.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Reference -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">REF</span>
+      <h2>Quick Exam Reference</h2>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Scenario</th><th>Answer / Key fact</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Fastest scale-out policy</td><td style="color:var(--text2)">Target Tracking or Step Scaling (no cooldown wait between steps)</td></tr>
+          <tr><td>Predictive scaling data requirement</td><td style="color:var(--text2)">At least 24 hours of CloudWatch history; improves with 2 weeks of data</td></tr>
+          <tr><td>Reduce scale-out boot time</td><td style="color:var(--text2)">Pre-baked golden AMI + Warm Pools (Stopped state is cost-effective)</td></tr>
+          <tr><td>Custom termination logic</td><td style="color:var(--text2)">Lambda-backed Custom Termination Policy</td></tr>
+          <tr><td>Drain in-flight requests before terminate</td><td style="color:var(--text2)">Lifecycle hook on EC2_INSTANCE_TERMINATING + connection draining on ELB</td></tr>
+          <tr><td>Roll out new AMI safely</td><td style="color:var(--text2)">Instance Refresh with MinHealthyPercentage + Checkpoints</td></tr>
+          <tr><td>Scale on SQS queue depth</td><td style="color:var(--text2)">Custom metric (ApproximateNumberOfMessagesVisible) + Target Tracking or Step Scaling</td></tr>
+          <tr><td>Prevent ASG from terminating specific instance</td><td style="color:var(--text2)">Instance Scale-In Protection (per-instance or ASG-level)</td></tr>
+          <tr><td>Lifecycle hook default wait</td><td style="color:var(--text2)">3600s (1h); max 7200s (2h); extend with heartbeat API</td></tr>
+          <tr><td>Warm Pool: return instances on scale-in</td><td style="color:var(--text2)">Instance Reuse Policy: ReuseOnScaleIn = true</td></tr>
+          <tr><td>SNS events from ASG</td><td style="color:var(--text2)">4 events: LAUNCH, LAUNCH_ERROR, TERMINATE, TERMINATE_ERROR</td></tr>
+          <tr><td>EventBridge vs SNS for ASG</td><td style="color:var(--text2)">EventBridge has richer events (refresh, checkpoints) + more routing targets; prefer for automation</td></tr>
+          <tr><td>Launch Template vs Launch Configuration</td><td style="color:var(--text2)">LT: versioned, supports mixed instances, Spot + OD, T-Unlimited — always prefer LT. LC: immutable, legacy.</td></tr>
+          <tr><td>Scale-in protection</td><td style="color:var(--text2)">Enabled via ASG setting or per-instance API; instance won't be terminated during scale-in (manual termination still works)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>AWS DOP-C02 · Auto Scaling Groups · Exam Study Guide</p>
+    <p>All facts current as of AWS exam blueprint v2.x</p>
+  </div>
+
+</div>
+</body>
+</html>

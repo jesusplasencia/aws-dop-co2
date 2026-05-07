@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Application Auto Scaling — DOP-C02 Study Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10;
+    --bg2: #10131a;
+    --bg3: #161b24;
+    --bg4: #1c2230;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.14);
+    --text: #e8eaf0;
+    --text2: #9ba3b4;
+    --text3: #5d6475;
+    --teal: #2dd4bf;
+    --teal-dim: rgba(45,212,191,0.1);
+    --teal-border: rgba(45,212,191,0.25);
+    --orange: #ff6b35;
+    --orange-dim: rgba(255,107,53,0.1);
+    --orange-border: rgba(255,107,53,0.28);
+    --blue: #4a9eff;
+    --blue-dim: rgba(74,158,255,0.1);
+    --blue-border: rgba(74,158,255,0.25);
+    --green: #3ecf8e;
+    --green-dim: rgba(62,207,142,0.1);
+    --green-border: rgba(62,207,142,0.25);
+    --yellow: #f5c842;
+    --yellow-dim: rgba(245,200,66,0.09);
+    --yellow-border: rgba(245,200,66,0.28);
+    --red: #ff4d4d;
+    --red-dim: rgba(255,77,77,0.1);
+    --red-border: rgba(255,77,77,0.25);
+    --purple: #a78bfa;
+    --purple-dim: rgba(167,139,250,0.1);
+    --purple-border: rgba(167,139,250,0.28);
+    --font: 'Syne', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 15px; line-height: 1.65; }
+
+  .page { max-width: 980px; margin: 0 auto; padding: 48px 32px 80px; }
+
+  /* Header */
+  .badge { display: inline-flex; align-items: center; gap: 6px; background: var(--teal-dim); border: 1px solid var(--teal-border); color: var(--teal); font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 4px 10px; border-radius: 4px; margin-bottom: 16px; }
+  .header { margin-bottom: 48px; padding-bottom: 32px; border-bottom: 1px solid var(--border2); }
+  .header h1 { font-size: 42px; font-weight: 800; line-height: 1.1; letter-spacing: -0.02em; color: #fff; }
+  .header h1 span { color: var(--teal); }
+  .header p { margin-top: 10px; color: var(--text2); font-size: 14px; max-width: 680px; }
+
+  /* TOC */
+  .toc { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 20px 24px; margin-bottom: 48px; display: grid; grid-template-columns: 1fr 1fr; gap: 4px 24px; }
+  .toc-title { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); margin-bottom: 12px; grid-column: 1 / -1; }
+  .toc a { color: var(--text2); text-decoration: none; font-size: 13px; padding: 3px 0; display: block; transition: color 0.15s; }
+  .toc a:hover { color: var(--teal); }
+  .toc a::before { content: '→ '; color: var(--text3); }
+
+  /* Sections */
+  .section { margin-bottom: 56px; scroll-margin-top: 24px; }
+  .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+  .section-num { font-family: var(--mono); font-size: 12px; color: var(--teal); background: var(--teal-dim); border: 1px solid var(--teal-border); border-radius: 4px; padding: 2px 8px; }
+  .section h2 { font-size: 22px; font-weight: 700; color: #fff; letter-spacing: -0.01em; }
+  .section h3 { font-size: 13px; font-weight: 700; color: var(--text3); margin-bottom: 12px; margin-top: 28px; text-transform: uppercase; letter-spacing: 0.08em; }
+
+  /* Grid */
+  .grid { display: grid; gap: 12px; }
+  .grid-2 { grid-template-columns: 1fr 1fr; }
+  .grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .grid-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+
+  /* Cards */
+  .card { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; }
+  .card.teal   { border-color: var(--teal-border);   background: var(--teal-dim); }
+  .card.orange { border-color: var(--orange-border); background: var(--orange-dim); }
+  .card.blue   { border-color: var(--blue-border);   background: var(--blue-dim); }
+  .card.green  { border-color: var(--green-border);  background: var(--green-dim); }
+  .card.yellow { border-color: var(--yellow-border); background: var(--yellow-dim); }
+  .card.red    { border-color: var(--red-border);    background: var(--red-dim); }
+  .card.purple { border-color: var(--purple-border); background: var(--purple-dim); }
+  .card-label { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 6px; }
+  .teal   .card-label { color: var(--teal); }
+  .orange .card-label { color: var(--orange); }
+  .blue   .card-label { color: var(--blue); }
+  .green  .card-label { color: var(--green); }
+  .yellow .card-label { color: var(--yellow); }
+  .red    .card-label { color: var(--red); }
+  .purple .card-label { color: var(--purple); }
+  .card h4 { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+  .card p  { font-size: 13.5px; color: var(--text2); line-height: 1.55; }
+  .card ul { list-style: none; padding: 0; margin-top: 4px; }
+  .card ul li { font-size: 13px; color: var(--text2); padding: 3px 0; display: flex; gap: 8px; align-items: flex-start; line-height: 1.5; }
+  .card ul li::before { content: '·'; color: var(--text3); flex-shrink: 0; }
+
+  /* Mono tag */
+  .mono { font-family: var(--mono); font-size: 11.5px; background: var(--bg4); border: 1px solid var(--border); border-radius: 4px; padding: 1px 6px; color: var(--text); }
+
+  /* Exam tip */
+  .tip { background: linear-gradient(90deg, rgba(245,200,66,0.07) 0%, rgba(245,200,66,0.03) 100%); border-left: 3px solid var(--yellow); border-radius: 0 8px 8px 0; padding: 12px 16px; margin: 16px 0; }
+  .tip strong { color: var(--yellow); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; display: block; margin-bottom: 4px; }
+  .tip p, .tip ul { font-size: 13.5px; color: var(--text2); }
+  .tip ul { list-style: none; padding: 0; margin-top: 6px; }
+  .tip ul li { padding: 2px 0; display: flex; gap: 8px; }
+  .tip ul li::before { content: '→'; color: var(--yellow); flex-shrink: 0; }
+
+  /* Tables */
+  .table-wrap { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 16px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th { text-align: left; padding: 9px 14px; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); border-bottom: 1px solid var(--border2); }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--text2); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  td:first-child { color: var(--text); font-weight: 600; }
+  td code { font-family: var(--mono); font-size: 11px; background: var(--bg4); border: 1px solid var(--border); border-radius: 3px; padding: 1px 5px; color: var(--text); }
+
+  /* Comparison pill row */
+  .compare-header { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 0; }
+  .compare-pill { border-radius: 8px 8px 0 0; padding: 12px 16px; font-size: 13px; font-weight: 700; }
+  .compare-body { background: var(--bg2); border: 1px solid var(--border); border-radius: 0 0 10px 10px; overflow: hidden; }
+
+  /* Services grid */
+  .svc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+  .svc-item { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; }
+  .svc-name { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+  .svc-detail { font-size: 11.5px; color: var(--text3); font-family: var(--mono); }
+  .svc-item.hi { border-color: var(--teal-border); background: var(--teal-dim); }
+  .svc-item.hi .svc-name { color: var(--teal); }
+
+  /* Scalable target anatomy */
+  .anatomy { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .anatomy-row { display: grid; grid-template-columns: 200px 1fr; border-bottom: 1px solid var(--border); }
+  .anatomy-row:last-child { border-bottom: none; }
+  .anatomy-key { background: var(--bg3); padding: 12px 16px; font-family: var(--mono); font-size: 12px; color: var(--teal); border-right: 1px solid var(--border); display: flex; align-items: center; }
+  .anatomy-val { padding: 12px 16px; font-size: 13px; color: var(--text2); display: flex; align-items: center; }
+
+  /* Flow */
+  .flow { display: flex; align-items: center; flex-wrap: wrap; gap: 0; margin: 12px 0; }
+  .flow-box { background: var(--bg3); border: 1px solid var(--border2); border-radius: 8px; padding: 7px 14px; font-size: 12.5px; font-weight: 600; color: var(--text); white-space: nowrap; }
+  .flow-box.teal   { background: var(--teal-dim);   border-color: var(--teal-border);   color: var(--teal); }
+  .flow-box.orange { background: var(--orange-dim); border-color: var(--orange-border); color: var(--orange); }
+  .flow-box.green  { background: var(--green-dim);  border-color: var(--green-border);  color: var(--green); }
+  .flow-box.blue   { background: var(--blue-dim);   border-color: var(--blue-border);   color: var(--blue); }
+  .flow-arrow { color: var(--text3); padding: 0 7px; font-size: 15px; }
+
+  /* Footer */
+  .footer { border-top: 1px solid var(--border); padding-top: 24px; margin-top: 56px; display: flex; justify-content: space-between; align-items: center; }
+  .footer p { font-size: 12px; color: var(--text3); }
+
+  @media (max-width: 700px) {
+    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+    .header h1 { font-size: 28px; }
+    .anatomy-row { grid-template-columns: 1fr; }
+    .anatomy-key { border-right: none; border-bottom: 1px solid var(--border); }
+  }
+  .home-btn{display:inline-flex;align-items:center;gap:6px;color:var(--text2);text-decoration:none;font-size:13px;font-family:var(--mono);padding:6px 12px;border:1px solid var(--border);border-radius:6px;margin-bottom:32px;transition:color .15s,border-color .15s;}
+  .home-btn:hover{color:var(--text);border-color:var(--border2);}
+</style>
+</head>
+<body>
+<div class="page">
+<a href="../index.html" class="home-btn">← DOP-C02 Home</a>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="badge">DOP-C02 · AWS DevOps Professional</div>
+    <h1>Application <span>Auto Scaling</span></h1>
+    <p>Unified scaling plane for 15+ AWS services — Scalable Targets · Scaling Plans · Policy Types · Service-specific nuances · IAM & CloudWatch integration</p>
+  </div>
+
+  <!-- TOC -->
+  <div class="toc">
+    <div class="toc-title">Contents</div>
+    <a href="#s1">01 · What is Application Auto Scaling</a>
+    <a href="#s5">05 · Scaling Policies Deep Dive</a>
+    <a href="#s2">02 · Scalable Target Anatomy</a>
+    <a href="#s6">06 · Scaling Plans</a>
+    <a href="#s3">03 · Supported Services</a>
+    <a href="#s7">07 · IAM & Permissions</a>
+    <a href="#s4">04 · AAS vs EC2 ASG</a>
+    <a href="#s8">08 · Quick Exam Reference</a>
+  </div>
+
+  <!-- S1: What is it -->
+  <div class="section" id="s1">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <h2>What is Application Auto Scaling</h2>
+    </div>
+
+    <p style="color:var(--text2);font-size:14px;margin-bottom:20px;">A single API and control plane for scaling resources across <strong style="color:var(--text)">15+ AWS services</strong>. Unlike EC2 Auto Scaling Groups (EC2-only), Application Auto Scaling abstracts scaling across any supported scalable resource using a unified model: <em>Scalable Target → Scaling Policy → CloudWatch Alarm → Scaling Action</em>.</p>
+
+    <div class="grid grid-3" style="margin-bottom:16px;">
+      <div class="card teal">
+        <div class="card-label">Unified API</div>
+        <h4>Single control plane</h4>
+        <p>One API (<span class="mono">application-autoscaling</span>) registers and manages scaling for any supported service. No per-service scaling consoles.</p>
+      </div>
+      <div class="card blue">
+        <div class="card-label">Discover resources</div>
+        <h4>3 discovery methods</h4>
+        <p>Point at resources via <strong style="color:var(--text)">CloudFormation Stack</strong>, <strong style="color:var(--text)">Resource Tags</strong>, or <strong style="color:var(--text)">EC2 ASG</strong> name. AAS discovers all scalable resources within scope.</p>
+      </div>
+      <div class="card orange">
+        <div class="card-label">Policy support</div>
+        <h4>3 policy types</h4>
+        <p>Target Tracking, Step Scaling, and Scheduled Scaling. Predictive Scaling is <strong style="color:var(--text)">not supported</strong> (EC2 ASG only).</p>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>Exam tip — AAS is the API, not the console</strong>
+      <p>When you configure scaling directly in the DynamoDB or ECS console, those consoles call Application Auto Scaling API under the hood. The exam may describe it either way — recognise that any service-level scaling (DynamoDB RCU/WCU, ECS task count, Aurora replicas) is implemented by AAS, not EC2 ASG.</p>
+    </div>
+  </div>
+
+  <!-- S2: Scalable Target -->
+  <div class="section" id="s2">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <h2>Scalable Target Anatomy</h2>
+    </div>
+
+    <p style="color:var(--text2);font-size:14px;margin-bottom:16px;">A <strong style="color:var(--text)">Scalable Target</strong> is the registration of a specific resource with AAS. You must register it before attaching any policy. Three mandatory fields uniquely identify every scalable target:</p>
+
+    <div class="anatomy" style="margin-bottom:20px;">
+      <div class="anatomy-row">
+        <div class="anatomy-key">ServiceNamespace</div>
+        <div class="anatomy-val">The AWS service. E.g. <span class="mono">ecs</span>, <span class="mono">dynamodb</span>, <span class="mono">rds</span>, <span class="mono">lambda</span>, <span class="mono">sagemaker</span>, <span class="mono">custom-resource</span></div>
+      </div>
+      <div class="anatomy-row">
+        <div class="anatomy-key">ResourceId</div>
+        <div class="anatomy-val">Unique resource path within the service. E.g. for ECS: <span class="mono">service/my-cluster/my-service</span>; DynamoDB: <span class="mono">table/my-table</span>; Lambda: <span class="mono">function:my-func:PROD</span></div>
+      </div>
+      <div class="anatomy-row">
+        <div class="anatomy-key">ScalableDimension</div>
+        <div class="anatomy-val">The specific metric dimension to scale. E.g. <span class="mono">ecs:service:DesiredCount</span>, <span class="mono">dynamodb:table:ReadCapacityUnits</span>, <span class="mono">lambda:function:ProvisionedConcurrency</span></div>
+      </div>
+      <div class="anatomy-row">
+        <div class="anatomy-key">MinCapacity</div>
+        <div class="anatomy-val">Floor — AAS will never scale below this value. Required. Must be ≥ 0.</div>
+      </div>
+      <div class="anatomy-row">
+        <div class="anatomy-key">MaxCapacity</div>
+        <div class="anatomy-val">Ceiling — AAS will never scale above this value. Required. Must be ≥ MinCapacity.</div>
+      </div>
+      <div class="anatomy-row">
+        <div class="anatomy-key">RoleARN</div>
+        <div class="anatomy-val">IAM role AAS assumes to call the target service APIs and publish CloudWatch metrics. Service-linked role is created automatically for most services.</div>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>Exam tip — ScalableDimension is critical</strong>
+      <p>One resource can have <strong>multiple scalable dimensions</strong>. DynamoDB table has <span class="mono">ReadCapacityUnits</span> AND <span class="mono">WriteCapacityUnits</span> — each is a separate scalable target registration. Lambda has <span class="mono">ProvisionedConcurrency</span> as its only AAS dimension (reserved concurrency is not managed by AAS). ECS has <span class="mono">DesiredCount</span>.</p>
+    </div>
+  </div>
+
+  <!-- S3: Supported Services -->
+  <div class="section" id="s3">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <h2>Supported Services &amp; Scalable Dimensions</h2>
+    </div>
+
+    <div class="tip" style="margin-bottom:20px;">
+      <strong>Exam tip — Know these four deeply</strong>
+      <p>DOP-C02 focuses most on ECS, DynamoDB, Aurora, and Lambda. The others appear as distractors. Know the exact scalable dimension name and what metric to track.</p>
+    </div>
+
+    <div class="svc-grid" style="margin-bottom:24px;">
+      <div class="svc-item hi">
+        <div class="svc-name">ECS</div>
+        <div class="svc-detail">DesiredCount</div>
+      </div>
+      <div class="svc-item hi">
+        <div class="svc-name">DynamoDB</div>
+        <div class="svc-detail">RCU / WCU (table &amp; GSI)</div>
+      </div>
+      <div class="svc-item hi">
+        <div class="svc-name">Aurora</div>
+        <div class="svc-detail">Read replicas count</div>
+      </div>
+      <div class="svc-item hi">
+        <div class="svc-name">Lambda</div>
+        <div class="svc-detail">ProvisionedConcurrency</div>
+      </div>
+      <div class="svc-item">
+        <div class="svc-name">AppStream 2.0</div>
+        <div class="svc-detail">Fleet DesiredCapacity</div>
+      </div>
+      <div class="svc-item">
+        <div class="svc-name">ElastiCache</div>
+        <div class="svc-detail">Redis ReplicationGroups</div>
+      </div>
+      <div class="svc-item">
+        <div class="svc-name">EMR</div>
+        <div class="svc-detail">InstanceCount (core/task)</div>
+      </div>
+      <div class="svc-item">
+        <div class="svc-name">Keyspaces</div>
+        <div class="svc-detail">RCU / WCU</div>
+      </div>
+      <div class="svc-item">
+        <div class="svc-name">MSK</div>
+        <div class="svc-detail">Broker storage</div>
+      </div>
+      <div class="svc-item">
+        <div class="svc-name">Neptune</div>
+        <div class="svc-detail">Read replicas count</div>
+      </div>
+      <div class="svc-item">
+        <div class="svc-name">SageMaker</div>
+        <div class="svc-detail">EndpointVariant count</div>
+      </div>
+      <div class="svc-item">
+        <div class="svc-name">Spot Fleet</div>
+        <div class="svc-detail">TargetCapacity</div>
+      </div>
+      <div class="svc-item">
+        <div class="svc-name">Comprehend</div>
+        <div class="svc-detail">Endpoint &amp; Classifier</div>
+      </div>
+      <div class="svc-item">
+        <div class="svc-name">Custom Resource</div>
+        <div class="svc-detail">Any via Lambda endpoint</div>
+      </div>
+    </div>
+
+    <h3>Service-specific exam details</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Service</th><th>What scales</th><th>Key exam nuance</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>ECS</td>
+            <td style="color:var(--text2)">Task count (DesiredCount) of a Service</td>
+            <td style="color:var(--text2)">Metric: <code>ECSServiceAverageCPUUtilization</code> or <code>ALBRequestCountPerTarget</code>. Scales tasks, not EC2 instances (use EC2 ASG for that separately).</td>
+          </tr>
+          <tr>
+            <td>DynamoDB</td>
+            <td style="color:var(--text2)">Read and Write Capacity Units on tables and GSIs independently</td>
+            <td style="color:var(--text2)">Each dimension is a separate target. Scale-up is near-instant; scale-down limited to 4 times per day (table) / 4 times per day (GSI). On-Demand mode bypasses AAS entirely.</td>
+          </tr>
+          <tr>
+            <td>Aurora</td>
+            <td style="color:var(--text2)">Number of Aurora Replicas (read scale-out)</td>
+            <td style="color:var(--text2)">Only Aurora Serverless v1 auto-scales the writer (ACU). AAS scales replica <em>count</em>, not writer capacity. Replicas add read IOPS; writer capacity is separate.</td>
+          </tr>
+          <tr>
+            <td>Lambda</td>
+            <td style="color:var(--text2)">Provisioned Concurrency (not reserved concurrency)</td>
+            <td style="color:var(--text2)">Use Scheduled Scaling to pre-warm Lambda before peak traffic. Target Tracking metric: <code>ProvisionedConcurrencyUtilization</code>. Scale target is a function alias or version, not $LATEST.</td>
+          </tr>
+          <tr>
+            <td>Custom Resource</td>
+            <td style="color:var(--text2)">Any resource via a Lambda-backed HTTP endpoint</td>
+            <td style="color:var(--text2)">AAS calls a defined API Gateway + Lambda to GET current capacity and PATCH to set new capacity. Enables scaling of any resource (e.g., on-prem, third-party SaaS).</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- S4: AAS vs EC2 ASG -->
+  <div class="section" id="s4">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <h2>Application Auto Scaling vs EC2 Auto Scaling</h2>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Dimension</th><th>Application Auto Scaling</th><th>EC2 Auto Scaling Groups</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Scope</td>
+            <td style="color:var(--text2)">15+ services (ECS, DynamoDB, Lambda, Aurora, ...)</td>
+            <td style="color:var(--text2)">EC2 instances only</td>
+          </tr>
+          <tr>
+            <td>What scales</td>
+            <td style="color:var(--text2)">Logical capacity units (tasks, RCU, replicas, concurrency)</td>
+            <td style="color:var(--text2)">EC2 instance count</td>
+          </tr>
+          <tr>
+            <td>Policy types</td>
+            <td style="color:var(--text2)">Target Tracking, Step, Scheduled</td>
+            <td style="color:var(--text2)">Target Tracking, Simple, Step, Scheduled, <strong style="color:var(--text)">Predictive</strong></td>
+          </tr>
+          <tr>
+            <td>Lifecycle hooks</td>
+            <td style="color:var(--text2)">❌ Not supported</td>
+            <td style="color:var(--text2)">✅ Full lifecycle hook support</td>
+          </tr>
+          <tr>
+            <td>Warm pools</td>
+            <td style="color:var(--text2)">❌ Not supported</td>
+            <td style="color:var(--text2)">✅ Supported</td>
+          </tr>
+          <tr>
+            <td>Predictive scaling</td>
+            <td style="color:var(--text2)">❌ Not supported</td>
+            <td style="color:var(--text2)">✅ ML-based forecasting</td>
+          </tr>
+          <tr>
+            <td>Cooldown</td>
+            <td style="color:var(--text2)">Scale-in / scale-out cooldown per policy</td>
+            <td style="color:var(--text2)">Default + per-policy cooldown</td>
+          </tr>
+          <tr>
+            <td>IAM</td>
+            <td style="color:var(--text2)">Service-linked role <code>AWSServiceRoleForApplicationAutoScaling_*</code> per service namespace</td>
+            <td style="color:var(--text2)">Service-linked role <code>AWSServiceRoleForAutoScaling</code></td>
+          </tr>
+          <tr>
+            <td>Custom resource</td>
+            <td style="color:var(--text2)">✅ Via Lambda HTTP endpoint</td>
+            <td style="color:var(--text2)">❌ EC2 only</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="tip">
+      <strong>Exam tip — Most frequent confusion</strong>
+      <ul>
+        <li>ECS Service scaling = Application Auto Scaling (DesiredCount). The EC2 instances running ECS tasks = EC2 ASG. Both layers needed for ECS on EC2.</li>
+        <li>Predictive Scaling is EC2 ASG only — AAS does not support it.</li>
+        <li>Lifecycle hooks exist only on EC2 ASG — if a scenario needs pre-launch or pre-terminate hooks, answer is EC2 ASG.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- S5: Scaling Policies -->
+  <div class="section" id="s5">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <h2>Scaling Policies Deep Dive</h2>
+    </div>
+
+    <h3>Target Tracking Scaling</h3>
+    <div class="grid grid-2" style="margin-bottom:8px;">
+      <div class="card teal">
+        <div class="card-label">How it works</div>
+        <p>Define a target value for a metric. AAS automatically creates and manages CloudWatch alarms and calculates the required capacity. You never specify step adjustments.</p>
+      </div>
+      <div class="card">
+        <div class="card-label" style="color:var(--text3)">Predefined metrics (per service)</div>
+        <ul>
+          <li><strong style="color:var(--text)">ECS:</strong> ECSServiceAverageCPUUtilization, ECSServiceAverageMemoryUtilization, ALBRequestCountPerTarget</li>
+          <li><strong style="color:var(--text)">DynamoDB:</strong> DynamoDBReadCapacityUtilization, DynamoDBWriteCapacityUtilization</li>
+          <li><strong style="color:var(--text)">Lambda:</strong> LambdaProvisionedConcurrencyUtilization</li>
+          <li><strong style="color:var(--text)">Aurora:</strong> RDSReaderAverageCPUUtilization, RDSReaderAverageDatabaseConnections</li>
+          <li><strong style="color:var(--text)">SageMaker:</strong> SageMakerVariantInvocationsPerInstance</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-label" style="color:var(--text3)">Custom metric target tracking</div>
+      <p style="font-size:13.5px;color:var(--text2);">Any CloudWatch metric can be used as the tracking target by specifying a <span class="mono">CustomizedMetricSpecification</span>. The metric must represent load per unit of capacity (e.g. SQS <span class="mono">ApproximateNumberOfMessagesVisible / DesiredCount</span>). AAS cannot use metrics that don't reflect utilization-per-unit.</p>
+    </div>
+
+    <div class="tip">
+      <strong>Exam tip — Target Tracking behaviour</strong>
+      <p>AAS scale-out is aggressive (fast); scale-in is conservative (slow, with a longer cooldown) to avoid thrashing. You can <strong>disable scale-in</strong> on a Target Tracking policy (<span class="mono">DisableScaleIn: true</span>) — useful when you want another policy to manage scale-in independently (e.g. Scheduled scale-in at end of business day).</p>
+    </div>
+
+    <h3>Step Scaling</h3>
+    <div class="grid grid-2" style="margin-bottom:16px;">
+      <div class="card orange">
+        <div class="card-label">How it works</div>
+        <p>You define a CloudWatch alarm and a set of step adjustments. Each step specifies a metric range and the capacity change (add N, remove N, or set to exact N). Multiple steps fire based on alarm breach magnitude.</p>
+      </div>
+      <div class="card">
+        <div class="card-label" style="color:var(--text3)">Adjustment types</div>
+        <ul>
+          <li><span class="mono">ChangeInCapacity</span> — add or subtract absolute count (e.g. +2 tasks)</li>
+          <li><span class="mono">ExactCapacity</span> — set to a specific value regardless of current</li>
+          <li><span class="mono">PercentChangeInCapacity</span> — scale by % of current capacity (rounded up)</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3>Scheduled Scaling</h3>
+    <div class="grid grid-2" style="margin-bottom:16px;">
+      <div class="card blue">
+        <div class="card-label">How it works</div>
+        <p>Set min/max/desired capacity at a specific time or recurrence using cron or <span class="mono">at()</span> expressions. Proactive — does not react to metrics.</p>
+      </div>
+      <div class="card">
+        <div class="card-label" style="color:var(--text3)">Key fields</div>
+        <ul>
+          <li><span class="mono">ScheduledActionName</span> — unique name</li>
+          <li><span class="mono">Schedule</span> — <span class="mono">cron(0 9 * * ? *)</span> or <span class="mono">rate(1 hour)</span> or <span class="mono">at(2025-01-01T09:00:00)</span></li>
+          <li><span class="mono">StartTime / EndTime</span> — optional bounded window</li>
+          <li><span class="mono">MinCapacity / MaxCapacity</span> — sets new bounds at scheduled time</li>
+          <li>Timezone: all times in UTC by default</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>Exam tip — Combining policies</strong>
+      <p>You can attach multiple policies to one scalable target. Common pattern: <strong>Scheduled Scaling</strong> raises MinCapacity before predicted peak (pre-warm) + <strong>Target Tracking</strong> handles real-time fluctuation within the new bounds. For Lambda: Scheduled pre-warms provisioned concurrency; Target Tracking scales it during the event window.</p>
+    </div>
+
+    <h3>Cooldown Periods</h3>
+    <div class="grid grid-2">
+      <div class="card green">
+        <div class="card-label">Scale-out cooldown</div>
+        <p>Default: <span class="mono">300s</span>. After a scale-out action, AAS waits this duration before evaluating another scale-out. Set shorter for bursty workloads.</p>
+      </div>
+      <div class="card yellow">
+        <div class="card-label">Scale-in cooldown</div>
+        <p>Default: <span class="mono">300s</span>. After a scale-in action, AAS waits before evaluating another scale-in. Target Tracking uses a longer default scale-in cooldown to avoid premature removal.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- S6: Scaling Plans -->
+  <div class="section" id="s6">
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <h2>Scaling Plans (AWS Auto Scaling console)</h2>
+    </div>
+
+    <p style="color:var(--text2);font-size:14px;margin-bottom:20px;">A Scaling Plan is a higher-level abstraction in the <strong style="color:var(--text)">AWS Auto Scaling</strong> service (distinct from Application Auto Scaling API). It discovers resources via CFN Stack, Tags, or EC2 ASG, then applies scaling strategies across all of them centrally.</p>
+
+    <div class="grid grid-3" style="margin-bottom:16px;">
+      <div class="card teal">
+        <div class="card-label">Optimize for availability</div>
+        <h4>High availability</h4>
+        <p>Scales out aggressively. Keeps resources above the target utilization. Prioritises capacity over cost.</p>
+      </div>
+      <div class="card orange">
+        <div class="card-label">Balance availability &amp; cost</div>
+        <h4>Balanced (default)</h4>
+        <p>Target tracking at 50% utilization. Moderate scale-in/out speed. Suitable for most general workloads.</p>
+      </div>
+      <div class="card blue">
+        <div class="card-label">Optimize for cost</div>
+        <h4>Cost optimized</h4>
+        <p>Scales in aggressively. Keeps utilization high. Accepts higher risk of under-provisioning under unexpected spikes.</p>
+      </div>
+    </div>
+
+    <div class="grid grid-2">
+      <div class="card purple">
+        <div class="card-label">Predictive scaling in plans</div>
+        <h4>Available for EC2 ASG only</h4>
+        <p>Within a Scaling Plan, EC2 ASG resources can use predictive scaling (ML forecast). Non-EC2 resources use reactive scaling only.</p>
+      </div>
+      <div class="card">
+        <div class="card-label" style="color:var(--text3)">Resource discovery methods</div>
+        <ul>
+          <li><strong style="color:var(--text)">CloudFormation Stack</strong> — all scalable resources within a stack</li>
+          <li><strong style="color:var(--text)">Tags</strong> — resources matching a key/value tag</li>
+          <li><strong style="color:var(--text)">EC2 ASG</strong> — a specific ASG by name</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>Exam tip — Scaling Plan vs direct AAS policy</strong>
+      <p>Scaling Plans use Application Auto Scaling under the hood but add a discovery layer and strategy templates. If the exam scenario mentions managing scaling across a whole application stack from one place, or mentions the <em>AWS Auto Scaling console</em>, the answer is Scaling Plans. If it's per-resource fine-grained policy control, the answer is direct AAS policy.</p>
+    </div>
+  </div>
+
+  <!-- S7: IAM -->
+  <div class="section" id="s7">
+    <div class="section-header">
+      <span class="section-num">07</span>
+      <h2>IAM &amp; Permissions</h2>
+    </div>
+
+    <div class="grid grid-2" style="margin-bottom:16px;">
+      <div class="card teal">
+        <div class="card-label">Service-Linked Roles (SLR)</div>
+        <h4>Auto-created per namespace</h4>
+        <p>AAS creates one SLR per service namespace automatically on first use. Named <span class="mono">AWSServiceRoleForApplicationAutoScaling_[Service]</span>. The role grants AAS permission to call the target service's APIs (e.g. <span class="mono">ecs:UpdateService</span>) and publish CloudWatch metrics.</p>
+      </div>
+      <div class="card orange">
+        <div class="card-label">Caller permissions</div>
+        <h4>Who calls AAS</h4>
+        <p>The IAM principal calling <span class="mono">RegisterScalableTarget</span>, <span class="mono">PutScalingPolicy</span> etc. must have <span class="mono">application-autoscaling:*</span> + <span class="mono">iam:CreateServiceLinkedRole</span> (for first-time registration) + target service describe/update permissions.</p>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Service</th><th>Service-Linked Role name</th><th>Key permissions granted</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>ECS</td>
+            <td><code>...ApplicationAutoScaling_ECSService</code></td>
+            <td style="color:var(--text2)"><code>ecs:DescribeServices</code>, <code>ecs:UpdateService</code></td>
+          </tr>
+          <tr>
+            <td>DynamoDB</td>
+            <td><code>...ApplicationAutoScaling_DynamoDBTable</code></td>
+            <td style="color:var(--text2)"><code>dynamodb:DescribeTable</code>, <code>dynamodb:UpdateTable</code></td>
+          </tr>
+          <tr>
+            <td>Aurora</td>
+            <td><code>...ApplicationAutoScaling_RDSCluster</code></td>
+            <td style="color:var(--text2)"><code>rds:DescribeDBClusters</code>, <code>rds:CreateDBInstance</code>, <code>rds:DeleteDBInstance</code></td>
+          </tr>
+          <tr>
+            <td>Lambda</td>
+            <td><code>...ApplicationAutoScaling_LambdaConcurrency</code></td>
+            <td style="color:var(--text2)"><code>lambda:PutProvisionedConcurrencyConfig</code>, <code>lambda:GetProvisionedConcurrencyConfig</code></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="tip">
+      <strong>Exam tip — SLR creation failure</strong>
+      <p>If a user tries to register a scalable target but gets an <em>IAM permission error</em>, they likely lack <span class="mono">iam:CreateServiceLinkedRole</span>. Once the SLR exists, this permission is no longer needed. This is a common scenario question.</p>
+    </div>
+  </div>
+
+  <!-- S8: Quick Reference -->
+  <div class="section" id="s8">
+    <div class="section-header">
+      <span class="section-num">REF</span>
+      <h2>Quick Exam Reference</h2>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Scenario</th><th>Answer / Key fact</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Scale ECS tasks based on CPU</td>
+            <td style="color:var(--text2)">AAS Target Tracking on <code>ECSServiceAverageCPUUtilization</code>. Separate EC2 ASG for the EC2 instances.</td>
+          </tr>
+          <tr>
+            <td>DynamoDB throttles on reads during peak</td>
+            <td style="color:var(--text2)">AAS Target Tracking on <code>DynamoDBReadCapacityUtilization</code> at ~70%. Or switch to On-Demand mode (bypasses AAS).</td>
+          </tr>
+          <tr>
+            <td>Lambda cold starts at 9am every day</td>
+            <td style="color:var(--text2)">Scheduled Scaling to increase Provisioned Concurrency at 8:45am. Target = function alias or version, not $LATEST.</td>
+          </tr>
+          <tr>
+            <td>Scale Aurora read replicas under load</td>
+            <td style="color:var(--text2)">AAS Target Tracking on <code>RDSReaderAverageCPUUtilization</code>. AAS adds/removes replicas, not writer capacity.</td>
+          </tr>
+          <tr>
+            <td>Scale a non-AWS resource</td>
+            <td style="color:var(--text2)">Custom Resource scalable target via API Gateway + Lambda endpoint. AAS calls GET (current) and PATCH (new capacity).</td>
+          </tr>
+          <tr>
+            <td>Predictive Scaling for non-EC2 service</td>
+            <td style="color:var(--text2)">Not supported. Predictive Scaling is EC2 ASG only.</td>
+          </tr>
+          <tr>
+            <td>Lifecycle hooks on ECS scaling</td>
+            <td style="color:var(--text2)">Not supported by AAS. ECS has its own task lifecycle events via EventBridge.</td>
+          </tr>
+          <tr>
+            <td>Disable scale-in on Target Tracking</td>
+            <td style="color:var(--text2)"><code>DisableScaleIn: true</code> on the policy. AAS will not remove capacity; use another policy or manual action for scale-in.</td>
+          </tr>
+          <tr>
+            <td>Scale multiple services from one place</td>
+            <td style="color:var(--text2)">AWS Auto Scaling Scaling Plan (discovers via CFN stack, tags, or ASG name).</td>
+          </tr>
+          <tr>
+            <td>User gets IAM error registering first target</td>
+            <td style="color:var(--text2)">Missing <code>iam:CreateServiceLinkedRole</code>. Only needed once per namespace.</td>
+          </tr>
+          <tr>
+            <td>DynamoDB scale-down limit</td>
+            <td style="color:var(--text2)">4 scale-down events per table per day (AWS service limit). AAS respects this limit.</td>
+          </tr>
+          <tr>
+            <td>SageMaker endpoint under variable inference load</td>
+            <td style="color:var(--text2)">AAS Target Tracking on <code>SageMakerVariantInvocationsPerInstance</code>. Scales instance count of endpoint variant.</td>
+          </tr>
+          <tr>
+            <td>AAS vs EC2 ASG: which supports Warm Pools?</td>
+            <td style="color:var(--text2)">EC2 ASG only. AAS has no warm pool concept.</td>
+          </tr>
+          <tr>
+            <td>Step vs Target Tracking: when to use Step?</td>
+            <td style="color:var(--text2)">When you need proportional or exact capacity changes based on breach magnitude, or when you need to control which alarms trigger scaling independently.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>AWS DOP-C02 · Application Auto Scaling · Exam Study Guide</p>
+    <p>All facts current as of AWS exam blueprint v2.x</p>
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS DMS — DOP-C02 Study Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --surface2: #1a2236;
+    --border: #1e2d45;
+    --accent: #f59e0b;
+    --accent2: #38bdf8;
+    --accent3: #4ade80;
+    --accent4: #f87171;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --dms: #f97316;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14px; line-height: 1.6;
+    padding: 40px 24px 80px;
+  }
+  .page { max-width: 960px; margin: 0 auto; }
+
+  header { border-left: 4px solid var(--dms); padding-left: 20px; margin-bottom: 48px; }
+  header .service-tag {
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+    letter-spacing: 0.2em; color: var(--dms); text-transform: uppercase; margin-bottom: 6px;
+  }
+  header h1 { font-size: 38px; font-weight: 700; letter-spacing: -1px; color: #fff; }
+  header p { color: var(--muted); margin-top: 8px; font-size: 13px; }
+
+  section { margin-bottom: 40px; }
+  .section-title { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+  .section-title h2 { font-size: 18px; font-weight: 700; color: #fff; }
+
+  .badge {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+    padding: 2px 8px; border-radius: 2px;
+    text-transform: uppercase; letter-spacing: 0.12em; font-weight: 600;
+  }
+  .b-dms    { background: #2a1200; color: var(--dms); }
+  .b-blue   { background: #0f2030; color: var(--accent2); }
+  .b-green  { background: #0f2515; color: var(--accent3); }
+  .b-amber  { background: #2a1e00; color: var(--accent); }
+  .b-red    { background: #2a1212; color: var(--accent4); }
+  .b-purple { background: #1e1030; color: #a78bfa; }
+  .b-teal   { background: #0f2525; color: #2dd4bf; }
+  .b-pink   { background: #2a1020; color: #f472b6; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 6px; padding: 18px 20px;
+  }
+  .card h3 {
+    font-size: 11px; font-weight: 700; color: var(--accent2);
+    margin-bottom: 10px; text-transform: uppercase;
+    letter-spacing: 0.1em; font-family: 'IBM Plex Mono', monospace;
+  }
+  .card ul { list-style: none; padding: 0; }
+  .card ul li {
+    padding: 4px 0 4px 14px; position: relative;
+    color: var(--text); font-size: 13px; border-bottom: 1px solid #1a2236;
+  }
+  .card ul li:last-child { border-bottom: none; }
+  .card ul li::before { content: '›'; position: absolute; left: 0; color: var(--muted); }
+
+  .card-full {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 6px; padding: 20px 24px; margin-bottom: 16px;
+  }
+
+  .compare-table { width: 100%; border-collapse: collapse; }
+  .compare-table thead tr { background: var(--surface2); }
+  .compare-table th {
+    padding: 10px 16px; text-align: left;
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted);
+    border-bottom: 1px solid var(--border);
+  }
+  .compare-table td {
+    padding: 10px 16px; font-size: 13px;
+    border-bottom: 1px solid var(--border); vertical-align: top;
+  }
+  .compare-table tr:last-child td { border-bottom: none; }
+  .compare-table tr:hover td { background: var(--surface2); }
+  .compare-table td:first-child {
+    font-weight: 600; color: var(--accent2); white-space: nowrap;
+    font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+  }
+
+  .chip {
+    display: inline-block; padding: 2px 8px; border-radius: 3px;
+    font-size: 11px; font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600; margin: 2px 2px 2px 0;
+  }
+  .chip-green  { background: #14291e; color: var(--accent3); border: 1px solid #1f4030; }
+  .chip-red    { background: #2a1212; color: var(--accent4); border: 1px solid #3a1e1e; }
+  .chip-blue   { background: #0f2030; color: var(--accent2); border: 1px solid #1a3050; }
+  .chip-amber  { background: #2a1e00; color: var(--accent);  border: 1px solid #3a2a00; }
+  .chip-purple { background: #1e1030; color: #a78bfa;        border: 1px solid #2e1a40; }
+  .chip-dms    { background: #2a1200; color: var(--dms);     border: 1px solid #4a2200; }
+  .chip-teal   { background: #0f2525; color: #2dd4bf;        border: 1px solid #1a3535; }
+
+  .exam-box {
+    background: #1a1500; border: 1px solid #3a2e00;
+    border-left: 3px solid var(--accent); border-radius: 6px;
+    padding: 14px 18px; margin-top: 16px;
+  }
+  .exam-box .exam-label {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+    color: var(--accent); font-weight: 700;
+    letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 6px;
+  }
+  .exam-box p, .exam-box li { font-size: 13px; color: #d4b96a; }
+  .exam-box ul { padding-left: 16px; }
+  .exam-box ul li { margin-bottom: 4px; }
+
+  .yes { color: var(--accent3); font-weight: 600; }
+  .no  { color: var(--accent4); font-weight: 600; }
+
+  code {
+    background: #0f1e2e; padding: 1px 6px; border-radius: 3px;
+    color: #7dd3fc; font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+  }
+
+  /* Architecture flow */
+  .arch-flow {
+    display: flex; align-items: center; gap: 0;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 6px; padding: 20px; margin-bottom: 16px;
+    flex-wrap: wrap; row-gap: 12px;
+  }
+  .arch-node {
+    border-radius: 4px; padding: 10px 16px;
+    font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+    font-weight: 600; text-align: center; min-width: 110px;
+  }
+  .an-source  { background: #2a1a00; border: 1px solid #4a2e00; color: #fdba74; }
+  .an-dms     { background: #1a1030; border: 1px solid #3a2060; color: #a78bfa; }
+  .an-sct     { background: #0f2030; border: 1px solid #1a3a50; color: var(--accent2); }
+  .an-target  { background: #0f2515; border: 1px solid #1a4020; color: var(--accent3); }
+  .arch-arr   { color: var(--muted); font-size: 20px; padding: 0 8px; }
+  .arch-label { font-size: 10px; color: var(--muted); font-family: 'IBM Plex Mono', monospace; text-align: center; margin-top: 4px; }
+  .arch-col   { display: flex; flex-direction: column; align-items: center; }
+
+  /* Migration phase timeline */
+  .phase-row {
+    display: flex; gap: 0; margin-bottom: 16px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 6px; overflow: hidden;
+  }
+  .phase-box {
+    flex: 1; padding: 14px 16px; border-right: 1px solid var(--border);
+    position: relative;
+  }
+  .phase-box:last-child { border-right: none; }
+  .phase-num {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+    color: var(--muted); margin-bottom: 4px;
+  }
+  .phase-title {
+    font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+    font-weight: 600; margin-bottom: 6px;
+  }
+  .phase-title.p1 { color: #fdba74; }
+  .phase-title.p2 { color: var(--accent2); }
+  .phase-title.p3 { color: var(--accent3); }
+  .phase-body { font-size: 12px; color: #94a3b8; }
+
+  @media (max-width: 640px) {
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    header h1 { font-size: 28px; }
+    .phase-row { flex-direction: column; }
+    .phase-box { border-right: none; border-bottom: 1px solid var(--border); }
+  }
+  .home-btn { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); text-decoration: none; font-size: 12px; font-family: 'IBM Plex Mono', monospace; padding: 6px 12px; border: 1px solid var(--border); border-radius: 4px; margin-bottom: 32px; transition: color 0.15s; }
+  .home-btn:hover { color: var(--text); }
+</style>
+</head>
+<body>
+<div class="page">
+<a href="../index.html" class="home-btn">← DOP-C02 Home</a>
+
+  <header>
+    <div class="service-tag">AWS · DOP-C02 · Migration</div>
+    <h1>AWS Database Migration Service</h1>
+    <p>DMS + SCT — migrate any database to AWS with minimal downtime — DevOps Professional exam scope</p>
+  </header>
+
+  <!-- ═══════════════════ CORE -->
+  <section>
+    <div class="section-title">
+      <span class="badge b-dms">Core</span>
+      <h2>How DMS Works</h2>
+    </div>
+
+    <div class="arch-flow">
+      <div class="arch-col">
+        <div class="arch-node an-source">Source DB</div>
+        <div class="arch-label">remains online</div>
+      </div>
+      <div class="arch-arr">→</div>
+      <div class="arch-col">
+        <div class="arch-node an-sct">AWS SCT</div>
+        <div class="arch-label">schema conversion<br>(heterogeneous only)</div>
+      </div>
+      <div class="arch-arr">→</div>
+      <div class="arch-col">
+        <div class="arch-node an-dms">DMS Replication<br>Instance (EC2)</div>
+        <div class="arch-label">full load + CDC</div>
+      </div>
+      <div class="arch-arr">→</div>
+      <div class="arch-col">
+        <div class="arch-node an-target">Target DB</div>
+        <div class="arch-label">AWS or on-prem</div>
+      </div>
+    </div>
+
+    <!-- Migration phases -->
+    <div class="phase-row">
+      <div class="phase-box">
+        <div class="phase-num">PHASE 1</div>
+        <div class="phase-title p1">Full Load</div>
+        <div class="phase-body">Existing data bulk-copied to target. Source continues serving traffic. Takes minutes to days depending on size.</div>
+      </div>
+      <div class="phase-box">
+        <div class="phase-num">PHASE 2</div>
+        <div class="phase-title p2">Full Load + CDC</div>
+        <div class="phase-body">DMS captures changes from source (via CDC) while full load is still running. Ensures no data loss during migration.</div>
+      </div>
+      <div class="phase-box">
+        <div class="phase-num">PHASE 3</div>
+        <div class="phase-title p3">CDC Only</div>
+        <div class="phase-body">After full load completes, only ongoing changes are replicated. Use for near-zero-downtime cutover.</div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:16px;">
+      <div class="card">
+        <h3>Key Facts</h3>
+        <ul>
+          <li>Source DB stays <strong>fully available</strong> during migration</li>
+          <li>Requires an <strong>EC2 Replication Instance</strong> — you provision it inside a VPC</li>
+          <li>Resilient and <strong>self-healing</strong> — auto-restarts failed tasks</li>
+          <li>Supports <strong>Homogeneous</strong> migrations (same engine)</li>
+          <li>Supports <strong>Heterogeneous</strong> migrations (different engines) — requires SCT first</li>
+          <li>Continuous replication via <strong>CDC</strong> (Change Data Capture)</li>
+          <li>Multi-AZ: provisions synchronous standby replica of replication instance</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Migration Types</h3>
+        <ul>
+          <li><span class="chip chip-green">Homogeneous</span> Same engine: Oracle → Oracle, MySQL → MySQL. SCT not needed.</li>
+          <li><span class="chip chip-dms">Heterogeneous</span> Different engine: SQL Server → Aurora, Oracle → PostgreSQL. SCT required first.</li>
+          <li><span class="chip chip-blue">Full Load</span> One-time bulk migration. Downtime at cutover.</li>
+          <li><span class="chip chip-teal">Full Load + CDC</span> Bulk + ongoing changes. Minimizes cutover window.</li>
+          <li><span class="chip chip-purple">CDC Only</span> Replicate ongoing changes only — source already synced.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="exam-box">
+      <div class="exam-label">⚑ Exam — Key Architecture Point</div>
+      <ul>
+        <li>DMS is <strong>not serverless</strong> — you must provision and size the EC2 Replication Instance. Under-sizing it causes migration lag.</li>
+        <li><strong>Multi-AZ DMS</strong>: creates a synchronous standby of the replication instance in another AZ — protects the migration process itself from AZ failure, not the data.</li>
+        <li>SCT runs on a <strong>server you provide</strong> (on-prem or EC2) — it is a software tool, not a managed service.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ SOURCES & TARGETS -->
+  <section>
+    <div class="section-title">
+      <span class="badge b-blue">Endpoints</span>
+      <h2>Supported Sources &amp; Targets</h2>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:16px;">
+      <div class="card">
+        <h3>Sources</h3>
+        <ul>
+          <li><strong>On-premises / EC2:</strong> Oracle, MS SQL Server, MySQL, MariaDB, PostgreSQL, MongoDB, SAP, DB2</li>
+          <li><strong>Cloud:</strong> Azure SQL Database, Google Cloud SQL</li>
+          <li><strong>AWS:</strong> Amazon RDS (all engines including Aurora), Amazon S3, DocumentDB</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Targets</h3>
+        <ul>
+          <li><strong>On-premises / EC2:</strong> Oracle, MS SQL Server, MySQL, MariaDB, PostgreSQL, SAP</li>
+          <li><strong>AWS Databases:</strong> Amazon RDS, Aurora, Redshift, DynamoDB, DocumentDB, Amazon Neptune</li>
+          <li><strong>AWS Services:</strong> S3, OpenSearch Service, Kinesis Data Streams, Apache Kafka</li>
+          <li><strong>Compatibility:</strong> Redis, Babelfish (Aurora PostgreSQL)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="exam-box">
+      <div class="exam-label">⚑ Exam — Notable Targets</div>
+      <ul>
+        <li><strong>Redshift</strong> as target = migrate OLAP workloads from Oracle/Teradata → data warehouse on AWS.</li>
+        <li><strong>S3</strong> as target = useful for data lake migrations or archiving DB snapshots.</li>
+        <li><strong>Kinesis Data Streams</strong> as target = stream DB changes into a real-time pipeline.</li>
+        <li><strong>DynamoDB</strong> as target = migrate relational data to NoSQL (schema redesign required).</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ SCT -->
+  <section>
+    <div class="section-title">
+      <span class="badge b-blue">SCT</span>
+      <h2>AWS Schema Conversion Tool (SCT)</h2>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:16px;">
+      <div class="card">
+        <h3>What SCT Does</h3>
+        <ul>
+          <li>Converts DB schema + stored procedures + views from one engine to another</li>
+          <li><strong>Not needed</strong> for homogeneous migrations (same engine)</li>
+          <li>Installed on a local server or EC2 — it is a <strong>desktop/client tool</strong>, not a managed service</li>
+          <li>Generates a migration assessment report — shows complexity + manual effort</li>
+          <li>Automatically converts what it can — flags what needs manual intervention</li>
+          <li>Works before DMS starts the data migration</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>SCT Conversion Examples</h3>
+        <ul>
+          <li><span class="chip chip-dms">OLTP</span> Oracle / SQL Server → MySQL, PostgreSQL, Aurora</li>
+          <li><span class="chip chip-purple">OLAP</span> Teradata / Oracle → Amazon Redshift</li>
+          <li>SCT converts: tables, views, indexes, constraints, stored procedures, triggers, sequences</li>
+          <li>Complex Oracle PL/SQL or MSSQL T-SQL → may require <strong>manual rewrite</strong></li>
+          <li>SCT can target Babelfish on Aurora PG to minimize code rewrite for SQL Server migrations</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="exam-box">
+      <div class="exam-label">⚑ Exam — DMS vs SCT</div>
+      <ul>
+        <li><strong>SCT</strong>: converts the <em>schema</em> (DDL, stored procedures) — no data movement.</li>
+        <li><strong>DMS</strong>: moves the <em>data</em> — does not convert schema.</li>
+        <li>Workflow for heterogeneous: <strong>SCT first → DMS second</strong>. Never the reverse.</li>
+        <li>For homogeneous migration (MySQL → RDS MySQL): use DMS alone — SCT is unnecessary.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ CDC -->
+  <section>
+    <div class="section-title">
+      <span class="badge b-teal">CDC</span>
+      <h2>Change Data Capture (CDC)</h2>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:16px;">
+      <div class="card">
+        <h3>How CDC Works</h3>
+        <ul>
+          <li>Reads the source database's <strong>transaction log</strong> (e.g. Oracle Redo Logs, MySQL Binlog)</li>
+          <li>Captures INSERT, UPDATE, DELETE as they happen — in real time</li>
+          <li>Applies changes to target in <strong>near-real-time</strong></li>
+          <li>Enables <strong>minimal-downtime migrations</strong> — run CDC until cutover, then flip DNS/connection</li>
+          <li>Source must have <strong>transaction log access enabled</strong> for CDC to work</li>
+          <li>Latency: typically seconds to minutes depending on load</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>CDC Prerequisites by Engine</h3>
+        <ul>
+          <li><strong>Oracle:</strong> LogMiner or Binary Reader mode; supplemental logging must be enabled</li>
+          <li><strong>SQL Server:</strong> MS-CDC or MS-Replication must be enabled on source DB</li>
+          <li><strong>MySQL:</strong> Binary logging (binlog_format = ROW) must be enabled</li>
+          <li><strong>PostgreSQL:</strong> Logical replication slot must be configured; <code>wal_level = logical</code></li>
+          <li><strong>Aurora MySQL:</strong> Binary logging enabled in parameter group</li>
+          <li><strong>RDS sources:</strong> Automated backups must be enabled to use CDC</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="exam-box">
+      <div class="exam-label">⚑ Exam — CDC Gotchas</div>
+      <ul>
+        <li>If source does not support CDC (e.g. no binlog, no transaction logs): you can only do <strong>Full Load</strong> — requires downtime at cutover.</li>
+        <li>For <strong>Amazon S3 as source</strong>: CDC is simulated by reading new files added to a prefix — not true log-based CDC.</li>
+        <li>Replication Instance must have enough storage for CDC lag — if it falls behind, it needs to re-read logs that may have already been purged → task failure.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ REPLICATION INSTANCE -->
+  <section>
+    <div class="section-title">
+      <span class="badge b-purple">Instance</span>
+      <h2>Replication Instance Sizing &amp; HA</h2>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:16px;">
+      <div class="card">
+        <h3>Instance Classes</h3>
+        <ul>
+          <li>Runs DMS tasks — sized like an EC2 instance (t3, r5, c5 families)</li>
+          <li><strong>t3.micro / t3.small</strong>: dev/test, small migrations</li>
+          <li><strong>r5 (memory-optimized)</strong>: recommended for large, complex migrations</li>
+          <li>Deployed in a <strong>VPC subnet group</strong> — must have network access to both source and target</li>
+          <li>Single instance can handle multiple tasks (tables) in parallel</li>
+          <li>CPU/memory bottleneck = slower migration throughput</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Multi-AZ Replication Instance</h3>
+        <ul>
+          <li>Provisions a <strong>synchronous standby replica</strong> in a second AZ</li>
+          <li>Automatic failover if primary replication instance fails</li>
+          <li>No data loss — standby is in sync</li>
+          <li>Does <strong>NOT</strong> improve migration throughput — only improves availability of migration process</li>
+          <li>Recommended for: large, long-running migrations, production cutovers</li>
+          <li>~double the cost of single-AZ replication instance</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="exam-box">
+      <div class="exam-label">⚑ Exam Note</div>
+      <ul>
+        <li>Multi-AZ replication instance = HA for the <strong>DMS process itself</strong>, not for the source or target DB.</li>
+        <li>If the replication instance runs out of storage during CDC: migration fails. Always provision generous storage for long-running CDC tasks.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ TASK TYPES & CONFIG -->
+  <section>
+    <div class="section-title">
+      <span class="badge b-green">Tasks</span>
+      <h2>Task Configuration &amp; Settings</h2>
+    </div>
+
+    <div class="card-full" style="margin-bottom:16px;">
+      <table class="compare-table">
+        <thead>
+          <tr><th>Setting</th><th>Options</th><th>Use Case</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Migration Type</td>
+            <td>Full Load / Full Load + CDC / CDC Only</td>
+            <td>Full Load + CDC = standard best practice for live migrations</td>
+          </tr>
+          <tr>
+            <td>LOB (Large Objects)</td>
+            <td>Don't include / Full LOB / Limited LOB</td>
+            <td>Full LOB = slower; Limited LOB = truncates to max size. Skip if not needed.</td>
+          </tr>
+          <tr>
+            <td>Table Mappings</td>
+            <td>Include/exclude rules per schema/table</td>
+            <td>Migrate a subset of tables; rename schemas on target</td>
+          </tr>
+          <tr>
+            <td>Transformation Rules</td>
+            <td>Rename, convert case, add/remove columns</td>
+            <td>Transform data during migration without ETL</td>
+          </tr>
+          <tr>
+            <td>Task Logging</td>
+            <td>CloudWatch Logs per task</td>
+            <td>Debug failed rows, schema mismatches, CDC lag</td>
+          </tr>
+          <tr>
+            <td>Stop Task on LOB Error</td>
+            <td>Yes / No</td>
+            <td>Control whether LOB truncation failures halt migration</td>
+          </tr>
+          <tr>
+            <td>Parallel Load</td>
+            <td>By partitions, segments, or sub-partitions</td>
+            <td>Speed up full load for large tables</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ MONITORING -->
+  <section>
+    <div class="section-title">
+      <span class="badge b-amber">Monitoring</span>
+      <h2>Monitoring &amp; CloudWatch Metrics</h2>
+    </div>
+
+    <div class="grid-3" style="margin-bottom:16px;">
+      <div class="card">
+        <h3>Task &amp; Table Status</h3>
+        <ul>
+          <li><strong>Task Status:</strong> Creating, Running, Stopped, Failed, Starting</li>
+          <li><strong>Task Status Bar:</strong> % progress estimate</li>
+          <li><strong>Table State:</strong> Before load, Table completed, Table error, Table cancelled</li>
+          <li>Counts per table: inserts, updates, deletes, DDL statements completed</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Host Metrics (Replication Instance)</h3>
+        <ul>
+          <li><code>CPUUtilization</code> — high = resize instance</li>
+          <li><code>FreeableMemory</code> — low = memory pressure, resize</li>
+          <li><code>FreeStorageSpace</code> — low = risk of task failure</li>
+          <li><code>WriteIOPS</code> / <code>ReadIOPS</code> — I/O throughput of instance disk</li>
+          <li><code>NetworkTransmitThroughput</code></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Replication Task Metrics</h3>
+        <ul>
+          <li><code>FullLoadThroughputRowsSource</code> — rows read/sec from source</li>
+          <li><code>FullLoadThroughputRowsTarget</code> — rows written/sec to target</li>
+          <li><code>CDCThroughputRowsSource</code> — CDC rows captured/sec</li>
+          <li><code>CDCThroughputRowsTarget</code> — CDC rows applied/sec</li>
+          <li><code>CDCLatencySource</code> — lag between source change and DMS reading it</li>
+          <li><code>CDCLatencyTarget</code> — lag between DMS reading and applying to target</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="exam-box">
+      <div class="exam-label">⚑ Exam — CDCLatency</div>
+      <ul>
+        <li><code>CDCLatencySource</code> high → DMS is falling behind reading source logs. Cause: under-sized replication instance or source generates too many changes.</li>
+        <li><code>CDCLatencyTarget</code> high → DMS reads changes fast but applying to target is slow. Cause: target DB throughput bottleneck (write capacity, indexing).</li>
+        <li>Both high → overall replication lag is growing — risky for cutover timing.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ MIGRATION STRATEGIES -->
+  <section>
+    <div class="section-title">
+      <span class="badge b-pink">Strategies</span>
+      <h2>Common Migration Patterns for DOP-C02</h2>
+    </div>
+
+    <div class="card-full">
+      <table class="compare-table">
+        <thead>
+          <tr><th>Scenario</th><th>Pattern</th><th>Tools</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>On-prem Oracle → Aurora PostgreSQL</td>
+            <td>Heterogeneous — SCT schema convert, DMS Full Load + CDC</td>
+            <td>SCT + DMS</td>
+          </tr>
+          <tr>
+            <td>On-prem MySQL → RDS MySQL</td>
+            <td>Homogeneous — no schema conversion needed</td>
+            <td>DMS only</td>
+          </tr>
+          <tr>
+            <td>Oracle OLAP → Redshift</td>
+            <td>SCT converts schema + DMS migrates data</td>
+            <td>SCT + DMS</td>
+          </tr>
+          <tr>
+            <td>Minimize cutover downtime</td>
+            <td>Full Load + CDC → run CDC until lag &lt;seconds → flip connection</td>
+            <td>DMS CDC</td>
+          </tr>
+          <tr>
+            <td>Continuous replication to analytics</td>
+            <td>CDC → Kinesis Data Streams → analytics pipeline</td>
+            <td>DMS + Kinesis</td>
+          </tr>
+          <tr>
+            <td>Migrate + archive to S3 data lake</td>
+            <td>DMS Full Load → S3 target; query with Athena</td>
+            <td>DMS + S3 + Athena</td>
+          </tr>
+          <tr>
+            <td>SQL Server → Aurora with minimal code rewrite</td>
+            <td>Use Babelfish target on Aurora PostgreSQL — partial T-SQL compatibility</td>
+            <td>SCT + DMS + Babelfish</td>
+          </tr>
+          <tr>
+            <td>Protect migration process from AZ failure</td>
+            <td>Enable Multi-AZ on the DMS Replication Instance</td>
+            <td>DMS Multi-AZ</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ CHEATSHEET -->
+  <section>
+    <div class="section-title">
+      <span class="badge b-amber">Cheatsheet</span>
+      <h2>DOP-C02 Key Decision Tree</h2>
+    </div>
+
+    <div class="card-full">
+      <table class="compare-table">
+        <thead>
+          <tr><th>Scenario / Keyword</th><th>Answer</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Migrate DB with source staying online</td><td>DMS (Full Load + CDC)</td></tr>
+          <tr><td>Different DB engine migration</td><td>SCT (schema) → then DMS (data)</td></tr>
+          <tr><td>Same DB engine migration</td><td>DMS only — SCT not needed</td></tr>
+          <tr><td>Minimize cutover downtime to seconds</td><td>DMS Full Load + CDC → cut over when CDCLatencyTarget ≈ 0</td></tr>
+          <tr><td>Oracle → Aurora PostgreSQL</td><td>SCT converts schema + DMS migrates data</td></tr>
+          <tr><td>Oracle / Teradata → Redshift</td><td>SCT (OLAP conversion) + DMS</td></tr>
+          <tr><td>SQL Server → Aurora with min code rewrite</td><td>Babelfish on Aurora + DMS</td></tr>
+          <tr><td>DMS replication instance fails mid-migration</td><td>Enable Multi-AZ on DMS Replication Instance</td></tr>
+          <tr><td>CDCLatencySource growing</td><td>Replication instance under-sized — scale up instance class</td></tr>
+          <tr><td>CDCLatencyTarget growing</td><td>Target DB is write bottleneck — scale target throughput</td></tr>
+          <tr><td>FreeStorageSpace on replication instance low</td><td>Increase storage — risk of CDC task failure if logs purged</td></tr>
+          <tr><td>Stream DB changes to real-time pipeline</td><td>DMS → Kinesis Data Streams target</td></tr>
+          <tr><td>What does SCT run on?</td><td>A server you manage (on-prem or EC2) — not a managed AWS service</td></tr>
+          <tr><td>Does DMS convert stored procedures?</td><td>No — SCT handles schema/code conversion; DMS moves data only</td></tr>
+          <tr><td>MySQL CDC requirement</td><td>binlog_format = ROW must be set on source MySQL</td></tr>
+          <tr><td>PostgreSQL CDC requirement</td><td>wal_level = logical + logical replication slot on source</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

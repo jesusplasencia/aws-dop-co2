@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NAT Gateway — DOP-C02 Study Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:   #0a0c10;
+    --bg2:  #10131a;
+    --bg3:  #161b24;
+    --bg4:  #1c2230;
+    --border:  rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.14);
+    --text:  #e8eaf0;
+    --text2: #9ba3b4;
+    --text3: #5d6475;
+    --cyan:   #22d3ee;
+    --cyan-dim:    rgba(34,211,238,0.09);
+    --cyan-border: rgba(34,211,238,0.25);
+    --orange:  #ff6b35;
+    --orange-dim:    rgba(255,107,53,0.10);
+    --orange-border: rgba(255,107,53,0.28);
+    --blue:  #4a9eff;
+    --blue-dim:    rgba(74,158,255,0.10);
+    --blue-border: rgba(74,158,255,0.25);
+    --green:  #3ecf8e;
+    --green-dim:    rgba(62,207,142,0.10);
+    --green-border: rgba(62,207,142,0.25);
+    --yellow:  #f5c842;
+    --yellow-dim:    rgba(245,200,66,0.09);
+    --yellow-border: rgba(245,200,66,0.28);
+    --red:  #ff4d4d;
+    --red-dim:    rgba(255,77,77,0.10);
+    --red-border: rgba(255,77,77,0.25);
+    --purple:  #a78bfa;
+    --purple-dim:    rgba(167,139,250,0.10);
+    --purple-border: rgba(167,139,250,0.28);
+    --font: 'Syne', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:15px;line-height:1.65;}
+  .page{max-width:980px;margin:0 auto;padding:48px 32px 80px;}
+
+  /* Header */
+  .badge{display:inline-flex;align-items:center;gap:6px;background:var(--cyan-dim);border:1px solid var(--cyan-border);color:var(--cyan);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:4px 10px;border-radius:4px;margin-bottom:16px;}
+  .header{margin-bottom:48px;padding-bottom:32px;border-bottom:1px solid var(--border2);}
+  .header h1{font-size:42px;font-weight:800;line-height:1.1;letter-spacing:-.02em;color:#fff;}
+  .header h1 span{color:var(--cyan);}
+  .header p{margin-top:10px;color:var(--text2);font-size:14px;max-width:700px;}
+
+  /* TOC */
+  .toc{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:20px 24px;margin-bottom:48px;display:grid;grid-template-columns:1fr 1fr;gap:4px 24px;}
+  .toc-title{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:12px;grid-column:1/-1;}
+  .toc a{color:var(--text2);text-decoration:none;font-size:13px;padding:3px 0;display:block;transition:color .15s;}
+  .toc a:hover{color:var(--cyan);}
+  .toc a::before{content:'→ ';color:var(--text3);}
+
+  /* Sections */
+  .section{margin-bottom:56px;scroll-margin-top:24px;}
+  .section-header{display:flex;align-items:center;gap:12px;margin-bottom:24px;}
+  .section-num{font-family:var(--mono);font-size:12px;color:var(--cyan);background:var(--cyan-dim);border:1px solid var(--cyan-border);border-radius:4px;padding:2px 8px;}
+  .section h2{font-size:22px;font-weight:700;color:#fff;letter-spacing:-.01em;}
+  .section h3{font-size:12px;font-weight:700;color:var(--text3);margin-bottom:12px;margin-top:28px;text-transform:uppercase;letter-spacing:.09em;}
+
+  /* Grid */
+  .grid{display:grid;gap:12px;}
+  .grid-2{grid-template-columns:1fr 1fr;}
+  .grid-3{grid-template-columns:1fr 1fr 1fr;}
+  .grid-4{grid-template-columns:1fr 1fr 1fr 1fr;}
+
+  /* Cards */
+  .card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:18px 20px;}
+  .card.cyan   {border-color:var(--cyan-border);  background:var(--cyan-dim);}
+  .card.orange {border-color:var(--orange-border);background:var(--orange-dim);}
+  .card.blue   {border-color:var(--blue-border);  background:var(--blue-dim);}
+  .card.green  {border-color:var(--green-border); background:var(--green-dim);}
+  .card.yellow {border-color:var(--yellow-border);background:var(--yellow-dim);}
+  .card.red    {border-color:var(--red-border);   background:var(--red-dim);}
+  .card.purple {border-color:var(--purple-border);background:var(--purple-dim);}
+  .card-label{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;}
+  .cyan   .card-label{color:var(--cyan);}
+  .orange .card-label{color:var(--orange);}
+  .blue   .card-label{color:var(--blue);}
+  .green  .card-label{color:var(--green);}
+  .yellow .card-label{color:var(--yellow);}
+  .red    .card-label{color:var(--red);}
+  .purple .card-label{color:var(--purple);}
+  .card h4{font-size:15px;font-weight:700;color:#fff;margin-bottom:8px;}
+  .card p{font-size:13.5px;color:var(--text2);line-height:1.55;}
+  .card ul{list-style:none;padding:0;margin-top:4px;}
+  .card ul li{font-size:13px;color:var(--text2);padding:3px 0;display:flex;gap:8px;align-items:flex-start;line-height:1.5;}
+  .card ul li::before{content:'·';color:var(--text3);flex-shrink:0;}
+
+  /* Inline code */
+  .mono{font-family:var(--mono);font-size:11.5px;background:var(--bg4);border:1px solid var(--border);border-radius:4px;padding:1px 6px;color:var(--text);}
+
+  /* Exam tip */
+  .tip{background:linear-gradient(90deg,rgba(245,200,66,.07) 0%,rgba(245,200,66,.03) 100%);border-left:3px solid var(--yellow);border-radius:0 8px 8px 0;padding:12px 16px;margin:16px 0;}
+  .tip strong{color:var(--yellow);font-size:11px;letter-spacing:.1em;text-transform:uppercase;display:block;margin-bottom:4px;}
+  .tip p,.tip ul{font-size:13.5px;color:var(--text2);}
+  .tip ul{list-style:none;padding:0;margin-top:6px;}
+  .tip ul li{padding:2px 0;display:flex;gap:8px;}
+  .tip ul li::before{content:'→';color:var(--yellow);flex-shrink:0;}
+
+  /* Tables */
+  .table-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:16px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{text-align:left;padding:9px 14px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border2);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:top;}
+  tr:last-child td{border-bottom:none;}
+  td:first-child{color:var(--text);font-weight:600;}
+  td code{font-family:var(--mono);font-size:11px;background:var(--bg4);border:1px solid var(--border);border-radius:3px;padding:1px 5px;color:var(--text);}
+
+  /* Check / Cross badges */
+  .yes{color:var(--green);font-weight:700;}
+  .no {color:var(--red);  font-weight:700;}
+
+  /* Flow diagram */
+  .flow{display:flex;align-items:center;flex-wrap:wrap;gap:0;margin:14px 0;}
+  .flow-box{background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:7px 14px;font-size:12.5px;font-weight:600;color:var(--text);white-space:nowrap;}
+  .flow-box.cyan  {background:var(--cyan-dim);  border-color:var(--cyan-border);  color:var(--cyan);}
+  .flow-box.orange{background:var(--orange-dim);border-color:var(--orange-border);color:var(--orange);}
+  .flow-box.green {background:var(--green-dim); border-color:var(--green-border); color:var(--green);}
+  .flow-box.blue  {background:var(--blue-dim);  border-color:var(--blue-border);  color:var(--blue);}
+  .flow-box.red   {background:var(--red-dim);   border-color:var(--red-border);   color:var(--red);}
+  .flow-arrow{color:var(--text3);padding:0 7px;font-size:15px;}
+
+  /* HA diagram */
+  .ha-diagram{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0;}
+  .az-box{background:var(--bg2);border:1px solid var(--border2);border-radius:10px;padding:16px;}
+  .az-label{font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--text3);margin-bottom:10px;}
+  .az-subnet{background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:10px 12px;margin-bottom:8px;font-size:12.5px;}
+  .az-subnet-label{font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-bottom:4px;}
+  .pub-label{color:var(--cyan);}
+  .priv-label{color:var(--orange);}
+  .az-subnet p{font-size:12px;color:var(--text2);}
+  .az-arrow{text-align:center;font-size:11px;color:var(--text3);margin:3px 0;}
+
+  /* Route table visual */
+  .rtable{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+  .rtable-header{background:var(--bg3);padding:8px 14px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border2);}
+  .rtable-row{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--border);padding:9px 14px;font-size:13px;}
+  .rtable-row:last-child{border-bottom:none;}
+  .rt-dest{color:var(--text);font-family:var(--mono);font-size:12px;}
+  .rt-target{color:var(--text2);}
+  .rt-target span{font-family:var(--mono);font-size:12px;color:var(--cyan);}
+
+  /* Footer */
+  .footer{border-top:1px solid var(--border);padding-top:24px;margin-top:56px;display:flex;justify-content:space-between;align-items:center;}
+  .footer p{font-size:12px;color:var(--text3);}
+
+  @media(max-width:700px){
+    .grid-2,.grid-3,.grid-4{grid-template-columns:1fr;}
+    .header h1{font-size:28px;}
+    .ha-diagram{grid-template-columns:1fr;}
+    .rtable-row{grid-template-columns:1fr;}
+  }
+  .home-btn{display:inline-flex;align-items:center;gap:6px;color:var(--text2);text-decoration:none;font-size:13px;font-family:var(--mono);padding:6px 12px;border:1px solid var(--border);border-radius:6px;margin-bottom:32px;transition:color .15s,border-color .15s;}
+  .home-btn:hover{color:var(--text);border-color:var(--border2);}
+</style>
+</head>
+<body>
+<div class="page">
+<a href="../index.html" class="home-btn">← DOP-C02 Home</a>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="badge">DOP-C02 · AWS DevOps Professional</div>
+    <h1>NAT <span>Gateway</span></h1>
+    <p>Architecture · High Availability · Routing · vs NAT Instance · Cost · Security · Exam scenarios</p>
+  </div>
+
+  <!-- TOC -->
+  <div class="toc">
+    <div class="toc-title">Contents</div>
+    <a href="#s1">01 · Core Concepts & Architecture</a>
+    <a href="#s5">05 · NAT Gateway vs NAT Instance</a>
+    <a href="#s2">02 · When to use NAT Gateway</a>
+    <a href="#s6">06 · Cost Model</a>
+    <a href="#s3">03 · High Availability Pattern</a>
+    <a href="#s7">07 · Security & Monitoring</a>
+    <a href="#s4">04 · Routing Configuration</a>
+    <a href="#s8">08 · Quick Exam Reference</a>
+  </div>
+
+  <!-- S1: Core Concepts -->
+  <div class="section" id="s1">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <h2>Core Concepts &amp; Architecture</h2>
+    </div>
+
+    <div class="grid grid-3" style="margin-bottom:14px;">
+      <div class="card cyan">
+        <div class="card-label">Managed service</div>
+        <h4>AWS-managed NAT</h4>
+        <p>No OS patches, no failover scripts, no instance management. AWS handles availability within the AZ automatically.</p>
+      </div>
+      <div class="card blue">
+        <div class="card-label">Addressing</div>
+        <h4>Elastic IP required</h4>
+        <p>Each NATGW is assigned one static Elastic IP (public IPv4). This is the source IP seen by internet destinations. Cannot be changed after creation.</p>
+      </div>
+      <div class="card orange">
+        <div class="card-label">Placement</div>
+        <h4>Lives in public subnet</h4>
+        <p>Created in a <strong style="color:var(--text)">public subnet</strong> of a specific AZ. Private subnet instances route outbound internet traffic through it.</p>
+      </div>
+    </div>
+
+    <div class="grid grid-4" style="margin-bottom:14px;">
+      <div class="card">
+        <div class="card-label" style="color:var(--cyan)">Bandwidth</div>
+        <p style="font-size:13px;"><strong style="color:var(--text)">5 Gbps</strong> baseline, auto-scales to <strong style="color:var(--text)">100 Gbps</strong>. No manual action needed.</p>
+      </div>
+      <div class="card">
+        <div class="card-label" style="color:var(--green)">Ports</div>
+        <p style="font-size:13px;">Supports <strong style="color:var(--text)">TCP, UDP, ICMP</strong>. Does <strong style="color:var(--text)">not</strong> support IP protocols beyond those three.</p>
+      </div>
+      <div class="card">
+        <div class="card-label" style="color:var(--orange)">IPv6</div>
+        <p style="font-size:13px;">NAT Gateway supports <strong style="color:var(--text)">IPv4 only</strong>. For IPv6 egress use an <strong style="color:var(--text)">Egress-Only IGW</strong> instead.</p>
+      </div>
+      <div class="card">
+        <div class="card-label" style="color:var(--purple)">Security groups</div>
+        <p style="font-size:13px;"><strong style="color:var(--text)">Cannot</strong> attach security groups to NATGW. Control access via NACLs and SGs on the private instances.</p>
+      </div>
+    </div>
+
+    <h3>Traffic path — private instance to internet</h3>
+    <div class="flow">
+      <div class="flow-box orange">Private Instance<br><span style="font-size:10px;opacity:.7">Private Subnet</span></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">Route Table<br><span style="font-size:10px;opacity:.7">0.0.0.0/0 → NATGW</span></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box cyan">NAT Gateway<br><span style="font-size:10px;opacity:.7">Public Subnet (EIP)</span></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">Route Table<br><span style="font-size:10px;opacity:.7">0.0.0.0/0 → IGW</span></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box green">Internet Gateway<br><span style="font-size:10px;opacity:.7">VPC level</span></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box blue">Internet</div>
+    </div>
+
+    <div class="tip">
+      <strong>Critical rule</strong>
+      <p>NATGW cannot be used to route traffic from <strong>within the same subnet</strong> it resides in. It must be in a different (public) subnet than the instances using it. Also: a NATGW cannot be used as a bastion host or to receive inbound-initiated connections — it is egress-only for private resources.</p>
+    </div>
+  </div>
+
+  <!-- S2: When to use -->
+  <div class="section" id="s2">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <h2>When to Use NAT Gateway</h2>
+    </div>
+
+    <p style="color:var(--text2);font-size:14px;margin-bottom:18px;">Private subnet resources need <strong style="color:var(--text)">outbound internet access</strong> without being reachable from the internet. The private subnet has no route to an IGW — NATGW is the bridge.</p>
+
+    <div class="grid grid-2" style="margin-bottom:14px;">
+      <div class="card green">
+        <div class="card-label">Common use cases</div>
+        <ul>
+          <li>EC2 instances pulling OS updates (<span class="mono">yum</span>, <span class="mono">apt</span>) from public repos</li>
+          <li>Lambda functions in a VPC calling external APIs or AWS public endpoints</li>
+          <li>ECS / EKS tasks needing to pull images from Docker Hub or public ECR</li>
+          <li>Private RDS instances downloading software patches</li>
+          <li>Instances calling AWS services in other regions not covered by VPC Endpoints</li>
+          <li>Sending outbound webhooks or notifications to internet URLs</li>
+        </ul>
+      </div>
+      <div class="card red">
+        <div class="card-label">When NOT to use NATGW</div>
+        <ul>
+          <li>Traffic between two private subnets in the same VPC — use VPC routing directly</li>
+          <li>Traffic to AWS services that have VPC Interface Endpoints (cheaper, no NAT needed)</li>
+          <li>Inbound connections from the internet — use ALB/NLB in public subnet instead</li>
+          <li>IPv6 egress — use Egress-Only Internet Gateway</li>
+          <li>Inter-VPC traffic — use VPC Peering or Transit Gateway</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>Exam tip — Cost optimisation angle</strong>
+      <p>If private instances only need to reach <strong>AWS services</strong> (S3, DynamoDB, SSM, Secrets Manager, ECR, etc.) — use <strong>VPC Endpoints</strong> instead of routing through a NATGW. VPC Gateway Endpoints (S3, DynamoDB) are free. Interface Endpoints cost less than NAT data transfer charges at scale. A common DOP-C02 scenario asks you to reduce NAT Gateway costs.</p>
+    </div>
+  </div>
+
+  <!-- S3: High Availability -->
+  <div class="section" id="s3">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <h2>High Availability Pattern</h2>
+    </div>
+
+    <p style="color:var(--text2);font-size:14px;margin-bottom:16px;">A single NATGW is highly available <strong style="color:var(--text)">within its AZ</strong> — AWS manages redundancy inside the AZ. However if the AZ fails, instances in other AZs lose internet access if they all route through one NATGW. The exam-correct HA pattern is <strong style="color:var(--text)">one NATGW per AZ</strong>.</p>
+
+    <div class="ha-diagram">
+      <div class="az-box">
+        <div class="az-label">Availability Zone A</div>
+        <div class="az-subnet">
+          <div class="az-subnet-label pub-label">Public Subnet A</div>
+          <p>NAT Gateway A (EIP-A)</p>
+        </div>
+        <div class="az-arrow">↕ routes to NATGW-A</div>
+        <div class="az-subnet">
+          <div class="az-subnet-label priv-label">Private Subnet A</div>
+          <p>EC2 / ECS tasks</p>
+          <p style="margin-top:4px;font-size:11px;color:var(--text3);">Route: 0.0.0.0/0 → NATGW-A</p>
+        </div>
+      </div>
+      <div class="az-box">
+        <div class="az-label">Availability Zone B</div>
+        <div class="az-subnet">
+          <div class="az-subnet-label pub-label">Public Subnet B</div>
+          <p>NAT Gateway B (EIP-B)</p>
+        </div>
+        <div class="az-arrow">↕ routes to NATGW-B</div>
+        <div class="az-subnet">
+          <div class="az-subnet-label priv-label">Private Subnet B</div>
+          <p>EC2 / ECS tasks</p>
+          <p style="margin-top:4px;font-size:11px;color:var(--text3);">Route: 0.0.0.0/0 → NATGW-B</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>Exam tip — HA vs Cross-AZ cost trade-off</strong>
+      <ul>
+        <li>One NATGW for all AZs: single point of AZ failure + cross-AZ data transfer charges (adds cost per GB).</li>
+        <li>One NATGW per AZ: AZ-resilient + each AZ's traffic stays local (no cross-AZ charges), but you pay per-hour for each NATGW.</li>
+        <li>The exam-correct answer for production resilience is always <strong>one NATGW per AZ with AZ-local routing</strong>.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- S4: Routing -->
+  <div class="section" id="s4">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <h2>Routing Configuration</h2>
+    </div>
+
+    <p style="color:var(--text2);font-size:14px;margin-bottom:16px;">Two route tables must be correctly configured for NATGW to work end-to-end.</p>
+
+    <div class="grid grid-2" style="margin-bottom:16px;">
+      <div>
+        <h3>Private subnet route table</h3>
+        <div class="rtable">
+          <div class="rtable-header">Private Subnet A — Route Table</div>
+          <div class="rtable-row">
+            <div class="rt-dest">10.0.0.0/16</div>
+            <div class="rt-target">local</div>
+          </div>
+          <div class="rtable-row">
+            <div class="rt-dest">0.0.0.0/0</div>
+            <div class="rt-target"><span>nat-xxxxxxxx</span> (NATGW in same AZ)</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <h3>Public subnet route table</h3>
+        <div class="rtable">
+          <div class="rtable-header">Public Subnet A — Route Table</div>
+          <div class="rtable-row">
+            <div class="rt-dest">10.0.0.0/16</div>
+            <div class="rt-target">local</div>
+          </div>
+          <div class="rtable-row">
+            <div class="rt-dest">0.0.0.0/0</div>
+            <div class="rt-target"><span>igw-xxxxxxxx</span> (Internet Gateway)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>Exam tip — Common misconfiguration traps</strong>
+      <ul>
+        <li>NATGW in a <strong>private subnet</strong> — will not work. NATGW must be in a public subnet with a route to IGW.</li>
+        <li>Missing IGW on the VPC — NATGW cannot reach internet without an attached IGW.</li>
+        <li>Private subnet route points to wrong AZ's NATGW — works but incurs cross-AZ data transfer charges.</li>
+        <li>NATGW not yet in <span class="mono">Available</span> state — it takes ~1 min to provision; route exists but traffic drops.</li>
+        <li>NACL blocking outbound on the public subnet — NATGW traffic is affected by subnet-level NACLs (both inbound and outbound rules matter for return traffic).</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- S5: vs NAT Instance -->
+  <div class="section" id="s5">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <h2>NAT Gateway vs NAT Instance</h2>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Dimension</th>
+            <th>NAT Gateway</th>
+            <th>NAT Instance</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Management</td>
+            <td style="color:var(--text2)">Fully managed by AWS. No patching, no failover scripts.</td>
+            <td style="color:var(--text2)">You manage: OS patches, monitoring, failover automation.</td>
+          </tr>
+          <tr>
+            <td>Availability</td>
+            <td style="color:var(--text2)">Highly available within the AZ automatically.</td>
+            <td style="color:var(--text2)">Single EC2 instance; you must script Multi-AZ failover.</td>
+          </tr>
+          <tr>
+            <td>Bandwidth</td>
+            <td style="color:var(--text2)">5 Gbps → auto-scales to 100 Gbps.</td>
+            <td style="color:var(--text2)">Limited by EC2 instance type (e.g. c5n.18xlarge ≈ 100 Gbps max).</td>
+          </tr>
+          <tr>
+            <td>Public IPv4</td>
+            <td><span class="yes">✔</span> <span style="color:var(--text2);font-size:13px;">Elastic IP assigned at creation</span></td>
+            <td><span class="yes">✔</span> <span style="color:var(--text2);font-size:13px;">Elastic IP or auto-assigned public IP</span></td>
+          </tr>
+          <tr>
+            <td>Private IPv4</td>
+            <td><span class="yes">✔</span> <span style="color:var(--text2);font-size:13px;">Private IP in the public subnet</span></td>
+            <td><span class="yes">✔</span> <span style="color:var(--text2);font-size:13px;">Private IP in subnet</span></td>
+          </tr>
+          <tr>
+            <td>Security Groups</td>
+            <td><span class="no">✘</span> <span style="color:var(--text2);font-size:13px;">Cannot attach SGs to NATGW</span></td>
+            <td><span class="yes">✔</span> <span style="color:var(--text2);font-size:13px;">Full SG support — attach inbound/outbound rules</span></td>
+          </tr>
+          <tr>
+            <td>Bastion Host</td>
+            <td><span class="no">✘</span> <span style="color:var(--text2);font-size:13px;">Not possible — no SSH/RDP access</span></td>
+            <td><span class="yes">✔</span> <span style="color:var(--text2);font-size:13px;">Can serve dual purpose as bastion + NAT</span></td>
+          </tr>
+          <tr>
+            <td>Source/dest check</td>
+            <td style="color:var(--text2)">Disabled automatically by AWS.</td>
+            <td style="color:var(--text2)"><strong style="color:var(--red)">Must be manually disabled</strong> on the EC2 instance — most common exam trap.</td>
+          </tr>
+          <tr>
+            <td>Cost</td>
+            <td style="color:var(--text2)">Per hour + per GB data processed.</td>
+            <td style="color:var(--text2)">Per hour (EC2) + EC2 instance type cost + data transfer.</td>
+          </tr>
+          <tr>
+            <td>Port forwarding</td>
+            <td><span class="no">✘</span> <span style="color:var(--text2);font-size:13px;">Not supported</span></td>
+            <td><span class="yes">✔</span> <span style="color:var(--text2);font-size:13px;">Configurable via iptables</span></td>
+          </tr>
+          <tr>
+            <td>IPv6 support</td>
+            <td><span class="no">✘</span> <span style="color:var(--text2);font-size:13px;">IPv4 only (use Egress-Only IGW for IPv6)</span></td>
+            <td><span class="yes">✔</span> <span style="color:var(--text2);font-size:13px;">Can handle IPv6 with custom config</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="tip">
+      <strong>Exam tip — The one thing about NAT Instances</strong>
+      <p>If the exam mentions a NAT instance where traffic is failing, the answer is almost always: <strong>Source/Destination Check must be disabled</strong> on the EC2 instance. EC2 by default drops packets that are not addressed to/from its own IP. NAT instances forward packets on behalf of others — check must be off.</p>
+    </div>
+  </div>
+
+  <!-- S6: Cost -->
+  <div class="section" id="s6">
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <h2>Cost Model</h2>
+    </div>
+
+    <div class="grid grid-3" style="margin-bottom:16px;">
+      <div class="card cyan">
+        <div class="card-label">Hourly charge</div>
+        <h4>Per NATGW per hour</h4>
+        <p>Charged for every hour the NATGW exists, even with zero traffic. Delete unused NATGWs to stop billing.</p>
+      </div>
+      <div class="card orange">
+        <div class="card-label">Data processing</div>
+        <h4>Per GB processed</h4>
+        <p>Charged per GB of data that passes through the NATGW in either direction. Applies to all traffic regardless of destination.</p>
+      </div>
+      <div class="card blue">
+        <div class="card-label">Data transfer</div>
+        <h4>Cross-AZ charges</h4>
+        <p>If instances in AZ-B route through a NATGW in AZ-A, AWS charges <strong style="color:var(--text)">cross-AZ data transfer fees</strong> in addition to NATGW processing fees.</p>
+      </div>
+    </div>
+
+    <h3>Cost optimisation strategies</h3>
+    <div class="grid grid-2">
+      <div class="card green">
+        <div class="card-label">Use VPC Endpoints</div>
+        <ul>
+          <li><strong style="color:var(--text)">Gateway Endpoints</strong> (S3, DynamoDB): free, no data processing charge</li>
+          <li><strong style="color:var(--text)">Interface Endpoints</strong>: hourly + per-GB, but cheaper than NAT for high-volume AWS service traffic</li>
+          <li>Eliminates NAT processing charge for all traffic to those services</li>
+        </ul>
+      </div>
+      <div class="card yellow">
+        <div class="card-label">Architecture choices</div>
+        <ul>
+          <li>Place NATGW in same AZ as the majority of compute (avoid cross-AZ fees)</li>
+          <li>Delete NATGWs in dev/staging environments when not in use</li>
+          <li>Use one NATGW per AZ (not per subnet) — multiple subnets in same AZ share one NATGW</li>
+          <li>Monitor with CloudWatch <span class="mono">BytesOutToDestination</span> to identify high-traffic sources</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- S7: Security & Monitoring -->
+  <div class="section" id="s7">
+    <div class="section-header">
+      <span class="section-num">07</span>
+      <h2>Security &amp; Monitoring</h2>
+    </div>
+
+    <h3>Security controls available</h3>
+    <div class="grid grid-3" style="margin-bottom:16px;">
+      <div class="card">
+        <div class="card-label" style="color:var(--cyan)">NACLs</div>
+        <p style="font-size:13.5px;">Apply on the <strong style="color:var(--text)">public subnet</strong> where NATGW lives. NACLs are stateless — you must allow both outbound (requests) and inbound (return traffic) on ephemeral ports <span class="mono">1024–65535</span>.</p>
+      </div>
+      <div class="card">
+        <div class="card-label" style="color:var(--orange)">Security Groups (on instances)</div>
+        <p style="font-size:13.5px;">Control what traffic the <strong style="color:var(--text)">private instances</strong> can send outbound. NATGW itself has no SG — the first security boundary is the instance SG.</p>
+      </div>
+      <div class="card">
+        <div class="card-label" style="color:var(--purple)">DNS Firewall / Network Firewall</div>
+        <p style="font-size:13.5px;">For content inspection or domain filtering on outbound traffic through NATGW, deploy <strong style="color:var(--text)">AWS Network Firewall</strong> in a dedicated inspection VPC or between NATGW and IGW.</p>
+      </div>
+    </div>
+
+    <h3>CloudWatch metrics for NATGW</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Metric</th><th>What it measures</th><th>Exam relevance</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>BytesInFromDestination</code></td>
+            <td style="color:var(--text2)">Bytes received from internet (inbound return traffic)</td>
+            <td style="color:var(--text2)">Monitor data download volume; cost driver</td>
+          </tr>
+          <tr>
+            <td><code>BytesOutToDestination</code></td>
+            <td style="color:var(--text2)">Bytes sent to internet by NATGW</td>
+            <td style="color:var(--text2)">Identify high-egress workloads; cost driver</td>
+          </tr>
+          <tr>
+            <td><code>ConnectionAttemptCount</code></td>
+            <td style="color:var(--text2)">Connections attempted through NATGW</td>
+            <td style="color:var(--text2)">Detect unusual connection spikes</td>
+          </tr>
+          <tr>
+            <td><code>ConnectionEstablishedCount</code></td>
+            <td style="color:var(--text2)">Successful outbound connections</td>
+            <td style="color:var(--text2)">Baseline traffic patterns</td>
+          </tr>
+          <tr>
+            <td><code>ErrorPortAllocation</code></td>
+            <td style="color:var(--text2)">Times NATGW could not allocate a port</td>
+            <td style="color:var(--text2)"><strong style="color:var(--red)">Port exhaustion</strong> — NATGW supports 55,000 simultaneous connections per unique destination. Alert on this metric.</td>
+          </tr>
+          <tr>
+            <td><code>PacketsDropCount</code></td>
+            <td style="color:var(--text2)">Packets dropped</td>
+            <td style="color:var(--text2)">Indicates connectivity issues; check NACLs</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="tip">
+      <strong>Exam tip — Port exhaustion</strong>
+      <p>NATGW supports <strong>55,000 simultaneous connections</strong> to the same destination IP:port. If thousands of instances all hit the same endpoint, you may hit port exhaustion (<span class="mono">ErrorPortAllocation</span> rises). Solution: spread traffic across multiple destination IPs, or deploy multiple NATGWs and distribute instances across subnets.</p>
+    </div>
+  </div>
+
+  <!-- S8: Quick Reference -->
+  <div class="section" id="s8">
+    <div class="section-header">
+      <span class="section-num">REF</span>
+      <h2>Quick Exam Reference</h2>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Scenario</th><th>Answer / Key fact</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Private EC2 cannot reach internet</td><td style="color:var(--text2)">Check: NATGW in public subnet, private RT has <code>0.0.0.0/0 → natgw</code>, public RT has <code>0.0.0.0/0 → igw</code>, IGW attached to VPC, NACL allows return traffic on ephemeral ports.</td></tr>
+          <tr><td>NAT Instance traffic failing</td><td style="color:var(--text2)">Source/destination check must be <strong style="color:var(--text)">disabled</strong> on the EC2 instance. Most common trap.</td></tr>
+          <tr><td>Multi-AZ HA for outbound internet</td><td style="color:var(--text2)">One NAT Gateway per AZ; each AZ's private subnets route to their local NATGW.</td></tr>
+          <tr><td>Reduce NAT costs for AWS service traffic</td><td style="color:var(--text2)">Use VPC Gateway Endpoints (S3, DynamoDB — free) or Interface Endpoints for other AWS services.</td></tr>
+          <tr><td>Cross-AZ data transfer charges via NAT</td><td style="color:var(--text2)">Route each AZ's private subnet to a NATGW in the same AZ. Eliminates cross-AZ traffic fee.</td></tr>
+          <tr><td>IPv6 outbound from private subnet</td><td style="color:var(--text2)">NATGW does not support IPv6. Use Egress-Only Internet Gateway.</td></tr>
+          <tr><td>Filter outbound NATGW traffic by domain</td><td style="color:var(--text2)">AWS Network Firewall or Route 53 Resolver DNS Firewall in front of NATGW path.</td></tr>
+          <tr><td>Port exhaustion — many instances same destination</td><td style="color:var(--text2)">Monitor <code>ErrorPortAllocation</code>. Spread load or deploy multiple NATGWs across subnets.</td></tr>
+          <tr><td>Can NATGW act as bastion host?</td><td style="color:var(--text2)">No. NATGW does not support SSH/RDP. Use EC2 bastion or AWS Systems Manager Session Manager.</td></tr>
+          <tr><td>Security group on NATGW</td><td style="color:var(--text2)">Cannot attach SGs to NATGW. Use NACLs on the public subnet and SGs on the private instances.</td></tr>
+          <tr><td>NATGW bandwidth limit</td><td style="color:var(--text2)">5 Gbps baseline, auto-scales to 100 Gbps. If you need more: split subnets across multiple NATGWs.</td></tr>
+          <tr><td>Cost components of NATGW</td><td style="color:var(--text2)">Hourly fee (per NATGW) + per-GB data processing fee. Delete idle NATGWs to stop hourly charge.</td></tr>
+          <tr><td>NATGW vs NAT Instance: choose managed</td><td style="color:var(--text2)">NATGW for production (managed, scalable). NAT Instance only if you need SG control, bastion dual-use, or port forwarding, or strict cost control on tiny workloads.</td></tr>
+          <tr><td>Inbound internet traffic to private instance</td><td style="color:var(--text2)">NATGW is egress-only. For inbound: place ALB/NLB in public subnet. NATGW never enables inbound connections.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>AWS DOP-C02 · NAT Gateway · Exam Study Guide</p>
+    <p>All facts current as of AWS exam blueprint v2.x</p>
+  </div>
+
+</div>
+</body>
+</html>
