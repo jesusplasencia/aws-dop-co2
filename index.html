@@ -926,15 +926,43 @@ body::before {
       </div>
     </div>
 
-    <!-- Domain 4: Monitoring & Logging — DISABLED -->
-    <div class="domain-card disabled" style="--i:3">
+    <!-- Domain 4: Monitoring & Logging — ACTIVE -->
+    <div class="domain-card active" style="--i:3" onclick="toggleDomain(this)">
       <div class="domain-header">
         <span class="domain-num">04</span>
         <div class="domain-info">
           <h2>Monitoring &amp; Logging</h2>
           <span class="domain-weight">15% of exam</span>
         </div>
-        <span class="badge-soon">Coming Soon</span>
+        <span class="domain-chevron">&#9662;</span>
+      </div>
+      <div class="domain-body">
+        <hr class="domain-divider">
+        <div class="service-grid">
+
+          <a href="domain_four/cloudwatch-dopc02.html" class="svc-btn" onclick="event.stopPropagation()">
+            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="18" cy="18" r="13"/>
+              <path d="M18 10v8l5 3"/>
+              <path d="M9 27l2-3"/>
+              <path d="M27 27l-2-3"/>
+            </svg>
+            <span class="svc-label">CloudWatch</span>
+          </a>
+
+          <a href="domain_four/amazon-athena-dopc02.html" class="svc-btn" onclick="event.stopPropagation()">
+            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <ellipse cx="18" cy="10" rx="12" ry="4"/>
+              <path d="M6 10v6c0 2.2 5.4 4 12 4s12-1.8 12-4v-6"/>
+              <path d="M6 16v6c0 2.2 5.4 4 12 4s12-1.8 12-4v-6"/>
+              <path d="M13 25l2 6"/>
+              <path d="M23 25l-2 6"/>
+              <path d="M11 31h14"/>
+            </svg>
+            <span class="svc-label">Amazon Athena</span>
+          </a>
+
+        </div>
       </div>
     </div>
 

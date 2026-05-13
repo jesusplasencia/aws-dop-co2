@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Amazon Athena — DOP-C02 Study Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0f14;
+    --surface: #111822;
+    --surface2: #1a2333;
+    --border: #1e2d42;
+    --accent: #f7941d;
+    --accent2: #3b9ede;
+    --accent3: #4ecf7c;
+    --danger: #e05252;
+    --text: #d4dde8;
+    --text-dim: #6b84a0;
+    --text-bright: #eaf2ff;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 14px; line-height: 1.65; }
+
+  header {
+    background: linear-gradient(135deg, #0d1b2a 0%, #0b1320 100%);
+    border-bottom: 2px solid var(--accent2);
+    padding: 36px 48px 28px;
+    position: sticky; top: 0; z-index: 100;
+    display: flex; align-items: flex-end; justify-content: space-between;
+  }
+  header h1 { font-family: var(--mono); font-size: 28px; font-weight: 600; color: var(--accent2); letter-spacing: -0.5px; }
+  header h1 span { color: var(--text-dim); font-weight: 400; font-size: 14px; margin-left: 12px; }
+  .badge { background: var(--accent2); color: #000; font-family: var(--mono); font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 3px; letter-spacing: 1px; }
+
+  .container { max-width: 1100px; margin: 0 auto; padding: 40px 32px 80px; }
+
+  .toc { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 40px; padding: 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; }
+  .toc a { font-family: var(--mono); font-size: 12px; color: var(--accent2); text-decoration: none; padding: 4px 10px; border: 1px solid var(--border); border-radius: 3px; transition: all .15s; }
+  .toc a:hover { background: var(--accent2); color: #000; border-color: var(--accent2); }
+
+  section { margin-bottom: 48px; animation: fadein .4s ease both; }
+  section:nth-child(2){animation-delay:.05s} section:nth-child(3){animation-delay:.10s}
+  section:nth-child(4){animation-delay:.15s} section:nth-child(5){animation-delay:.20s}
+  section:nth-child(6){animation-delay:.25s}
+
+  .section-title { display: flex; align-items: center; gap: 12px; font-family: var(--mono); font-size: 18px; font-weight: 600; color: var(--accent2); border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 20px; }
+  .section-title .icon { background: var(--accent2); color: #000; width: 28px; height: 28px; display: grid; place-items: center; border-radius: 4px; font-size: 13px; font-weight: 700; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 20px 24px; margin-bottom: 16px; }
+  .card-title { font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--accent2); margin-bottom: 12px; text-transform: uppercase; letter-spacing: .5px; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  @media(max-width: 750px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+  .kv { display: flex; flex-direction: column; gap: 7px; }
+  .kv-row { display: flex; gap: 10px; align-items: flex-start; }
+  .kv-key { font-family: var(--mono); font-size: 12px; color: var(--accent3); min-width: 130px; padding-top: 1px; }
+  .kv-val { color: var(--text); font-size: 13px; }
+
+  ul.bullets { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+  ul.bullets li { display: flex; gap: 8px; font-size: 13px; }
+  ul.bullets li::before { content: "▸"; color: var(--accent2); flex-shrink: 0; margin-top: 1px; }
+
+  code { font-family: var(--mono); font-size: 12px; background: #162030; color: var(--accent3); padding: 1px 6px; border-radius: 3px; border: 1px solid var(--border); }
+  pre { font-family: var(--mono); font-size: 12px; background: #0d1620; border: 1px solid var(--border); border-left: 3px solid var(--accent2); padding: 14px 16px; border-radius: 4px; color: var(--accent3); overflow-x: auto; white-space: pre-wrap; margin-top: 8px; }
+
+  .tag { display: inline-block; font-family: var(--mono); font-size: 11px; padding: 2px 8px; border-radius: 3px; margin-right: 4px; margin-bottom: 4px; font-weight: 600; }
+  .tag-orange { background: rgba(247,148,29,.15); color: var(--accent);  border: 1px solid rgba(247,148,29,.3); }
+  .tag-blue   { background: rgba(59,158,222,.15);  color: var(--accent2); border: 1px solid rgba(59,158,222,.3); }
+  .tag-green  { background: rgba(78,207,124,.15);  color: var(--accent3); border: 1px solid rgba(78,207,124,.3); }
+  .tag-red    { background: rgba(224,82,82,.15);   color: var(--danger);  border: 1px solid rgba(224,82,82,.3); }
+  .tag-purple { background: rgba(167,108,255,.15); color: #a76cff;        border: 1px solid rgba(167,108,255,.3); }
+
+  .exam-tip { background: rgba(59,158,222,.08); border: 1px solid rgba(59,158,222,.3); border-left: 3px solid var(--accent2); padding: 12px 16px; border-radius: 4px; margin-top: 14px; font-size: 13px; }
+  .exam-tip strong { color: var(--accent2); font-family: var(--mono); font-size: 11px; letter-spacing: .5px; display: block; margin-bottom: 4px; }
+
+  .warn-tip { background: rgba(247,148,29,.08); border: 1px solid rgba(247,148,29,.3); border-left: 3px solid var(--accent); padding: 12px 16px; border-radius: 4px; margin-top: 14px; font-size: 13px; }
+  .warn-tip strong { color: var(--accent); font-family: var(--mono); font-size: 11px; letter-spacing: .5px; display: block; margin-bottom: 4px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: var(--surface2); font-family: var(--mono); font-size: 12px; color: var(--accent2); text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border); }
+  td { padding: 9px 14px; border-bottom: 1px solid #151f2e; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,.015); }
+
+  .flow { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .flow-node { background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 5px 12px; font-family: var(--mono); font-size: 12px; color: var(--text-bright); }
+  .flow-arrow { color: var(--text-dim); font-size: 14px; }
+
+  .pricing-box { background: rgba(78,207,124,.06); border: 1px solid rgba(78,207,124,.25); border-radius: 6px; padding: 16px 20px; display: flex; align-items: center; gap: 20px; }
+  .pricing-num { font-family: var(--mono); font-size: 32px; font-weight: 600; color: var(--accent3); }
+  .pricing-label { font-size: 13px; color: var(--text-dim); }
+  .pricing-label strong { color: var(--text); }
+
+  .home-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    text-decoration: none;
+    border: 1px solid var(--border);
+    padding: 6px 14px;
+    margin-bottom: 32px;
+    transition: color 0.2s ease, border-color 0.2s ease;
+  }
+  .home-btn:hover { color: var(--accent2); border-color: rgba(59,158,222,0.4); }
+  .home-btn svg { width: 14px; height: 14px; }
+
+  @keyframes fadein { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
+  ::-webkit-scrollbar { width:6px; height:6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius:3px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Amazon Athena <span>AWS DevOps Professional — DOP-C02</span></h1>
+  <span class="badge">EXAM PREP</span>
+</header>
+
+<div class="container">
+
+  <a href="../index.html" class="home-btn">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M10 12L6 8l4-4"/>
+    </svg>
+    Home
+  </a>
+
+  <nav class="toc">
+    <a href="#overview">Overview</a>
+    <a href="#performance">Performance</a>
+    <a href="#federated">Federated Query</a>
+    <a href="#integrations">Integrations</a>
+    <a href="#security">Security</a>
+    <a href="#quickref">Quick Reference</a>
+  </nav>
+
+  <!-- ═══════════ OVERVIEW ═══════════ -->
+  <section id="overview">
+    <div class="section-title"><span class="icon">A</span>Overview</div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">What it is</div>
+        <div class="kv">
+          <div class="kv-row"><span class="kv-key">Type</span><span class="kv-val">Serverless interactive query service — no infrastructure to manage</span></div>
+          <div class="kv-row"><span class="kv-key">Source</span><span class="kv-val">Queries data <strong>directly in S3</strong> (no ETL required to load into a DB)</span></div>
+          <div class="kv-row"><span class="kv-key">Language</span><span class="kv-val">Standard SQL (based on <strong>Presto / Trino</strong> engine)</span></div>
+          <div class="kv-row"><span class="kv-key">Schema</span><span class="kv-val">Defined in <strong>AWS Glue Data Catalog</strong> (schema-on-read)</span></div>
+          <div class="kv-row"><span class="kv-key">Output</span><span class="kv-val">Query results stored in a designated S3 bucket</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Supported Formats</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;">
+          <span class="tag tag-green">Parquet ★</span>
+          <span class="tag tag-green">ORC ★</span>
+          <span class="tag tag-blue">JSON</span>
+          <span class="tag tag-blue">CSV / TSV</span>
+          <span class="tag tag-blue">Avro</span>
+          <span class="tag tag-blue">Ion</span>
+        </div>
+        <p style="font-size:12px;color:var(--text-dim);">★ Columnar formats — strongly preferred for cost and performance</p>
+        <div class="exam-tip">
+          <strong>⚡ EXAM TIP</strong>
+          If a question asks how to reduce Athena query cost → answer is <strong>Parquet or ORC</strong> (columnar). Convert with AWS Glue.
+        </div>
+      </div>
+    </div>
+
+    <div class="pricing-box">
+      <div>
+        <div class="pricing-num">$5.00</div>
+        <div class="pricing-label">per <strong>TB of data scanned</strong></div>
+      </div>
+      <div style="border-left:1px solid rgba(78,207,124,.2);padding-left:20px;">
+        <ul class="bullets">
+          <li>You are charged only for the data actually scanned per query</li>
+          <li>Compress data + use columnar formats = less data scanned = lower cost</li>
+          <li>Partitioning = fewer files scanned = lower cost</li>
+          <li>No charge for DDL queries (CREATE, DROP, ALTER)</li>
+          <li>No charge for failed queries</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ PERFORMANCE ═══════════ -->
+  <section id="performance">
+    <div class="section-title"><span class="icon">⚡</span>Performance Improvement</div>
+
+    <div class="card">
+      <div class="card-title">The 4 Levers — memorize these</div>
+      <table>
+        <tr><th>Technique</th><th>What to Do</th><th>Why it Helps</th></tr>
+        <tr>
+          <td><span class="tag tag-green">Columnar Format</span></td>
+          <td>Convert data to <strong>Parquet</strong> or <strong>ORC</strong> using AWS Glue</td>
+          <td>Only relevant columns are read → massive scan reduction</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-blue">Compression</span></td>
+          <td><code>bzip2</code>, <code>gzip</code>, <code>lz4</code>, <code>snappy</code>, <code>zlip</code>, <code>zstd</code></td>
+          <td>Smaller files = less data transferred and scanned</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-orange">Partitioning</span></td>
+          <td>Organize S3 data in Hive-style partition paths</td>
+          <td>Athena prunes partitions — only scans matching folders</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-purple">Larger Files</span></td>
+          <td>Keep files <strong>&gt; 128 MB</strong></td>
+          <td>Reduces per-file overhead; avoids the "small files problem"</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Partitioning — S3 Path Structure</div>
+      <p style="font-size:13px;margin-bottom:10px;">Hive-compatible paths allow Athena to skip irrelevant partitions entirely:</p>
+      <pre>s3://yourBucket/pathToTable
+  /&lt;PARTITION_COL&gt;=&lt;VALUE&gt;
+    /&lt;PARTITION_COL&gt;=&lt;VALUE&gt;
+      /&lt;PARTITION_COL&gt;=&lt;VALUE&gt;
+        /data.parquet
+
+# Real example:
+s3://athena-examples/flight/parquet/year=1991/month=1/day=1/</pre>
+      <div class="exam-tip">
+        <strong>⚡ EXAM TIP</strong>
+        Query on a partitioned column (e.g. <code>WHERE year=2023 AND month=6</code>) and Athena <strong>only scans that partition</strong>. This is the most impactful cost/performance optimization for large datasets.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Workgroups</div>
+      <ul class="bullets">
+        <li>Isolate query execution and costs per team, application, or environment</li>
+        <li>Set <strong>data usage controls</strong> — max data scanned per query or per workgroup</li>
+        <li>Separate query result locations in S3 per workgroup</li>
+        <li>Integrates with IAM, CloudWatch metrics, and SNS alerts on data usage limits</li>
+      </ul>
+      <div class="exam-tip">
+        <strong>⚡ EXAM TIP</strong>
+        Workgroups enforce cost controls at the query level. A common scenario: limit a workgroup to <strong>X GB per query</strong> to prevent runaway scans.
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ FEDERATED ═══════════ -->
+  <section id="federated">
+    <div class="section-title"><span class="icon">F</span>Federated Query</div>
+
+    <div class="card">
+      <div class="card-title">What it is</div>
+      <ul class="bullets">
+        <li>Extend Athena SQL queries to data sources <strong>beyond S3</strong> — relational, non-relational, and custom</li>
+        <li>Uses <strong>Data Source Connectors</strong> that run as <strong>AWS Lambda functions</strong></li>
+        <li>Results can be stored back to S3 for further analysis</li>
+        <li>Query across multiple data sources <strong>in a single SQL statement</strong></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Supported Data Sources via Connectors</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;">
+        <span class="tag tag-blue">CloudWatch Logs</span>
+        <span class="tag tag-blue">DynamoDB</span>
+        <span class="tag tag-blue">RDS / Aurora</span>
+        <span class="tag tag-blue">Redshift</span>
+        <span class="tag tag-blue">ElastiCache</span>
+        <span class="tag tag-blue">DocumentDB</span>
+        <span class="tag tag-blue">HBase on EMR</span>
+        <span class="tag tag-blue">SQL Server</span>
+        <span class="tag tag-blue">MySQL / PostgreSQL</span>
+        <span class="tag tag-orange">On-Premises DBs</span>
+        <span class="tag tag-orange">Custom (any JDBC)</span>
+      </div>
+      <div class="flow" style="margin-top:16px;">
+        <span class="flow-node">Athena SQL</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-node">Lambda Connector</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-node">Data Source</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-node">Results → S3</span>
+      </div>
+      <div class="exam-tip">
+        <strong>⚡ EXAM TIP</strong>
+        Federated Query scenario: "query DynamoDB AND S3 in a single SQL query without moving data" → answer is <strong>Athena Federated Query with Lambda Data Source Connector</strong>.
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ INTEGRATIONS ═══════════ -->
+  <section id="integrations">
+    <div class="section-title"><span class="icon">↔</span>Key Integrations</div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">AWS Glue</div>
+        <ul class="bullets">
+          <li><strong>Glue Data Catalog</strong> = central metadata store (databases, tables, schemas)</li>
+          <li>Glue Crawlers auto-discover S3 data and populate the catalog</li>
+          <li>Use Glue ETL jobs to <strong>convert CSV/JSON → Parquet/ORC</strong> before querying</li>
+          <li>Athena uses Glue catalog by default — no separate schema setup needed</li>
+        </ul>
+        <div class="exam-tip">
+          <strong>⚡ EXAM TIP</strong>
+          Athena + Glue Crawler + S3 = a fully serverless data lake query stack. This architecture appears frequently in DOP-C02 scenarios.
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Amazon QuickSight</div>
+        <ul class="bullets">
+          <li>Native BI / visualization layer on top of Athena</li>
+          <li>QuickSight → Athena → S3 = serverless reporting pipeline</li>
+          <li>No data movement required — QuickSight queries Athena directly</li>
+          <li>Supports SPICE (in-memory cache) to reduce repeated Athena costs</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">CloudWatch Logs Insights vs Athena</div>
+        <table>
+          <tr><th></th><th>CW Logs Insights</th><th>Athena</th></tr>
+          <tr><td>Source</td><td>CloudWatch Logs</td><td>S3</td></tr>
+          <tr><td>Language</td><td>CW Query Language</td><td>Standard SQL</td></tr>
+          <tr><td>Best for</td><td>Operational log queries</td><td>Analytics on exported logs</td></tr>
+          <tr><td>Export logs?</td><td>Not needed</td><td>Export CW Logs → S3 first</td></tr>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-title">S3 + Athena Common Use Cases</div>
+        <ul class="bullets">
+          <li>Query <strong>VPC Flow Logs</strong> exported to S3</li>
+          <li>Query <strong>CloudTrail</strong> audit logs in S3</li>
+          <li>Query <strong>ALB / ELB access logs</strong> in S3</li>
+          <li>Query <strong>CloudFront access logs</strong> in S3</li>
+          <li>Ad-hoc analysis on any structured S3 data lake</li>
+        </ul>
+        <div class="exam-tip">
+          <strong>⚡ EXAM TIP</strong>
+          "Analyze CloudTrail / VPC Flow Logs without loading into a DB" → <strong>Export to S3 + Athena</strong>.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ SECURITY ═══════════ -->
+  <section id="security">
+    <div class="section-title"><span class="icon">🔒</span>Security</div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Access Control</div>
+        <ul class="bullets">
+          <li><strong>IAM policies</strong> control who can run queries and access workgroups</li>
+          <li>S3 bucket policies / ACLs control access to the underlying data</li>
+          <li>Workgroup-level permissions — restrict workgroup access per team</li>
+          <li>Supports <strong>Lake Formation</strong> for fine-grained column/row-level security on Glue catalog tables</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Encryption</div>
+        <ul class="bullets">
+          <li>Query results in S3 can be encrypted with <strong>SSE-S3</strong>, <strong>SSE-KMS</strong>, or <strong>CSE-KMS</strong></li>
+          <li>Data at rest in S3 follows the bucket's encryption settings</li>
+          <li>In-transit encryption: TLS between Athena and S3</li>
+          <li>Cross-account S3 access supported with proper bucket policies + IAM</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ QUICK REF ═══════════ -->
+  <section id="quickref">
+    <div class="section-title"><span class="icon">✓</span>Exam Quick Reference</div>
+
+    <div class="card">
+      <div class="card-title">Scenario → Answer Map</div>
+      <table>
+        <tr><th>If the question says…</th><th>Answer involves…</th></tr>
+        <tr><td>Reduce Athena cost / scan less data</td><td>Parquet/ORC + partitioning + compression + &gt;128 MB files</td></tr>
+        <tr><td>Convert CSV to columnar format</td><td>AWS Glue ETL job → Parquet/ORC → S3</td></tr>
+        <tr><td>Query DynamoDB / RDS with SQL without ETL</td><td>Athena Federated Query + Lambda connector</td></tr>
+        <tr><td>Analyze CloudTrail / VPC Flow Logs</td><td>Export to S3 → Query with Athena</td></tr>
+        <tr><td>Serverless BI dashboard on S3 data</td><td>Athena + QuickSight</td></tr>
+        <tr><td>Prevent expensive queries / control costs per team</td><td>Athena Workgroups with data usage limits</td></tr>
+        <tr><td>Auto-discover S3 schema for Athena</td><td>AWS Glue Crawler → Glue Data Catalog</td></tr>
+        <tr><td>Fine-grained access control on Athena tables</td><td>AWS Lake Formation + Glue Data Catalog</td></tr>
+        <tr><td>Real-time log queries</td><td>CloudWatch Logs Insights (not Athena)</td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-title">What Athena is NOT</div>
+      <ul class="bullets">
+        <li>Not a database — it does <strong>not store data</strong>; S3 is the store</li>
+        <li>Not for real-time streaming queries — use Kinesis Data Analytics for that</li>
+        <li>Not a replacement for Redshift on large-scale petabyte analytics with complex joins</li>
+        <li>Not suited for frequent small queries — cost adds up vs. a cached DB</li>
+      </ul>
+      <div class="warn-tip">
+        <strong>⚠ WATCH OUT</strong>
+        Athena charges per TB scanned — a single <code>SELECT *</code> on an unpartitioned, non-columnar dataset can be expensive. Always recommend partitioning + Parquet when cost is mentioned.
+      </div>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

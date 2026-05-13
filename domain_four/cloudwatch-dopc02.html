@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CloudWatch — DOP-C02 Study Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0f14;
+    --surface: #111822;
+    --surface2: #1a2333;
+    --border: #1e2d42;
+    --accent: #f7941d;
+    --accent2: #3b9ede;
+    --accent3: #4ecf7c;
+    --danger: #e05252;
+    --text: #d4dde8;
+    --text-dim: #6b84a0;
+    --text-bright: #eaf2ff;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.65;
+  }
+
+  /* HEADER */
+  header {
+    background: linear-gradient(135deg, #0d1b2a 0%, #0b1320 100%);
+    border-bottom: 2px solid var(--accent);
+    padding: 36px 48px 28px;
+    position: sticky; top: 0; z-index: 100;
+    display: flex; align-items: flex-end; justify-content: space-between;
+  }
+  header h1 {
+    font-family: var(--mono);
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: -0.5px;
+  }
+  header h1 span { color: var(--text-dim); font-weight: 400; font-size: 14px; margin-left: 12px; }
+  .badge {
+    background: var(--accent);
+    color: #000;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 3px;
+    letter-spacing: 1px;
+  }
+
+  /* LAYOUT */
+  .container { max-width: 1100px; margin: 0 auto; padding: 40px 32px 80px; }
+
+  /* NAV */
+  .toc {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    margin-bottom: 40px;
+    padding: 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+  }
+  .toc a {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent2);
+    text-decoration: none;
+    padding: 4px 10px;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    transition: all .15s;
+  }
+  .toc a:hover { background: var(--accent2); color: #000; border-color: var(--accent2); }
+
+  /* SECTIONS */
+  section { margin-bottom: 48px; }
+  .section-title {
+    display: flex; align-items: center; gap: 12px;
+    font-family: var(--mono);
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--accent);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+  }
+  .section-title .icon {
+    background: var(--accent);
+    color: #000;
+    width: 28px; height: 28px;
+    display: grid; place-items: center;
+    border-radius: 4px;
+    font-size: 13px;
+  }
+
+  /* CARDS */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+  }
+  .card-title {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent2);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+  }
+
+  /* GRID */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  @media(max-width: 750px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+  /* KV LIST */
+  .kv { display: flex; flex-direction: column; gap: 7px; }
+  .kv-row { display: flex; gap: 10px; align-items: flex-start; }
+  .kv-key {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent3);
+    min-width: 140px;
+    padding-top: 1px;
+  }
+  .kv-val { color: var(--text); font-size: 13px; }
+
+  /* BULLETS */
+  ul.bullets { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+  ul.bullets li { display: flex; gap: 8px; font-size: 13px; }
+  ul.bullets li::before { content: "▸"; color: var(--accent); flex-shrink: 0; margin-top: 1px; }
+
+  /* INLINE CODE */
+  code {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: #162030;
+    color: var(--accent3);
+    padding: 1px 6px;
+    border-radius: 3px;
+    border: 1px solid var(--border);
+  }
+  pre {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: #0d1620;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent2);
+    padding: 14px 16px;
+    border-radius: 4px;
+    color: var(--accent3);
+    overflow-x: auto;
+    white-space: pre-wrap;
+    margin-top: 8px;
+  }
+
+  /* TAGS */
+  .tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    margin-right: 4px;
+    margin-bottom: 4px;
+    font-weight: 600;
+  }
+  .tag-orange { background: rgba(247,148,29,.15); color: var(--accent); border: 1px solid rgba(247,148,29,.3); }
+  .tag-blue   { background: rgba(59,158,222,.15); color: var(--accent2); border: 1px solid rgba(59,158,222,.3); }
+  .tag-green  { background: rgba(78,207,124,.15); color: var(--accent3); border: 1px solid rgba(78,207,124,.3); }
+  .tag-red    { background: rgba(224,82,82,.15);  color: var(--danger);  border: 1px solid rgba(224,82,82,.3); }
+
+  /* EXAM TIP */
+  .exam-tip {
+    background: rgba(247,148,29,.08);
+    border: 1px solid rgba(247,148,29,.3);
+    border-left: 3px solid var(--accent);
+    padding: 12px 16px;
+    border-radius: 4px;
+    margin-top: 14px;
+    font-size: 13px;
+  }
+  .exam-tip strong { color: var(--accent); font-family: var(--mono); font-size: 11px; letter-spacing: .5px; display: block; margin-bottom: 4px; }
+
+  /* STATE PILLS */
+  .states { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+  .state {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 5px 14px;
+    border-radius: 20px;
+    letter-spacing: .5px;
+  }
+  .state-ok    { background: rgba(78,207,124,.2); color: var(--accent3); border: 1px solid rgba(78,207,124,.4); }
+  .state-insuf { background: rgba(247,148,29,.2); color: var(--accent);  border: 1px solid rgba(247,148,29,.4); }
+  .state-alarm { background: rgba(224,82,82,.2);  color: var(--danger);  border: 1px solid rgba(224,82,82,.4); }
+
+  /* FLOW */
+  .flow {
+    display: flex; align-items: center; flex-wrap: wrap;
+    gap: 6px; margin-top: 10px;
+  }
+  .flow-node {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 5px 12px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-bright);
+  }
+  .flow-arrow { color: var(--text-dim); font-size: 14px; }
+
+  /* COMPARISON TABLE */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th {
+    background: var(--surface2);
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent2);
+    text-align: left;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  td { padding: 9px 14px; border-bottom: 1px solid #151f2e; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,.015); }
+
+  /* DIVIDER */
+  hr { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+
+  /* HOME BUTTON */
+  .home-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    text-decoration: none;
+    border: 1px solid var(--border);
+    padding: 6px 14px;
+    margin-bottom: 32px;
+    transition: color 0.2s ease, border-color 0.2s ease;
+  }
+  .home-btn:hover { color: var(--accent); border-color: rgba(247,148,29,0.4); }
+  .home-btn svg { width: 14px; height: 14px; }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* ANIM */
+  @keyframes fadein { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
+  section { animation: fadein .4s ease both; }
+  section:nth-child(2) { animation-delay: .05s; }
+  section:nth-child(3) { animation-delay: .10s; }
+  section:nth-child(4) { animation-delay: .15s; }
+  section:nth-child(5) { animation-delay: .20s; }
+  section:nth-child(6) { animation-delay: .25s; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>CloudWatch <span>AWS DevOps Professional — DOP-C02</span></h1>
+  <span class="badge">EXAM PREP</span>
+</header>
+
+<div class="container">
+
+  <a href="../index.html" class="home-btn">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M10 12L6 8l4-4"/>
+    </svg>
+    Home
+  </a>
+
+  <!-- TOC -->
+  <nav class="toc">
+    <a href="#metrics">Metrics</a>
+    <a href="#logs">Logs</a>
+    <a href="#agent">Agent</a>
+    <a href="#alarms">Alarms</a>
+    <a href="#anomaly">Anomaly Detection</a>
+    <a href="#synthetics">Synthetics</a>
+  </nav>
+
+  <!-- ═══════════════════════════════ METRICS ═══════════════════════════════ -->
+  <section id="metrics">
+    <div class="section-title"><span class="icon">M</span>CloudWatch Metrics</div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Core Concepts</div>
+        <div class="kv">
+          <div class="kv-row"><span class="kv-key">Metric</span><span class="kv-val">A variable to monitor (e.g. CPUUtilization, NetworkIn). Belongs to a <strong>namespace</strong>.</span></div>
+          <div class="kv-row"><span class="kv-key">Namespace</span><span class="kv-val">Container that isolates metrics by service (e.g. <code>AWS/EC2</code>).</span></div>
+          <div class="kv-row"><span class="kv-key">Dimension</span><span class="kv-val">Key/value attribute used to filter/segment metrics (e.g. InstanceId, Environment). <strong>Max 30 per metric.</strong></span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Custom Metrics</div>
+        <ul class="bullets">
+          <li>Publish with API call <code>PutMetricData</code></li>
+          <li>Use cases: RAM usage, disk space, app-specific counters</li>
+          <li>Supports up to 30 dimensions per metric</li>
+          <li>Accepts data points <strong>2 weeks in the past</strong> and <strong>2 hours in the future</strong> — ensure EC2 time is correct</li>
+        </ul>
+        <div class="exam-tip">
+          <strong>⚡ EXAM TIP</strong>
+          RAM and disk metrics are NOT collected by default — you must publish them via a Custom Metric or the Unified Agent.
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Metric Resolution (StorageResolution parameter)</div>
+      <table>
+        <tr><th>Type</th><th>Resolution</th><th>Cost</th><th>Use Case</th></tr>
+        <tr><td><span class="tag tag-green">Standard</span></td><td>1 minute (60s)</td><td>Normal</td><td>Default for most services</td></tr>
+        <tr><td><span class="tag tag-orange">High Resolution</span></td><td>1 / 5 / 10 / 30 seconds</td><td>Higher</td><td>Fine-grained application monitoring</td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Metric Streams</div>
+      <ul class="bullets">
+        <li>Near-real-time, low-latency delivery of metrics outside CloudWatch</li>
+        <li>Destinations: <span class="tag tag-blue">Kinesis Data Firehose</span> <span class="tag tag-orange">Datadog</span> <span class="tag tag-orange">Splunk</span> <span class="tag tag-orange">New Relic</span></li>
+        <li>Output formats: JSON or OpenTelemetry 0.7</li>
+        <li>Option to filter by namespace — stream only the metrics you need</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════ LOGS ═══════════════════════════════ -->
+  <section id="logs">
+    <div class="section-title"><span class="icon">L</span>CloudWatch Logs</div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Structure</div>
+        <div class="kv">
+          <div class="kv-row"><span class="kv-key">Log Group</span><span class="kv-val">Arbitrary name, usually represents an application</span></div>
+          <div class="kv-row"><span class="kv-key">Log Stream</span><span class="kv-val">Instances within an app / individual log files / containers</span></div>
+          <div class="kv-row"><span class="kv-key">Retention</span><span class="kv-val">Never expire → 10 years (configurable per log group)</span></div>
+          <div class="kv-row"><span class="kv-key">Encryption</span><span class="kv-val">Encrypted by default; optional KMS with your own keys</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Log Sources</div>
+        <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:4px;">
+          <span class="tag tag-blue">SDK / CLI</span>
+          <span class="tag tag-blue">CW Logs Agent</span>
+          <span class="tag tag-blue">Unified Agent</span>
+          <span class="tag tag-orange">Elastic Beanstalk</span>
+          <span class="tag tag-orange">AWS Lambda</span>
+          <span class="tag tag-orange">VPC Flow Logs</span>
+          <span class="tag tag-orange">API Gateway</span>
+          <span class="tag tag-orange">CloudTrail</span>
+          <span class="tag tag-orange">Route 53</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Log Destinations (Export / Forward)</div>
+      <table>
+        <tr><th>Destination</th><th>Mechanism</th><th>Latency</th><th>Notes</th></tr>
+        <tr><td>Amazon S3</td><td>S3 Export (<code>CreateExportTask</code>)</td><td>Up to 12 hours</td><td>Not real-time — use Subscriptions for near-RT</td></tr>
+        <tr><td>Kinesis Data Streams</td><td>Subscription Filter</td><td>Near real-time</td><td>Fan out to KDA, KDF, Lambda, EC2</td></tr>
+        <tr><td>Kinesis Data Firehose</td><td>Subscription Filter</td><td>Near real-time</td><td>Delivers to S3, Redshift, OpenSearch</td></tr>
+        <tr><td>AWS Lambda</td><td>Subscription Filter</td><td>Real-time</td><td>Custom processing / alerting</td></tr>
+        <tr><td>OpenSearch</td><td>Subscription Filter → Lambda</td><td>Real-time</td><td>Full-text search and dashboards</td></tr>
+      </table>
+      <div class="exam-tip">
+        <strong>⚡ EXAM TIP</strong>
+        S3 Export is batch/async — when the question mentions "real-time" or "near real-time" forwarding, the answer is <strong>Subscription Filters → Kinesis or Lambda</strong>.
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Logs Insights</div>
+        <ul class="bullets">
+          <li>Interactive query language (similar to SQL) against log groups</li>
+          <li>Query across multiple log groups including different AWS accounts</li>
+          <li>Supports time range filtering, aggregations, sorting, limiting</li>
+          <li>Results can be exported or pinned to a CloudWatch Dashboard</li>
+          <li><strong>Not real-time</strong> — designed for historical/analytical queries</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Metric Filters</div>
+        <ul class="bullets">
+          <li>Apply filter patterns to log data to extract metric values</li>
+          <li>Examples: count ERROR occurrences, extract response time</li>
+          <li>Max <strong>3 dimensions</strong> per filter</li>
+          <li>Can trigger CloudWatch Alarms</li>
+          <li>Filters only apply to <strong>new log events</strong> (not retroactive)</li>
+        </ul>
+        <div class="flow" style="margin-top:12px;">
+          <span class="flow-node">EC2 + CW Agent</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-node">CW Logs</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-node">Metric Filter</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-node">CW Alarm</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-node">SNS</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Logs Aggregation (Multi-Account / Multi-Region)</div>
+      <ul class="bullets">
+        <li>Use <strong>Subscription Filters</strong> in each account/region pointing to a central Kinesis Data Streams</li>
+        <li>Pattern: Account A (Region 1) + Account B (Region 2) + Account B (Region 3) → Kinesis Data Streams → Kinesis Data Firehose → S3 (near real-time)</li>
+        <li>Enables centralized log aggregation architecture across an organization</li>
+      </ul>
+      <div class="exam-tip">
+        <strong>⚡ EXAM TIP</strong>
+        Cross-account log aggregation uses Subscription Filters with cross-account IAM permissions — a common DevOps architecture scenario.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">AWS Managed Logs (native integrations → direct to S3 or CW Logs)</div>
+      <table>
+        <tr><th>Service</th><th>Log Type</th><th>Destination</th></tr>
+        <tr><td>Load Balancer (ALB/NLB/CLB)</td><td>Access Logs</td><td>S3</td></tr>
+        <tr><td>CloudTrail</td><td>API call audit logs</td><td>S3 + CloudWatch Logs</td></tr>
+        <tr><td>VPC</td><td>VPC Flow Logs (IP traffic)</td><td>S3 + CloudWatch Logs</td></tr>
+        <tr><td>Route 53</td><td>DNS query logs</td><td>CloudWatch Logs</td></tr>
+        <tr><td>S3</td><td>Server access logs</td><td>S3</td></tr>
+        <tr><td>CloudFront</td><td>Access logs (user requests)</td><td>S3</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════ AGENT ═══════════════════════════════ -->
+  <section id="agent">
+    <div class="section-title"><span class="icon">A</span>CloudWatch Agent</div>
+
+    <div class="exam-tip" style="margin-bottom:16px;">
+      <strong>⚡ KEY CONCEPT</strong>
+      By default, <strong>no logs and no OS-level metrics</strong> leave an EC2 instance. You must install and configure the CW Agent. Requires appropriate <strong>IAM role/permissions</strong>.
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">CloudWatch Logs Agent <span class="tag tag-red" style="margin-left:6px;">OLDER</span></div>
+        <ul class="bullets">
+          <li>Only sends logs to CloudWatch Logs</li>
+          <li>No system-level metrics collection</li>
+          <li>Limited configuration options</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title">CloudWatch Unified Agent <span class="tag tag-green" style="margin-left:6px;">PREFERRED</span></div>
+        <ul class="bullets">
+          <li>Collects logs AND system-level metrics</li>
+          <li>Additional metrics: CPU (per-core), RAM, disk I/O, net stats, processes, swap</li>
+          <li>Centralized config via <strong>SSM Parameter Store</strong></li>
+          <li>Works on EC2 <em>and</em> on-premises servers</li>
+          <li>More granularity, same agent for logs + metrics</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Unified Agent — Metrics Collected</div>
+      <div style="display:flex; flex-wrap:wrap; gap:6px;">
+        <span class="tag tag-blue">CPU (per core)</span>
+        <span class="tag tag-blue">Disk I/O</span>
+        <span class="tag tag-blue">Disk Usage</span>
+        <span class="tag tag-blue">RAM</span>
+        <span class="tag tag-blue">Net stats</span>
+        <span class="tag tag-blue">Processes</span>
+        <span class="tag tag-blue">Swap space</span>
+      </div>
+      <div class="exam-tip" style="margin-top:12px;">
+        <strong>⚡ EXAM TIP</strong>
+        RAM, swap, and per-process metrics are NOT in standard EC2 CloudWatch metrics. Any question about monitoring memory on EC2 → answer is <strong>CloudWatch Unified Agent + Custom Metric</strong>.
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════ ALARMS ═══════════════════════════════ -->
+  <section id="alarms">
+    <div class="section-title"><span class="icon">!</span>CloudWatch Alarms</div>
+
+    <div class="card">
+      <div class="card-title">Alarm States</div>
+      <div class="states">
+        <span class="state state-ok">OK</span>
+        <span class="state state-insuf">INSUFFICIENT_DATA</span>
+        <span class="state state-alarm">ALARM</span>
+      </div>
+      <p style="margin-top:12px; font-size:13px; color:var(--text-dim);">INSUFFICIENT_DATA = not enough data to evaluate the condition (e.g. metric just created or EC2 stopped)</p>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Period</div>
+        <ul class="bullets">
+          <li>Time window (in seconds) over which the metric is evaluated</li>
+          <li>Supported intervals: <code>10s</code> <code>30s</code> <code>60s</code> (multiples of 60 for standard)</li>
+          <li>High-resolution alarms require high-resolution custom metrics</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Alarm Targets (Actions)</div>
+        <ul class="bullets">
+          <li><strong>EC2 Actions:</strong> Stop, Terminate, Reboot, Recover instance</li>
+          <li><strong>Auto Scaling:</strong> Scale out / Scale in (ASG)</li>
+          <li><strong>SNS notification</strong> → trigger further automation</li>
+          <li>Alarms can be created <strong>from Metric Filters</strong></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Composite Alarms</div>
+      <ul class="bullets">
+        <li>Combine multiple alarms using <strong>AND / OR</strong> logic</li>
+        <li>Reduces alarm noise — only alert when multiple conditions are met</li>
+        <li>Example: ALARM only if CPU &gt; 80% <strong>AND</strong> IOPS &gt; threshold</li>
+      </ul>
+      <div class="exam-tip">
+        <strong>⚡ EXAM TIP</strong>
+        Composite Alarms are key for avoiding alarm storms. If the question is about reducing unnecessary alert notifications, the answer involves Composite Alarms with AND logic.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Testing Alarms via CLI</div>
+      <pre>aws cloudwatch set-alarm-state \
+  --alarm-name "myAlarm" \
+  --state-value ALARM \
+  --state-reason "testing purposes"</pre>
+      <p style="margin-top:8px; font-size:12px; color:var(--text-dim);">Useful for testing alarm actions in CI/CD pipelines without waiting for actual threshold breaches.</p>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════ ANOMALY ═══════════════════════════════ -->
+  <section id="anomaly">
+    <div class="section-title"><span class="icon">~</span>Anomaly Detection</div>
+
+    <div class="card">
+      <ul class="bullets">
+        <li>Uses <strong>ML algorithms</strong> to continuously analyze metrics and establish a normal baseline band</li>
+        <li>Creates a model based on metric's <strong>historical data</strong> (patterns, seasonality, trends)</li>
+        <li>Highlights data points that fall <strong>outside the normal range</strong> on graphs</li>
+        <li>Allows creating alarms based on <strong>expected value</strong> instead of a hard static threshold</li>
+        <li>Can exclude specific time windows from training (maintenance periods, deployments)</li>
+      </ul>
+      <div class="exam-tip">
+        <strong>⚡ EXAM TIP</strong>
+        When a question mentions dynamic thresholds, variable workloads, or avoiding false alarms from predictable load patterns → answer is <strong>CloudWatch Anomaly Detection</strong>.
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════ SYNTHETICS ═══════════════════════════════ -->
+  <section id="synthetics">
+    <div class="section-title"><span class="icon">S</span>CloudWatch Synthetics Canary</div>
+
+    <div class="card">
+      <div class="card-title">What it is</div>
+      <ul class="bullets">
+        <li>Configurable scripts that monitor APIs, URLs, and websites <strong>from the outside</strong>, simulating real user behavior</li>
+        <li>Detects issues <strong>before customers are impacted</strong></li>
+        <li>Checks availability and latency of endpoints; stores screenshots and load time data</li>
+        <li>Integrates with CloudWatch Alarms → trigger Route 53 failover automatically</li>
+        <li>Scripts written in <strong>Node.js</strong> or <strong>Python</strong>; uses headless Chromium browser</li>
+        <li>Runs <strong>once</strong> or on a <strong>recurring schedule</strong></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Built-in Blueprints</div>
+      <table>
+        <tr><th>Blueprint</th><th>Purpose</th></tr>
+        <tr><td><span class="tag tag-blue">Heartbeat Monitor</span></td><td>Loads a URL, stores a screenshot and HTTP archive file</td></tr>
+        <tr><td><span class="tag tag-blue">API Canary</span></td><td>Tests basic read and write operations of REST APIs</td></tr>
+        <tr><td><span class="tag tag-blue">Broken Link Checker</span></td><td>Checks all hyperlinks within a target URL</td></tr>
+        <tr><td><span class="tag tag-blue">Visual Monitoring</span></td><td>Compares current screenshot vs a baseline — detects visual regressions</td></tr>
+        <tr><td><span class="tag tag-blue">Canary Recorder</span></td><td>Records your actions on a site and auto-generates a canary script</td></tr>
+        <tr><td><span class="tag tag-blue">GUI Workflow Builder</span></td><td>Verifies multi-step actions work (e.g. login form → dashboard)</td></tr>
+      </table>
+      <div class="exam-tip">
+        <strong>⚡ EXAM TIP</strong>
+        Synthetics Canary + CloudWatch Alarm + Route 53 Health Check is a common <strong>automated failover</strong> pattern in DOP-C02. The canary detects the failure → alarm fires → Route 53 DNS failover to a secondary region.
+      </div>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>
