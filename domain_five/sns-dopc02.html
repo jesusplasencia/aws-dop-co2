@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SNS — DOP-C02 Study Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0f14;
+    --surface: #111822;
+    --surface2: #1a2333;
+    --border: #1e2d42;
+    --accent: #f7941d;
+    --accent2: #3b9ede;
+    --accent3: #4ecf7c;
+    --red: #e05252;
+    --violet: #9b6dff;
+    --text: #d4dde8;
+    --text-dim: #6b84a0;
+    --text-bright: #eaf2ff;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 14px; line-height: 1.65; }
+
+  header {
+    background: linear-gradient(135deg, #0d1b2a 0%, #0b1320 100%);
+    border-bottom: 2px solid var(--violet);
+    padding: 36px 48px 28px;
+    position: sticky; top: 0; z-index: 100;
+    display: flex; align-items: flex-end; justify-content: space-between;
+  }
+  header h1 { font-family: var(--mono); font-size: 28px; font-weight: 600; color: var(--violet); letter-spacing: -0.5px; }
+  header h1 span { color: var(--text-dim); font-weight: 400; font-size: 14px; margin-left: 12px; }
+  .badge { background: var(--violet); color: #fff; font-family: var(--mono); font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 3px; letter-spacing: 1px; }
+  .home-btn { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--violet); background: rgba(155,109,255,.1); border: 1px solid rgba(155,109,255,.3); padding: 5px 12px; border-radius: 3px; text-decoration: none; letter-spacing: .5px; transition: all .15s; }
+  .home-btn:hover { background: var(--violet); color: #fff; }
+
+  .container { max-width: 1100px; margin: 0 auto; padding: 40px 32px 80px; }
+
+  .toc { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 40px; padding: 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; }
+  .toc a { font-family: var(--mono); font-size: 12px; color: var(--violet); text-decoration: none; padding: 4px 10px; border: 1px solid var(--border); border-radius: 3px; transition: all .15s; }
+  .toc a:hover { background: var(--violet); color: #fff; border-color: var(--violet); }
+
+  section { margin-bottom: 48px; animation: fadein .4s ease both; }
+  section:nth-child(2){animation-delay:.04s} section:nth-child(3){animation-delay:.08s}
+  section:nth-child(4){animation-delay:.12s} section:nth-child(5){animation-delay:.16s}
+  section:nth-child(6){animation-delay:.20s} section:nth-child(7){animation-delay:.24s}
+  section:nth-child(8){animation-delay:.28s}
+
+  .section-title { display: flex; align-items: center; gap: 12px; font-family: var(--mono); font-size: 18px; font-weight: 600; color: var(--violet); border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 20px; }
+  .section-title .icon { background: var(--violet); color: #fff; width: 28px; height: 28px; display: grid; place-items: center; border-radius: 4px; font-size: 13px; font-weight: 700; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 20px 24px; margin-bottom: 16px; }
+  .card-title { font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--violet); margin-bottom: 12px; text-transform: uppercase; letter-spacing: .5px; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  @media(max-width: 760px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+  .kv { display: flex; flex-direction: column; gap: 7px; }
+  .kv-row { display: flex; gap: 10px; align-items: flex-start; }
+  .kv-key { font-family: var(--mono); font-size: 12px; color: var(--accent3); min-width: 160px; padding-top: 1px; flex-shrink: 0; }
+  .kv-val { color: var(--text); font-size: 13px; }
+
+  ul.bullets { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+  ul.bullets li { display: flex; gap: 8px; font-size: 13px; }
+  ul.bullets li::before { content: "▸"; color: var(--violet); flex-shrink: 0; margin-top: 1px; }
+
+  code { font-family: var(--mono); font-size: 12px; background: #162030; color: var(--accent3); padding: 1px 6px; border-radius: 3px; border: 1px solid var(--border); }
+  pre { font-family: var(--mono); font-size: 12px; background: #0d1620; border: 1px solid var(--border); border-left: 3px solid var(--violet); padding: 14px 16px; border-radius: 4px; color: #c9d1d9; overflow-x: auto; white-space: pre-wrap; margin-top: 8px; line-height: 1.8; }
+  pre .k { color: var(--violet); } pre .s { color: var(--accent3); } pre .c { color: var(--text-dim); }
+
+  .tag { display: inline-block; font-family: var(--mono); font-size: 11px; padding: 2px 8px; border-radius: 3px; margin-right: 4px; margin-bottom: 4px; font-weight: 600; }
+  .tag-violet { background: rgba(155,109,255,.15); color: var(--violet);  border: 1px solid rgba(155,109,255,.3); }
+  .tag-blue   { background: rgba(59,158,222,.15);  color: var(--accent2); border: 1px solid rgba(59,158,222,.3); }
+  .tag-green  { background: rgba(78,207,124,.15);  color: var(--accent3); border: 1px solid rgba(78,207,124,.3); }
+  .tag-orange { background: rgba(247,148,29,.15);  color: var(--accent);  border: 1px solid rgba(247,148,29,.3); }
+  .tag-red    { background: rgba(224,82,82,.15);   color: var(--red);     border: 1px solid rgba(224,82,82,.3); }
+
+  .exam-tip { background: rgba(155,109,255,.07); border: 1px solid rgba(155,109,255,.3); border-left: 3px solid var(--violet); padding: 12px 16px; border-radius: 4px; margin-top: 14px; font-size: 13px; }
+  .exam-tip strong { color: var(--violet); font-family: var(--mono); font-size: 11px; letter-spacing: .5px; display: block; margin-bottom: 4px; }
+
+  .warn-tip { background: rgba(247,148,29,.08); border: 1px solid rgba(247,148,29,.3); border-left: 3px solid var(--accent); padding: 12px 16px; border-radius: 4px; margin-top: 14px; font-size: 13px; }
+  .warn-tip strong { color: var(--accent); font-family: var(--mono); font-size: 11px; letter-spacing: .5px; display: block; margin-bottom: 4px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: var(--surface2); font-family: var(--mono); font-size: 12px; color: var(--violet); text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border); }
+  td { padding: 9px 14px; border-bottom: 1px solid #151f2e; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,.015); }
+
+  .flow { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .flow-node { background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 5px 12px; font-family: var(--mono); font-size: 12px; color: var(--text-bright); }
+  .flow-node.violet { border-color: rgba(155,109,255,.4); color: var(--violet); }
+  .flow-node.green  { border-color: rgba(78,207,124,.4);  color: var(--accent3); }
+  .flow-node.orange { border-color: rgba(247,148,29,.4);  color: var(--accent); }
+  .flow-node.blue   { border-color: rgba(59,158,222,.4);  color: var(--accent2); }
+  .flow-node.red    { border-color: rgba(224,82,82,.4);   color: var(--red); }
+  .flow-arrow { color: var(--text-dim); font-size: 14px; }
+
+  /* fanout visual */
+  .fanout { display: flex; gap: 24px; align-items: center; flex-wrap: wrap; margin-top: 12px; }
+  .fanout-source { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .fanout-arrow-block { display: flex; flex-direction: column; justify-content: center; }
+  .fanout-targets { display: flex; flex-direction: column; gap: 8px; }
+  .fanout-node { background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 6px 14px; font-family: var(--mono); font-size: 12px; color: var(--text-bright); min-width: 160px; }
+  .fanout-node.filtered { border-color: rgba(78,207,124,.4); color: var(--accent3); }
+
+  @keyframes fadein { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
+  ::-webkit-scrollbar { width:6px; height:6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius:3px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Amazon SNS <span>AWS DevOps Professional — DOP-C02</span></h1>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <a href="../index.html" class="home-btn">&#8592; Home</a>
+    <span class="badge">EXAM PREP</span>
+  </div>
+</header>
+
+<div class="container">
+
+  <nav class="toc">
+    <a href="#overview">Overview</a>
+    <a href="#subscriptions">Subscriptions</a>
+    <a href="#fanout">Fan-Out</a>
+    <a href="#filtering">Filtering</a>
+    <a href="#fifo">SNS FIFO</a>
+    <a href="#dlq">DLQ / ReDrive</a>
+    <a href="#security">Security</a>
+    <a href="#quickref">Quick Reference</a>
+  </nav>
+
+  <!-- ═══════════ OVERVIEW ═══════════ -->
+  <section id="overview">
+    <div class="section-title"><span class="icon">N</span>Overview</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Core Concepts</div>
+        <div class="kv">
+          <div class="kv-row"><span class="kv-key">Model</span><span class="kv-val"><strong>Pub/Sub</strong> — publisher sends once to a Topic; SNS pushes to all subscribers</span></div>
+          <div class="kv-row"><span class="kv-key">Delivery</span><span class="kv-val"><strong>Push</strong> (SNS delivers to subscribers) vs SQS Pull model</span></div>
+          <div class="kv-row"><span class="kv-key">Persistence</span><span class="kv-val">SNS does <strong>NOT store messages</strong> — delivery is real-time push only</span></div>
+          <div class="kv-row"><span class="kv-key">Topics limit</span><span class="kv-val"><strong>100,000</strong> topics per account (soft limit)</span></div>
+          <div class="kv-row"><span class="kv-key">Subscriptions</span><span class="kv-val"><strong>12,500,000</strong> per topic</span></div>
+          <div class="kv-row"><span class="kv-key">Message size</span><span class="kv-val">Max <strong>256 KB</strong></span></div>
+          <div class="kv-row"><span class="kv-key">Retention</span><span class="kv-val"><strong>None</strong> — undelivered messages are lost unless DLQ is configured</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">AWS Services That Publish to SNS</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;">
+          <span class="tag tag-blue">CloudWatch Alarms</span>
+          <span class="tag tag-blue">AWS Budgets</span>
+          <span class="tag tag-blue">Auto Scaling (notifications)</span>
+          <span class="tag tag-blue">S3 Events</span>
+          <span class="tag tag-blue">CloudFormation state changes</span>
+          <span class="tag tag-blue">DynamoDB streams</span>
+          <span class="tag tag-blue">RDS Events</span>
+          <span class="tag tag-blue">AWS DMS (New Replica)</span>
+          <span class="tag tag-blue">Lambda</span>
+          <span class="tag tag-orange">EventBridge</span>
+        </div>
+        <div class="exam-tip">
+          <strong>⚡ EXAM TIP</strong>
+          CloudWatch Alarm → SNS → Email/Lambda/SQS is the single most tested SNS pattern. Know it cold.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ SUBSCRIPTIONS ═══════════ -->
+  <section id="subscriptions">
+    <div class="section-title"><span class="icon">S</span>Subscription Protocols</div>
+    <div class="card">
+      <table>
+        <tr><th>Protocol</th><th>Use Case</th><th>Notes</th></tr>
+        <tr><td><span class="tag tag-blue">SQS</span></td><td>Decouple SNS from downstream processing; fan-out to multiple queues</td><td>SQS resource policy must allow <code>sns:Publish</code></td></tr>
+        <tr><td><span class="tag tag-blue">Lambda</span></td><td>Trigger serverless functions on event</td><td>Async invocation; Lambda has its own retry + DLQ</td></tr>
+        <tr><td><span class="tag tag-blue">HTTP/HTTPS</span></td><td>Webhook to external systems</td><td>Endpoint must confirm subscription first</td></tr>
+        <tr><td><span class="tag tag-orange">Email / Email-JSON</span></td><td>Human notifications</td><td>Subscriber must confirm via email link</td></tr>
+        <tr><td><span class="tag tag-orange">SMS</span></td><td>Text alerts to phone numbers</td><td>Costs per message; region availability varies</td></tr>
+        <tr><td><span class="tag tag-orange">Mobile Push</span></td><td>Push to iOS (APNs) / Android (FCM/GCM)</td><td>Requires platform app + endpoint setup (Direct Publish)</td></tr>
+        <tr><td><span class="tag tag-green">Kinesis Data Firehose</span></td><td>Stream SNS messages to S3, Redshift, OpenSearch</td><td>Fan-out to data lake without separate consumer</td></tr>
+      </table>
+      <div class="exam-tip">
+        <strong>⚡ EXAM TIP</strong>
+        <strong>Kinesis Data Streams is NOT a direct SNS subscriber</strong> — only Kinesis Data Firehose is. For KDS, route SNS → SQS → Lambda → KDS. Common distractor.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Publish Methods</div>
+      <div class="grid-2">
+        <div>
+          <p style="font-family:var(--mono);font-size:11px;color:var(--accent3);margin-bottom:8px;">TOPIC PUBLISH (SDK)</p>
+          <ul class="bullets">
+            <li>Create a topic → create subscriptions → publish to topic ARN</li>
+            <li>All subscriptions receive the message (subject to filter policies)</li>
+            <li>Standard API: <code>Publish</code> with <code>TopicArn</code></li>
+          </ul>
+        </div>
+        <div>
+          <p style="font-family:var(--mono);font-size:11px;color:var(--accent3);margin-bottom:8px;">DIRECT PUBLISH (MOBILE SDK)</p>
+          <ul class="bullets">
+            <li>Create platform application (iOS/Android) → create platform endpoint → publish to endpoint ARN</li>
+            <li>Bypasses topic — sends directly to one mobile device</li>
+            <li>Platform support: Apple APNs, Google FCM/GCM, Amazon ADM</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ FAN-OUT ═══════════ -->
+  <section id="fanout">
+    <div class="section-title"><span class="icon">F</span>SNS + SQS Fan-Out</div>
+
+    <div class="card">
+      <div class="card-title">Why Fan-Out?</div>
+      <ul class="bullets">
+        <li>Publish <strong>once</strong> to an SNS topic → message delivered to <strong>all subscribed SQS queues simultaneously</strong></li>
+        <li>Fully decoupled — new consumers just subscribe; the producer doesn't change</li>
+        <li>Each SQS queue can have its own processing logic, scaling, and DLQ</li>
+        <li>Cross-region delivery: SNS can deliver to SQS queues in <strong>other AWS regions</strong></li>
+        <li>SQS adds durability — messages are retained in queue even if consumer is down</li>
+      </ul>
+      <div class="warn-tip">
+        <strong>⚠ REQUIRED</strong>
+        SQS queue must have a <strong>resource-based policy allowing SNS to call <code>sqs:SendMessage</code></strong> on the queue ARN. Without this, delivery silently fails.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Fan-Out Architecture Patterns</div>
+      <div class="grid-2">
+        <div>
+          <p style="font-family:var(--mono);font-size:11px;color:var(--accent3);margin-bottom:8px;">S3 EVENT → MULTIPLE QUEUES</p>
+          <ul class="bullets">
+            <li>S3 can only send one event notification per event type per bucket</li>
+            <li>Solution: S3 → SNS → multiple SQS queues (fan-out)</li>
+            <li>This is the canonical exam pattern for S3 multi-consumer scenarios</li>
+          </ul>
+        </div>
+        <div>
+          <p style="font-family:var(--mono);font-size:11px;color:var(--accent3);margin-bottom:8px;">SNS → KINESIS DATA FIREHOSE → S3</p>
+          <ul class="bullets">
+            <li>SNS cannot write directly to S3</li>
+            <li>Route via Kinesis Data Firehose subscriber</li>
+            <li>Pattern: SNS → KDF → S3 / Redshift / OpenSearch</li>
+          </ul>
+        </div>
+      </div>
+      <div class="flow" style="margin-top:14px;">
+        <span class="flow-node orange">S3 Event</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-node violet">SNS Topic</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-node blue">SQS Queue A (Fraud)</span>
+        <br style="flex-basis:100%;">
+        <span style="min-width:220px;"></span>
+        <span class="flow-arrow" style="opacity:0">→</span>
+        <span class="flow-node blue">SQS Queue B (Shipping)</span>
+        <br style="flex-basis:100%;">
+        <span style="min-width:220px;"></span>
+        <span class="flow-arrow" style="opacity:0">→</span>
+        <span class="flow-node green">Kinesis Firehose → S3</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ FILTERING ═══════════ -->
+  <section id="filtering">
+    <div class="section-title"><span class="icon">~</span>SNS Message Filtering</div>
+
+    <div class="card">
+      <ul class="bullets">
+        <li>Each subscription can have a <strong>filter policy</strong> (JSON) — SNS only delivers messages that match</li>
+        <li>Filter applies to <strong>message attributes</strong> (not the message body)</li>
+        <li>Subscription with <strong>no filter policy receives ALL messages</strong></li>
+        <li>Supports: exact match, prefix, numeric ranges, <code>anything-but</code>, <code>exists</code></li>
+        <li>Filter scope can be set to <strong>MessageBody</strong> (newer) or <strong>MessageAttributes</strong> (default)</li>
+      </ul>
+
+      <pre><span class="c">// Subscription filter — only deliver "Placed" orders</span>
+{
+  <span class="k">"State"</span>: [<span class="s">"Placed"</span>]
+}
+
+<span class="c">// Only deliver orders where quantity > 10</span>
+{
+  <span class="k">"Quantity"</span>: [{ <span class="k">"numeric"</span>: [<span class="s">">"</span>, <span class="s">10</span>] }]
+}
+
+<span class="c">// Anything BUT cancelled</span>
+{
+  <span class="k">"State"</span>: [{ <span class="k">"anything-but"</span>: [<span class="s">"Cancelled"</span>] }]
+}</pre>
+
+      <div class="exam-tip">
+        <strong>⚡ EXAM TIP</strong>
+        Classic scenario: one SNS topic, multiple SQS subscribers each with a different filter policy — "Placed orders → Queue A", "Cancelled orders → Queue B + Email", "All orders → Queue C". This fan-out + filter pattern is heavily tested.
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ FIFO ═══════════ -->
+  <section id="fifo">
+    <div class="section-title"><span class="icon">O</span>SNS FIFO</div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">FIFO Topic Characteristics</div>
+        <div class="kv">
+          <div class="kv-row"><span class="kv-key">Ordering</span><span class="kv-val">Strictly preserved per <strong>Message Group ID</strong></span></div>
+          <div class="kv-row"><span class="kv-key">Delivery</span><span class="kv-val"><span class="tag tag-green">Exactly-Once</span> — deduplication built-in</span></div>
+          <div class="kv-row"><span class="kv-key">Throughput</span><span class="kv-val"><strong>300 msg/s</strong> (3,000 with batching) — same as SQS FIFO</span></div>
+          <div class="kv-row"><span class="kv-key">Topic name</span><span class="kv-val">Must end in <code>.fifo</code></span></div>
+          <div class="kv-row"><span class="kv-key">Subscribers</span><span class="kv-val">Only <strong>SQS Standard or SQS FIFO queues</strong> — no Email, SMS, HTTP, Lambda</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">FIFO Deduplication</div>
+        <ul class="bullets">
+          <li>5-minute deduplication window (same as SQS FIFO)</li>
+          <li><strong>Content-based:</strong> SHA-256 hash of message body</li>
+          <li><strong>Explicit:</strong> provide a <code>MessageDeduplicationId</code></li>
+        </ul>
+        <div class="exam-tip">
+          <strong>⚡ EXAM TIP</strong>
+          SNS FIFO → SQS FIFO = ordered + exactly-once fan-out. Only SQS queues can subscribe to SNS FIFO — no Lambda, no HTTP. This subscriber restriction is a common distractor.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ DLQ ═══════════ -->
+  <section id="dlq">
+    <div class="section-title"><span class="icon">D</span>SNS DLQ &amp; ReDrive Policy</div>
+
+    <div class="card">
+      <div class="card-title">How SNS DLQ Differs from SQS DLQ</div>
+      <table>
+        <tr><th></th><th>SNS DLQ</th><th>SQS DLQ</th></tr>
+        <tr><td>Attached to</td><td><strong>Subscription</strong> (per-subscriber)</td><td>Source SQS Queue</td></tr>
+        <tr><td>Triggered by</td><td>Failed delivery retries to a specific subscriber</td><td>Message exceeds MaximumReceives</td></tr>
+        <tr><td>DLQ type</td><td>SQS or SQS FIFO queue</td><td>SQS (same type as source)</td></tr>
+        <tr><td>Config</td><td>Redrive Policy JSON on the subscription</td><td>Queue attribute on source queue</td></tr>
+      </table>
+      <div class="exam-tip">
+        <strong>⚡ EXAM TIP</strong>
+        SNS DLQ is at the <strong>subscription level</strong> — each subscriber can have its own DLQ. If HTTP endpoint fails delivery retries → messages go to that subscription's DLQ, not affecting other subscribers.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">SNS Delivery Retry Policy</div>
+      <ul class="bullets">
+        <li>SNS retries failed deliveries with <strong>exponential backoff</strong></li>
+        <li>HTTP/HTTPS: up to <strong>3 immediate retries</strong>, then <strong>20 retries over ~1 hour</strong> (configurable)</li>
+        <li>After retry policy is exhausted → message is <strong>discarded unless DLQ is configured</strong></li>
+        <li>SQS/Lambda subscribers: failures handled by those services' own retry mechanisms</li>
+      </ul>
+      <pre><span class="c">// Redrive Policy on SNS Subscription</span>
+{
+  <span class="k">"deadLetterTargetArn"</span>: <span class="s">"arn:aws:sqs:us-east-1:123456789012:MyDLQ"</span>
+}</pre>
+    </div>
+  </section>
+
+  <!-- ═══════════ SECURITY ═══════════ -->
+  <section id="security">
+    <div class="section-title"><span class="icon">🔒</span>Security</div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Encryption</div>
+        <ul class="bullets">
+          <li><strong>In-flight:</strong> HTTPS API enforced</li>
+          <li><strong>At-rest:</strong> SSE-KMS (AWS-managed or customer-managed key)</li>
+          <li><strong>Client-side:</strong> encrypt payload before publishing</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-title">Access Control</div>
+        <ul class="bullets">
+          <li><strong>IAM Policies</strong> — control which IAM principals can publish / subscribe</li>
+          <li><strong>SNS Topic Policy</strong> (resource-based) — required for cross-account access and for AWS services to publish (e.g. S3, CloudWatch)</li>
+          <li>To allow S3 to publish SNS notifications → SNS topic policy must allow <code>sns:Publish</code> from <code>s3.amazonaws.com</code> with a condition on the source bucket ARN</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ QUICK REF ═══════════ -->
+  <section id="quickref">
+    <div class="section-title"><span class="icon">✓</span>Exam Quick Reference</div>
+
+    <div class="card">
+      <div class="card-title">Scenario → Answer Map</div>
+      <table>
+        <tr><th>If the question says…</th><th>Answer involves…</th></tr>
+        <tr><td>Broadcast one event to many consumers</td><td>SNS topic with multiple subscriptions (pub/sub fan-out)</td></tr>
+        <tr><td>S3 event must trigger multiple downstream services</td><td>S3 → SNS → multiple SQS queues (fan-out; S3 only supports one direct notification)</td></tr>
+        <tr><td>Route SNS messages differently per subscriber</td><td>SNS <strong>Subscription Filter Policy</strong> per subscriber</td></tr>
+        <tr><td>SNS → persist messages to S3 / Redshift</td><td>SNS → <strong>Kinesis Data Firehose</strong> subscriber → S3</td></tr>
+        <tr><td>Ordered + exactly-once pub/sub fan-out</td><td>SNS <strong>FIFO</strong> topic → SQS FIFO subscribers</td></tr>
+        <tr><td>SNS subscriber keeps failing — don't lose messages</td><td>SNS <strong>Redrive Policy</strong> (DLQ on the subscription)</td></tr>
+        <tr><td>CloudWatch alarm must notify multiple teams</td><td>CW Alarm → SNS topic → multiple email/SQS/Lambda subscriptions</td></tr>
+        <tr><td>Cross-account SNS publish</td><td>SNS Topic Policy (resource-based) granting publish to external account</td></tr>
+        <tr><td>Push notification to iOS/Android device</td><td>SNS <strong>Direct Publish</strong> to platform endpoint (APNs/FCM)</td></tr>
+        <tr><td>Allow S3 to publish to SNS topic</td><td>SNS topic policy allowing <code>sns:Publish</code> from <code>s3.amazonaws.com</code></td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-title">SNS vs SQS vs EventBridge — Choosing the Right Service</div>
+      <table>
+        <tr><th></th><th>SNS</th><th>SQS</th><th>EventBridge</th></tr>
+        <tr><td>Model</td><td>Pub/Sub push</td><td>Queue pull</td><td>Event routing</td></tr>
+        <tr><td>Persistence</td><td>❌ No</td><td>✅ Up to 14 days</td><td>✅ Archive available</td></tr>
+        <tr><td>Fan-out</td><td>✅ Native</td><td>❌ One consumer per message</td><td>✅ Multiple targets</td></tr>
+        <tr><td>Filtering</td><td>Subscription filter (attributes/body)</td><td>❌ None</td><td>Advanced content filtering</td></tr>
+        <tr><td>Ordering</td><td>FIFO topic (SQS-only subscribers)</td><td>FIFO queue</td><td>❌ No ordering guarantee</td></tr>
+        <tr><td>Source</td><td>App code / AWS services</td><td>App code producers</td><td>AWS services / SaaS / custom</td></tr>
+        <tr><td>Best for</td><td>Fan-out notifications, alerts</td><td>Work queues, buffering</td><td>Event-driven automation</td></tr>
+      </table>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

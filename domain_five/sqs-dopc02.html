@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SQS — DOP-C02 Study Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0f14;
+    --surface: #111822;
+    --surface2: #1a2333;
+    --border: #1e2d42;
+    --accent: #f7941d;
+    --accent2: #3b9ede;
+    --accent3: #4ecf7c;
+    --red: #e05252;
+    --coral: #e8735a;
+    --text: #d4dde8;
+    --text-dim: #6b84a0;
+    --text-bright: #eaf2ff;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 14px; line-height: 1.65; }
+
+  header {
+    background: linear-gradient(135deg, #0d1b2a 0%, #0b1320 100%);
+    border-bottom: 2px solid var(--coral);
+    padding: 36px 48px 28px;
+    position: sticky; top: 0; z-index: 100;
+    display: flex; align-items: flex-end; justify-content: space-between;
+  }
+  header h1 { font-family: var(--mono); font-size: 28px; font-weight: 600; color: var(--coral); letter-spacing: -0.5px; }
+  header h1 span { color: var(--text-dim); font-weight: 400; font-size: 14px; margin-left: 12px; }
+  .badge { background: var(--coral); color: #fff; font-family: var(--mono); font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 3px; letter-spacing: 1px; }
+  .home-btn { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--coral); background: rgba(232,115,90,.1); border: 1px solid rgba(232,115,90,.3); padding: 5px 12px; border-radius: 3px; text-decoration: none; letter-spacing: .5px; transition: all .15s; }
+  .home-btn:hover { background: var(--coral); color: #fff; }
+
+  .container { max-width: 1100px; margin: 0 auto; padding: 40px 32px 80px; }
+
+  .toc { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 40px; padding: 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; }
+  .toc a { font-family: var(--mono); font-size: 12px; color: var(--coral); text-decoration: none; padding: 4px 10px; border: 1px solid var(--border); border-radius: 3px; transition: all .15s; }
+  .toc a:hover { background: var(--coral); color: #fff; border-color: var(--coral); }
+
+  section { margin-bottom: 48px; animation: fadein .4s ease both; }
+  section:nth-child(2){animation-delay:.04s} section:nth-child(3){animation-delay:.08s}
+  section:nth-child(4){animation-delay:.12s} section:nth-child(5){animation-delay:.16s}
+  section:nth-child(6){animation-delay:.20s} section:nth-child(7){animation-delay:.24s}
+  section:nth-child(8){animation-delay:.28s} section:nth-child(9){animation-delay:.32s}
+
+  .section-title { display: flex; align-items: center; gap: 12px; font-family: var(--mono); font-size: 18px; font-weight: 600; color: var(--coral); border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 20px; }
+  .section-title .icon { background: var(--coral); color: #fff; width: 28px; height: 28px; display: grid; place-items: center; border-radius: 4px; font-size: 13px; font-weight: 700; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 20px 24px; margin-bottom: 16px; }
+  .card-title { font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--coral); margin-bottom: 12px; text-transform: uppercase; letter-spacing: .5px; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  @media(max-width: 760px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+  .kv { display: flex; flex-direction: column; gap: 7px; }
+  .kv-row { display: flex; gap: 10px; align-items: flex-start; }
+  .kv-key { font-family: var(--mono); font-size: 12px; color: var(--accent3); min-width: 160px; padding-top: 1px; flex-shrink: 0; }
+  .kv-val { color: var(--text); font-size: 13px; }
+
+  ul.bullets { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+  ul.bullets li { display: flex; gap: 8px; font-size: 13px; }
+  ul.bullets li::before { content: "▸"; color: var(--coral); flex-shrink: 0; margin-top: 1px; }
+
+  code { font-family: var(--mono); font-size: 12px; background: #162030; color: var(--accent3); padding: 1px 6px; border-radius: 3px; border: 1px solid var(--border); }
+  pre { font-family: var(--mono); font-size: 12px; background: #0d1620; border: 1px solid var(--border); border-left: 3px solid var(--coral); padding: 14px 16px; border-radius: 4px; color: #c9d1d9; overflow-x: auto; white-space: pre-wrap; margin-top: 8px; line-height: 1.8; }
+  pre .k { color: var(--coral); } pre .s { color: var(--accent3); } pre .c { color: var(--text-dim); }
+
+  .tag { display: inline-block; font-family: var(--mono); font-size: 11px; padding: 2px 8px; border-radius: 3px; margin-right: 4px; margin-bottom: 4px; font-weight: 600; }
+  .tag-coral  { background: rgba(232,115,90,.15); color: var(--coral);   border: 1px solid rgba(232,115,90,.3); }
+  .tag-blue   { background: rgba(59,158,222,.15);  color: var(--accent2); border: 1px solid rgba(59,158,222,.3); }
+  .tag-green  { background: rgba(78,207,124,.15);  color: var(--accent3); border: 1px solid rgba(78,207,124,.3); }
+  .tag-orange { background: rgba(247,148,29,.15);  color: var(--accent);  border: 1px solid rgba(247,148,29,.3); }
+  .tag-red    { background: rgba(224,82,82,.15);   color: var(--red);     border: 1px solid rgba(224,82,82,.3); }
+
+  .exam-tip { background: rgba(232,115,90,.07); border: 1px solid rgba(232,115,90,.3); border-left: 3px solid var(--coral); padding: 12px 16px; border-radius: 4px; margin-top: 14px; font-size: 13px; }
+  .exam-tip strong { color: var(--coral); font-family: var(--mono); font-size: 11px; letter-spacing: .5px; display: block; margin-bottom: 4px; }
+
+  .warn-tip { background: rgba(247,148,29,.08); border: 1px solid rgba(247,148,29,.3); border-left: 3px solid var(--accent); padding: 12px 16px; border-radius: 4px; margin-top: 14px; font-size: 13px; }
+  .warn-tip strong { color: var(--accent); font-family: var(--mono); font-size: 11px; letter-spacing: .5px; display: block; margin-bottom: 4px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: var(--surface2); font-family: var(--mono); font-size: 12px; color: var(--coral); text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border); }
+  td { padding: 9px 14px; border-bottom: 1px solid #151f2e; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,.015); }
+
+  .flow { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .flow-node { background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 5px 12px; font-family: var(--mono); font-size: 12px; color: var(--text-bright); }
+  .flow-node.coral  { border-color: rgba(232,115,90,.4); color: var(--coral); }
+  .flow-node.green  { border-color: rgba(78,207,124,.4); color: var(--accent3); }
+  .flow-node.orange { border-color: rgba(247,148,29,.4); color: var(--accent); }
+  .flow-node.blue   { border-color: rgba(59,158,222,.4); color: var(--accent2); }
+  .flow-node.red    { border-color: rgba(224,82,82,.4);  color: var(--red); }
+  .flow-arrow { color: var(--text-dim); font-size: 14px; }
+
+  /* timeline bar for visibility timeout */
+  .timeline { display: flex; margin-top: 12px; font-family: var(--mono); font-size: 11px; }
+  .tl-seg { padding: 8px 12px; text-align: center; }
+  .tl-invisible { background: rgba(224,82,82,.2); border: 1px solid rgba(224,82,82,.4); color: var(--red); border-radius: 4px 0 0 4px; flex: 3; }
+  .tl-visible   { background: rgba(78,207,124,.2); border: 1px solid rgba(78,207,124,.4); color: var(--accent3); border-radius: 0 4px 4px 0; flex: 1; }
+
+  /* api table */
+  .api-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  @media(max-width: 700px) { .api-grid { grid-template-columns: 1fr; } }
+  .api-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 10px 14px; }
+  .api-name { font-family: var(--mono); font-size: 12px; color: var(--accent3); font-weight: 600; margin-bottom: 4px; }
+  .api-desc { font-size: 12px; color: var(--text-dim); }
+
+  @keyframes fadein { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
+  ::-webkit-scrollbar { width:6px; height:6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius:3px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Amazon SQS <span>AWS DevOps Professional — DOP-C02</span></h1>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <a href="../index.html" class="home-btn">&#8592; Home</a>
+    <span class="badge">EXAM PREP</span>
+  </div>
+</header>
+
+<div class="container">
+
+  <nav class="toc">
+    <a href="#overview">Overview</a>
+    <a href="#standard">Standard Queue</a>
+    <a href="#visibility">Visibility Timeout</a>
+    <a href="#dlq">DLQ</a>
+    <a href="#polling">Polling</a>
+    <a href="#fifo">FIFO</a>
+    <a href="#security">Security</a>
+    <a href="#scaling">Auto Scaling</a>
+    <a href="#api">API Reference</a>
+    <a href="#quickref">Quick Reference</a>
+  </nav>
+
+  <!-- ═══════════ OVERVIEW ═══════════ -->
+  <section id="overview">
+    <div class="section-title"><span class="icon">S</span>Overview</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Core Concepts</div>
+        <div class="kv">
+          <div class="kv-row"><span class="kv-key">Purpose</span><span class="kv-val">Decouple application components — asynchronous communication via a managed message queue</span></div>
+          <div class="kv-row"><span class="kv-key">Producer</span><span class="kv-val">Sends messages via <code>SendMessage</code> API. Messages persist until consumed or expired.</span></div>
+          <div class="kv-row"><span class="kv-key">Consumer</span><span class="kv-val">Polls queue, receives up to <strong>10 messages</strong> per call. Must call <code>DeleteMessage</code> after processing.</span></div>
+          <div class="kv-row"><span class="kv-key">Message size</span><span class="kv-val">Max <strong>256 KB</strong> per message. Use Extended Client + S3 for larger payloads.</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Decoupling Patterns</div>
+        <table>
+          <tr><th>Pattern</th><th>Service</th><th>Model</th></tr>
+          <tr><td>Queue / decouple</td><td><span class="tag tag-coral">SQS</span></td><td>Pull — consumer polls</td></tr>
+          <tr><td>Pub/Sub fan-out</td><td><span class="tag tag-orange">SNS</span></td><td>Push — SNS delivers to all subscribers</td></tr>
+          <tr><td>Real-time streaming</td><td><span class="tag tag-blue">Kinesis</span></td><td>Pull — consumers read shards</td></tr>
+        </table>
+        <div class="exam-tip">
+          <strong>⚡ EXAM TIP</strong>
+          SQS = point-to-point work queue (one consumer per message). SNS = broadcast to many. Kinesis = ordered, replayable stream. These three are the most common architecture distractors on DOP-C02.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ STANDARD ═══════════ -->
+  <section id="standard">
+    <div class="section-title"><span class="icon">Q</span>Standard Queue</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Characteristics</div>
+        <div class="kv">
+          <div class="kv-row"><span class="kv-key">Throughput</span><span class="kv-val">Unlimited (no TPS cap)</span></div>
+          <div class="kv-row"><span class="kv-key">Ordering</span><span class="kv-val"><span class="tag tag-red">NOT guaranteed</span> — best-effort ordering</span></div>
+          <div class="kv-row"><span class="kv-key">Delivery</span><span class="kv-val"><span class="tag tag-orange">At-Least-Once</span> — duplicates possible</span></div>
+          <div class="kv-row"><span class="kv-key">Retention</span><span class="kv-val">Default <strong>4 days</strong> · Max <strong>14 days</strong></span></div>
+          <div class="kv-row"><span class="kv-key">Latency</span><span class="kv-val">&lt; 10 ms publish and receive</span></div>
+          <div class="kv-row"><span class="kv-key">In-flight limit</span><span class="kv-val">Max <strong>120,000</strong> in-flight messages (being processed)</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Standard vs FIFO at a glance</div>
+        <table>
+          <tr><th></th><th>Standard</th><th>FIFO</th></tr>
+          <tr><td>Ordering</td><td>Best-effort</td><td>Strict FIFO</td></tr>
+          <tr><td>Delivery</td><td>At-Least-Once</td><td>Exactly-Once</td></tr>
+          <tr><td>Throughput</td><td>Unlimited</td><td>300/s (3000/s batched)</td></tr>
+          <tr><td>Deduplication</td><td>None</td><td>Built-in (5 min window)</td></tr>
+          <tr><td>Name suffix</td><td>Any</td><td>Must end in <code>.fifo</code></td></tr>
+          <tr><td>DLQ type</td><td>Standard DLQ</td><td>FIFO DLQ</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Delay Queue</div>
+      <div class="grid-2">
+        <div>
+          <ul class="bullets">
+            <li>Delay delivery of new messages — consumer doesn't see them immediately</li>
+            <li>Default: <strong>0 seconds</strong> · Maximum: <strong>15 minutes</strong></li>
+            <li>Set at queue level (<code>DelaySeconds</code> on CreateQueue)</li>
+            <li>Override per message using <code>DelaySeconds</code> in <code>SendMessage</code> — <strong>message-level delay</strong></li>
+            <li>Standard queues only — FIFO queues don't support per-message delay</li>
+          </ul>
+        </div>
+        <div>
+          <div class="exam-tip">
+            <strong>⚡ EXAM TIP</strong>
+            "Messages must not be processed until X minutes after being sent" → <strong>Delay Queue</strong>. Common use case: notify a customer 10 minutes after an order is placed.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Extended Client (Large Messages &gt; 256 KB)</div>
+      <div class="flow">
+        <span class="flow-node orange">Producer → large payload (up to 2 GB)</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-node blue">S3 (stores payload)</span>
+        <span class="flow-arrow">+</span>
+        <span class="flow-node coral">SQS (stores S3 pointer metadata)</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-node green">Consumer → retrieves from S3</span>
+      </div>
+      <p style="margin-top:10px;font-size:13px;color:var(--text-dim);">Uses the <strong>SQS Extended Client Library</strong> (Java). The SQS message carries only the S3 object reference, not the actual payload.</p>
+    </div>
+  </section>
+
+  <!-- ═══════════ VISIBILITY ═══════════ -->
+  <section id="visibility">
+    <div class="section-title"><span class="icon">V</span>Message Visibility Timeout</div>
+    <div class="card">
+      <ul class="bullets">
+        <li>When a consumer polls a message, it becomes <strong>invisible</strong> to all other consumers for the duration of the visibility timeout</li>
+        <li>Default: <strong>30 seconds</strong> · Configurable: <strong>0 seconds → 12 hours</strong></li>
+        <li>If not deleted within the timeout, the message becomes visible again and can be delivered to another consumer (duplicate processing risk)</li>
+        <li>Consumer can extend visibility using <code>ChangeMessageVisibility</code> API while still processing</li>
+        <li>If visibility timeout is too short → duplicate processing. If too long → slow re-processing on consumer crash.</li>
+      </ul>
+
+      <div style="margin-top:14px;">
+        <p style="font-family:var(--mono);font-size:11px;color:var(--text-dim);margin-bottom:6px;">MESSAGE LIFECYCLE DURING VISIBILITY TIMEOUT</p>
+        <div class="timeline">
+          <div class="tl-seg tl-invisible">INVISIBLE TO OTHER CONSUMERS<br><small>consumer processing (30s default)</small></div>
+          <div class="tl-seg tl-visible">VISIBLE AGAIN<br><small>if not deleted</small></div>
+        </div>
+      </div>
+
+      <div class="exam-tip">
+        <strong>⚡ EXAM TIP</strong>
+        Consumer gets a message but needs more than 30 seconds → call <code>ChangeMessageVisibility</code> to extend. If it crashes without deleting, the message reappears after timeout — this is how SQS guarantees at-least-once delivery.
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ DLQ ═══════════ -->
+  <section id="dlq">
+    <div class="section-title"><span class="icon">D</span>Dead Letter Queue (DLQ)</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">How It Works</div>
+        <ul class="bullets">
+          <li>Consumer fails → message returns to queue after visibility timeout</li>
+          <li>Set <code>MaximumReceives</code> threshold (e.g., 3) — if exceeded, message moves to DLQ</li>
+          <li>DLQ is a <strong>separate SQS queue</strong> — Standard DLQ for Standard, FIFO DLQ for FIFO</li>
+          <li>DLQ retention: up to <strong>14 days</strong> — set high to allow time to debug</li>
+          <li>Useful for: isolating poison pill messages, debugging, alerting on failures</li>
+        </ul>
+        <div class="exam-tip">
+          <strong>⚡ EXAM TIP</strong>
+          DLQ type must match source queue: Standard → Standard DLQ, FIFO → FIFO DLQ. This is a common distractor.
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">DLQ Redrive to Source</div>
+        <ul class="bullets">
+          <li>After fixing the consumer bug, send failed messages back to the source queue</li>
+          <li>Uses <strong>Redrive Task</strong> — no custom code needed</li>
+          <li>Messages reprocessed in batches from DLQ → source queue</li>
+          <li>Can redrive to the original source or a custom destination queue</li>
+        </ul>
+        <div class="flow" style="margin-top:12px;">
+          <span class="flow-node red">DLQ</span>
+          <span class="flow-arrow">→ (after fix)</span>
+          <span class="flow-node">Redrive Task</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-node coral">Source Queue</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-node green">Consumer (fixed)</span>
+        </div>
+        <div class="exam-tip">
+          <strong>⚡ EXAM TIP</strong>
+          Set DLQ retention to <strong>14 days</strong> — you want messages to survive long enough to debug and redrive. The default 4 days may be too short.
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">CloudWatch Alarm on DLQ — Operational Pattern</div>
+      <div class="flow">
+        <span class="flow-node red">DLQ — ApproximateNumberOfMessages &gt; 0</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-node">CW Alarm</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-node orange">SNS → Ops Alert</span>
+      </div>
+      <p style="margin-top:10px;font-size:13px;color:var(--text-dim);">Monitor <code>ApproximateNumberOfMessagesNotVisible</code> and <code>ApproximateNumberOfMessages</code> on the DLQ for alerting.</p>
+    </div>
+  </section>
+
+  <!-- ═══════════ POLLING ═══════════ -->
+  <section id="polling">
+    <div class="section-title"><span class="icon">P</span>Short vs Long Polling</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Short Polling (default)</div>
+        <ul class="bullets">
+          <li>Returns immediately, even if queue is empty</li>
+          <li>May return empty responses → wasted API calls + cost</li>
+          <li><code>ReceiveMessageWaitTimeSeconds</code> = <strong>0</strong></li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-title">Long Polling <span class="tag tag-green" style="margin-left:6px;">PREFERRED</span></div>
+        <ul class="bullets">
+          <li>Consumer waits up to <strong>20 seconds</strong> for messages to arrive</li>
+          <li>Reduces empty responses → fewer API calls → lower cost</li>
+          <li>Decreases latency of message processing</li>
+          <li>Set <code>ReceiveMessageWaitTimeSeconds</code> = 1–20 (queue level or per-call)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="exam-tip" style="margin-top:4px;">
+      <strong>⚡ EXAM TIP</strong>
+      "Too many empty SQS API responses / high cost from polling" → enable <strong>Long Polling</strong> (<code>ReceiveMessageWaitTimeSeconds</code> = 20). Always prefer Long Polling for consumers that don't need sub-second response.
+    </div>
+  </section>
+
+  <!-- ═══════════ FIFO ═══════════ -->
+  <section id="fifo">
+    <div class="section-title"><span class="icon">F</span>SQS FIFO</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">FIFO Fundamentals</div>
+        <div class="kv">
+          <div class="kv-row"><span class="kv-key">Ordering</span><span class="kv-val">Strict First-In-First-Out within a Message Group</span></div>
+          <div class="kv-row"><span class="kv-key">Delivery</span><span class="kv-val"><span class="tag tag-green">Exactly-Once</span> — deduplication built-in</span></div>
+          <div class="kv-row"><span class="kv-key">Throughput</span><span class="kv-val"><strong>300 msg/s</strong> without batching · <strong>3,000 msg/s</strong> with batching (batch size 10)</span></div>
+          <div class="kv-row"><span class="kv-key">Queue name</span><span class="kv-val">Must end in <code>.fifo</code></span></div>
+          <div class="kv-row"><span class="kv-key">In-flight limit</span><span class="kv-val">Max <strong>20,000</strong> in-flight messages</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Deduplication (5-minute window)</div>
+        <ul class="bullets">
+          <li>Duplicate messages sent within the <strong>5-minute deduplication interval</strong> are discarded</li>
+          <li><strong>Method 1 — Content-based:</strong> SQS hashes the message body with SHA-256; identical bodies = duplicate</li>
+          <li><strong>Method 2 — Explicit ID:</strong> producer sets a <code>MessageDeduplicationId</code>; same ID within 5 min = duplicate</li>
+        </ul>
+        <div class="exam-tip">
+          <strong>⚡ EXAM TIP</strong>
+          Exactly-once = FIFO queue with deduplication enabled. Standard queues can produce duplicates — consumers must be idempotent.
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Message Grouping (MessageGroupID)</div>
+      <ul class="bullets">
+        <li><code>MessageGroupID</code> partitions messages within a FIFO queue into ordered subsets</li>
+        <li>All messages with the <strong>same GroupID</strong> → delivered in order → to <strong>one consumer</strong></li>
+        <li>Different GroupIDs → parallel processing by different consumers simultaneously</li>
+        <li>Ordering is <strong>guaranteed within a group</strong>, not across groups</li>
+        <li>Single GroupID = one consumer at a time = no parallelism (like a standard FIFO)</li>
+      </ul>
+      <div class="exam-tip">
+        <strong>⚡ EXAM TIP</strong>
+        "Process orders for each customer in order, but process different customers in parallel" → FIFO queue with <strong>CustomerID as MessageGroupID</strong>. Each customer gets their own ordered lane.
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ SECURITY ═══════════ -->
+  <section id="security">
+    <div class="section-title"><span class="icon">🔒</span>Security</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Encryption</div>
+        <ul class="bullets">
+          <li><strong>In-flight:</strong> HTTPS API — enforced by default</li>
+          <li><strong>At-rest:</strong> SSE using <strong>AWS KMS</strong> (SSE-KMS) or <strong>SSE-SQS</strong> (AWS-managed key)</li>
+          <li><strong>Client-side:</strong> encrypt/decrypt in the application before sending to SQS</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-title">Access Control</div>
+        <ul class="bullets">
+          <li><strong>IAM Policies</strong> — control which IAM principals can call SQS APIs</li>
+          <li><strong>SQS Resource-Based Policy</strong> — attached to the queue itself; required for cross-account and service-to-service access</li>
+          <li>Use resource policies to allow <strong>S3 → SQS</strong> (S3 event notifications), <strong>SNS → SQS</strong>, <strong>Lambda → SQS</strong></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">SQS Access Policy Examples</div>
+      <div class="grid-2">
+        <div>
+          <p style="font-family:var(--mono);font-size:11px;color:var(--accent3);margin-bottom:8px;">CROSS-ACCOUNT ACCESS</p>
+          <pre><span class="c">// Allow Account B to poll from Account A's queue</span>
+{
+  <span class="k">"Effect"</span>: <span class="s">"Allow"</span>,
+  <span class="k">"Principal"</span>: { <span class="k">"AWS"</span>: <span class="s">"arn:aws:iam::ACCOUNT-B:root"</span> },
+  <span class="k">"Action"</span>: <span class="s">"sqs:ReceiveMessage"</span>,
+  <span class="k">"Resource"</span>: <span class="s">"arn:aws:sqs:us-east-1:ACCOUNT-A:queue1"</span>
+}</pre>
+        </div>
+        <div>
+          <p style="font-family:var(--mono);font-size:11px;color:var(--accent3);margin-bottom:8px;">S3 → SQS NOTIFICATIONS</p>
+          <pre><span class="c">// Allow S3 to send event notifications to SQS</span>
+{
+  <span class="k">"Effect"</span>: <span class="s">"Allow"</span>,
+  <span class="k">"Principal"</span>: { <span class="k">"Service"</span>: <span class="s">"s3.amazonaws.com"</span> },
+  <span class="k">"Action"</span>: <span class="s">"sqs:SendMessage"</span>,
+  <span class="k">"Resource"</span>: <span class="s">"arn:aws:sqs:us-east-1:123456:queue1"</span>,
+  <span class="k">"Condition"</span>: {
+    <span class="k">"ArnLike"</span>: { <span class="k">"aws:SourceArn"</span>: <span class="s">"arn:aws:s3:::bucket1"</span> }
+  }
+}</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ AUTO SCALING ═══════════ -->
+  <section id="scaling">
+    <div class="section-title"><span class="icon">↑</span>SQS + Auto Scaling (DOP-C02 Key Pattern)</div>
+    <div class="card">
+      <div class="card-title">Scale Consumers Based on Queue Depth</div>
+      <div class="flow">
+        <span class="flow-node coral">SQS Queue depth rising</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-node">CW Metric:<br><small>ApproximateNumberOfMessages</small></span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-node">CW Alarm</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-node green">ASG Scale Out</span>
+      </div>
+      <ul class="bullets" style="margin-top:14px;">
+        <li>Use <strong>Target Tracking Scaling</strong> on ASG with the SQS metric <code>ApproximateNumberOfMessagesNotVisible</code> per instance</li>
+        <li>Formula: <code>backlog per instance = queue depth / number of instances</code></li>
+        <li>Set target backlog per instance (e.g., 1000 messages/instance) — ASG adjusts count automatically</li>
+        <li>Works with Lambda too — Lambda auto-scales based on queue depth natively</li>
+      </ul>
+      <div class="exam-tip">
+        <strong>⚡ EXAM TIP</strong>
+        The most-tested SQS+DevOps pattern: <strong>SQS queue depth → CloudWatch alarm → ASG scale-out</strong>. Use <code>ApproximateNumberOfMessages</code> for the alarm metric. This decouples the frontend load from backend processing capacity.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">SQS as a Buffer — Classic Architecture</div>
+      <div class="flow">
+        <span class="flow-node orange">Client requests (spiky)</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-node coral">SQS Queue (buffer)</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-node green">EC2 / Lambda consumers (steady)</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-node blue">DB / downstream</span>
+      </div>
+      <p style="margin-top:10px;font-size:13px;color:var(--text-dim);">SQS absorbs traffic spikes, preventing downstream overload. Consumers process at a sustainable rate. Combined with ASG: queue grows → more consumers launch → queue drains.</p>
+    </div>
+  </section>
+
+  <!-- ═══════════ API ═══════════ -->
+  <section id="api">
+    <div class="section-title"><span class="icon">A</span>Must-Know API Reference</div>
+    <div class="card">
+      <div class="api-grid">
+        <div class="api-item"><div class="api-name">CreateQueue</div><div class="api-desc">Create queue; set MessageRetentionPeriod, DelaySeconds, VisibilityTimeout</div></div>
+        <div class="api-item"><div class="api-name">DeleteQueue</div><div class="api-desc">Permanently delete queue and all messages</div></div>
+        <div class="api-item"><div class="api-name">PurgeQueue</div><div class="api-desc">Delete ALL messages in a queue without deleting the queue</div></div>
+        <div class="api-item"><div class="api-name">SendMessage</div><div class="api-desc">Publish message; optionally set DelaySeconds per message</div></div>
+        <div class="api-item"><div class="api-name">ReceiveMessage</div><div class="api-desc">Poll for messages; MaxNumberOfMessages (default 1, max 10)</div></div>
+        <div class="api-item"><div class="api-name">DeleteMessage</div><div class="api-desc">Remove a processed message using its ReceiptHandle</div></div>
+        <div class="api-item"><div class="api-name">ChangeMessageVisibility</div><div class="api-desc">Extend visibility timeout while processing a message</div></div>
+        <div class="api-item"><div class="api-name">ReceiveMessageWaitTimeSeconds</div><div class="api-desc">Set to 1–20 to enable Long Polling</div></div>
+        <div class="api-item"><div class="api-name">GetQueueAttributes</div><div class="api-desc">Read queue config and metrics (ApproximateNumberOfMessages, etc.)</div></div>
+        <div class="api-item"><div class="api-name">SetQueueAttributes</div><div class="api-desc">Update queue settings after creation</div></div>
+      </div>
+      <div class="exam-tip" style="margin-top:14px;">
+        <strong>⚡ EXAM TIP — BATCH APIS</strong>
+        <code>SendMessageBatch</code>, <code>DeleteMessageBatch</code>, <code>ChangeMessageVisibilityBatch</code> — batch up to 10 operations per API call to reduce cost and increase throughput.
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ QUICK REF ═══════════ -->
+  <section id="quickref">
+    <div class="section-title"><span class="icon">✓</span>Exam Quick Reference</div>
+
+    <div class="card">
+      <div class="card-title">Scenario → Answer Map</div>
+      <table>
+        <tr><th>If the question says…</th><th>Answer involves…</th></tr>
+        <tr><td>Decouple two application tiers</td><td>SQS Standard Queue between producer and consumer</td></tr>
+        <tr><td>Guarantee message ordering AND exactly-once</td><td>SQS <strong>FIFO</strong> queue</td></tr>
+        <tr><td>Process per-customer messages in order, multiple customers in parallel</td><td>FIFO + <strong>MessageGroupID</strong> = CustomerID</td></tr>
+        <tr><td>Message &gt; 256 KB (e.g. 1 GB)</td><td>SQS Extended Client + S3 (store payload in S3, pointer in SQS)</td></tr>
+        <tr><td>Poison pill message crashing consumers</td><td>DLQ with <code>MaximumReceives</code> threshold</td></tr>
+        <tr><td>Reprocess failed messages after fixing bug</td><td>DLQ <strong>Redrive to Source</strong></td></tr>
+        <tr><td>Too many empty poll responses / high API cost</td><td>Enable <strong>Long Polling</strong> (<code>ReceiveMessageWaitTimeSeconds</code> = 20)</td></tr>
+        <tr><td>Don't process message immediately (delay)</td><td><strong>Delay Queue</strong> or per-message <code>DelaySeconds</code></td></tr>
+        <tr><td>Auto-scale EC2 consumers based on queue load</td><td>CW alarm on <code>ApproximateNumberOfMessages</code> → ASG scale-out</td></tr>
+        <tr><td>Allow S3 event notifications to go to SQS</td><td>SQS <strong>Resource-Based Policy</strong> allowing <code>s3.amazonaws.com</code></td></tr>
+        <tr><td>Cross-account SQS access</td><td>SQS Resource-Based Policy with cross-account Principal</td></tr>
+        <tr><td>Duplicate messages from standard queue</td><td>Make consumers <strong>idempotent</strong> (standard queues are at-least-once)</td></tr>
+        <tr><td>Prevent double-processing in FIFO</td><td>Enable content-based deduplication or provide <code>MessageDeduplicationId</code></td></tr>
+        <tr><td>Consumer needs more time to process message</td><td>Call <code>ChangeMessageVisibility</code> API to extend timeout</td></tr>
+      </table>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

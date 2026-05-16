@@ -966,15 +966,94 @@ body::before {
       </div>
     </div>
 
-    <!-- Domain 5: Incident & Event Response — DISABLED -->
-    <div class="domain-card disabled" style="--i:4">
+    <!-- Domain 5: Incident & Event Response — ACTIVE -->
+    <div class="domain-card active" style="--i:4" onclick="toggleDomain(this)">
       <div class="domain-header">
         <span class="domain-num">05</span>
         <div class="domain-info">
           <h2>Incident &amp; Event Response</h2>
           <span class="domain-weight">18% of exam</span>
         </div>
-        <span class="badge-soon">Coming Soon</span>
+        <span class="domain-chevron">&#9662;</span>
+      </div>
+      <div class="domain-body">
+        <hr class="domain-divider">
+        <div class="service-grid">
+
+          <a href="domain_five/eventbridge-dopc02.html" class="svc-btn" onclick="event.stopPropagation()">
+            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="10" cy="10" r="3"/>
+              <circle cx="10" cy="26" r="3"/>
+              <circle cx="26" cy="18" r="3"/>
+              <path d="M13 10h6l7 8"/>
+              <path d="M13 26h6l7-8"/>
+              <path d="M23 18h-6"/>
+            </svg>
+            <span class="svc-label">EventBridge</span>
+          </a>
+
+          <a href="domain_five/aws-health-dashboard-dopc02.html" class="svc-btn" onclick="event.stopPropagation()">
+            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="18" cy="18" r="13"/>
+              <path d="M4 18h5l3-8 5 16 4-10 3 6 4-4h4"/>
+            </svg>
+            <span class="svc-label">AWS Health Dashboard</span>
+          </a>
+
+          <a href="domain_five/instance-status-check-dopc02.html" class="svc-btn" onclick="event.stopPropagation()">
+            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="18" cy="18" r="13"/>
+              <path d="M11 18l5 5 9-10"/>
+            </svg>
+            <span class="svc-label">Instance Status Check</span>
+          </a>
+
+          <a href="domain_five/cloudtrail-dopc02.html" class="svc-btn" onclick="event.stopPropagation()">
+            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="7" y="5" width="22" height="26" rx="2"/>
+              <path d="M12 12h12"/>
+              <path d="M12 17h12"/>
+              <path d="M12 22h8"/>
+              <circle cx="26" cy="27" r="5" fill="none"/>
+              <path d="M24 27l1.5 1.5 2.5-2.5"/>
+            </svg>
+            <span class="svc-label">CloudTrail</span>
+          </a>
+
+          <a href="domain_five/sqs-dopc02.html" class="svc-btn" onclick="event.stopPropagation()">
+            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="4" y="8" width="22" height="6" rx="2"/>
+              <rect x="4" y="16" width="22" height="6" rx="2"/>
+              <rect x="4" y="24" width="22" height="6" rx="2"/>
+              <path d="M28 11h4"/>
+              <path d="M29 9l3 2-3 2"/>
+              <path d="M28 19h4"/>
+              <path d="M29 17l3 2-3 2"/>
+              <path d="M28 27h4"/>
+              <path d="M29 25l3 2-3 2"/>
+            </svg>
+            <span class="svc-label">SQS</span>
+          </a>
+
+          <a href="domain_five/sns-dopc02.html" class="svc-btn" onclick="event.stopPropagation()">
+            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 5a10 10 0 0 1 10 10v5l3 4H5l3-4v-5A10 10 0 0 1 18 5z"/>
+              <path d="M14 28a4 4 0 0 0 8 0"/>
+            </svg>
+            <span class="svc-label">SNS</span>
+          </a>
+
+          <a href="domain_five/xray-dopc02.html" class="svc-btn" onclick="event.stopPropagation()">
+            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="5" y="7" width="26" height="22" rx="2"/>
+              <path d="M5 14h26"/>
+              <path d="M12 20l3 4 6-8 3 4"/>
+              <circle cx="28" cy="11" r="1.5" fill="currentColor" stroke="none"/>
+            </svg>
+            <span class="svc-label">X-Ray</span>
+          </a>
+
+        </div>
       </div>
     </div>
 

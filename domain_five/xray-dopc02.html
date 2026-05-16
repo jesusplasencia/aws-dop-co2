@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS X-Ray — DOP-C02 Study Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0f14;
+    --surface: #111822;
+    --surface2: #1a2333;
+    --border: #1e2d42;
+    --accent: #f7941d;
+    --accent2: #3b9ede;
+    --accent3: #4ecf7c;
+    --red: #e05252;
+    --cyan: #00c8d4;
+    --text: #d4dde8;
+    --text-dim: #6b84a0;
+    --text-bright: #eaf2ff;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 14px; line-height: 1.65; }
+
+  header {
+    background: linear-gradient(135deg, #0d1b2a 0%, #0b1320 100%);
+    border-bottom: 2px solid var(--cyan);
+    padding: 36px 48px 28px;
+    position: sticky; top: 0; z-index: 100;
+    display: flex; align-items: flex-end; justify-content: space-between;
+  }
+  header h1 { font-family: var(--mono); font-size: 28px; font-weight: 600; color: var(--cyan); letter-spacing: -0.5px; }
+  header h1 span { color: var(--text-dim); font-weight: 400; font-size: 14px; margin-left: 12px; }
+  .badge { background: var(--cyan); color: #000; font-family: var(--mono); font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 3px; letter-spacing: 1px; }
+  .home-btn { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--cyan); background: rgba(0,200,212,.1); border: 1px solid rgba(0,200,212,.3); padding: 5px 12px; border-radius: 3px; text-decoration: none; letter-spacing: .5px; transition: all .15s; }
+  .home-btn:hover { background: var(--cyan); color: #000; }
+
+  .container { max-width: 1100px; margin: 0 auto; padding: 40px 32px 80px; }
+
+  .toc { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 40px; padding: 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; }
+  .toc a { font-family: var(--mono); font-size: 12px; color: var(--cyan); text-decoration: none; padding: 4px 10px; border: 1px solid var(--border); border-radius: 3px; transition: all .15s; }
+  .toc a:hover { background: var(--cyan); color: #000; border-color: var(--cyan); }
+
+  section { margin-bottom: 48px; animation: fadein .4s ease both; }
+  section:nth-child(2){animation-delay:.05s} section:nth-child(3){animation-delay:.10s}
+  section:nth-child(4){animation-delay:.15s} section:nth-child(5){animation-delay:.20s}
+  section:nth-child(6){animation-delay:.25s} section:nth-child(7){animation-delay:.30s}
+
+  .section-title { display: flex; align-items: center; gap: 12px; font-family: var(--mono); font-size: 18px; font-weight: 600; color: var(--cyan); border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 20px; }
+  .section-title .icon { background: var(--cyan); color: #000; width: 28px; height: 28px; display: grid; place-items: center; border-radius: 4px; font-size: 13px; font-weight: 700; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 20px 24px; margin-bottom: 16px; }
+  .card-title { font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--cyan); margin-bottom: 12px; text-transform: uppercase; letter-spacing: .5px; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  @media(max-width: 760px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+  .kv { display: flex; flex-direction: column; gap: 7px; }
+  .kv-row { display: flex; gap: 10px; align-items: flex-start; }
+  .kv-key { font-family: var(--mono); font-size: 12px; color: var(--accent3); min-width: 150px; padding-top: 1px; flex-shrink: 0; }
+  .kv-val { color: var(--text); font-size: 13px; }
+
+  ul.bullets { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+  ul.bullets li { display: flex; gap: 8px; font-size: 13px; }
+  ul.bullets li::before { content: "▸"; color: var(--cyan); flex-shrink: 0; margin-top: 1px; }
+
+  code { font-family: var(--mono); font-size: 12px; background: #162030; color: var(--accent3); padding: 1px 6px; border-radius: 3px; border: 1px solid var(--border); }
+  pre { font-family: var(--mono); font-size: 12px; background: #0d1620; border: 1px solid var(--border); border-left: 3px solid var(--cyan); padding: 14px 16px; border-radius: 4px; color: #c9d1d9; overflow-x: auto; white-space: pre-wrap; margin-top: 8px; line-height: 1.8; }
+  pre .k { color: var(--cyan); } pre .s { color: var(--accent3); } pre .c { color: var(--text-dim); }
+
+  .tag { display: inline-block; font-family: var(--mono); font-size: 11px; padding: 2px 8px; border-radius: 3px; margin-right: 4px; margin-bottom: 4px; font-weight: 600; }
+  .tag-cyan   { background: rgba(0,200,212,.15); color: var(--cyan);   border: 1px solid rgba(0,200,212,.3); }
+  .tag-blue   { background: rgba(59,158,222,.15); color: var(--accent2); border: 1px solid rgba(59,158,222,.3); }
+  .tag-green  { background: rgba(78,207,124,.15); color: var(--accent3); border: 1px solid rgba(78,207,124,.3); }
+  .tag-orange { background: rgba(247,148,29,.15); color: var(--accent);  border: 1px solid rgba(247,148,29,.3); }
+  .tag-red    { background: rgba(224,82,82,.15);  color: var(--red);     border: 1px solid rgba(224,82,82,.3); }
+
+  .exam-tip { background: rgba(0,200,212,.07); border: 1px solid rgba(0,200,212,.3); border-left: 3px solid var(--cyan); padding: 12px 16px; border-radius: 4px; margin-top: 14px; font-size: 13px; }
+  .exam-tip strong { color: var(--cyan); font-family: var(--mono); font-size: 11px; letter-spacing: .5px; display: block; margin-bottom: 4px; }
+
+  .warn-tip { background: rgba(247,148,29,.08); border: 1px solid rgba(247,148,29,.3); border-left: 3px solid var(--accent); padding: 12px 16px; border-radius: 4px; margin-top: 14px; font-size: 13px; }
+  .warn-tip strong { color: var(--accent); font-family: var(--mono); font-size: 11px; letter-spacing: .5px; display: block; margin-bottom: 4px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: var(--surface2); font-family: var(--mono); font-size: 12px; color: var(--cyan); text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border); }
+  td { padding: 9px 14px; border-bottom: 1px solid #151f2e; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,.015); }
+
+  .flow { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .flow-node { background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 5px 12px; font-family: var(--mono); font-size: 12px; color: var(--text-bright); }
+  .flow-node.cyan   { border-color: rgba(0,200,212,.4);   color: var(--cyan); }
+  .flow-node.green  { border-color: rgba(78,207,124,.4);  color: var(--accent3); }
+  .flow-node.orange { border-color: rgba(247,148,29,.4);  color: var(--accent); }
+  .flow-node.blue   { border-color: rgba(59,158,222,.4);  color: var(--accent2); }
+  .flow-node.red    { border-color: rgba(224,82,82,.4);   color: var(--red); }
+  .flow-arrow { color: var(--text-dim); font-size: 14px; }
+
+  /* concepts grid */
+  .concept-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+  @media(max-width:760px){ .concept-grid { grid-template-columns: 1fr; } }
+  .concept-card { background: var(--surface2); border: 1px solid rgba(0,200,212,.2); border-radius: 6px; padding: 14px 16px; }
+  .concept-name { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--cyan); margin-bottom: 6px; }
+  .concept-desc { font-size: 12px; color: var(--text-dim); line-height: 1.6; }
+
+  /* integration table */
+  .int-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 12px; }
+  @media(max-width:700px){ .int-grid { grid-template-columns: 1fr; } }
+  .int-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 14px 16px; }
+  .int-service { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--accent2); margin-bottom: 6px; }
+
+  @keyframes fadein { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
+  ::-webkit-scrollbar { width:6px; height:6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius:3px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>AWS X-Ray <span>AWS DevOps Professional — DOP-C02</span></h1>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <a href="../index.html" class="home-btn">&#8592; Home</a>
+    <span class="badge">EXAM PREP</span>
+  </div>
+</header>
+
+<div class="container">
+
+  <nav class="toc">
+    <a href="#overview">Overview</a>
+    <a href="#concepts">Core Concepts</a>
+    <a href="#daemon">X-Ray Daemon</a>
+    <a href="#integrations">Integrations</a>
+    <a href="#sampling">Sampling</a>
+    <a href="#annotations">Annotations & Metadata</a>
+    <a href="#otel">OpenTelemetry</a>
+    <a href="#quickref">Quick Reference</a>
+  </nav>
+
+  <!-- ═══════════ OVERVIEW ═══════════ -->
+  <section id="overview">
+    <div class="section-title"><span class="icon">X</span>Overview</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">What it is</div>
+        <div class="kv">
+          <div class="kv-row"><span class="kv-key">Purpose</span><span class="kv-val">Distributed tracing — follow a request end-to-end across all microservices and AWS resources</span></div>
+          <div class="kv-row"><span class="kv-key">Level</span><span class="kv-val"><strong>Request level</strong> (vs CloudWatch = metric/log level)</span></div>
+          <div class="kv-row"><span class="kv-key">Output</span><span class="kv-val">Service map, trace timeline, latency histograms, error breakdown</span></div>
+          <div class="kv-row"><span class="kv-key">Requirement</span><span class="kv-val">Application must be instrumented with the <strong>X-Ray SDK</strong> + X-Ray Daemon running</span></div>
+          <div class="kv-row"><span class="kv-key">IAM</span><span class="kv-val">Instance profile / execution role must include <code>xray:PutTraceSegments</code> and <code>xray:PutTelemetryRecords</code></span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Problems X-Ray Solves</div>
+        <ul class="bullets">
+          <li>Find latency bottlenecks across distributed services</li>
+          <li>Identify which microservice is causing errors or throttling</li>
+          <li>Understand request flow across Lambda, API Gateway, EC2, ECS, DynamoDB, SQS, SNS</li>
+          <li>Debug "why is this request slow?" without reading individual logs</li>
+          <li>Visualize service dependencies via the <strong>Service Map</strong></li>
+        </ul>
+        <div class="exam-tip">
+          <strong>⚡ EXAM TIP</strong>
+          "Debug latency / errors across microservices" or "trace a request end-to-end" → <strong>AWS X-Ray</strong>. CloudWatch shows metrics; X-Ray shows request flow.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ CORE CONCEPTS ═══════════ -->
+  <section id="concepts">
+    <div class="section-title"><span class="icon">C</span>Core Concepts</div>
+
+    <div class="concept-grid">
+      <div class="concept-card">
+        <div class="concept-name">Trace</div>
+        <div class="concept-desc">End-to-end record of a single request across all services. Composed of one or more <strong>Segments</strong>. Identified by a unique <strong>Trace ID</strong>.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-name">Segment</div>
+        <div class="concept-desc">Work done by a single service/resource for one request. Contains: timing, HTTP data, errors, annotations, metadata. Sub-tasks = <strong>Subsegments</strong>.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-name">Subsegment</div>
+        <div class="concept-desc">Granular unit of work within a segment. Examples: outbound HTTP call, DB query, AWS SDK call. Required to trace downstream dependencies.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-name">Annotations</div>
+        <div class="concept-desc">Key-value pairs <strong>indexed for searching/filtering</strong> in the X-Ray console. Max 50 per trace. Use for: user ID, order ID, environment, feature flag.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-name">Metadata</div>
+        <div class="concept-desc">Key-value pairs attached to segments for <strong>debugging context</strong> — NOT indexed, not searchable. Use for rich objects, payloads, non-filterable data.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-name">Service Map</div>
+        <div class="concept-desc">Visual graph of all services involved in requests — shows avg latency, error rates, and request volume per node and edge. Auto-generated from trace data.</div>
+      </div>
+    </div>
+
+    <div class="exam-tip" style="margin-top:16px;">
+      <strong>⚡ EXAM TIP — ANNOTATIONS vs METADATA</strong>
+      <strong>Annotations</strong> = indexed, searchable (find all traces where user_id = "abc123"). <strong>Metadata</strong> = not indexed, stored only for context. If the question says "filter traces by a custom attribute" → Annotations. If it says "attach debug payload" → Metadata.
+    </div>
+  </section>
+
+  <!-- ═══════════ DAEMON ═══════════ -->
+  <section id="daemon">
+    <div class="section-title"><span class="icon">D</span>X-Ray Daemon</div>
+
+    <div class="card">
+      <div class="card-title">How It Works</div>
+      <div class="flow">
+        <span class="flow-node orange">Application + X-Ray SDK</span>
+        <span class="flow-arrow">→ UDP :2000</span>
+        <span class="flow-node cyan">X-Ray Daemon<br><small>(local agent)</small></span>
+        <span class="flow-arrow">→ HTTPS batch</span>
+        <span class="flow-node green">X-Ray Service<br><small>(AWS managed)</small></span>
+      </div>
+      <ul class="bullets" style="margin-top:14px;">
+        <li>The SDK sends raw segment data via <strong>UDP to port 2000</strong> on localhost — daemon collects and batches</li>
+        <li>Daemon sends batches to the X-Ray API over HTTPS (handles retries, buffering)</li>
+        <li>Must be running alongside your application — not built-in except where AWS manages it</li>
+        <li>Required IAM permissions on the instance/role: <code>xray:PutTraceSegments</code>, <code>xray:PutTelemetryRecords</code></li>
+      </ul>
+      <div class="exam-tip">
+        <strong>⚡ EXAM TIP</strong>
+        "X-Ray not receiving traces from EC2" → check: (1) X-Ray Daemon is running, (2) EC2 Instance Profile has <code>xray:PutTraceSegments</code> permission, (3) SDK is instrumented in code. All three are needed.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Daemon — Where It Runs per Platform</div>
+      <table>
+        <tr><th>Platform</th><th>Daemon Setup</th><th>Notes</th></tr>
+        <tr><td>EC2</td><td>Install + run daemon manually or via user data</td><td>EC2 Instance Profile must have X-Ray permissions</td></tr>
+        <tr><td>ECS (EC2 launch)</td><td>Sidecar container in the task definition</td><td>Daemon runs as a separate container in the task</td></tr>
+        <tr><td>ECS Fargate</td><td>Sidecar container in the task definition</td><td>No host access — must use sidecar pattern</td></tr>
+        <tr><td>Lambda</td><td><strong>Built-in</strong> — enable Active Tracing in function config</td><td>No daemon needed; enable <code>xray:PutTraceSegments</code> on execution role</td></tr>
+        <tr><td>Elastic Beanstalk</td><td>Enable via <code>.ebextensions/xray-daemon.config</code> or console toggle</td><td>Instance profile must have X-Ray permissions</td></tr>
+        <tr><td>API Gateway</td><td>Enable X-Ray tracing per stage in console</td><td>No daemon needed; API GW manages it</td></tr>
+        <tr><td>App Mesh</td><td>Envoy proxy sends traces automatically</td><td>No SDK changes needed</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- ═══════════ INTEGRATIONS ═══════════ -->
+  <section id="integrations">
+    <div class="section-title"><span class="icon">↔</span>Service Integrations</div>
+
+    <div class="int-grid">
+      <div class="int-card">
+        <div class="int-service">Lambda</div>
+        <ul class="bullets">
+          <li>Enable <strong>Active Tracing</strong> on Lambda function (console or <code>TracingConfig: Active</code>)</li>
+          <li>Lambda runs daemon — no setup needed</li>
+          <li>Execution role must have <code>xray:PutTraceSegments</code></li>
+          <li>Traces Lambda invocations and downstream calls (DynamoDB, SNS, etc.)</li>
+        </ul>
+      </div>
+      <div class="int-card">
+        <div class="int-service">API Gateway</div>
+        <ul class="bullets">
+          <li>Enable X-Ray tracing per <strong>stage</strong> (not per method)</li>
+          <li>Traces API Gateway + propagates trace header to Lambda/backend</li>
+          <li>Shows latency at API layer separately from backend latency</li>
+          <li>No daemon required — API GW is fully managed</li>
+        </ul>
+      </div>
+      <div class="int-card">
+        <div class="int-service">Elastic Beanstalk</div>
+        <ul class="bullets">
+          <li>Enable via <code>.ebextensions/xray-daemon.config</code></li>
+          <li>Or toggle in EB console under Software configuration</li>
+          <li>Instance profile must include X-Ray permissions</li>
+        </ul>
+        <pre><span class="k">option_settings</span>:
+  <span class="k">aws:elasticbeanstalk:xray</span>:
+    <span class="s">XRayEnabled</span>: <span class="s">true</span></pre>
+      </div>
+      <div class="int-card">
+        <div class="int-service">ECS / Fargate</div>
+        <ul class="bullets">
+          <li>Add X-Ray daemon as a <strong>sidecar container</strong> in task definition</li>
+          <li>App container sends to <code>localhost:2000</code> (UDP)</li>
+          <li>Task execution role must include X-Ray permissions</li>
+          <li>Use <code>AWS_XRAY_DAEMON_ADDRESS</code> env var if daemon is in a separate container port</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ SAMPLING ═══════════ -->
+  <section id="sampling">
+    <div class="section-title"><span class="icon">%</span>Sampling Rules</div>
+
+    <div class="card">
+      <div class="card-title">Why Sampling?</div>
+      <ul class="bullets">
+        <li>Tracing every request at high traffic = high cost and overhead</li>
+        <li>Sampling rules control what <strong>percentage of requests</strong> generate traces</li>
+        <li>Default rule: <strong>first request per second</strong> + <strong>5% of additional requests</strong></li>
+        <li>Custom rules can be set per service, URL path, HTTP method, or host</li>
+        <li>Rules are managed in the <strong>X-Ray console or API</strong> — no code deployment needed to change sampling</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Sampling Rule Parameters</div>
+      <table>
+        <tr><th>Parameter</th><th>Description</th><th>Default</th></tr>
+        <tr><td><code>ReservoirSize</code></td><td>Fixed number of traces per second regardless of traffic rate</td><td>1 req/sec</td></tr>
+        <tr><td><code>FixedRate</code></td><td>Percentage of requests sampled beyond the reservoir</td><td>5%</td></tr>
+        <tr><td>Priority</td><td>Rule evaluation order — lower number = evaluated first</td><td>—</td></tr>
+        <tr><td>Host / URL / Method</td><td>Match criteria — scope the rule to specific traffic patterns</td><td>Wildcard (*)</td></tr>
+      </table>
+      <div class="exam-tip">
+        <strong>⚡ EXAM TIP</strong>
+        "Reduce X-Ray costs but still capture all errors" → create a custom sampling rule with higher rate for error responses (5xx) and lower rate for 2xx. Sampling rules are updated centrally without redeploying code.
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ ANNOTATIONS ═══════════ -->
+  <section id="annotations">
+    <div class="section-title"><span class="icon">A</span>Annotations, Metadata &amp; Groups</div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Annotations vs Metadata</div>
+        <table>
+          <tr><th></th><th>Annotations</th><th>Metadata</th></tr>
+          <tr><td>Indexed?</td><td><span class="tag tag-green">YES</span></td><td><span class="tag tag-red">NO</span></td></tr>
+          <tr><td>Searchable?</td><td><span class="tag tag-green">YES</span></td><td><span class="tag tag-red">NO</span></td></tr>
+          <tr><td>Data type</td><td>String, number, boolean</td><td>Any JSON value</td></tr>
+          <tr><td>Max per trace</td><td>50 key-value pairs</td><td>Unlimited</td></tr>
+          <tr><td>Use case</td><td>Filter traces by business attribute</td><td>Debug context, request payloads</td></tr>
+          <tr><td>SDK method</td><td><code>putAnnotation()</code></td><td><code>putMetadata()</code></td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">X-Ray Groups</div>
+        <ul class="bullets">
+          <li>Filter expressions to group traces into named subsets (e.g. "errors", "slow requests")</li>
+          <li>Groups can have their own <strong>sampling rules</strong></li>
+          <li>Used to create focused views in the Service Map and Traces console</li>
+          <li>Example group filter: <code>responsetime > 5 AND http.status = 500</code></li>
+          <li>Can generate CloudWatch metrics per group (error rate, latency) → trigger CW alarms</li>
+        </ul>
+        <div class="exam-tip">
+          <strong>⚡ EXAM TIP</strong>
+          X-Ray Groups + CloudWatch Metrics = alarm on high error rates detected in traces. This bridges X-Ray observability into CloudWatch automation.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ OPENTELEMETRY ═══════════ -->
+  <section id="otel">
+    <div class="section-title"><span class="icon">O</span>AWS Distro for OpenTelemetry (ADOT)</div>
+
+    <div class="card">
+      <ul class="bullets">
+        <li>AWS-supported distribution of the open-source <strong>OpenTelemetry</strong> project</li>
+        <li>Collects traces, metrics, and contextual data from applications</li>
+        <li>Vendor-agnostic — send data to <strong>multiple destinations simultaneously</strong></li>
+        <li>Destinations: X-Ray, CloudWatch, Amazon Managed Service for Prometheus, partner monitoring tools (Datadog, New Relic, etc.)</li>
+        <li>Supports same instrumentation libraries as X-Ray SDK (auto-instrumentation for Java, Python, Node.js, .NET)</li>
+      </ul>
+      <div class="flow" style="margin-top:14px;">
+        <span class="flow-node orange">Application (instrumented)</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-node cyan">ADOT Collector</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-node green">X-Ray</span>
+        <span class="flow-arrow">+</span>
+        <span class="flow-node blue">CloudWatch</span>
+        <span class="flow-arrow">+</span>
+        <span class="flow-node">Prometheus / Partners</span>
+      </div>
+      <div class="exam-tip">
+        <strong>⚡ EXAM TIP</strong>
+        "Send traces to X-Ray AND a third-party monitoring tool simultaneously" → migrate from X-Ray SDK to <strong>AWS Distro for OpenTelemetry</strong>. X-Ray alone can only send to X-Ray.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">X-Ray SDK vs ADOT — When to Choose</div>
+      <table>
+        <tr><th></th><th>X-Ray SDK</th><th>AWS Distro for OpenTelemetry</th></tr>
+        <tr><td>Destinations</td><td>X-Ray only</td><td>X-Ray + CloudWatch + Prometheus + 3rd party</td></tr>
+        <tr><td>Standard</td><td>AWS proprietary</td><td>Open standard (CNCF)</td></tr>
+        <tr><td>Vendor lock-in</td><td>AWS only</td><td>Portable across clouds</td></tr>
+        <tr><td>Setup complexity</td><td>Simple (SDK + Daemon)</td><td>More config (Collector pipeline)</td></tr>
+        <tr><td>Use when</td><td>AWS-only, X-Ray traces sufficient</td><td>Multi-destination, hybrid, or open-source tooling required</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- ═══════════ QUICK REF ═══════════ -->
+  <section id="quickref">
+    <div class="section-title"><span class="icon">✓</span>Exam Quick Reference</div>
+
+    <div class="card">
+      <div class="card-title">Scenario → Answer Map</div>
+      <table>
+        <tr><th>If the question says…</th><th>Answer involves…</th></tr>
+        <tr><td>Trace a request across microservices / debug latency</td><td>AWS X-Ray — distributed tracing at request level</td></tr>
+        <tr><td>X-Ray not receiving data from EC2</td><td>Check: daemon running + IAM instance profile has <code>xray:PutTraceSegments</code></td></tr>
+        <tr><td>Enable X-Ray on Lambda</td><td>Set <code>TracingConfig: Active</code>; add X-Ray permissions to execution role</td></tr>
+        <tr><td>Enable X-Ray on Elastic Beanstalk</td><td><code>.ebextensions/xray-daemon.config</code> with <code>XRayEnabled: true</code></td></tr>
+        <tr><td>Enable X-Ray on ECS / Fargate</td><td>Add X-Ray daemon as a <strong>sidecar container</strong> in task definition</td></tr>
+        <tr><td>Enable X-Ray on API Gateway</td><td>Enable X-Ray tracing on the API Gateway <strong>stage</strong></td></tr>
+        <tr><td>Filter traces by a custom business attribute</td><td>Add <strong>Annotations</strong> via <code>putAnnotation()</code> in the X-Ray SDK</td></tr>
+        <tr><td>Attach debug payload to trace (not searchable)</td><td>Add <strong>Metadata</strong> via <code>putMetadata()</code></td></tr>
+        <tr><td>Reduce X-Ray cost at high traffic volume</td><td>Configure custom <strong>Sampling Rules</strong> (lower FixedRate for 2xx, higher for errors)</td></tr>
+        <tr><td>Send traces to X-Ray AND Datadog simultaneously</td><td>Migrate to <strong>AWS Distro for OpenTelemetry (ADOT)</strong></td></tr>
+        <tr><td>Alarm when error rate detected in X-Ray traces is high</td><td>X-Ray <strong>Groups</strong> → CloudWatch Metrics → CW Alarm → SNS</td></tr>
+        <tr><td>Visualize all service dependencies and call latencies</td><td>X-Ray <strong>Service Map</strong></td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-title">X-Ray vs CloudWatch vs CloudTrail</div>
+      <table>
+        <tr><th></th><th>X-Ray</th><th>CloudWatch</th><th>CloudTrail</th></tr>
+        <tr><td>Question answered</td><td>Why is this request slow/failing?</td><td>Is my app healthy? (metrics/logs)</td><td>Who made this API call?</td></tr>
+        <tr><td>Granularity</td><td>Request level (trace)</td><td>Metric/log level</td><td>API call level</td></tr>
+        <tr><td>Requires instrumentation</td><td>Yes — SDK in app code</td><td>Partial (CW Agent for custom)</td><td>No — always on</td></tr>
+        <tr><td>Latency visibility</td><td>Per-service, per-call breakdown</td><td>Aggregate metrics</td><td>No</td></tr>
+        <tr><td>Primary use</td><td>Debugging distributed systems</td><td>Monitoring &amp; alerting</td><td>Audit &amp; compliance</td></tr>
+      </table>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

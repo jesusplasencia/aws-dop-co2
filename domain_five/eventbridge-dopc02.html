@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EventBridge — DOP-C02 Study Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0f14;
+    --surface: #111822;
+    --surface2: #1a2333;
+    --border: #1e2d42;
+    --accent: #f7941d;
+    --accent2: #3b9ede;
+    --accent3: #4ecf7c;
+    --purple: #a76cff;
+    --danger: #e05252;
+    --text: #d4dde8;
+    --text-dim: #6b84a0;
+    --text-bright: #eaf2ff;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 14px; line-height: 1.65; }
+
+  header {
+    background: linear-gradient(135deg, #0d1b2a 0%, #0b1320 100%);
+    border-bottom: 2px solid var(--purple);
+    padding: 36px 48px 28px;
+    position: sticky; top: 0; z-index: 100;
+    display: flex; align-items: flex-end; justify-content: space-between;
+  }
+  header h1 { font-family: var(--mono); font-size: 28px; font-weight: 600; color: var(--purple); letter-spacing: -0.5px; }
+  header h1 span { color: var(--text-dim); font-weight: 400; font-size: 14px; margin-left: 12px; }
+  .badge { background: var(--purple); color: #fff; font-family: var(--mono); font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 3px; letter-spacing: 1px; }
+  .home-btn { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--purple); background: rgba(167,108,255,.1); border: 1px solid rgba(167,108,255,.3); padding: 5px 12px; border-radius: 3px; text-decoration: none; letter-spacing: .5px; transition: all .15s; }
+  .home-btn:hover { background: var(--purple); color: #fff; }
+
+  .container { max-width: 1100px; margin: 0 auto; padding: 40px 32px 80px; }
+
+  .toc { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 40px; padding: 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; }
+  .toc a { font-family: var(--mono); font-size: 12px; color: var(--purple); text-decoration: none; padding: 4px 10px; border: 1px solid var(--border); border-radius: 3px; transition: all .15s; }
+  .toc a:hover { background: var(--purple); color: #fff; border-color: var(--purple); }
+
+  section { margin-bottom: 48px; animation: fadein .4s ease both; }
+  section:nth-child(2){animation-delay:.05s} section:nth-child(3){animation-delay:.10s}
+  section:nth-child(4){animation-delay:.15s} section:nth-child(5){animation-delay:.20s}
+  section:nth-child(6){animation-delay:.25s} section:nth-child(7){animation-delay:.30s}
+
+  .section-title { display: flex; align-items: center; gap: 12px; font-family: var(--mono); font-size: 18px; font-weight: 600; color: var(--purple); border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 20px; }
+  .section-title .icon { background: var(--purple); color: #fff; width: 28px; height: 28px; display: grid; place-items: center; border-radius: 4px; font-size: 13px; font-weight: 700; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 20px 24px; margin-bottom: 16px; }
+  .card-title { font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--purple); margin-bottom: 12px; text-transform: uppercase; letter-spacing: .5px; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  @media(max-width: 750px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+  .kv { display: flex; flex-direction: column; gap: 7px; }
+  .kv-row { display: flex; gap: 10px; align-items: flex-start; }
+  .kv-key { font-family: var(--mono); font-size: 12px; color: var(--accent3); min-width: 140px; padding-top: 1px; flex-shrink: 0; }
+  .kv-val { color: var(--text); font-size: 13px; }
+
+  ul.bullets { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+  ul.bullets li { display: flex; gap: 8px; font-size: 13px; }
+  ul.bullets li::before { content: "▸"; color: var(--purple); flex-shrink: 0; margin-top: 1px; }
+
+  code { font-family: var(--mono); font-size: 12px; background: #162030; color: var(--accent3); padding: 1px 6px; border-radius: 3px; border: 1px solid var(--border); }
+  pre { font-family: var(--mono); font-size: 12px; background: #0d1620; border: 1px solid var(--border); border-left: 3px solid var(--purple); padding: 14px 16px; border-radius: 4px; color: #c9d1d9; overflow-x: auto; white-space: pre-wrap; margin-top: 8px; line-height: 1.7; }
+  pre .k { color: var(--purple); } pre .s { color: var(--accent3); } pre .n { color: var(--accent2); } pre .c { color: var(--text-dim); }
+
+  .tag { display: inline-block; font-family: var(--mono); font-size: 11px; padding: 2px 8px; border-radius: 3px; margin-right: 4px; margin-bottom: 4px; font-weight: 600; }
+  .tag-orange { background: rgba(247,148,29,.15); color: var(--accent);  border: 1px solid rgba(247,148,29,.3); }
+  .tag-blue   { background: rgba(59,158,222,.15);  color: var(--accent2); border: 1px solid rgba(59,158,222,.3); }
+  .tag-green  { background: rgba(78,207,124,.15);  color: var(--accent3); border: 1px solid rgba(78,207,124,.3); }
+  .tag-red    { background: rgba(224,82,82,.15);   color: var(--danger);  border: 1px solid rgba(224,82,82,.3); }
+  .tag-purple { background: rgba(167,108,255,.15); color: var(--purple);  border: 1px solid rgba(167,108,255,.3); }
+
+  .exam-tip { background: rgba(167,108,255,.08); border: 1px solid rgba(167,108,255,.3); border-left: 3px solid var(--purple); padding: 12px 16px; border-radius: 4px; margin-top: 14px; font-size: 13px; }
+  .exam-tip strong { color: var(--purple); font-family: var(--mono); font-size: 11px; letter-spacing: .5px; display: block; margin-bottom: 4px; }
+
+  .warn-tip { background: rgba(247,148,29,.08); border: 1px solid rgba(247,148,29,.3); border-left: 3px solid var(--accent); padding: 12px 16px; border-radius: 4px; margin-top: 14px; font-size: 13px; }
+  .warn-tip strong { color: var(--accent); font-family: var(--mono); font-size: 11px; letter-spacing: .5px; display: block; margin-bottom: 4px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: var(--surface2); font-family: var(--mono); font-size: 12px; color: var(--purple); text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border); }
+  td { padding: 9px 14px; border-bottom: 1px solid #151f2e; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,.015); }
+
+  .flow { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .flow-node { background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 5px 12px; font-family: var(--mono); font-size: 12px; color: var(--text-bright); }
+  .flow-node.purple { border-color: rgba(167,108,255,.4); color: var(--purple); }
+  .flow-node.green  { border-color: rgba(78,207,124,.4);  color: var(--accent3); }
+  .flow-node.blue   { border-color: rgba(59,158,222,.4);  color: var(--accent2); }
+  .flow-node.orange { border-color: rgba(247,148,29,.4);  color: var(--accent); }
+  .flow-arrow { color: var(--text-dim); font-size: 14px; }
+
+  /* bus type cards */
+  .bus-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 4px; }
+  @media(max-width: 700px){ .bus-grid { grid-template-columns: 1fr; } }
+  .bus-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 14px 16px; }
+  .bus-card-title { font-family: var(--mono); font-size: 12px; font-weight: 600; margin-bottom: 8px; }
+  .bus-card-title.default { color: var(--accent2); }
+  .bus-card-title.partner { color: var(--accent3); }
+  .bus-card-title.custom  { color: var(--purple); }
+
+  /* filter pill grid */
+  .filter-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  @media(max-width: 700px){ .filter-grid { grid-template-columns: 1fr 1fr; } }
+  .filter-pill { background: var(--surface2); border: 1px solid rgba(167,108,255,.25); border-radius: 6px; padding: 12px 14px; }
+  .filter-pill-name { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--purple); margin-bottom: 5px; }
+  .filter-pill-desc { font-size: 12px; color: var(--text-dim); }
+  .filter-pill pre { margin-top: 6px; padding: 6px 10px; font-size: 11px; }
+
+  @keyframes fadein { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
+  ::-webkit-scrollbar { width:6px; height:6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius:3px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Amazon EventBridge <span>AWS DevOps Professional — DOP-C02</span></h1>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <a href="../index.html" class="home-btn">&#8592; Home</a>
+    <span class="badge">EXAM PREP</span>
+  </div>
+</header>
+
+<div class="container">
+
+  <nav class="toc">
+    <a href="#overview">Overview</a>
+    <a href="#rules">Rules &amp; Triggers</a>
+    <a href="#buses">Event Buses</a>
+    <a href="#schema">Schema Registry</a>
+    <a href="#filtering">Content Filtering</a>
+    <a href="#reliability">Reliability</a>
+    <a href="#security">Security</a>
+    <a href="#quickref">Quick Reference</a>
+  </nav>
+
+  <!-- ═══════════ OVERVIEW ═══════════ -->
+  <section id="overview">
+    <div class="section-title"><span class="icon">E</span>Overview</div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">What it is</div>
+        <div class="kv">
+          <div class="kv-row"><span class="kv-key">Type</span><span class="kv-val">Serverless event bus — routes events between AWS services, SaaS apps, and custom applications</span></div>
+          <div class="kv-row"><span class="kv-key">Event format</span><span class="kv-val">JSON — every event has a standard envelope: <code>source</code>, <code>detail-type</code>, <code>detail</code>, <code>account</code>, <code>region</code>, <code>time</code></span></div>
+          <div class="kv-row"><span class="kv-key">Throughput</span><span class="kv-val">Default 10,000 events/sec per region (soft limit, can be raised)</span></div>
+          <div class="kv-row"><span class="kv-key">Latency</span><span class="kv-val">Typically under 500ms end-to-end</span></div>
+          <div class="kv-row"><span class="kv-key">Old name</span><span class="kv-val">CloudWatch Events (same underlying service, rebranded)</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Event Structure (JSON envelope)</div>
+        <pre>{
+  <span class="k">"version"</span>: <span class="s">"0"</span>,
+  <span class="k">"id"</span>: <span class="s">"abc-123"</span>,
+  <span class="k">"source"</span>: <span class="s">"aws.ec2"</span>,
+  <span class="k">"account"</span>: <span class="s">"123456789012"</span>,
+  <span class="k">"time"</span>: <span class="s">"2024-01-01T00:00:00Z"</span>,
+  <span class="k">"region"</span>: <span class="s">"us-east-1"</span>,
+  <span class="k">"detail-type"</span>: <span class="s">"EC2 Instance State-change Notification"</span>,
+  <span class="k">"detail"</span>: {
+    <span class="k">"instance-id"</span>: <span class="s">"i-0abc123"</span>,
+    <span class="k">"state"</span>: <span class="s">"terminated"</span>
+  }
+}</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ RULES & TRIGGERS ═══════════ -->
+  <section id="rules">
+    <div class="section-title"><span class="icon">R</span>Rules &amp; Triggers</div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Trigger Type 1 — Event Pattern</div>
+        <ul class="bullets">
+          <li>Rule matches incoming events based on their JSON content</li>
+          <li>Pattern is a <strong>partial JSON subset</strong> of the event — only specify fields you care about</li>
+          <li>Supports content filtering (prefix, suffix, numeric ranges, etc.)</li>
+          <li>Multiple targets can be invoked by a single rule</li>
+        </ul>
+        <pre><span class="c">// Match any EC2 instance termination in us-east-1</span>
+{
+  <span class="k">"source"</span>: [<span class="s">"aws.ec2"</span>],
+  <span class="k">"detail-type"</span>: [<span class="s">"EC2 Instance State-change Notification"</span>],
+  <span class="k">"detail"</span>: {
+    <span class="k">"state"</span>: [<span class="s">"terminated"</span>]
+  }
+}</pre>
+        <div class="exam-tip">
+          <strong>⚡ EXAM TIP</strong>
+          Classic pattern: IAM Root User sign-in → EventBridge rule → SNS email alert. Know this cold — it appears repeatedly.
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Trigger Type 2 — Schedule</div>
+        <ul class="bullets">
+          <li><strong>Rate expression:</strong> <code>rate(5 minutes)</code>, <code>rate(1 hour)</code></li>
+          <li><strong>Cron expression:</strong> full cron syntax for complex schedules</li>
+          <li>EventBridge Scheduler (newer): dedicated service for large-scale scheduling, one-time or recurring</li>
+          <li>Scheduler supports <strong>flexible time windows</strong> — spread invocations to avoid thundering herd</li>
+        </ul>
+        <pre><span class="c"># Every day at 6 AM UTC</span>
+<span class="s">cron(0 6 * * ? *)</span>
+
+<span class="c"># Every 15 minutes</span>
+<span class="s">rate(15 minutes)</span></pre>
+        <div class="exam-tip">
+          <strong>⚡ EXAM TIP</strong>
+          EventBridge Scheduler can invoke <strong>any AWS API action</strong> directly as a target — not just Lambda. Replaces cron-based Lambda triggers for scheduled tasks.
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Event Sources</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">
+        <span class="tag tag-blue">AWS Services (EC2, S3, RDS…)</span>
+        <span class="tag tag-blue">CloudTrail (any API call)</span>
+        <span class="tag tag-blue">Scheduled / Cron</span>
+        <span class="tag tag-green">SaaS Partners (Zendesk, Datadog…)</span>
+        <span class="tag tag-purple">Custom Apps (PutEvents API)</span>
+      </div>
+      <div class="exam-tip">
+        <strong>⚡ EXAM TIP</strong>
+        CloudTrail + EventBridge is the primary pattern for <strong>reacting to any AWS API call</strong> (e.g., detect a Security Group change, an S3 bucket policy modification, or an IAM role deletion).
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Targets (Destinations)</div>
+      <table>
+        <tr><th>Category</th><th>Targets</th></tr>
+        <tr><td><span class="tag tag-blue">Compute</span></td><td>Lambda, AWS Batch, ECS Task</td></tr>
+        <tr><td><span class="tag tag-green">Integration</span></td><td>SQS, SNS, Kinesis Data Streams, Kinesis Firehose</td></tr>
+        <tr><td><span class="tag tag-purple">Orchestration</span></td><td>Step Functions, CodePipeline, CodeBuild</td></tr>
+        <tr><td><span class="tag tag-orange">Maintenance</span></td><td>SSM Run Command, EC2 Actions (stop/terminate/reboot)</td></tr>
+        <tr><td><span class="tag tag-orange">API</span></td><td>API Gateway, EventBridge API Destinations (any HTTP endpoint)</td></tr>
+        <tr><td><span class="tag tag-blue">Other buses</span></td><td>EventBridge Event Bus (cross-account / cross-region)</td></tr>
+      </table>
+      <div class="exam-tip">
+        <strong>⚡ EXAM TIP</strong>
+        A single EventBridge rule can have <strong>up to 5 targets</strong>. Fan-out: use EventBridge → SNS or EventBridge → multiple targets directly. For &gt;5, route to SNS first.
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ EVENT BUSES ═══════════ -->
+  <section id="buses">
+    <div class="section-title"><span class="icon">B</span>Event Buses</div>
+
+    <div class="bus-grid">
+      <div class="bus-card">
+        <div class="bus-card-title default">Default Event Bus</div>
+        <ul class="bullets">
+          <li>Receives all AWS service events automatically</li>
+          <li>One per account per region</li>
+          <li>Cannot be deleted</li>
+          <li>AWS services publish here natively</li>
+        </ul>
+      </div>
+      <div class="bus-card">
+        <div class="bus-card-title partner">Partner Event Bus</div>
+        <ul class="bullets">
+          <li>Receives events from SaaS partners</li>
+          <li>Partners: Zendesk, Datadog, PagerDuty, Auth0, Stripe…</li>
+          <li>Partner must be activated in AWS console</li>
+          <li>Creates a dedicated bus per partner</li>
+        </ul>
+      </div>
+      <div class="bus-card">
+        <div class="bus-card-title custom">Custom Event Bus</div>
+        <ul class="bullets">
+          <li>For your own application events</li>
+          <li>Publish via <code>PutEvents</code> API</li>
+          <li>Scoped to an account by default</li>
+          <li>Share cross-account via resource-based policy</li>
+          <li>Can be shared with other AWS accounts or org</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+      <div class="card-title">Cross-Account / Cross-Region Event Routing</div>
+      <div class="flow">
+        <span class="flow-node blue">Account A<br><small>Source Bus</small></span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-node purple">EventBridge Rule<br><small>target = bus in Acct B</small></span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-node green">Account B<br><small>Central Event Bus</small></span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-node orange">Lambda / SQS / etc.</span>
+      </div>
+      <ul class="bullets" style="margin-top:14px;">
+        <li>Receiving bus must have a <strong>resource-based policy</strong> granting <code>events:PutEvents</code> from the source account</li>
+        <li>Cross-region: rule targets a bus in a different region — same account or cross-account</li>
+        <li>Common pattern: centralize all org events to a <strong>security / audit account</strong></li>
+      </ul>
+      <div class="exam-tip">
+        <strong>⚡ EXAM TIP</strong>
+        Multi-account event aggregation = EventBridge rules in each account routing to a <strong>central custom bus</strong> in a dedicated audit account. This is the DevOps-recommended observability pattern.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Event Archive &amp; Replay</div>
+      <ul class="bullets">
+        <li>Archive <strong>all</strong> events or a filtered subset from any bus</li>
+        <li>Configurable retention: indefinite or specific number of days</li>
+        <li><strong>Replay</strong>: re-process archived events through a bus to recover from bugs or reprocess data</li>
+        <li>Replay can target a different bus or the same bus with a specific time window</li>
+      </ul>
+      <div class="exam-tip">
+        <strong>⚡ EXAM TIP</strong>
+        Archive + Replay is the EventBridge answer to "how do you reprocess events after fixing a Lambda bug?" — events are replayed from the archive, not resent by the source.
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ SCHEMA REGISTRY ═══════════ -->
+  <section id="schema">
+    <div class="section-title"><span class="icon">S</span>Schema Registry</div>
+
+    <div class="card">
+      <ul class="bullets">
+        <li>Automatically discovers and stores event <strong>schemas</strong> from your buses</li>
+        <li>Schema = the structure/shape of an event's <code>detail</code> field</li>
+        <li>Allows you to <strong>generate code bindings</strong> (Java, Python, TypeScript) for event types — speeds up development</li>
+        <li>Versioned — tracks schema changes over time</li>
+        <li>Available for AWS service events, partner events, and custom events</li>
+      </ul>
+      <div class="exam-tip">
+        <strong>⚡ EXAM TIP</strong>
+        Schema Registry is a secondary topic — know it exists and that it generates typed code bindings. Unlikely to be a primary question focus on DOP-C02.
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ CONTENT FILTERING ═══════════ -->
+  <section id="filtering">
+    <div class="section-title"><span class="icon">F</span>Content Filtering</div>
+
+    <div class="card" style="margin-bottom:16px;">
+      <p style="font-size:13px;margin-bottom:16px;">Event patterns support advanced filtering so rules only trigger on precisely matched events — reducing unnecessary target invocations.</p>
+      <div class="filter-grid">
+        <div class="filter-pill">
+          <div class="filter-pill-name">Prefix</div>
+          <div class="filter-pill-desc">String starts with value</div>
+          <pre>{ "prefix": "us-east" }</pre>
+        </div>
+        <div class="filter-pill">
+          <div class="filter-pill-name">Suffix</div>
+          <div class="filter-pill-desc">String ends with value</div>
+          <pre>{ "suffix": ".jpg" }</pre>
+        </div>
+        <div class="filter-pill">
+          <div class="filter-pill-name">Anything-But</div>
+          <div class="filter-pill-desc">Match anything except listed values</div>
+          <pre>{ "anything-but": ["WARN","INFO"] }</pre>
+        </div>
+        <div class="filter-pill">
+          <div class="filter-pill-name">Exists</div>
+          <div class="filter-pill-desc">Field is present (true) or absent (false)</div>
+          <pre>{ "exists": true }</pre>
+        </div>
+        <div class="filter-pill">
+          <div class="filter-pill-name">Numeric</div>
+          <div class="filter-pill-desc">Range comparison on numeric fields</div>
+          <pre>{ "numeric": [">", 100, "<=", 500] }</pre>
+        </div>
+        <div class="filter-pill">
+          <div class="filter-pill-name">Multiple / AND / OR</div>
+          <div class="filter-pill-desc">Combine filters; same field = OR, different fields = AND</div>
+          <pre>{ "state": ["running","stopped"] }</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="exam-tip" style="margin-top:0;">
+      <strong>⚡ EXAM TIP</strong>
+      Content filtering happens <strong>before</strong> the target is invoked — you are not charged for filtered-out events that don't reach a target. Use <code>anything-but</code> to suppress noisy events like health checks.
+    </div>
+  </section>
+
+  <!-- ═══════════ RELIABILITY ═══════════ -->
+  <section id="reliability">
+    <div class="section-title"><span class="icon">↻</span>Reliability &amp; Error Handling</div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Retry Policy</div>
+        <ul class="bullets">
+          <li>EventBridge retries failed target invocations with <strong>exponential backoff</strong></li>
+          <li>Default: <strong>24 hours</strong> max retry window, up to <strong>185 retries</strong></li>
+          <li>Configurable per rule target: max event age + max retry attempts</li>
+          <li>Applies to async targets (Lambda async, SQS, etc.)</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-title">Dead Letter Queue (DLQ)</div>
+        <ul class="bullets">
+          <li>Configure an <strong>SQS queue as DLQ</strong> on a rule target</li>
+          <li>Events that fail all retries are sent to the DLQ</li>
+          <li>Prevents event loss — inspect and replay from DLQ</li>
+          <li>Each target has its own DLQ configuration</li>
+        </ul>
+        <div class="exam-tip">
+          <strong>⚡ EXAM TIP</strong>
+          EventBridge → Lambda failures → DLQ on EventBridge target (not on Lambda itself). Don't confuse with Lambda's own DLQ/SQS destination.
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">API Destinations</div>
+      <ul class="bullets">
+        <li>Invoke any <strong>external HTTP/S endpoint</strong> as an EventBridge target</li>
+        <li>Supports OAuth, API Key, and Basic auth via <strong>Connections</strong> (credentials stored in Secrets Manager)</li>
+        <li>Rate limiting: configure max invocations per second to protect downstream APIs</li>
+        <li>Use case: send AWS events to Slack, PagerDuty, Splunk, or any webhook</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ═══════════ SECURITY ═══════════ -->
+  <section id="security">
+    <div class="section-title"><span class="icon">🔒</span>Security &amp; Permissions</div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">IAM Role (for targets)</div>
+        <ul class="bullets">
+          <li>EventBridge needs an <strong>execution role</strong> to invoke targets on your behalf</li>
+          <li>Role must allow the target action (e.g. <code>lambda:InvokeFunction</code>, <code>sqs:SendMessage</code>)</li>
+          <li>AWS-managed targets (Lambda, SNS) also accept <strong>resource-based policies</strong> instead</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Resource-Based Policy (on the Bus)</div>
+        <ul class="bullets">
+          <li>Controls <strong>who can put events onto a custom bus</strong></li>
+          <li>Grant <code>events:PutEvents</code> to specific accounts, OUs, or entire AWS Organization</li>
+          <li>Required for cross-account event routing</li>
+        </ul>
+        <pre>{
+  <span class="k">"Effect"</span>: <span class="s">"Allow"</span>,
+  <span class="k">"Action"</span>: <span class="s">"events:PutEvents"</span>,
+  <span class="k">"Principal"</span>: { <span class="k">"AWS"</span>: <span class="s">"arn:aws:iam::111222333444:root"</span> },
+  <span class="k">"Resource"</span>: <span class="s">"arn:aws:events:us-east-1:123456789012:event-bus/central"</span>
+}</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ QUICK REF ═══════════ -->
+  <section id="quickref">
+    <div class="section-title"><span class="icon">✓</span>Exam Quick Reference</div>
+
+    <div class="card">
+      <div class="card-title">Scenario → Answer Map</div>
+      <table>
+        <tr><th>If the question says…</th><th>Answer involves…</th></tr>
+        <tr><td>React to IAM Root User login</td><td>EventBridge rule (Event Pattern: <code>aws.signin</code>) → SNS</td></tr>
+        <tr><td>Trigger Lambda on a schedule</td><td>EventBridge rule with <code>rate()</code> or <code>cron()</code> expression</td></tr>
+        <tr><td>React to any AWS API call (e.g. SG change)</td><td>CloudTrail + EventBridge rule on <code>aws.cloudtrail</code> events</td></tr>
+        <tr><td>Aggregate events from all org accounts</td><td>EventBridge rules → cross-account custom bus (central audit account)</td></tr>
+        <tr><td>Reprocess events after a Lambda bug fix</td><td>EventBridge Archive + Replay</td></tr>
+        <tr><td>Send AWS events to Slack / external webhook</td><td>EventBridge API Destinations</td></tr>
+        <tr><td>SaaS app (Zendesk/Datadog) triggers Lambda</td><td>EventBridge Partner Event Bus</td></tr>
+        <tr><td>Suppress noisy events (e.g. INFO logs)</td><td>Content filtering with <code>anything-but</code></td></tr>
+        <tr><td>Prevent event loss on Lambda failure</td><td>DLQ (SQS) configured on EventBridge rule target</td></tr>
+        <tr><td>Fan-out to many consumers</td><td>EventBridge → SNS (then SNS → multiple SQS); or multiple rule targets (max 5)</td></tr>
+        <tr><td>Invoke any AWS API on a schedule</td><td>EventBridge Scheduler with Universal Targets</td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-title">EventBridge vs SNS vs SQS — When to Choose</div>
+      <table>
+        <tr><th></th><th>EventBridge</th><th>SNS</th><th>SQS</th></tr>
+        <tr><td>Pattern</td><td>Event routing / filtering</td><td>Pub/Sub fan-out</td><td>Queue / decoupling</td></tr>
+        <tr><td>Sources</td><td>AWS services, SaaS, custom</td><td>AWS services, custom</td><td>Custom producers</td></tr>
+        <tr><td>Filtering</td><td>Advanced content filtering</td><td>Basic attribute filter</td><td>None (consumer pulls)</td></tr>
+        <tr><td>Replay</td><td>Yes (Archive+Replay)</td><td>No</td><td>Messages persist in queue</td></tr>
+        <tr><td>Schema</td><td>Schema Registry</td><td>No</td><td>No</td></tr>
+        <tr><td>Best for</td><td>Event-driven architecture, automation</td><td>Notifications, fan-out</td><td>Work queues, buffering</td></tr>
+      </table>
+      <div class="warn-tip">
+        <strong>⚠ WATCH OUT</strong>
+        EventBridge is <strong>not a queue</strong> — if a target is down and retries exhaust, events are lost (unless DLQ is configured). For guaranteed delivery with ordering, use SQS FIFO.
+      </div>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

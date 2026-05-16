@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS Health Dashboard — DOP-C02 Study Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0f14;
+    --surface: #111822;
+    --surface2: #1a2333;
+    --border: #1e2d42;
+    --accent: #f7941d;
+    --accent2: #3b9ede;
+    --accent3: #4ecf7c;
+    --red: #e05252;
+    --teal: #2ec4b6;
+    --text: #d4dde8;
+    --text-dim: #6b84a0;
+    --text-bright: #eaf2ff;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 14px; line-height: 1.65; }
+
+  header {
+    background: linear-gradient(135deg, #0d1b2a 0%, #0b1320 100%);
+    border-bottom: 2px solid var(--teal);
+    padding: 36px 48px 28px;
+    position: sticky; top: 0; z-index: 100;
+    display: flex; align-items: flex-end; justify-content: space-between;
+  }
+  header h1 { font-family: var(--mono); font-size: 26px; font-weight: 600; color: var(--teal); letter-spacing: -0.5px; }
+  header h1 span { color: var(--text-dim); font-weight: 400; font-size: 14px; margin-left: 12px; }
+  .badge { background: var(--teal); color: #000; font-family: var(--mono); font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 3px; letter-spacing: 1px; }
+  .home-btn { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--teal); background: rgba(46,196,182,.1); border: 1px solid rgba(46,196,182,.3); padding: 5px 12px; border-radius: 3px; text-decoration: none; letter-spacing: .5px; transition: all .15s; }
+  .home-btn:hover { background: var(--teal); color: #000; }
+
+  .container { max-width: 1000px; margin: 0 auto; padding: 40px 32px 80px; }
+
+  .toc { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 40px; padding: 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; }
+  .toc a { font-family: var(--mono); font-size: 12px; color: var(--teal); text-decoration: none; padding: 4px 10px; border: 1px solid var(--border); border-radius: 3px; transition: all .15s; }
+  .toc a:hover { background: var(--teal); color: #000; border-color: var(--teal); }
+
+  section { margin-bottom: 44px; animation: fadein .4s ease both; }
+  section:nth-child(2){animation-delay:.05s} section:nth-child(3){animation-delay:.10s}
+  section:nth-child(4){animation-delay:.15s} section:nth-child(5){animation-delay:.20s}
+
+  .section-title { display: flex; align-items: center; gap: 12px; font-family: var(--mono); font-size: 18px; font-weight: 600; color: var(--teal); border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 20px; }
+  .section-title .icon { background: var(--teal); color: #000; width: 28px; height: 28px; display: grid; place-items: center; border-radius: 4px; font-size: 13px; font-weight: 700; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 20px 24px; margin-bottom: 16px; }
+  .card-title { font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--teal); margin-bottom: 12px; text-transform: uppercase; letter-spacing: .5px; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media(max-width: 720px) { .grid-2 { grid-template-columns: 1fr; } }
+
+  .kv { display: flex; flex-direction: column; gap: 8px; }
+  .kv-row { display: flex; gap: 10px; align-items: flex-start; }
+  .kv-key { font-family: var(--mono); font-size: 12px; color: var(--accent3); min-width: 150px; padding-top: 1px; flex-shrink: 0; }
+  .kv-val { color: var(--text); font-size: 13px; }
+
+  ul.bullets { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+  ul.bullets li { display: flex; gap: 8px; font-size: 13px; }
+  ul.bullets li::before { content: "▸"; color: var(--teal); flex-shrink: 0; margin-top: 1px; }
+
+  code { font-family: var(--mono); font-size: 12px; background: #162030; color: var(--accent3); padding: 1px 6px; border-radius: 3px; border: 1px solid var(--border); }
+  pre { font-family: var(--mono); font-size: 12px; background: #0d1620; border: 1px solid var(--border); border-left: 3px solid var(--teal); padding: 14px 16px; border-radius: 4px; color: #c9d1d9; overflow-x: auto; white-space: pre-wrap; margin-top: 8px; line-height: 1.7; }
+  pre .k { color: var(--teal); } pre .s { color: var(--accent3); } pre .c { color: var(--text-dim); }
+
+  .tag { display: inline-block; font-family: var(--mono); font-size: 11px; padding: 2px 8px; border-radius: 3px; margin-right: 4px; margin-bottom: 4px; font-weight: 600; }
+  .tag-teal   { background: rgba(46,196,182,.15); color: var(--teal);   border: 1px solid rgba(46,196,182,.3); }
+  .tag-blue   { background: rgba(59,158,222,.15);  color: var(--accent2); border: 1px solid rgba(59,158,222,.3); }
+  .tag-green  { background: rgba(78,207,124,.15);  color: var(--accent3); border: 1px solid rgba(78,207,124,.3); }
+  .tag-orange { background: rgba(247,148,29,.15);  color: var(--accent);  border: 1px solid rgba(247,148,29,.3); }
+  .tag-red    { background: rgba(224,82,82,.15);   color: var(--red);     border: 1px solid rgba(224,82,82,.3); }
+
+  .exam-tip { background: rgba(46,196,182,.07); border: 1px solid rgba(46,196,182,.3); border-left: 3px solid var(--teal); padding: 12px 16px; border-radius: 4px; margin-top: 14px; font-size: 13px; }
+  .exam-tip strong { color: var(--teal); font-family: var(--mono); font-size: 11px; letter-spacing: .5px; display: block; margin-bottom: 4px; }
+
+  .warn-tip { background: rgba(247,148,29,.08); border: 1px solid rgba(247,148,29,.3); border-left: 3px solid var(--accent); padding: 12px 16px; border-radius: 4px; margin-top: 14px; font-size: 13px; }
+  .warn-tip strong { color: var(--accent); font-family: var(--mono); font-size: 11px; letter-spacing: .5px; display: block; margin-bottom: 4px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: var(--surface2); font-family: var(--mono); font-size: 12px; color: var(--teal); text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border); }
+  td { padding: 9px 14px; border-bottom: 1px solid #151f2e; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,.015); }
+
+  /* automation flow */
+  .auto-flow { display: flex; flex-direction: column; gap: 10px; }
+  .auto-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .auto-label { font-family: var(--mono); font-size: 11px; color: var(--text-dim); min-width: 220px; }
+  .flow-node { background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 5px 12px; font-family: var(--mono); font-size: 12px; color: var(--text-bright); }
+  .flow-node.teal   { border-color: rgba(46,196,182,.4); color: var(--teal); }
+  .flow-node.green  { border-color: rgba(78,207,124,.4); color: var(--accent3); }
+  .flow-node.orange { border-color: rgba(247,148,29,.4); color: var(--accent); }
+  .flow-node.red    { border-color: rgba(224,82,82,.4);  color: var(--red); }
+  .flow-arrow { color: var(--text-dim); font-size: 14px; }
+
+  /* comparison cards */
+  .compare-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 16px 18px; }
+  .compare-card-title { font-family: var(--mono); font-size: 12px; font-weight: 600; margin-bottom: 10px; }
+  .compare-card-title.service { color: var(--accent2); }
+  .compare-card-title.account { color: var(--teal); }
+
+  @keyframes fadein { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
+  ::-webkit-scrollbar { width:6px; height:6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius:3px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>AWS Health Dashboard <span>AWS DevOps Professional — DOP-C02</span></h1>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <a href="../index.html" class="home-btn">&#8592; Home</a>
+    <span class="badge">EXAM PREP</span>
+  </div>
+</header>
+
+<div class="container">
+
+  <nav class="toc">
+    <a href="#overview">Overview</a>
+    <a href="#views">Two Views</a>
+    <a href="#events">Event Types</a>
+    <a href="#automation">Automation Patterns</a>
+    <a href="#org">Org-Level</a>
+    <a href="#api">API &amp; CLI</a>
+    <a href="#quickref">Quick Reference</a>
+  </nav>
+
+  <!-- ═══════════ OVERVIEW ═══════════ -->
+  <section id="overview">
+    <div class="section-title"><span class="icon">H</span>Overview</div>
+
+    <div class="card">
+      <div class="kv">
+        <div class="kv-row"><span class="kv-key">What it is</span><span class="kv-val">Centralized visibility into the health of AWS services and how they affect your specific resources and account</span></div>
+        <div class="kv-row"><span class="kv-key">Old name</span><span class="kv-val"><strong>AWS Personal Health Dashboard</strong> — renamed to AWS Health Dashboard (Your Account view)</span></div>
+        <div class="kv-row"><span class="kv-key">Access</span><span class="kv-val">Console, AWS Health API, EventBridge integration</span></div>
+        <div class="kv-row"><span class="kv-key">Support plan</span><span class="kv-val">Basic: limited. Business / Enterprise support: full API access + proactive notifications</span></div>
+        <div class="kv-row"><span class="kv-key">Event retention</span><span class="kv-val">90 days of event history</span></div>
+      </div>
+      <div class="exam-tip">
+        <strong>⚡ EXAM TIP</strong>
+        AWS Health API (programmatic access) requires <strong>Business or Enterprise Support</strong> plan. Basic support only shows the console UI.
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ TWO VIEWS ═══════════ -->
+  <section id="views">
+    <div class="section-title"><span class="icon">V</span>Two Views</div>
+
+    <div class="grid-2">
+      <div class="compare-card">
+        <div class="compare-card-title service">Service Health (Public)</div>
+        <ul class="bullets">
+          <li>Shows health of <strong>all AWS services across all regions</strong></li>
+          <li>General / public status — not account-specific</li>
+          <li>Historical log of past 12 months of service interruptions</li>
+          <li>Available at <code>health.aws.amazon.com/health/status</code></li>
+          <li>No login required — publicly accessible</li>
+          <li>Equivalent to the old "AWS Service Health Dashboard"</li>
+        </ul>
+      </div>
+
+      <div class="compare-card">
+        <div class="compare-card-title account">Your Account (Personal)</div>
+        <ul class="bullets">
+          <li>Formerly <strong>Personal Health Dashboard (PHD)</strong></li>
+          <li><strong>Personalized view</strong> — shows only events affecting your specific resources</li>
+          <li>Provides <strong>alerts + remediation guidance</strong> for impacting events</li>
+          <li>Shows scheduled maintenance, lifecycle notifications, security advisories</li>
+          <li>Proactive notifications for planned AWS changes</li>
+          <li>Can aggregate across an <strong>entire AWS Organization</strong></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="exam-tip" style="margin-top:4px;">
+      <strong>⚡ EXAM TIP — KEY DISTINCTION</strong>
+      Service Health = "Is EC2 down globally?" (public, generic). Your Account = "Are MY EC2 instances affected?" (private, resource-specific). The exam tests this distinction — always prefer Your Account / PHD when the scenario involves your own resources.
+    </div>
+  </section>
+
+  <!-- ═══════════ EVENT TYPES ═══════════ -->
+  <section id="events">
+    <div class="section-title"><span class="icon">T</span>Event Types</div>
+
+    <div class="card">
+      <table>
+        <tr><th>Event Type</th><th>Description</th><th>Example</th></tr>
+        <tr>
+          <td><span class="tag tag-red">Issue</span></td>
+          <td>Active service disruption or degraded performance affecting your resources</td>
+          <td>EC2 API errors in us-east-1 affecting your instances</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-orange">Scheduled Change</span></td>
+          <td>Planned maintenance or lifecycle events requiring action or awareness</td>
+          <td>EC2 instance retirement, RDS maintenance window, TLS cert deprecation</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-teal">Account Notification</span></td>
+          <td>Informational — billing, security advisories, service limit warnings</td>
+          <td>IAM access key exposed in public repo, service limit approaching</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Event Scope</div>
+      <div class="grid-2">
+        <div>
+          <p style="font-family:var(--mono);font-size:12px;color:var(--accent3);margin-bottom:8px;">ACCOUNT EVENTS</p>
+          <ul class="bullets">
+            <li>Specific to your account and resources</li>
+            <li>Only visible to your account</li>
+            <li>Examples: your EC2 scheduled for retirement, your IAM key exposed</li>
+          </ul>
+        </div>
+        <div>
+          <p style="font-family:var(--mono);font-size:12px;color:var(--accent2);margin-bottom:8px;">PUBLIC EVENTS</p>
+          <ul class="bullets">
+            <li>Broad service-level events affecting many customers</li>
+            <li>Visible to all accounts</li>
+            <li>Examples: regional EC2 degradation, S3 connectivity issues</li>
+          </ul>
+        </div>
+      </div>
+      <div class="exam-tip">
+        <strong>⚡ EXAM TIP</strong>
+        EventBridge can react to <strong>both Account Events and Public Events</strong> from AWS Health. The source in EventBridge patterns is <code>"aws.health"</code>.
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ AUTOMATION ═══════════ -->
+  <section id="automation">
+    <div class="section-title"><span class="icon">⚡</span>EventBridge Automation Patterns</div>
+
+    <div class="card">
+      <div class="card-title">How It Works</div>
+      <ul class="bullets">
+        <li>AWS Health publishes events to EventBridge on the <strong>default event bus</strong></li>
+        <li>Source: <code>"aws.health"</code> — match on <code>detail-type</code> and <code>detail.service</code></li>
+        <li>Works for both Account Events and Public Events</li>
+        <li>Enables fully automated remediation without human intervention</li>
+      </ul>
+      <pre><span class="c">// EventBridge pattern — react to any AWS Health event</span>
+{
+  <span class="k">"source"</span>: [<span class="s">"aws.health"</span>],
+  <span class="k">"detail-type"</span>: [<span class="s">"AWS Health Event"</span>],
+  <span class="k">"detail"</span>: {
+    <span class="k">"service"</span>: [<span class="s">"EC2"</span>],
+    <span class="k">"eventTypeCategory"</span>: [<span class="s">"scheduledChange"</span>]
+  }
+}</pre>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Key Automation Scenarios (exam-tested)</div>
+      <div class="auto-flow">
+
+        <div class="auto-row">
+          <span class="auto-label">Exposed IAM Access Key</span>
+          <span class="flow-node teal">AWS Health</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-node">EventBridge</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-node green">Lambda</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-node red">IAM: Delete Key</span>
+        </div>
+
+        <div class="auto-row">
+          <span class="auto-label">EC2 Scheduled for Retirement</span>
+          <span class="flow-node teal">AWS Health</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-node">EventBridge</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-node orange">EC2: Restart Instance</span>
+        </div>
+
+        <div class="auto-row">
+          <span class="auto-label">Service Degradation Alert</span>
+          <span class="flow-node teal">AWS Health</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-node">EventBridge</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-node">SNS</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-node orange">Email / Slack / PagerDuty</span>
+        </div>
+
+        <div class="auto-row">
+          <span class="auto-label">Capture Event for Audit</span>
+          <span class="flow-node teal">AWS Health</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-node">EventBridge</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-node">Kinesis Firehose</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-node green">S3 / OpenSearch</span>
+        </div>
+
+        <div class="auto-row">
+          <span class="auto-label">RDS Maintenance Window</span>
+          <span class="flow-node teal">AWS Health</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-node">EventBridge</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-node green">Lambda</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-node orange">Switch Traffic to Replica</span>
+        </div>
+
+      </div>
+      <div class="exam-tip">
+        <strong>⚡ EXAM TIP</strong>
+        The two most-tested scenarios: (1) <strong>IAM Key Exposed → Lambda → Delete Key</strong>, and (2) <strong>EC2 Retirement → EventBridge → Restart/Replace Instance</strong>. Know these flows cold.
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ ORG LEVEL ═══════════ -->
+  <section id="org">
+    <div class="section-title"><span class="icon">O</span>Organization-Level Health</div>
+
+    <div class="card">
+      <ul class="bullets">
+        <li>Enable <strong>AWS Health Organizational View</strong> from the management (payer) account</li>
+        <li>Aggregates health events across <strong>all accounts in the AWS Organization</strong></li>
+        <li>Requires AWS Organizations and Business/Enterprise Support on the management account</li>
+        <li>View events per-account, per-service, per-region across the org</li>
+        <li>EventBridge in the management account can react to health events from member accounts</li>
+        <li>Useful for: centralized ops team responding to issues across all child accounts</li>
+      </ul>
+      <div class="exam-tip">
+        <strong>⚡ EXAM TIP</strong>
+        "Monitor health of all accounts in an organization from a single place" → <strong>AWS Health Organizational View</strong> from the management account. Requires Business/Enterprise Support.
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ API & CLI ═══════════ -->
+  <section id="api">
+    <div class="section-title"><span class="icon">A</span>AWS Health API</div>
+
+    <div class="card">
+      <div class="card-title">Key API Calls</div>
+      <table>
+        <tr><th>API Call</th><th>Purpose</th></tr>
+        <tr><td><code>DescribeEvents</code></td><td>List health events filtered by service, region, type, status</td></tr>
+        <tr><td><code>DescribeEventDetails</code></td><td>Get full details and remediation guidance for specific events</td></tr>
+        <tr><td><code>DescribeAffectedEntities</code></td><td>List your specific resources (instances, buckets, etc.) affected by an event</td></tr>
+        <tr><td><code>DescribeEventAggregates</code></td><td>Count of events grouped by status (open, closed, upcoming)</td></tr>
+        <tr><td><code>DescribeAffectedAccountsForOrganization</code></td><td>List org accounts affected by an event (org view required)</td></tr>
+      </table>
+      <div class="warn-tip">
+        <strong>⚠ REQUIREMENT</strong>
+        AWS Health API access requires <strong>Business or Enterprise Support plan</strong>. Calls from accounts with Basic support return an error. This is a common exam distractor.
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ QUICK REF ═══════════ -->
+  <section id="quickref">
+    <div class="section-title"><span class="icon">✓</span>Exam Quick Reference</div>
+
+    <div class="card">
+      <div class="card-title">Scenario → Answer Map</div>
+      <table>
+        <tr><th>If the question says…</th><th>Answer involves…</th></tr>
+        <tr><td>Get notified when your EC2 is scheduled for retirement</td><td>AWS Health Dashboard (Your Account) + EventBridge → SNS</td></tr>
+        <tr><td>Automatically delete an exposed IAM access key</td><td>AWS Health event → EventBridge → Lambda → IAM DeleteAccessKey</td></tr>
+        <tr><td>Automatically replace an EC2 scheduled for retirement</td><td>AWS Health event → EventBridge → EC2 Restart / ASG replace</td></tr>
+        <tr><td>View health of all AWS services globally (no login)</td><td>Service Health view (public dashboard)</td></tr>
+        <tr><td>View only events affecting your account's resources</td><td>Your Account / Personal Health Dashboard</td></tr>
+        <tr><td>Aggregate health events from all org accounts</td><td>AWS Health Organizational View (management account, Business Support)</td></tr>
+        <tr><td>Programmatically query health events</td><td>AWS Health API — requires Business/Enterprise Support</td></tr>
+        <tr><td>Proactive notification of scheduled AWS maintenance</td><td>AWS Health Dashboard (Your Account) — Scheduled Change events</td></tr>
+        <tr><td>Security advisory about your account (e.g. exposed key)</td><td>AWS Health Account Notification event → EventBridge automation</td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-title">AWS Health vs CloudWatch vs Trusted Advisor</div>
+      <table>
+        <tr><th></th><th>AWS Health</th><th>CloudWatch</th><th>Trusted Advisor</th></tr>
+        <tr><td>Focus</td><td>AWS service/resource health events</td><td>Metrics, logs, alarms on your workloads</td><td>Cost, security, performance best practices</td></tr>
+        <tr><td>Source</td><td>AWS-generated events about your resources</td><td>Your application and AWS service telemetry</td><td>AWS checks against your config</td></tr>
+        <tr><td>Automation</td><td>EventBridge → Lambda / SNS</td><td>CloudWatch Alarm → Action</td><td>EventBridge on TA findings</td></tr>
+        <tr><td>Proactive?</td><td>Yes — scheduled changes, advisories</td><td>Reactive (threshold breach)</td><td>Yes — best practice gaps</td></tr>
+        <tr><td>Support req.</td><td>API: Business/Enterprise</td><td>All plans</td><td>Full checks: Business/Enterprise</td></tr>
+      </table>
+      <div class="exam-tip">
+        <strong>⚡ EXAM TIP</strong>
+        AWS Health = "AWS tells you something about your resources." CloudWatch = "You monitor your own resources." Trusted Advisor = "AWS reviews your config against best practices." These three are often presented as distractors for each other.
+      </div>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Instance Status Check — DOP-C02 Study Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0f14;
+    --surface: #111822;
+    --surface2: #1a2333;
+    --border: #1e2d42;
+    --accent: #f7941d;
+    --accent2: #3b9ede;
+    --accent3: #4ecf7c;
+    --red: #e05252;
+    --yellow: #f0c040;
+    --text: #d4dde8;
+    --text-dim: #6b84a0;
+    --text-bright: #eaf2ff;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 14px; line-height: 1.65; }
+
+  header {
+    background: linear-gradient(135deg, #0d1b2a 0%, #0b1320 100%);
+    border-bottom: 2px solid var(--yellow);
+    padding: 36px 48px 28px;
+    position: sticky; top: 0; z-index: 100;
+    display: flex; align-items: flex-end; justify-content: space-between;
+  }
+  header h1 { font-family: var(--mono); font-size: 26px; font-weight: 600; color: var(--yellow); letter-spacing: -0.5px; }
+  header h1 span { color: var(--text-dim); font-weight: 400; font-size: 14px; margin-left: 12px; }
+  .badge { background: var(--yellow); color: #000; font-family: var(--mono); font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 3px; letter-spacing: 1px; }
+  .home-btn { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--yellow); background: rgba(240,192,64,.1); border: 1px solid rgba(240,192,64,.3); padding: 5px 12px; border-radius: 3px; text-decoration: none; letter-spacing: .5px; transition: all .15s; }
+  .home-btn:hover { background: var(--yellow); color: #000; }
+
+  .container { max-width: 1000px; margin: 0 auto; padding: 40px 32px 80px; }
+
+  .toc { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 40px; padding: 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; }
+  .toc a { font-family: var(--mono); font-size: 12px; color: var(--yellow); text-decoration: none; padding: 4px 10px; border: 1px solid var(--border); border-radius: 3px; transition: all .15s; }
+  .toc a:hover { background: var(--yellow); color: #000; border-color: var(--yellow); }
+
+  section { margin-bottom: 44px; animation: fadein .4s ease both; }
+  section:nth-child(2){animation-delay:.05s} section:nth-child(3){animation-delay:.10s}
+  section:nth-child(4){animation-delay:.15s} section:nth-child(5){animation-delay:.20s}
+
+  .section-title { display: flex; align-items: center; gap: 12px; font-family: var(--mono); font-size: 18px; font-weight: 600; color: var(--yellow); border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 20px; }
+  .section-title .icon { background: var(--yellow); color: #000; width: 28px; height: 28px; display: grid; place-items: center; border-radius: 4px; font-size: 13px; font-weight: 700; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 20px 24px; margin-bottom: 16px; }
+  .card-title { font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--yellow); margin-bottom: 12px; text-transform: uppercase; letter-spacing: .5px; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  @media(max-width: 720px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+  ul.bullets { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+  ul.bullets li { display: flex; gap: 8px; font-size: 13px; }
+  ul.bullets li::before { content: "▸"; color: var(--yellow); flex-shrink: 0; margin-top: 1px; }
+
+  code { font-family: var(--mono); font-size: 12px; background: #162030; color: var(--accent3); padding: 1px 6px; border-radius: 3px; border: 1px solid var(--border); }
+
+  .tag { display: inline-block; font-family: var(--mono); font-size: 11px; padding: 2px 8px; border-radius: 3px; margin-right: 4px; margin-bottom: 4px; font-weight: 600; }
+  .tag-yellow { background: rgba(240,192,64,.15); color: var(--yellow); border: 1px solid rgba(240,192,64,.3); }
+  .tag-blue   { background: rgba(59,158,222,.15);  color: var(--accent2); border: 1px solid rgba(59,158,222,.3); }
+  .tag-green  { background: rgba(78,207,124,.15);  color: var(--accent3); border: 1px solid rgba(78,207,124,.3); }
+  .tag-orange { background: rgba(247,148,29,.15);  color: var(--accent);  border: 1px solid rgba(247,148,29,.3); }
+  .tag-red    { background: rgba(224,82,82,.15);   color: var(--red);     border: 1px solid rgba(224,82,82,.3); }
+
+  .exam-tip { background: rgba(240,192,64,.07); border: 1px solid rgba(240,192,64,.3); border-left: 3px solid var(--yellow); padding: 12px 16px; border-radius: 4px; margin-top: 14px; font-size: 13px; }
+  .exam-tip strong { color: var(--yellow); font-family: var(--mono); font-size: 11px; letter-spacing: .5px; display: block; margin-bottom: 4px; }
+
+  .warn-tip { background: rgba(224,82,82,.07); border: 1px solid rgba(224,82,82,.3); border-left: 3px solid var(--red); padding: 12px 16px; border-radius: 4px; margin-top: 14px; font-size: 13px; }
+  .warn-tip strong { color: var(--red); font-family: var(--mono); font-size: 11px; letter-spacing: .5px; display: block; margin-bottom: 4px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: var(--surface2); font-family: var(--mono); font-size: 12px; color: var(--yellow); text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border); }
+  td { padding: 9px 14px; border-bottom: 1px solid #151f2e; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,.015); }
+
+  /* check type cards */
+  .check-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  @media(max-width: 720px){ .check-grid { grid-template-columns: 1fr; } }
+  .check-card { border-radius: 6px; padding: 16px 18px; }
+  .check-card.system   { background: rgba(224,82,82,.08);  border: 1px solid rgba(224,82,82,.3); }
+  .check-card.instance { background: rgba(59,158,222,.08); border: 1px solid rgba(59,158,222,.3); }
+  .check-card.ebs      { background: rgba(78,207,124,.08); border: 1px solid rgba(78,207,124,.3); }
+  .check-card-title { font-family: var(--mono); font-size: 12px; font-weight: 600; margin-bottom: 10px; }
+  .check-card-title.system   { color: var(--red); }
+  .check-card-title.instance { color: var(--accent2); }
+  .check-card-title.ebs      { color: var(--accent3); }
+  .check-card-sub { font-size: 11px; font-family: var(--mono); color: var(--text-dim); margin-bottom: 8px; }
+
+  /* metric pill */
+  .metric-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+  .metric-pill { font-family: var(--mono); font-size: 12px; padding: 5px 12px; border-radius: 4px; border: 1px solid var(--border); background: var(--surface2); color: var(--accent3); }
+
+  /* recovery comparison */
+  .rec-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media(max-width: 720px){ .rec-grid { grid-template-columns: 1fr; } }
+  .rec-card { border-radius: 6px; padding: 16px 18px; }
+  .rec-card.cw  { background: rgba(247,148,29,.08); border: 1px solid rgba(247,148,29,.3); }
+  .rec-card.asg { background: rgba(59,158,222,.08); border: 1px solid rgba(59,158,222,.3); }
+  .rec-card-title { font-family: var(--mono); font-size: 12px; font-weight: 600; margin-bottom: 10px; }
+  .rec-card-title.cw  { color: var(--accent); }
+  .rec-card-title.asg { color: var(--accent2); }
+
+  /* flow */
+  .flow { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .flow-node { background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 5px 12px; font-family: var(--mono); font-size: 12px; color: var(--text-bright); }
+  .flow-node.yellow { border-color: rgba(240,192,64,.4); color: var(--yellow); }
+  .flow-node.green  { border-color: rgba(78,207,124,.4); color: var(--accent3); }
+  .flow-node.orange { border-color: rgba(247,148,29,.4); color: var(--accent); }
+  .flow-node.red    { border-color: rgba(224,82,82,.4);  color: var(--red); }
+  .flow-node.blue   { border-color: rgba(59,158,222,.4); color: var(--accent2); }
+  .flow-arrow { color: var(--text-dim); font-size: 14px; }
+
+  @keyframes fadein { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
+  ::-webkit-scrollbar { width:6px; height:6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius:3px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>EC2 Instance Status Check <span>AWS DevOps Professional — DOP-C02</span></h1>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <a href="../index.html" class="home-btn">&#8592; Home</a>
+    <span class="badge">EXAM PREP</span>
+  </div>
+</header>
+
+<div class="container">
+
+  <nav class="toc">
+    <a href="#checks">Check Types</a>
+    <a href="#metrics">CW Metrics</a>
+    <a href="#recovery">Recovery Options</a>
+    <a href="#comparison">CW Alarm vs ASG</a>
+    <a href="#quickref">Quick Reference</a>
+  </nav>
+
+  <!-- ═══════════ CHECK TYPES ═══════════ -->
+  <section id="checks">
+    <div class="section-title"><span class="icon">✓</span>The Three Check Types</div>
+
+    <div class="check-grid">
+
+      <div class="check-card system">
+        <div class="check-card-title system">System Status Check</div>
+        <div class="check-card-sub">AWS INFRASTRUCTURE LAYER</div>
+        <ul class="bullets">
+          <li>Monitors the <strong>physical host</strong> (AWS side)</li>
+          <li>Detects: hardware failure, loss of network connectivity, system power, software issues on the host</li>
+          <li>Problem is <strong>AWS's responsibility</strong> to fix</li>
+          <li>Check AWS Health Dashboard for scheduled host maintenance</li>
+        </ul>
+        <div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(224,82,82,.2);">
+          <p style="font-family:var(--mono);font-size:11px;color:var(--red);margin-bottom:6px;">RESOLUTION</p>
+          <p style="font-size:12px;"><strong>Stop &amp; Start</strong> the instance → migrates to a new physical host. (Reboot keeps same host — won't fix system issues)</p>
+        </div>
+      </div>
+
+      <div class="check-card instance">
+        <div class="check-card-title instance">Instance Status Check</div>
+        <div class="check-card-sub">GUEST OS / SOFTWARE LAYER</div>
+        <ul class="bullets">
+          <li>Monitors the <strong>software/network config</strong> inside the instance (your responsibility)</li>
+          <li>Detects: exhausted memory, corrupted file system, incompatible kernel, invalid network config, failed OS boot</li>
+          <li>Problem is the <strong>customer's responsibility</strong></li>
+        </ul>
+        <div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(59,158,222,.2);">
+          <p style="font-family:var(--mono);font-size:11px;color:var(--accent2);margin-bottom:6px;">RESOLUTION</p>
+          <p style="font-size:12px;"><strong>Reboot</strong> the instance or change instance config (security groups, instance type, user-data fix)</p>
+        </div>
+      </div>
+
+      <div class="check-card ebs">
+        <div class="check-card-title ebs">Attached EBS Status Check</div>
+        <div class="check-card-sub">STORAGE LAYER</div>
+        <ul class="bullets">
+          <li>Monitors <strong>EBS volumes</strong> attached to the instance</li>
+          <li>Detects: unreachable volume, I/O operations failing or stalling</li>
+          <li>Separate from instance health — an instance can be healthy while its EBS fails</li>
+        </ul>
+        <div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(78,207,124,.2);">
+          <p style="font-family:var(--mono);font-size:11px;color:var(--accent3);margin-bottom:6px;">RESOLUTION</p>
+          <p style="font-size:12px;"><strong>Reboot</strong> the instance or <strong>replace the affected EBS volume</strong></p>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="exam-tip" style="margin-top:16px;">
+      <strong>⚡ EXAM TIP — STOP vs REBOOT</strong>
+      System check fail → <strong>Stop &amp; Start</strong> (moves to new host). Instance check fail → <strong>Reboot</strong> (same host, restarts OS). Reboot does NOT fix system-level failures because the host doesn't change.
+    </div>
+  </section>
+
+  <!-- ═══════════ CW METRICS ═══════════ -->
+  <section id="metrics">
+    <div class="section-title"><span class="icon">M</span>CloudWatch Metrics</div>
+
+    <div class="card">
+      <div class="card-title">Status Check Metrics (1-minute interval)</div>
+      <div class="metric-row">
+        <span class="metric-pill">StatusCheckFailed_System</span>
+        <span class="metric-pill">StatusCheckFailed_Instance</span>
+        <span class="metric-pill">StatusCheckFailed_AttachedEBS</span>
+        <span class="metric-pill">StatusCheckFailed</span>
+      </div>
+      <table style="margin-top:16px;">
+        <tr><th>Metric</th><th>Value = 1 means…</th><th>Triggers on</th></tr>
+        <tr><td><code>StatusCheckFailed_System</code></td><td>Physical host failure</td><td>System check only</td></tr>
+        <tr><td><code>StatusCheckFailed_Instance</code></td><td>OS/software failure</td><td>Instance check only</td></tr>
+        <tr><td><code>StatusCheckFailed_AttachedEBS</code></td><td>EBS volume I/O failure</td><td>EBS check only</td></tr>
+        <tr><td><code>StatusCheckFailed</code></td><td>Either System or Instance failed</td><td>System OR Instance (not EBS)</td></tr>
+      </table>
+      <div class="exam-tip">
+        <strong>⚡ EXAM TIP</strong>
+        <code>StatusCheckFailed</code> = System OR Instance failure — it is <strong>not</strong> a catch-all for EBS. To catch EBS failures you must explicitly monitor <code>StatusCheckFailed_AttachedEBS</code>. This distinction appears in exam distractors.
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ RECOVERY OPTIONS ═══════════ -->
+  <section id="recovery">
+    <div class="section-title"><span class="icon">↻</span>Recovery Options</div>
+
+    <div class="rec-grid">
+
+      <div class="rec-card cw">
+        <div class="rec-card-title cw">Option 1 — CloudWatch Alarm Action: Recover</div>
+        <ul class="bullets">
+          <li>Alarm on <code>StatusCheckFailed_System</code> → action: <strong>EC2 Recover</strong></li>
+          <li>Migrates instance to a new healthy physical host</li>
+          <li>Preserves: <strong>same private IP, public IP, EIP, instance ID, metadata, Placement Group</strong></li>
+          <li>In-memory data (RAM) is <strong>lost</strong></li>
+          <li>Pair with SNS to notify team on recovery</li>
+          <li>Only works for instances backed by <strong>EBS</strong> (not instance store)</li>
+        </ul>
+        <div class="flow" style="margin-top:12px;">
+          <span class="flow-node yellow">CW Alarm<br><small>StatusCheckFailed_System</small></span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-node orange">EC2 Recover</span>
+          <span class="flow-arrow">+</span>
+          <span class="flow-node">SNS notify</span>
+        </div>
+      </div>
+
+      <div class="rec-card asg">
+        <div class="rec-card-title asg">Option 2 — Auto Scaling Group (ASG)</div>
+        <ul class="bullets">
+          <li>Set min/max/desired = <strong>1</strong> — ASG replaces a terminated/failed instance automatically</li>
+          <li>Uses EC2 health checks or ELB health checks to detect unhealthy instances</li>
+          <li>Launches a <strong>brand new instance</strong> — does <strong>not</strong> preserve private IP, EIP, or instance ID</li>
+          <li>Better for stateless workloads; less suitable when IP/identity must be preserved</li>
+          <li>Can span multiple AZs for higher availability</li>
+        </ul>
+        <div class="flow" style="margin-top:12px;">
+          <span class="flow-node blue">ASG Health Check<br><small>EC2 or ELB</small></span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-node red">Terminate failed</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-node green">Launch new</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════════ COMPARISON ═══════════ -->
+  <section id="comparison">
+    <div class="section-title"><span class="icon">⇄</span>CW Alarm Recover vs ASG — Key Differences</div>
+
+    <div class="card">
+      <table>
+        <tr><th></th><th>CW Alarm: Recover</th><th>Auto Scaling Group</th></tr>
+        <tr><td><strong>Trigger</strong></td><td>CloudWatch Alarm on StatusCheckFailed_System</td><td>EC2 health check or ELB health check failure</td></tr>
+        <tr><td><strong>Action</strong></td><td>Migrate same instance to new host</td><td>Terminate + launch brand-new instance</td></tr>
+        <tr><td><strong>Private IP preserved?</strong></td><td><span class="tag tag-green">YES</span></td><td><span class="tag tag-red">NO</span></td></tr>
+        <tr><td><strong>EIP preserved?</strong></td><td><span class="tag tag-green">YES</span></td><td><span class="tag tag-red">NO</span> (must re-associate)</td></tr>
+        <tr><td><strong>Instance ID preserved?</strong></td><td><span class="tag tag-green">YES</span></td><td><span class="tag tag-red">NO</span></td></tr>
+        <tr><td><strong>RAM contents</strong></td><td><span class="tag tag-red">LOST</span></td><td><span class="tag tag-red">LOST</span></td></tr>
+        <tr><td><strong>Instance store data</strong></td><td><span class="tag tag-red">LOST</span></td><td><span class="tag tag-red">LOST</span></td></tr>
+        <tr><td><strong>Works with instance store?</strong></td><td><span class="tag tag-red">NO (EBS only)</span></td><td><span class="tag tag-green">YES</span></td></tr>
+        <tr><td><strong>Multi-AZ?</strong></td><td>Same AZ</td><td>Can span multiple AZs</td></tr>
+        <tr><td><strong>Best for</strong></td><td>Stateful instances (fixed IP, licenses)</td><td>Stateless, scalable workloads</td></tr>
+      </table>
+      <div class="exam-tip">
+        <strong>⚡ EXAM TIP — THE CRITICAL DECIDER</strong>
+        If the scenario says "must keep same private/public IP or EIP" → <strong>CW Alarm Recover</strong>. If it says "stateless, replace with new instance, multi-AZ" → <strong>ASG</strong>. This tradeoff is the most-tested aspect of this topic.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">EC2 Recover — What is and isn't preserved</div>
+      <div class="grid-2">
+        <div>
+          <p style="font-family:var(--mono);font-size:11px;color:var(--accent3);margin-bottom:8px;">PRESERVED ✓</p>
+          <ul class="bullets">
+            <li>Instance ID</li>
+            <li>Private IPv4 address</li>
+            <li>Public IPv4 address (if assigned at launch)</li>
+            <li>Elastic IP (EIP)</li>
+            <li>IPv6 address</li>
+            <li>Placement Group membership</li>
+            <li>All instance metadata &amp; tags</li>
+            <li>EBS volumes (reattached)</li>
+          </ul>
+        </div>
+        <div>
+          <p style="font-family:var(--mono);font-size:11px;color:var(--red);margin-bottom:8px;">NOT PRESERVED ✗</p>
+          <ul class="bullets">
+            <li>RAM / in-memory data</li>
+            <li>Instance store volumes (ephemeral)</li>
+            <li>Physical host (migrates to a new one)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ QUICK REF ═══════════ -->
+  <section id="quickref">
+    <div class="section-title"><span class="icon">✓</span>Exam Quick Reference</div>
+
+    <div class="card">
+      <div class="card-title">Scenario → Answer Map</div>
+      <table>
+        <tr><th>If the question says…</th><th>Answer involves…</th></tr>
+        <tr><td>Physical host hardware failure on EC2</td><td>System Status Check failed → Stop &amp; Start to migrate host</td></tr>
+        <tr><td>OS kernel panic / out of memory</td><td>Instance Status Check failed → Reboot or fix config</td></tr>
+        <tr><td>EBS volume I/O stalling on running instance</td><td>StatusCheckFailed_AttachedEBS → Reboot or replace EBS</td></tr>
+        <tr><td>Auto-recover EC2 keeping same IP and EIP</td><td>CW Alarm on StatusCheckFailed_System → EC2 Recover action</td></tr>
+        <tr><td>Auto-replace a failed EC2 (stateless, no IP req.)</td><td>Auto Scaling Group with min=1</td></tr>
+        <tr><td>Notify ops team when an EC2 is auto-recovered</td><td>CW Alarm → EC2 Recover action + SNS notification</td></tr>
+        <tr><td>Detect any EC2 status failure with one metric</td><td><code>StatusCheckFailed</code> (System OR Instance, not EBS)</td></tr>
+        <tr><td>EC2 with instance store that must auto-replace</td><td>ASG (CW Recover doesn't support instance store)</td></tr>
+        <tr><td>Recover EC2 after system failure in same AZ</td><td>CW Alarm Recover (same AZ, same IP)</td></tr>
+        <tr><td>Recover EC2 across AZ if one AZ fails</td><td>ASG with multi-AZ configuration</td></tr>
+      </table>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>
