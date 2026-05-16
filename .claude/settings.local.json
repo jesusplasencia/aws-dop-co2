@@ -3,7 +3,10 @@
     "allow": [
       "Bash(git add *)",
       "Bash(git commit -m ' *)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(git -C /mnt/WorkShop/aws-notes status)",
+      "Bash(git -C /mnt/WorkShop/aws-notes diff --stat)",
+      "Bash(git *)"
     ]
   }
 }
