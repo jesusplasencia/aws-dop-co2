@@ -6,7 +6,8 @@
       "Bash(git push *)",
       "Bash(git -C /mnt/WorkShop/aws-notes status)",
       "Bash(git -C /mnt/WorkShop/aws-notes diff --stat)",
-      "Bash(git *)"
+      "Bash(git *)",
+      "Bash(python3 *)"
     ]
   }
 }
