@@ -1,558 +1,1341 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DOP-C02 Certification Journey</title>
-<link rel="icon" type="image/svg+xml" href="favicon.svg">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;0,9..144,900;1,9..144,400&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
-<style>
-:root {
-  --bg:        #0A0E1A;
-  --bg2:       #0F1525;
-  --bg3:       #141C30;
-  --surface:   #1A2340;
-  --surface2:  #1F2A4A;
-  --border:    rgba(99,179,237,0.1);
-  --border2:   rgba(255,255,255,0.05);
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DOP-C02 Certification Journey</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;0,9..144,900;1,9..144,400&family=IBM+Plex+Mono:wght@300;400;500&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0A0E1A;
+      --bg2: #0F1525;
+      --bg3: #141C30;
+      --surface: #1A2340;
+      --surface2: #1F2A4A;
+      --border: rgba(99, 179, 237, 0.1);
+      --border2: rgba(255, 255, 255, 0.05);
 
-  --amp:       #FF9900;
-  --amp-l:     rgba(255,153,0,0.08);
-  --amp-m:     rgba(255,153,0,0.15);
-  --amp-b:     rgba(255,153,0,0.3);
+      --amp: #FF9900;
+      --amp-l: rgba(255, 153, 0, 0.08);
+      --amp-m: rgba(255, 153, 0, 0.15);
+      --amp-b: rgba(255, 153, 0, 0.3);
 
-  --cyan:      #38BDF8;
-  --cyan-l:    rgba(56,189,248,0.07);
-  --cyan-b:    rgba(56,189,248,0.3);
+      --cyan: #38BDF8;
+      --cyan-l: rgba(56, 189, 248, 0.07);
+      --cyan-b: rgba(56, 189, 248, 0.3);
 
-  --violet:    #A78BFA;
-  --violet-l:  rgba(167,139,250,0.07);
-  --violet-b:  rgba(167,139,250,0.3);
+      --violet: #A78BFA;
+      --violet-l: rgba(167, 139, 250, 0.07);
+      --violet-b: rgba(167, 139, 250, 0.3);
 
-  --emerald:   #34D399;
-  --emerald-l: rgba(52,211,153,0.07);
-  --emerald-b: rgba(52,211,153,0.3);
+      --emerald: #34D399;
+      --emerald-l: rgba(52, 211, 153, 0.07);
+      --emerald-b: rgba(52, 211, 153, 0.3);
 
-  --rose:      #FB7185;
-  --rose-l:    rgba(251,113,133,0.07);
-  --rose-b:    rgba(251,113,133,0.3);
+      --rose: #FB7185;
+      --rose-l: rgba(251, 113, 133, 0.07);
+      --rose-b: rgba(251, 113, 133, 0.3);
 
-  --amber:     #FCD34D;
-  --amber-l:   rgba(252,211,77,0.07);
-  --amber-b:   rgba(252,211,77,0.3);
+      --amber: #FCD34D;
+      --amber-l: rgba(252, 211, 77, 0.07);
+      --amber-b: rgba(252, 211, 77, 0.3);
 
-  --text:      #E2E8F0;
-  --text2:     #94A3B8;
-  --text3:     #475569;
-  --text4:     #334155;
+      --text: #E2E8F0;
+      --text2: #94A3B8;
+      --text3: #475569;
+      --text4: #334155;
 
-  --r:         12px;
-  --r-sm:      8px;
-}
+      --r: 12px;
+      --r-sm: 8px;
+    }
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 15px;
-  line-height: 1.7;
-  overflow-x: hidden;
-}
+    html {
+      scroll-behavior: smooth;
+    }
 
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
-  pointer-events: none;
-  z-index: 9999;
-}
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 15px;
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
 
-/* ── HERO ── */
-.hero {
-  position: relative;
-  min-height: 380px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  padding: 0 60px 56px;
-  overflow: hidden;
-}
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9999;
+    }
 
-.hero-bg {
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse 60% 50% at 80% 20%, rgba(255,153,0,0.12) 0%, transparent 60%),
-    radial-gradient(ellipse 40% 40% at 20% 80%, rgba(56,189,248,0.08) 0%, transparent 60%),
-    linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%);
-}
+    /* ── HERO ── */
+    .hero {
+      position: relative;
+      min-height: 380px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 0 60px 56px;
+      overflow: hidden;
+    }
 
-.hero-mesh {
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(255,153,0,0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,153,0,0.03) 1px, transparent 1px);
-  background-size: 60px 60px;
-  mask-image: radial-gradient(ellipse 70% 70% at 80% 30%, black 20%, transparent 80%);
-}
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 80% 20%, rgba(255, 153, 0, 0.12) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 40% at 20% 80%, rgba(56, 189, 248, 0.08) 0%, transparent 60%),
+        linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%);
+    }
 
-.hero-inner { position: relative; max-width: 1060px; margin: 0 auto; width: 100%; }
+    .hero-mesh {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255, 153, 0, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 153, 0, 0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      mask-image: radial-gradient(ellipse 70% 70% at 80% 30%, black 20%, transparent 80%);
+    }
 
-.hero-kicker {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--amp);
-  background: var(--amp-m);
-  border: 1px solid var(--amp-b);
-  padding: 6px 14px;
-  border-radius: 100px;
-  margin-bottom: 28px;
-  animation: riseUp 0.6s ease both;
-}
+    .hero-inner {
+      position: relative;
+      max-width: 1060px;
+      margin: 0 auto;
+      width: 100%;
+    }
 
-.hero-kicker::before {
-  content: '';
-  width: 6px; height: 6px;
-  background: var(--amp);
-  border-radius: 50%;
-  animation: throb 2s ease-in-out infinite;
-}
+    .hero-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--amp);
+      background: var(--amp-m);
+      border: 1px solid var(--amp-b);
+      padding: 6px 14px;
+      border-radius: 100px;
+      margin-bottom: 28px;
+      animation: riseUp 0.6s ease both;
+    }
 
-@keyframes throb {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(0.6); opacity: 0.4; }
-}
+    .hero-kicker::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      background: var(--amp);
+      border-radius: 50%;
+      animation: throb 2s ease-in-out infinite;
+    }
 
-.hero h1 {
-  font-family: 'Fraunces', serif;
-  font-size: clamp(36px, 5.5vw, 68px);
-  font-weight: 900;
-  line-height: 1.05;
-  letter-spacing: -0.02em;
-  margin-bottom: 18px;
-  animation: riseUp 0.6s 0.1s ease both;
-}
+    @keyframes throb {
 
-.hero h1 em {
-  font-style: italic;
-  font-weight: 300;
-  color: var(--amp);
-}
+      0%,
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
 
-.hero-tagline {
-  font-size: 16px;
-  color: var(--text2);
-  max-width: 580px;
-  font-weight: 300;
-  line-height: 1.6;
-  animation: riseUp 0.6s 0.2s ease both;
-}
+      50% {
+        transform: scale(0.6);
+        opacity: 0.4;
+      }
+    }
 
-@keyframes riseUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
+    .hero h1 {
+      font-family: 'Fraunces', serif;
+      font-size: clamp(36px, 5.5vw, 68px);
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      margin-bottom: 18px;
+      animation: riseUp 0.6s 0.1s ease both;
+    }
 
-/* ── MAIN WRAP ── */
-.wrap {
-  max-width: 1060px;
-  margin: 0 auto;
-  padding: 56px 60px 100px;
-}
+    .hero h1 em {
+      font-style: italic;
+      font-weight: 300;
+      color: var(--amp);
+    }
 
-/* ── DOMAINS GRID ── */
-.domains-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
-  align-items: start;
-}
+    .hero-tagline {
+      font-size: 16px;
+      color: var(--text2);
+      max-width: 580px;
+      font-weight: 300;
+      line-height: 1.6;
+      animation: riseUp 0.6s 0.2s ease both;
+    }
 
-/* ── DOMAIN CARD ── */
-.domain-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--r);
-  overflow: hidden;
-  animation: riseUp 0.5s calc(0.3s + var(--i) * 0.07s) ease both;
-}
+    @keyframes riseUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
 
-.domain-card.active {
-  cursor: pointer;
-  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
-}
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
 
-.domain-card.active:hover {
-  transform: translateY(-2px);
-  border-color: var(--amp-b);
-  box-shadow: 0 8px 32px rgba(255,153,0,0.08);
-}
+    /* ── MAIN WRAP ── */
+    .wrap {
+      max-width: 1060px;
+      margin: 0 auto;
+      padding: 56px 60px 100px;
+    }
 
-.domain-card.disabled {
-  opacity: 0.4;
-  pointer-events: none;
-  filter: grayscale(0.3);
-  border-color: rgba(255,255,255,0.03);
-}
+    /* ── DOMAINS GRID ── */
+    .domains-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      align-items: start;
+    }
 
-.domain-header {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 22px 24px;
-}
+    /* ── DOMAIN CARD ── */
+    .domain-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      overflow: hidden;
+      animation: riseUp 0.5s calc(0.3s + var(--i) * 0.07s) ease both;
+    }
 
-.domain-num {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 26px;
-  font-weight: 500;
-  color: var(--amp);
-  line-height: 1;
-  flex-shrink: 0;
-}
+    .domain-card.active {
+      cursor: pointer;
+      transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+    }
 
-.domain-card.disabled .domain-num {
-  color: var(--text3);
-}
+    .domain-card.active:hover {
+      transform: translateY(-2px);
+      border-color: var(--amp-b);
+      box-shadow: 0 8px 32px rgba(255, 153, 0, 0.08);
+    }
 
-.domain-info {
-  flex: 1;
-  min-width: 0;
-}
+    .domain-card.disabled {
+      opacity: 0.4;
+      pointer-events: none;
+      filter: grayscale(0.3);
+      border-color: rgba(255, 255, 255, 0.03);
+    }
 
-.domain-info h2 {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--text);
-  line-height: 1.3;
-}
+    .domain-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 22px 24px;
+    }
 
-.domain-card.disabled .domain-info h2 {
-  color: var(--text3);
-}
+    .domain-num {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 26px;
+      font-weight: 500;
+      color: var(--amp);
+      line-height: 1;
+      flex-shrink: 0;
+    }
 
-.domain-weight {
-  display: inline-block;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--amp);
-  background: var(--amp-l);
-  border: 1px solid var(--amp-b);
-  border-radius: 100px;
-  padding: 2px 10px;
-  margin-top: 6px;
-  letter-spacing: 0.04em;
-}
+    .domain-card.disabled .domain-num {
+      color: var(--text3);
+    }
 
-.domain-card.disabled .domain-weight {
-  color: var(--text3);
-  background: rgba(255,255,255,0.03);
-  border-color: rgba(255,255,255,0.05);
-}
+    .domain-info {
+      flex: 1;
+      min-width: 0;
+    }
 
-.domain-chevron {
-  font-size: 14px;
-  color: var(--text3);
-  transition: transform 0.3s ease;
-  flex-shrink: 0;
-}
+    .domain-info h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.3;
+    }
 
-.domain-card.open .domain-chevron {
-  transform: rotate(180deg);
-}
+    .domain-card.disabled .domain-info h2 {
+      color: var(--text3);
+    }
 
-.badge-soon {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--text3);
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 100px;
-  padding: 4px 12px;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
+    .domain-weight {
+      display: inline-block;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--amp);
+      background: var(--amp-l);
+      border: 1px solid var(--amp-b);
+      border-radius: 100px;
+      padding: 2px 10px;
+      margin-top: 6px;
+      letter-spacing: 0.04em;
+    }
 
-/* ── DOMAIN BODY (expandable) ── */
-.domain-body {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.45s cubic-bezier(0.4, 0, 0.2, 1), padding 0.45s cubic-bezier(0.4, 0, 0.2, 1);
-  padding: 0 24px;
-}
+    .domain-card.disabled .domain-weight {
+      color: var(--text3);
+      background: rgba(255, 255, 255, 0.03);
+      border-color: rgba(255, 255, 255, 0.05);
+    }
 
-.domain-card.open .domain-body {
-  padding: 0 24px 24px;
-}
+    .domain-chevron {
+      font-size: 14px;
+      color: var(--text3);
+      transition: transform 0.3s ease;
+      flex-shrink: 0;
+    }
 
-.domain-divider {
-  border: none;
-  height: 1px;
-  background: var(--border2);
-  margin-bottom: 20px;
-}
+    .domain-card.open .domain-chevron {
+      transform: rotate(180deg);
+    }
 
-/* ── SERVICE BUTTONS (with icons) ── */
-.service-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin-bottom: 16px;
-}
+    .badge-soon {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text3);
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 100px;
+      padding: 4px 12px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
 
-.svc-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  padding: 20px 12px 16px;
-  background: var(--bg3);
-  border: 1px solid var(--border);
-  border-radius: var(--r-sm);
-  text-decoration: none;
-  color: var(--text2);
-  transition: all 0.2s ease;
-  text-align: center;
-}
+    /* ── DOMAIN BODY (expandable) ── */
+    .domain-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.45s cubic-bezier(0.4, 0, 0.2, 1), padding 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+      padding: 0 24px;
+    }
 
-.svc-btn:hover {
-  background: var(--surface2);
-  border-color: var(--amp-b);
-  color: var(--text);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(255,153,0,0.06);
-}
+    .domain-card.open .domain-body {
+      padding: 0 24px 24px;
+    }
 
-.svc-btn svg {
-  width: 36px;
-  height: 36px;
-  color: var(--text3);
-  transition: color 0.2s ease;
-}
+    .domain-divider {
+      border: none;
+      height: 1px;
+      background: var(--border2);
+      margin-bottom: 20px;
+    }
 
-.svc-btn:hover svg {
-  color: var(--amp);
-}
+    /* ── SERVICE BUTTONS (with icons) ── */
+    .service-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
 
-.svc-label {
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.02em;
-  line-height: 1.3;
-}
+    .svc-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      padding: 20px 12px 16px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      text-decoration: none;
+      color: var(--text2);
+      transition: all 0.2s ease;
+      text-align: center;
+    }
 
-/* ── TOPIC BUTTONS (text only) ── */
-.topic-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-}
+    .svc-btn:hover {
+      background: var(--surface2);
+      border-color: var(--amp-b);
+      color: var(--text);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(255, 153, 0, 0.06);
+    }
 
-.topic-btn {
-  display: flex;
-  align-items: center;
-  padding: 14px 16px;
-  background: var(--bg3);
-  border: 1px solid var(--border);
-  border-left: 3px solid var(--amp);
-  border-radius: var(--r-sm);
-  text-decoration: none;
-  color: var(--text2);
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.02em;
-  transition: all 0.2s ease;
-  line-height: 1.3;
-}
+    .svc-btn svg {
+      width: 36px;
+      height: 36px;
+      color: var(--text3);
+      transition: color 0.2s ease;
+    }
 
-.topic-btn:hover {
-  background: var(--surface2);
-  border-color: var(--amp-b);
-  border-left-color: var(--amp);
-  color: var(--text);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(255,153,0,0.06);
-}
+    .svc-btn:hover svg {
+      color: var(--amp);
+    }
 
-/* ── FOOTER ── */
-.footer {
-  text-align: center;
-  padding-top: 56px;
-  color: var(--text4);
-  font-size: 12px;
-  font-family: 'IBM Plex Mono', monospace;
-  letter-spacing: 0.04em;
-}
+    .svc-label {
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      line-height: 1.3;
+    }
 
-/* ── RESPONSIVE ── */
-@media (max-width: 1024px) {
-  .hero { padding-left: 40px; padding-right: 40px; }
-  .wrap { padding-left: 40px; padding-right: 40px; }
-  .service-grid { grid-template-columns: repeat(2, 1fr); }
-  .topic-grid { grid-template-columns: repeat(2, 1fr); }
-}
+    /* ── TOPIC BUTTONS (text only) ── */
+    .topic-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
 
-@media (max-width: 768px) {
-  .hero { padding: 0 24px 40px; min-height: 300px; }
-  .wrap { padding: 40px 24px 80px; }
-  .domains-grid { grid-template-columns: 1fr; }
-  .service-grid { grid-template-columns: repeat(2, 1fr); }
-  .topic-grid { grid-template-columns: 1fr; }
-}
+    .topic-btn {
+      display: flex;
+      align-items: center;
+      padding: 14px 16px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--amp);
+      border-radius: var(--r-sm);
+      text-decoration: none;
+      color: var(--text2);
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      transition: all 0.2s ease;
+      line-height: 1.3;
+    }
 
-@media (max-width: 480px) {
-  .hero h1 { font-size: 32px; }
-  .service-grid { grid-template-columns: 1fr; }
-  .domain-header { padding: 18px 16px; gap: 12px; }
-  .domain-body { padding-left: 16px; padding-right: 16px; }
-  .domain-card.open .domain-body { padding: 0 16px 16px; }
-}
-</style>
+    .topic-btn:hover {
+      background: var(--surface2);
+      border-color: var(--amp-b);
+      border-left-color: var(--amp);
+      color: var(--text);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(255, 153, 0, 0.06);
+    }
+
+    /* ── FOOTER ── */
+    .footer {
+      text-align: center;
+      padding-top: 56px;
+      color: var(--text4);
+      font-size: 12px;
+      font-family: 'IBM Plex Mono', monospace;
+      letter-spacing: 0.04em;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 1024px) {
+      .hero {
+        padding-left: 40px;
+        padding-right: 40px;
+      }
+
+      .wrap {
+        padding-left: 40px;
+        padding-right: 40px;
+      }
+
+      .service-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .topic-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .hero {
+        padding: 0 24px 40px;
+        min-height: 300px;
+      }
+
+      .wrap {
+        padding: 40px 24px 80px;
+      }
+
+      .domains-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .service-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .topic-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .hero h1 {
+        font-size: 32px;
+      }
+
+      .service-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .domain-header {
+        padding: 18px 16px;
+        gap: 12px;
+      }
+
+      .domain-body {
+        padding-left: 16px;
+        padding-right: 16px;
+      }
+
+      .domain-card.open .domain-body {
+        padding: 0 16px 16px;
+      }
+    }
+  </style>
 </head>
+
 <body>
 
-<!-- ── HERO ── -->
-<section class="hero">
-  <div class="hero-bg"></div>
-  <div class="hero-mesh"></div>
-  <div class="hero-inner">
-    <span class="hero-kicker">AWS DevOps Professional</span>
-    <h1>DOP-C02 Certification<br><em>Journey</em></h1>
-    <p class="hero-tagline">Interactive study guides organized by exam domain. Master each area with focused, hands-on learning resources.</p>
-  </div>
-</section>
+  <!-- ── HERO ── -->
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-mesh"></div>
+    <div class="hero-inner">
+      <span class="hero-kicker">AWS DevOps Professional</span>
+      <h1>DOP-C02 Certification<br><em>Journey of Jesus Plasencia Toledo</em></h1>
+      <p class="hero-tagline">Interactive study guides organized by exam domain. Master each area with focused, hands-on
+        learning resources.</p>
+    </div>
+  </section>
 
-<!-- ── DOMAINS ── -->
-<main class="wrap">
-  <div class="domains-grid">
+  <!-- ── DOMAINS ── -->
+  <main class="wrap">
+    <div class="domains-grid">
 
-    <!-- Domain 1: SDLC Automation — ACTIVE -->
-    <div class="domain-card active" style="--i:0; grid-column: 1 / -1;" onclick="toggleDomain(this)">
-      <div class="domain-header">
-        <span class="domain-num">01</span>
-        <div class="domain-info">
-          <h2>SDLC Automation</h2>
-          <span class="domain-weight">22% of exam</span>
+      <!-- Domain 1: SDLC Automation — ACTIVE -->
+      <div class="domain-card active" style="--i:0; grid-column: 1 / -1;" onclick="toggleDomain(this)">
+        <div class="domain-header">
+          <span class="domain-num">01</span>
+          <div class="domain-info">
+            <h2>SDLC Automation</h2>
+            <span class="domain-weight">22% of exam</span>
+          </div>
+          <span class="domain-chevron">&#9662;</span>
         </div>
-        <span class="domain-chevron">&#9662;</span>
+        <div class="domain-body">
+          <hr class="domain-divider">
+          <div class="service-grid">
+
+            <a href="domain_one/Amplify_DOP-C02.html" class="svc-btn" onclick="event.stopPropagation()">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M18 4L4 32h28L18 4z" />
+                <path d="M18 4v14" />
+                <path d="M18 18l-8 14" />
+                <path d="M18 18l8 14" />
+                <circle cx="18" cy="18" r="2.5" fill="currentColor" stroke="none" />
+              </svg>
+              <span class="svc-label">Amplify</span>
+            </a>
+
+            <a href="domain_one/CodeArtifact_DOP-C02.html" class="svc-btn" onclick="event.stopPropagation()">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <rect x="6" y="8" width="24" height="20" rx="2" />
+                <path d="M6 14h24" />
+                <path d="M14 14v14" />
+                <circle cx="10" cy="11" r="1" fill="currentColor" stroke="none" />
+                <path d="M20 21l3 3-3 3" />
+                <path d="M26 21l-3 3 3 3" />
+              </svg>
+              <span class="svc-label">CodeArtifact</span>
+            </a>
+
+            <a href="domain_one/CodeBuild_DOP-C02.html" class="svc-btn" onclick="event.stopPropagation()">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <circle cx="18" cy="18" r="12" />
+                <path d="M18 10v8l5 3" />
+                <path d="M12 6l-2-3" />
+                <path d="M24 6l2-3" />
+                <path d="M14 28l3 2 3-2" />
+              </svg>
+              <span class="svc-label">CodeBuild</span>
+            </a>
+
+            <a href="domain_one/CodeDeploy_DOP-C02.html" class="svc-btn" onclick="event.stopPropagation()">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M18 4v20" />
+                <path d="M12 18l6 6 6-6" />
+                <path d="M6 28h24" />
+                <path d="M8 32h20" />
+                <circle cx="18" cy="7" r="3" />
+              </svg>
+              <span class="svc-label">CodeDeploy</span>
+            </a>
+
+            <a href="domain_one/CodeGuru_DOP-C02.html" class="svc-btn" onclick="event.stopPropagation()">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <circle cx="15" cy="15" r="10" />
+                <path d="M22 22l10 10" />
+                <path d="M11 13l3 4 5-7" />
+              </svg>
+              <span class="svc-label">CodeGuru</span>
+            </a>
+
+            <a href="domain_one/EC2ImageBuilder_DOP-C02.html" class="svc-btn" onclick="event.stopPropagation()">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <rect x="6" y="6" width="24" height="8" rx="2" />
+                <rect x="6" y="16" width="24" height="8" rx="2" />
+                <rect x="6" y="26" width="24" height="6" rx="2" />
+                <circle cx="11" cy="10" r="1.5" fill="currentColor" stroke="none" />
+                <circle cx="11" cy="20" r="1.5" fill="currentColor" stroke="none" />
+                <circle cx="11" cy="29" r="1.5" fill="currentColor" stroke="none" />
+              </svg>
+              <span class="svc-label">EC2 Image Builder</span>
+            </a>
+
+            <a href="domain_one/CodeStart_DOP-CO2.html" class="svc-btn" onclick="event.stopPropagation()">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <rect x="4" y="8" width="28" height="20" rx="3" />
+                <path d="M4 14h28" />
+                <circle cx="9" cy="11" r="1.2" fill="currentColor" stroke="none" />
+                <circle cx="13" cy="11" r="1.2" fill="currentColor" stroke="none" />
+                <circle cx="17" cy="11" r="1.2" fill="currentColor" stroke="none" />
+                <path d="M11 20l-3 2 3 2" />
+                <path d="M25 20l3 2-3 2" />
+                <path d="M20 19l-4 6" />
+              </svg>
+              <span class="svc-label">CodeStar</span>
+            </a>
+
+          </div>
+
+          <div class="topic-grid">
+            <a href="domain_one/MultiAccount_CrossRegion_Pipelines.html" class="topic-btn"
+              onclick="event.stopPropagation()">Multi-Account &amp; Cross-Region</a>
+            <a href="domain_one/Pipeline_Failures_Lab.html" class="topic-btn" onclick="event.stopPropagation()">Pipeline
+              Failures</a>
+            <a href="domain_one/Testing_Strategies_CICD_DOP-C02.html" class="topic-btn"
+              onclick="event.stopPropagation()">Testing Strategies</a>
+          </div>
+        </div>
       </div>
-      <div class="domain-body">
-        <hr class="domain-divider">
-        <div class="service-grid">
 
-          <a href="domain_one/Amplify_DOP-C02.html" class="svc-btn" onclick="event.stopPropagation()">
-            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M18 4L4 32h28L18 4z"/>
-              <path d="M18 4v14"/>
-              <path d="M18 18l-8 14"/>
-              <path d="M18 18l8 14"/>
-              <circle cx="18" cy="18" r="2.5" fill="currentColor" stroke="none"/>
-            </svg>
-            <span class="svc-label">Amplify</span>
-          </a>
-
-          <a href="domain_one/CodeArtifact_DOP-C02.html" class="svc-btn" onclick="event.stopPropagation()">
-            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="6" y="8" width="24" height="20" rx="2"/>
-              <path d="M6 14h24"/>
-              <path d="M14 14v14"/>
-              <circle cx="10" cy="11" r="1" fill="currentColor" stroke="none"/>
-              <path d="M20 21l3 3-3 3"/>
-              <path d="M26 21l-3 3 3 3"/>
-            </svg>
-            <span class="svc-label">CodeArtifact</span>
-          </a>
-
-          <a href="domain_one/CodeBuild_DOP-C02.html" class="svc-btn" onclick="event.stopPropagation()">
-            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="18" cy="18" r="12"/>
-              <path d="M18 10v8l5 3"/>
-              <path d="M12 6l-2-3"/>
-              <path d="M24 6l2-3"/>
-              <path d="M14 28l3 2 3-2"/>
-            </svg>
-            <span class="svc-label">CodeBuild</span>
-          </a>
-
-          <a href="domain_one/CodeDeploy_DOP-C02.html" class="svc-btn" onclick="event.stopPropagation()">
-            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M18 4v20"/>
-              <path d="M12 18l6 6 6-6"/>
-              <path d="M6 28h24"/>
-              <path d="M8 32h20"/>
-              <circle cx="18" cy="7" r="3"/>
-            </svg>
-            <span class="svc-label">CodeDeploy</span>
-          </a>
-
-          <a href="domain_one/CodeGuru_DOP-C02.html" class="svc-btn" onclick="event.stopPropagation()">
-            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="15" cy="15" r="10"/>
-              <path d="M22 22l10 10"/>
-              <path d="M11 13l3 4 5-7"/>
-            </svg>
-            <span class="svc-label">CodeGuru</span>
-          </a>
-
-          <a href="domain_one/EC2ImageBuilder_DOP-C02.html" class="svc-btn" onclick="event.stopPropagation()">
-            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="6" y="6" width="24" height="8" rx="2"/>
-              <rect x="6" y="16" width="24" height="8" rx="2"/>
-              <rect x="6" y="26" width="24" height="6" rx="2"/>
-              <circle cx="11" cy="10" r="1.5" fill="currentColor" stroke="none"/>
-              <circle cx="11" cy="20" r="1.5" fill="currentColor" stroke="none"/>
-              <circle cx="11" cy="29" r="1.5" fill="currentColor" stroke="none"/>
-            </svg>
-            <span class="svc-label">EC2 Image Builder</span>
-          </a>
-
-          <a href="domain_one/CodeStart_DOP-CO2.html" class="svc-btn" onclick="event.stopPropagation()">
-            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="4" y="8" width="28" height="20" rx="3"/>
-              <path d="M4 14h28"/>
-              <circle cx="9" cy="11" r="1.2" fill="currentColor" stroke="none"/>
-              <circle cx="13" cy="11" r="1.2" fill="currentColor" stroke="none"/>
-              <circle cx="17" cy="11" r="1.2" fill="currentColor" stroke="none"/>
-              <path d="M11 20l-3 2 3 2"/>
-              <path d="M25 20l3 2-3 2"/>
-              <path d="M20 19l-4 6"/>
-            </svg>
-            <span class="svc-label">CodeStar</span>
-          </a>
-
+      <!-- Domain 2: Configuration Management & IaC — ACTIVE -->
+      <div class="domain-card active" style="--i:1" onclick="toggleDomain(this)">
+        <div class="domain-header">
+          <span class="domain-num">02</span>
+          <div class="domain-info">
+            <h2>Configuration Management &amp; IaC</h2>
+            <span class="domain-weight">17% of exam</span>
+          </div>
+          <span class="domain-chevron">&#9662;</span>
         </div>
+        <div class="domain-body">
+          <hr class="domain-divider">
+          <div class="service-grid">
 
-        <div class="topic-grid">
-          <a href="domain_one/MultiAccount_CrossRegion_Pipelines.html" class="topic-btn" onclick="event.stopPropagation()">Multi-Account &amp; Cross-Region</a>
-          <a href="domain_one/Pipeline_Failures_Lab.html" class="topic-btn" onclick="event.stopPropagation()">Pipeline Failures</a>
-          <a href="domain_one/Testing_Strategies_CICD_DOP-C02.html" class="topic-btn" onclick="event.stopPropagation()">Testing Strategies</a>
+            <a href="domain_two/cloudformation-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <rect x="5" y="22" width="26" height="8" rx="2" />
+                <rect x="5" y="14" width="26" height="8" rx="2" />
+                <rect x="5" y="6" width="26" height="8" rx="2" />
+                <path d="M10 10h4" />
+                <path d="M10 18h4" />
+                <path d="M10 26h4" />
+              </svg>
+              <span class="svc-label">CloudFormation</span>
+            </a>
+
+            <a href="domain_two/service-catalog-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <rect x="5" y="5" width="11" height="11" rx="2" />
+                <rect x="20" y="5" width="11" height="11" rx="2" />
+                <rect x="5" y="20" width="11" height="11" rx="2" />
+                <rect x="20" y="20" width="11" height="11" rx="2" />
+                <path d="M8 10.5h5" />
+                <path d="M23 10.5h5" />
+                <path d="M8 25.5h5" />
+                <path d="M23 25.5h5" />
+              </svg>
+              <span class="svc-label">Service Catalog</span>
+            </a>
+
+            <a href="domain_two/elastic-beanstalk-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <ellipse cx="18" cy="10" rx="12" ry="5" />
+                <path d="M6 10v8c0 2.76 5.37 5 12 5s12-2.24 12-5v-8" />
+                <path d="M6 18v8c0 2.76 5.37 5 12 5s12-2.24 12-5v-8" />
+                <path d="M18 5v26" />
+              </svg>
+              <span class="svc-label">Elastic Beanstalk</span>
+            </a>
+
+            <a href="domain_two/aws-sam-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M18 4l12 7v14L18 32 6 25V11L18 4z" />
+                <path d="M18 4v28" />
+                <path d="M6 11l12 7 12-7" />
+                <path d="M12 7.5l6 3.5" />
+                <path d="M24 7.5l-6 3.5" />
+              </svg>
+              <span class="svc-label">SAM</span>
+            </a>
+
+            <a href="domain_two/aws-appconfig-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <rect x="5" y="8" width="26" height="20" rx="2" />
+                <path d="M5 14h26" />
+                <path d="M12 20h3" />
+                <path d="M12 24h5" />
+                <circle cx="22" cy="20" r="2.5" />
+                <path d="M22 17v1.5" />
+                <path d="M22 22.5v1.5" />
+                <path d="M19.5 20h1" />
+                <path d="M23.5 20h1" />
+              </svg>
+              <span class="svc-label">AppConfig</span>
+            </a>
+
+            <a href="domain_two/aws-step-functions-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <rect x="11" y="4" width="14" height="8" rx="2" />
+                <rect x="4" y="24" width="12" height="8" rx="2" />
+                <rect x="20" y="24" width="12" height="8" rx="2" />
+                <path d="M18 12v5" />
+                <path d="M18 17l-8 4" />
+                <path d="M18 17l8 4" />
+              </svg>
+              <span class="svc-label">Step Functions</span>
+            </a>
+
+            <a href="domain_two/aws-cdk-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <rect x="5" y="22" width="12" height="9" rx="2" />
+                <rect x="19" y="22" width="12" height="9" rx="2" />
+                <rect x="11" y="13" width="14" height="9" rx="2" />
+                <rect x="8" y="4" width="20" height="9" rx="2" />
+                <path d="M11 22v-9" />
+                <path d="M25 22v-9" />
+              </svg>
+              <span class="svc-label">CDK</span>
+            </a>
+
+            <a href="domain_two/aws-ssm-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <rect x="5" y="6" width="26" height="24" rx="2" />
+                <path d="M5 13h26" />
+                <circle cx="18" cy="22" r="4" />
+                <path d="M18 18v1.5" />
+                <path d="M18 24.5v1.5" />
+                <path d="M14 22h1.5" />
+                <path d="M20.5 22H22" />
+                <path d="M9 10h4" />
+              </svg>
+              <span class="svc-label">Systems Manager</span>
+            </a>
+
+          </div>
         </div>
       </div>
+
+      <!-- Domain 3: Resilient Cloud Solutions — ACTIVE -->
+      <div class="domain-card active" style="--i:2" onclick="toggleDomain(this)">
+        <div class="domain-header">
+          <span class="domain-num">03</span>
+          <div class="domain-info">
+            <h2>Resilient Cloud Solutions</h2>
+            <span class="domain-weight">15% of exam</span>
+          </div>
+          <span class="domain-chevron">&#9662;</span>
+        </div>
+        <div class="domain-body">
+          <hr class="domain-divider">
+          <div class="service-grid">
+
+            <a href="domain_three/lambda-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M8 28L16 8l4 10 4-6 4 16" />
+                <path d="M4 28h28" />
+              </svg>
+              <span class="svc-label">Lambda</span>
+            </a>
+
+            <a href="domain_three/api-gateway-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <rect x="4" y="10" width="28" height="16" rx="2" />
+                <path d="M4 18h28" />
+                <path d="M12 10v16" />
+                <path d="M24 10v16" />
+                <circle cx="8" cy="14" r="1.5" fill="currentColor" stroke="none" />
+                <circle cx="8" cy="22" r="1.5" fill="currentColor" stroke="none" />
+                <path d="M16 15h6" />
+                <path d="M16 21h4" />
+              </svg>
+              <span class="svc-label">API Gateway</span>
+            </a>
+
+            <a href="domain_three/ecs-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <rect x="4" y="6" width="28" height="8" rx="2" />
+                <rect x="4" y="16" width="28" height="8" rx="2" />
+                <rect x="4" y="26" width="28" height="6" rx="2" />
+                <circle cx="9" cy="10" r="1.5" fill="currentColor" stroke="none" />
+                <circle cx="9" cy="20" r="1.5" fill="currentColor" stroke="none" />
+                <circle cx="9" cy="29" r="1.5" fill="currentColor" stroke="none" />
+                <path d="M14 10h10" />
+                <path d="M14 20h10" />
+              </svg>
+              <span class="svc-label">ECS</span>
+            </a>
+
+            <a href="domain_three/ecr-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <rect x="5" y="5" width="26" height="26" rx="3" />
+                <path d="M5 14h26" />
+                <path d="M5 23h26" />
+                <path d="M14 5v26" />
+                <circle cx="9.5" cy="9.5" r="1.5" fill="currentColor" stroke="none" />
+                <circle cx="9.5" cy="18.5" r="1.5" fill="currentColor" stroke="none" />
+                <circle cx="9.5" cy="27.5" r="1.5" fill="currentColor" stroke="none" />
+              </svg>
+              <span class="svc-label">ECR</span>
+            </a>
+
+            <a href="domain_three/eks-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <circle cx="18" cy="18" r="13" />
+                <circle cx="18" cy="18" r="4" />
+                <path d="M18 5v6" />
+                <path d="M18 25v6" />
+                <path d="M5 18h6" />
+                <path d="M25 18h6" />
+                <path d="M9.1 9.1l4.2 4.2" />
+                <path d="M22.7 22.7l4.2 4.2" />
+                <path d="M26.9 9.1l-4.2 4.2" />
+                <path d="M13.3 22.7l-4.2 4.2" />
+              </svg>
+              <span class="svc-label">EKS</span>
+            </a>
+
+            <a href="domain_three/kinesis-data-streams-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M4 12 Q10 8 18 12 Q26 16 32 12" />
+                <path d="M4 18 Q10 14 18 18 Q26 22 32 18" />
+                <path d="M4 24 Q10 20 18 24 Q26 28 32 24" />
+              </svg>
+              <span class="svc-label">Kinesis Data Streams</span>
+            </a>
+
+            <a href="domain_three/firehose-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M6 10h24" />
+                <path d="M6 18h24" />
+                <path d="M6 26h24" />
+                <path d="M26 6l6 4-6 4" />
+                <path d="M26 14l6 4-6 4" />
+                <path d="M26 22l6 4-6 4" />
+              </svg>
+              <span class="svc-label">Firehose</span>
+            </a>
+
+            <a href="domain_three/flink-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <rect x="4" y="14" width="10" height="8" rx="2" />
+                <rect x="22" y="14" width="10" height="8" rx="2" />
+                <path d="M14 18h8" />
+                <path d="M20 15l3 3-3 3" />
+                <path d="M12 8l6 6" />
+                <path d="M24 8l-6 6" />
+                <path d="M12 28l6-6" />
+                <path d="M24 28l-6-6" />
+              </svg>
+              <span class="svc-label">Managed Flink</span>
+            </a>
+
+            <a href="domain_three/route53-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <circle cx="18" cy="18" r="13" />
+                <path d="M5 18h26" />
+                <path d="M18 5c-4 4-6 8-6 13s2 9 6 13" />
+                <path d="M18 5c4 4 6 8 6 13s-2 9-6 13" />
+                <path d="M7 11h22" />
+                <path d="M7 25h22" />
+              </svg>
+              <span class="svc-label">Route 53</span>
+            </a>
+
+            <a href="domain_three/RDS_DOP-C02.html" class="svc-btn" onclick="event.stopPropagation()">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <ellipse cx="18" cy="10" rx="12" ry="4" />
+                <path d="M6 10v16c0 2.2 5.4 4 12 4s12-1.8 12-4V10" />
+                <path d="M6 18c0 2.2 5.4 4 12 4s12-1.8 12-4" />
+              </svg>
+              <span class="svc-label">RDS</span>
+            </a>
+
+            <a href="domain_three/Aurora_DOP-C02.html" class="svc-btn" onclick="event.stopPropagation()">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <ellipse cx="18" cy="9" rx="12" ry="4" />
+                <path d="M6 9v18c0 2.2 5.4 4 12 4s12-1.8 12-4V9" />
+                <path d="M6 18c0 2.2 5.4 4 12 4s12-1.8 12-4" />
+                <path d="M20 14l-4 5h4l-4 5" />
+              </svg>
+              <span class="svc-label">Aurora</span>
+            </a>
+
+            <a href="domain_three/ElastiCache_DOP-C02.html" class="svc-btn" onclick="event.stopPropagation()">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <rect x="5" y="7" width="26" height="7" rx="2" />
+                <rect x="5" y="16" width="26" height="7" rx="2" />
+                <rect x="5" y="25" width="26" height="6" rx="2" />
+                <path d="M20 10.5h5" />
+                <path d="M20 19.5h5" />
+                <circle cx="10" cy="10.5" r="1.5" fill="currentColor" stroke="none" />
+                <circle cx="10" cy="19.5" r="1.5" fill="currentColor" stroke="none" />
+              </svg>
+              <span class="svc-label">ElastiCache</span>
+            </a>
+
+            <a href="domain_three/DynamoDB_DOP-C02.html" class="svc-btn" onclick="event.stopPropagation()">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <ellipse cx="18" cy="8" rx="10" ry="3.5" />
+                <path d="M8 8v20c0 1.9 4.5 3.5 10 3.5s10-1.6 10-3.5V8" />
+                <path d="M8 15c0 1.9 4.5 3.5 10 3.5s10-1.6 10-3.5" />
+                <path d="M8 22c0 1.9 4.5 3.5 10 3.5s10-1.6 10-3.5" />
+              </svg>
+              <span class="svc-label">DynamoDB</span>
+            </a>
+
+            <a href="domain_three/Application_Auto_Scaling_DOP-C02.html" class="svc-btn"
+              onclick="event.stopPropagation()">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <circle cx="18" cy="18" r="3.5" />
+                <path d="M18 6v8" />
+                <path d="M15 9l3-3 3 3" />
+                <path d="M18 30v-8" />
+                <path d="M15 27l3 3 3-3" />
+                <path d="M6 18h8" />
+                <path d="M9 15l-3 3 3 3" />
+                <path d="M30 18h-8" />
+                <path d="M27 15l3 3-3 3" />
+              </svg>
+              <span class="svc-label">App Auto Scaling</span>
+            </a>
+
+            <a href="domain_three/ASG_DOP-C02_Study_Guide.html" class="svc-btn" onclick="event.stopPropagation()">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <rect x="4" y="12" width="8" height="12" rx="2" />
+                <rect x="14" y="12" width="8" height="12" rx="2" />
+                <rect x="24" y="12" width="8" height="12" rx="2" />
+                <path d="M4 8h28" />
+                <path d="M29 5l3 3-3 3" />
+                <path d="M4 28h28" />
+                <path d="M29 25l3 3-3 3" />
+              </svg>
+              <span class="svc-label">Auto Scaling Groups</span>
+            </a>
+
+            <a href="domain_three/DMS_DOP-C02.html" class="svc-btn" onclick="event.stopPropagation()">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <ellipse cx="9" cy="10" rx="6" ry="3" />
+                <path d="M3 10v10c0 1.7 2.7 3 6 3s6-1.3 6-3V10" />
+                <ellipse cx="27" cy="10" rx="6" ry="3" />
+                <path d="M21 10v10c0 1.7 2.7 3 6 3s6-1.3 6-3V10" />
+                <path d="M15 16h6" />
+                <path d="M19 13l3 3-3 3" />
+              </svg>
+              <span class="svc-label">DMS</span>
+            </a>
+
+            <a href="domain_three/ELB_DOP-C02.html" class="svc-btn" onclick="event.stopPropagation()">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <rect x="13" y="4" width="10" height="7" rx="2" />
+                <rect x="3" y="25" width="9" height="7" rx="2" />
+                <rect x="13.5" y="25" width="9" height="7" rx="2" />
+                <rect x="24" y="25" width="9" height="7" rx="2" />
+                <path d="M18 11v8" />
+                <path d="M18 19l-10 6" />
+                <path d="M18 19v6" />
+                <path d="M18 19l10 6" />
+              </svg>
+              <span class="svc-label">ELB</span>
+            </a>
+
+            <a href="domain_three/NAT_Gateway_DOP-C02.html" class="svc-btn" onclick="event.stopPropagation()">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <rect x="8" y="12" width="20" height="12" rx="2" />
+                <path d="M3 18h5" />
+                <path d="M28 18h5" />
+                <circle cx="14" cy="18" r="1.5" fill="currentColor" stroke="none" />
+                <circle cx="22" cy="18" r="1.5" fill="currentColor" stroke="none" />
+                <path d="M14 12V7" />
+                <path d="M22 12V7" />
+                <path d="M11 7h14" />
+              </svg>
+              <span class="svc-label">NAT Gateway</span>
+            </a>
+
+            <a href="domain_three/S3_DOP-C02.html" class="svc-btn" onclick="event.stopPropagation()">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <ellipse cx="18" cy="9" rx="12" ry="4" />
+                <path d="M6 9v18c0 2.2 5.4 4 12 4s12-1.8 12-4V9" />
+                <path d="M6 17c0 2.2 5.4 4 12 4s12-1.8 12-4" />
+              </svg>
+              <span class="svc-label">S3</span>
+            </a>
+
+            <a href="domain_three/StorageGateway_DOP-C02.html" class="svc-btn" onclick="event.stopPropagation()">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <rect x="4" y="20" width="16" height="12" rx="2" />
+                <path d="M8 26h5" />
+                <path d="M8 29h7" />
+                <path d="M20 26h12V20H20" />
+                <ellipse cx="28" cy="12" rx="6" ry="4" />
+                <path d="M22 15l2 5" />
+                <path d="M34 15l-2 5" />
+              </svg>
+              <span class="svc-label">Storage Gateway</span>
+            </a>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Domain 4: Monitoring & Logging — ACTIVE -->
+      <div class="domain-card active" style="--i:3" onclick="toggleDomain(this)">
+        <div class="domain-header">
+          <span class="domain-num">04</span>
+          <div class="domain-info">
+            <h2>Monitoring &amp; Logging</h2>
+            <span class="domain-weight">15% of exam</span>
+          </div>
+          <span class="domain-chevron">&#9662;</span>
+        </div>
+        <div class="domain-body">
+          <hr class="domain-divider">
+          <div class="service-grid">
+
+            <a href="domain_four/cloudwatch-dopc02.html" class="svc-btn" onclick="event.stopPropagation()">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <circle cx="18" cy="18" r="13" />
+                <path d="M18 10v8l5 3" />
+                <path d="M9 27l2-3" />
+                <path d="M27 27l-2-3" />
+              </svg>
+              <span class="svc-label">CloudWatch</span>
+            </a>
+
+            <a href="domain_four/amazon-athena-dopc02.html" class="svc-btn" onclick="event.stopPropagation()">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <ellipse cx="18" cy="10" rx="12" ry="4" />
+                <path d="M6 10v6c0 2.2 5.4 4 12 4s12-1.8 12-4v-6" />
+                <path d="M6 16v6c0 2.2 5.4 4 12 4s12-1.8 12-4v-6" />
+                <path d="M13 25l2 6" />
+                <path d="M23 25l-2 6" />
+                <path d="M11 31h14" />
+              </svg>
+              <span class="svc-label">Amazon Athena</span>
+            </a>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Domain 5: Incident & Event Response — ACTIVE -->
+      <div class="domain-card active" style="--i:4" onclick="toggleDomain(this)">
+        <div class="domain-header">
+          <span class="domain-num">05</span>
+          <div class="domain-info">
+            <h2>Incident &amp; Event Response</h2>
+            <span class="domain-weight">18% of exam</span>
+          </div>
+          <span class="domain-chevron">&#9662;</span>
+        </div>
+        <div class="domain-body">
+          <hr class="domain-divider">
+          <div class="service-grid">
+
+            <a href="domain_five/eventbridge-dopc02.html" class="svc-btn" onclick="event.stopPropagation()">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <circle cx="10" cy="10" r="3" />
+                <circle cx="10" cy="26" r="3" />
+                <circle cx="26" cy="18" r="3" />
+                <path d="M13 10h6l7 8" />
+                <path d="M13 26h6l7-8" />
+                <path d="M23 18h-6" />
+              </svg>
+              <span class="svc-label">EventBridge</span>
+            </a>
+
+            <a href="domain_five/aws-health-dashboard-dopc02.html" class="svc-btn" onclick="event.stopPropagation()">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <circle cx="18" cy="18" r="13" />
+                <path d="M4 18h5l3-8 5 16 4-10 3 6 4-4h4" />
+              </svg>
+              <span class="svc-label">AWS Health Dashboard</span>
+            </a>
+
+            <a href="domain_five/instance-status-check-dopc02.html" class="svc-btn" onclick="event.stopPropagation()">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <circle cx="18" cy="18" r="13" />
+                <path d="M11 18l5 5 9-10" />
+              </svg>
+              <span class="svc-label">Instance Status Check</span>
+            </a>
+
+            <a href="domain_five/cloudtrail-dopc02.html" class="svc-btn" onclick="event.stopPropagation()">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <rect x="7" y="5" width="22" height="26" rx="2" />
+                <path d="M12 12h12" />
+                <path d="M12 17h12" />
+                <path d="M12 22h8" />
+                <circle cx="26" cy="27" r="5" fill="none" />
+                <path d="M24 27l1.5 1.5 2.5-2.5" />
+              </svg>
+              <span class="svc-label">CloudTrail</span>
+            </a>
+
+            <a href="domain_five/sqs-dopc02.html" class="svc-btn" onclick="event.stopPropagation()">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <rect x="4" y="8" width="22" height="6" rx="2" />
+                <rect x="4" y="16" width="22" height="6" rx="2" />
+                <rect x="4" y="24" width="22" height="6" rx="2" />
+                <path d="M28 11h4" />
+                <path d="M29 9l3 2-3 2" />
+                <path d="M28 19h4" />
+                <path d="M29 17l3 2-3 2" />
+                <path d="M28 27h4" />
+                <path d="M29 25l3 2-3 2" />
+              </svg>
+              <span class="svc-label">SQS</span>
+            </a>
+
+            <a href="domain_five/sns-dopc02.html" class="svc-btn" onclick="event.stopPropagation()">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M18 5a10 10 0 0 1 10 10v5l3 4H5l3-4v-5A10 10 0 0 1 18 5z" />
+                <path d="M14 28a4 4 0 0 0 8 0" />
+              </svg>
+              <span class="svc-label">SNS</span>
+            </a>
+
+            <a href="domain_five/xray-dopc02.html" class="svc-btn" onclick="event.stopPropagation()">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <rect x="5" y="7" width="26" height="22" rx="2" />
+                <path d="M5 14h26" />
+                <path d="M12 20l3 4 6-8 3 4" />
+                <circle cx="28" cy="11" r="1.5" fill="currentColor" stroke="none" />
+              </svg>
+              <span class="svc-label">X-Ray</span>
+            </a>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Domain 6: Security & Compliance — ACTIVE -->
+      <div class="domain-card active" style="--i:5; grid-column: 1 / -1;" onclick="toggleDomain(this)">
+        <div class="domain-header">
+          <span class="domain-num">06</span>
+          <div class="domain-info">
+            <h2>Security &amp; Compliance</h2>
+            <span class="domain-weight">13% of exam</span>
+          </div>
+          <span class="domain-chevron">&#9662;</span>
+        </div>
+        <div class="domain-body">
+          <hr class="domain-divider">
+          <div class="service-grid">
+
+            <a href="domain_six/aws-config-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <rect x="5" y="5" width="26" height="26" rx="2" />
+                <path d="M5 13h26" />
+                <path d="M13 13v18" />
+                <circle cx="9" cy="9" r="1.5" fill="currentColor" stroke="none" />
+                <path d="M18 20h7" />
+                <path d="M18 25h5" />
+              </svg>
+              <span class="svc-label">AWS Config</span>
+            </a>
+
+            <a href="domain_six/aws-control-tower-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M18 4l14 7v14L18 32 4 25V11L18 4z" />
+                <path d="M18 4v28" />
+                <path d="M4 11l14 7 14-7" />
+                <circle cx="18" cy="18" r="3" fill="currentColor" stroke="none" />
+              </svg>
+              <span class="svc-label">Control Tower</span>
+            </a>
+
+            <a href="domain_six/aws-detective-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <circle cx="16" cy="16" r="10" />
+                <path d="M24 24l8 8" />
+                <path d="M13 13l6 6" />
+                <path d="M19 13l-6 6" />
+              </svg>
+              <span class="svc-label">Detective</span>
+            </a>
+
+            <a href="domain_six/aws-firewall-manager-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M18 4L6 9v10c0 7 5.4 13.5 12 15 6.6-1.5 12-8 12-15V9L18 4z" />
+                <path d="M12 18l4 4 8-8" />
+              </svg>
+              <span class="svc-label">Firewall Manager</span>
+            </a>
+
+            <a href="domain_six/aws-guardduty-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M18 4L6 9v10c0 7 5.4 13.5 12 15 6.6-1.5 12-8 12-15V9L18 4z" />
+                <circle cx="18" cy="18" r="4" />
+                <path d="M18 14v4" />
+                <circle cx="18" cy="21" r="1" fill="currentColor" stroke="none" />
+              </svg>
+              <span class="svc-label">GuardDuty</span>
+            </a>
+
+            <a href="domain_six/aws-iam-identity-center-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <circle cx="18" cy="12" r="5" />
+                <path d="M7 32c0-6.1 4.9-11 11-11s11 4.9 11 11" />
+                <path d="M24 18l4-4" />
+                <path d="M26 12h4" />
+                <path d="M24 22l4 4" />
+              </svg>
+              <span class="svc-label">IAM Identity Center</span>
+            </a>
+
+            <a href="domain_six/aws-inspector-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <circle cx="15" cy="15" r="9" />
+                <path d="M22 22l10 10" />
+                <path d="M11 15h8" />
+                <path d="M15 11v8" />
+              </svg>
+              <span class="svc-label">Inspector</span>
+            </a>
+
+            <a href="domain_six/aws-organizations-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <rect x="13" y="4" width="10" height="7" rx="2" />
+                <rect x="3" y="25" width="9" height="7" rx="2" />
+                <rect x="14" y="25" width="9" height="7" rx="2" />
+                <rect x="24" y="25" width="9" height="7" rx="2" />
+                <path d="M18 11v7" />
+                <path d="M7 25v-7h22v7" />
+              </svg>
+              <span class="svc-label">Organizations</span>
+            </a>
+
+            <a href="domain_six/aws-secrets-manager-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <rect x="8" y="16" width="20" height="16" rx="2" />
+                <path d="M12 16v-4a6 6 0 0 1 12 0v4" />
+                <circle cx="18" cy="24" r="2.5" fill="currentColor" stroke="none" />
+                <path d="M18 26.5v3" />
+              </svg>
+              <span class="svc-label">Secrets Manager</span>
+            </a>
+
+            <a href="domain_six/aws-trusted-advisor-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <circle cx="18" cy="10" r="5" />
+                <path d="M10 28c0-4.4 3.6-8 8-8s8 3.6 8 8" />
+                <path d="M18 22v6" />
+                <path d="M14 26h8" />
+                <circle cx="18" cy="10" r="2" fill="currentColor" stroke="none" />
+              </svg>
+              <span class="svc-label">Trusted Advisor</span>
+            </a>
+
+            <a href="domain_six/aws-waf-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M18 4L6 9v10c0 7 5.4 13.5 12 15 6.6-1.5 12-8 12-15V9L18 4z" />
+                <path d="M13 16l3 3 7-7" />
+                <path d="M10 22h16" />
+              </svg>
+              <span class="svc-label">WAF</span>
+            </a>
+
+          </div>
+        </div>
+      </div>
+
     </div>
 
-    <!-- Domain 2: Configuration Management & IaC — ACTIVE -->
-    <div class="domain-card active" style="--i:1" onclick="toggleDomain(this)">
+    <!-- Extras: Additional Services -->
+    <div class="domain-card active" style="--i:6; grid-column: 1 / -1;" onclick="toggleDomain(this)">
       <div class="domain-header">
-        <span class="domain-num">02</span>
+        <span class="domain-num" style="color:var(--violet); font-size:18px; letter-spacing:-0.01em;">EXT</span>
         <div class="domain-info">
-          <h2>Configuration Management &amp; IaC</h2>
-          <span class="domain-weight">17% of exam</span>
+          <h2>Extras</h2>
+          <span class="domain-weight" style="color:var(--violet); background:var(--violet-l); border-color:var(--violet-b);">Additional Services</span>
         </div>
         <span class="domain-chevron">&#9662;</span>
       </div>
@@ -560,658 +1343,73 @@ body::before {
         <hr class="domain-divider">
         <div class="service-grid">
 
-          <a href="domain_two/cloudformation-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
+          <a href="domain_extras/aws_glue_dopc02.html" class="svc-btn" onclick="event.stopPropagation()">
             <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="5" y="22" width="26" height="8" rx="2"/>
-              <rect x="5" y="14" width="26" height="8" rx="2"/>
-              <rect x="5" y="6" width="26" height="8" rx="2"/>
-              <path d="M10 10h4"/>
-              <path d="M10 18h4"/>
-              <path d="M10 26h4"/>
+              <rect x="3" y="13" width="8" height="8" rx="1.5"/>
+              <rect x="14" y="13" width="8" height="8" rx="1.5"/>
+              <rect x="25" y="13" width="8" height="8" rx="1.5"/>
+              <path d="M11 17h3"/>
+              <path d="M22 17h3"/>
+              <path d="M18 7v6"/>
+              <path d="M15 10l3-3 3 3"/>
+              <path d="M7 21v3c0 1 .5 1.5 1.5 1.5h19c1 0 1.5-.5 1.5-1.5v-3"/>
             </svg>
-            <span class="svc-label">CloudFormation</span>
+            <span class="svc-label">Glue</span>
           </a>
 
-          <a href="domain_two/service-catalog-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
+          <a href="domain_extras/aws_quicksight_dopc02.html" class="svc-btn" onclick="event.stopPropagation()">
             <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="5" y="5" width="11" height="11" rx="2"/>
-              <rect x="20" y="5" width="11" height="11" rx="2"/>
-              <rect x="5" y="20" width="11" height="11" rx="2"/>
-              <rect x="20" y="20" width="11" height="11" rx="2"/>
-              <path d="M8 10.5h5"/>
-              <path d="M23 10.5h5"/>
-              <path d="M8 25.5h5"/>
-              <path d="M23 25.5h5"/>
-            </svg>
-            <span class="svc-label">Service Catalog</span>
-          </a>
-
-          <a href="domain_two/elastic-beanstalk-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
-            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <ellipse cx="18" cy="10" rx="12" ry="5"/>
-              <path d="M6 10v8c0 2.76 5.37 5 12 5s12-2.24 12-5v-8"/>
-              <path d="M6 18v8c0 2.76 5.37 5 12 5s12-2.24 12-5v-8"/>
-              <path d="M18 5v26"/>
-            </svg>
-            <span class="svc-label">Elastic Beanstalk</span>
-          </a>
-
-          <a href="domain_two/aws-sam-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
-            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M18 4l12 7v14L18 32 6 25V11L18 4z"/>
-              <path d="M18 4v28"/>
-              <path d="M6 11l12 7 12-7"/>
-              <path d="M12 7.5l6 3.5"/>
-              <path d="M24 7.5l-6 3.5"/>
-            </svg>
-            <span class="svc-label">SAM</span>
-          </a>
-
-          <a href="domain_two/aws-appconfig-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
-            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="5" y="8" width="26" height="20" rx="2"/>
-              <path d="M5 14h26"/>
-              <path d="M12 20h3"/>
-              <path d="M12 24h5"/>
-              <circle cx="22" cy="20" r="2.5"/>
-              <path d="M22 17v1.5"/>
-              <path d="M22 22.5v1.5"/>
-              <path d="M19.5 20h1"/>
-              <path d="M23.5 20h1"/>
-            </svg>
-            <span class="svc-label">AppConfig</span>
-          </a>
-
-          <a href="domain_two/aws-step-functions-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
-            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="11" y="4" width="14" height="8" rx="2"/>
-              <rect x="4" y="24" width="12" height="8" rx="2"/>
-              <rect x="20" y="24" width="12" height="8" rx="2"/>
-              <path d="M18 12v5"/>
-              <path d="M18 17l-8 4"/>
-              <path d="M18 17l8 4"/>
-            </svg>
-            <span class="svc-label">Step Functions</span>
-          </a>
-
-          <a href="domain_two/aws-cdk-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
-            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="5" y="22" width="12" height="9" rx="2"/>
-              <rect x="19" y="22" width="12" height="9" rx="2"/>
-              <rect x="11" y="13" width="14" height="9" rx="2"/>
-              <rect x="8" y="4" width="20" height="9" rx="2"/>
-              <path d="M11 22v-9"/>
-              <path d="M25 22v-9"/>
-            </svg>
-            <span class="svc-label">CDK</span>
-          </a>
-
-          <a href="domain_two/aws-ssm-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
-            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="5" y="6" width="26" height="24" rx="2"/>
-              <path d="M5 13h26"/>
-              <circle cx="18" cy="22" r="4"/>
-              <path d="M18 18v1.5"/>
-              <path d="M18 24.5v1.5"/>
-              <path d="M14 22h1.5"/>
-              <path d="M20.5 22H22"/>
-              <path d="M9 10h4"/>
-            </svg>
-            <span class="svc-label">Systems Manager</span>
-          </a>
-
-        </div>
-      </div>
-    </div>
-
-    <!-- Domain 3: Resilient Cloud Solutions — ACTIVE -->
-    <div class="domain-card active" style="--i:2" onclick="toggleDomain(this)">
-      <div class="domain-header">
-        <span class="domain-num">03</span>
-        <div class="domain-info">
-          <h2>Resilient Cloud Solutions</h2>
-          <span class="domain-weight">15% of exam</span>
-        </div>
-        <span class="domain-chevron">&#9662;</span>
-      </div>
-      <div class="domain-body">
-        <hr class="domain-divider">
-        <div class="service-grid">
-
-          <a href="domain_three/lambda-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
-            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M8 28L16 8l4 10 4-6 4 16"/>
               <path d="M4 28h28"/>
+              <rect x="6" y="18" width="5" height="10" rx="1"/>
+              <rect x="15.5" y="12" width="5" height="16" rx="1"/>
+              <rect x="25" y="7" width="5" height="21" rx="1"/>
+              <path d="M8.5 16l7.5-6 7.5 3 5-6" stroke-width="1.8"/>
+              <circle cx="8.5" cy="16" r="1.5" fill="currentColor" stroke="none"/>
+              <circle cx="16" cy="10" r="1.5" fill="currentColor" stroke="none"/>
+              <circle cx="23.5" cy="13" r="1.5" fill="currentColor" stroke="none"/>
+              <circle cx="28.5" cy="7" r="1.5" fill="currentColor" stroke="none"/>
             </svg>
-            <span class="svc-label">Lambda</span>
+            <span class="svc-label">QuickSight</span>
           </a>
 
-          <a href="domain_three/api-gateway-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
+          <a href="domain_extras/aws_tag_editor_dopc02.html" class="svc-btn" onclick="event.stopPropagation()">
             <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="4" y="10" width="28" height="16" rx="2"/>
-              <path d="M4 18h28"/>
-              <path d="M12 10v16"/>
-              <path d="M24 10v16"/>
-              <circle cx="8" cy="14" r="1.5" fill="currentColor" stroke="none"/>
-              <circle cx="8" cy="22" r="1.5" fill="currentColor" stroke="none"/>
-              <path d="M16 15h6"/>
-              <path d="M16 21h4"/>
+              <path d="M5 5h14l12 13-14 13L5 18V5z"/>
+              <circle cx="13" cy="13" r="2.5" fill="currentColor" stroke="none"/>
+              <path d="M22 8l9 9"/>
             </svg>
-            <span class="svc-label">API Gateway</span>
-          </a>
-
-          <a href="domain_three/ecs-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
-            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="4" y="6" width="28" height="8" rx="2"/>
-              <rect x="4" y="16" width="28" height="8" rx="2"/>
-              <rect x="4" y="26" width="28" height="6" rx="2"/>
-              <circle cx="9" cy="10" r="1.5" fill="currentColor" stroke="none"/>
-              <circle cx="9" cy="20" r="1.5" fill="currentColor" stroke="none"/>
-              <circle cx="9" cy="29" r="1.5" fill="currentColor" stroke="none"/>
-              <path d="M14 10h10"/>
-              <path d="M14 20h10"/>
-            </svg>
-            <span class="svc-label">ECS</span>
-          </a>
-
-          <a href="domain_three/ecr-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
-            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="5" y="5" width="26" height="26" rx="3"/>
-              <path d="M5 14h26"/>
-              <path d="M5 23h26"/>
-              <path d="M14 5v26"/>
-              <circle cx="9.5" cy="9.5" r="1.5" fill="currentColor" stroke="none"/>
-              <circle cx="9.5" cy="18.5" r="1.5" fill="currentColor" stroke="none"/>
-              <circle cx="9.5" cy="27.5" r="1.5" fill="currentColor" stroke="none"/>
-            </svg>
-            <span class="svc-label">ECR</span>
-          </a>
-
-          <a href="domain_three/eks-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
-            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="18" cy="18" r="13"/>
-              <circle cx="18" cy="18" r="4"/>
-              <path d="M18 5v6"/>
-              <path d="M18 25v6"/>
-              <path d="M5 18h6"/>
-              <path d="M25 18h6"/>
-              <path d="M9.1 9.1l4.2 4.2"/>
-              <path d="M22.7 22.7l4.2 4.2"/>
-              <path d="M26.9 9.1l-4.2 4.2"/>
-              <path d="M13.3 22.7l-4.2 4.2"/>
-            </svg>
-            <span class="svc-label">EKS</span>
-          </a>
-
-          <a href="domain_three/kinesis-data-streams-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
-            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M4 12 Q10 8 18 12 Q26 16 32 12"/>
-              <path d="M4 18 Q10 14 18 18 Q26 22 32 18"/>
-              <path d="M4 24 Q10 20 18 24 Q26 28 32 24"/>
-            </svg>
-            <span class="svc-label">Kinesis Data Streams</span>
-          </a>
-
-          <a href="domain_three/firehose-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
-            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M6 10h24"/>
-              <path d="M6 18h24"/>
-              <path d="M6 26h24"/>
-              <path d="M26 6l6 4-6 4"/>
-              <path d="M26 14l6 4-6 4"/>
-              <path d="M26 22l6 4-6 4"/>
-            </svg>
-            <span class="svc-label">Firehose</span>
-          </a>
-
-          <a href="domain_three/flink-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
-            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="4" y="14" width="10" height="8" rx="2"/>
-              <rect x="22" y="14" width="10" height="8" rx="2"/>
-              <path d="M14 18h8"/>
-              <path d="M20 15l3 3-3 3"/>
-              <path d="M12 8l6 6"/>
-              <path d="M24 8l-6 6"/>
-              <path d="M12 28l6-6"/>
-              <path d="M24 28l-6-6"/>
-            </svg>
-            <span class="svc-label">Managed Flink</span>
-          </a>
-
-          <a href="domain_three/route53-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
-            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="18" cy="18" r="13"/>
-              <path d="M5 18h26"/>
-              <path d="M18 5c-4 4-6 8-6 13s2 9 6 13"/>
-              <path d="M18 5c4 4 6 8 6 13s-2 9-6 13"/>
-              <path d="M7 11h22"/>
-              <path d="M7 25h22"/>
-            </svg>
-            <span class="svc-label">Route 53</span>
-          </a>
-
-          <a href="domain_three/RDS_DOP-C02.html" class="svc-btn" onclick="event.stopPropagation()">
-            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <ellipse cx="18" cy="10" rx="12" ry="4"/>
-              <path d="M6 10v16c0 2.2 5.4 4 12 4s12-1.8 12-4V10"/>
-              <path d="M6 18c0 2.2 5.4 4 12 4s12-1.8 12-4"/>
-            </svg>
-            <span class="svc-label">RDS</span>
-          </a>
-
-          <a href="domain_three/Aurora_DOP-C02.html" class="svc-btn" onclick="event.stopPropagation()">
-            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <ellipse cx="18" cy="9" rx="12" ry="4"/>
-              <path d="M6 9v18c0 2.2 5.4 4 12 4s12-1.8 12-4V9"/>
-              <path d="M6 18c0 2.2 5.4 4 12 4s12-1.8 12-4"/>
-              <path d="M20 14l-4 5h4l-4 5"/>
-            </svg>
-            <span class="svc-label">Aurora</span>
-          </a>
-
-          <a href="domain_three/ElastiCache_DOP-C02.html" class="svc-btn" onclick="event.stopPropagation()">
-            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="5" y="7" width="26" height="7" rx="2"/>
-              <rect x="5" y="16" width="26" height="7" rx="2"/>
-              <rect x="5" y="25" width="26" height="6" rx="2"/>
-              <path d="M20 10.5h5"/>
-              <path d="M20 19.5h5"/>
-              <circle cx="10" cy="10.5" r="1.5" fill="currentColor" stroke="none"/>
-              <circle cx="10" cy="19.5" r="1.5" fill="currentColor" stroke="none"/>
-            </svg>
-            <span class="svc-label">ElastiCache</span>
-          </a>
-
-          <a href="domain_three/DynamoDB_DOP-C02.html" class="svc-btn" onclick="event.stopPropagation()">
-            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <ellipse cx="18" cy="8" rx="10" ry="3.5"/>
-              <path d="M8 8v20c0 1.9 4.5 3.5 10 3.5s10-1.6 10-3.5V8"/>
-              <path d="M8 15c0 1.9 4.5 3.5 10 3.5s10-1.6 10-3.5"/>
-              <path d="M8 22c0 1.9 4.5 3.5 10 3.5s10-1.6 10-3.5"/>
-            </svg>
-            <span class="svc-label">DynamoDB</span>
-          </a>
-
-          <a href="domain_three/Application_Auto_Scaling_DOP-C02.html" class="svc-btn" onclick="event.stopPropagation()">
-            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="18" cy="18" r="3.5"/>
-              <path d="M18 6v8"/>
-              <path d="M15 9l3-3 3 3"/>
-              <path d="M18 30v-8"/>
-              <path d="M15 27l3 3 3-3"/>
-              <path d="M6 18h8"/>
-              <path d="M9 15l-3 3 3 3"/>
-              <path d="M30 18h-8"/>
-              <path d="M27 15l3 3-3 3"/>
-            </svg>
-            <span class="svc-label">App Auto Scaling</span>
-          </a>
-
-          <a href="domain_three/ASG_DOP-C02_Study_Guide.html" class="svc-btn" onclick="event.stopPropagation()">
-            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="4" y="12" width="8" height="12" rx="2"/>
-              <rect x="14" y="12" width="8" height="12" rx="2"/>
-              <rect x="24" y="12" width="8" height="12" rx="2"/>
-              <path d="M4 8h28"/>
-              <path d="M29 5l3 3-3 3"/>
-              <path d="M4 28h28"/>
-              <path d="M29 25l3 3-3 3"/>
-            </svg>
-            <span class="svc-label">Auto Scaling Groups</span>
-          </a>
-
-          <a href="domain_three/DMS_DOP-C02.html" class="svc-btn" onclick="event.stopPropagation()">
-            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <ellipse cx="9" cy="10" rx="6" ry="3"/>
-              <path d="M3 10v10c0 1.7 2.7 3 6 3s6-1.3 6-3V10"/>
-              <ellipse cx="27" cy="10" rx="6" ry="3"/>
-              <path d="M21 10v10c0 1.7 2.7 3 6 3s6-1.3 6-3V10"/>
-              <path d="M15 16h6"/>
-              <path d="M19 13l3 3-3 3"/>
-            </svg>
-            <span class="svc-label">DMS</span>
-          </a>
-
-          <a href="domain_three/ELB_DOP-C02.html" class="svc-btn" onclick="event.stopPropagation()">
-            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="13" y="4" width="10" height="7" rx="2"/>
-              <rect x="3" y="25" width="9" height="7" rx="2"/>
-              <rect x="13.5" y="25" width="9" height="7" rx="2"/>
-              <rect x="24" y="25" width="9" height="7" rx="2"/>
-              <path d="M18 11v8"/>
-              <path d="M18 19l-10 6"/>
-              <path d="M18 19v6"/>
-              <path d="M18 19l10 6"/>
-            </svg>
-            <span class="svc-label">ELB</span>
-          </a>
-
-          <a href="domain_three/NAT_Gateway_DOP-C02.html" class="svc-btn" onclick="event.stopPropagation()">
-            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="8" y="12" width="20" height="12" rx="2"/>
-              <path d="M3 18h5"/>
-              <path d="M28 18h5"/>
-              <circle cx="14" cy="18" r="1.5" fill="currentColor" stroke="none"/>
-              <circle cx="22" cy="18" r="1.5" fill="currentColor" stroke="none"/>
-              <path d="M14 12V7"/>
-              <path d="M22 12V7"/>
-              <path d="M11 7h14"/>
-            </svg>
-            <span class="svc-label">NAT Gateway</span>
-          </a>
-
-          <a href="domain_three/S3_DOP-C02.html" class="svc-btn" onclick="event.stopPropagation()">
-            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <ellipse cx="18" cy="9" rx="12" ry="4"/>
-              <path d="M6 9v18c0 2.2 5.4 4 12 4s12-1.8 12-4V9"/>
-              <path d="M6 17c0 2.2 5.4 4 12 4s12-1.8 12-4"/>
-            </svg>
-            <span class="svc-label">S3</span>
-          </a>
-
-          <a href="domain_three/StorageGateway_DOP-C02.html" class="svc-btn" onclick="event.stopPropagation()">
-            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="4" y="20" width="16" height="12" rx="2"/>
-              <path d="M8 26h5"/>
-              <path d="M8 29h7"/>
-              <path d="M20 26h12V20H20"/>
-              <ellipse cx="28" cy="12" rx="6" ry="4"/>
-              <path d="M22 15l2 5"/>
-              <path d="M34 15l-2 5"/>
-            </svg>
-            <span class="svc-label">Storage Gateway</span>
+            <span class="svc-label">Tag Editor</span>
           </a>
 
         </div>
       </div>
     </div>
 
-    <!-- Domain 4: Monitoring & Logging — ACTIVE -->
-    <div class="domain-card active" style="--i:3" onclick="toggleDomain(this)">
-      <div class="domain-header">
-        <span class="domain-num">04</span>
-        <div class="domain-info">
-          <h2>Monitoring &amp; Logging</h2>
-          <span class="domain-weight">15% of exam</span>
-        </div>
-        <span class="domain-chevron">&#9662;</span>
-      </div>
-      <div class="domain-body">
-        <hr class="domain-divider">
-        <div class="service-grid">
-
-          <a href="domain_four/cloudwatch-dopc02.html" class="svc-btn" onclick="event.stopPropagation()">
-            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="18" cy="18" r="13"/>
-              <path d="M18 10v8l5 3"/>
-              <path d="M9 27l2-3"/>
-              <path d="M27 27l-2-3"/>
-            </svg>
-            <span class="svc-label">CloudWatch</span>
-          </a>
-
-          <a href="domain_four/amazon-athena-dopc02.html" class="svc-btn" onclick="event.stopPropagation()">
-            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <ellipse cx="18" cy="10" rx="12" ry="4"/>
-              <path d="M6 10v6c0 2.2 5.4 4 12 4s12-1.8 12-4v-6"/>
-              <path d="M6 16v6c0 2.2 5.4 4 12 4s12-1.8 12-4v-6"/>
-              <path d="M13 25l2 6"/>
-              <path d="M23 25l-2 6"/>
-              <path d="M11 31h14"/>
-            </svg>
-            <span class="svc-label">Amazon Athena</span>
-          </a>
-
-        </div>
-      </div>
     </div>
 
-    <!-- Domain 5: Incident & Event Response — ACTIVE -->
-    <div class="domain-card active" style="--i:4" onclick="toggleDomain(this)">
-      <div class="domain-header">
-        <span class="domain-num">05</span>
-        <div class="domain-info">
-          <h2>Incident &amp; Event Response</h2>
-          <span class="domain-weight">18% of exam</span>
-        </div>
-        <span class="domain-chevron">&#9662;</span>
-      </div>
-      <div class="domain-body">
-        <hr class="domain-divider">
-        <div class="service-grid">
+    <div class="footer">DOP-C02 &middot; AWS Certified DevOps Engineer — Professional</div>
+  </main>
 
-          <a href="domain_five/eventbridge-dopc02.html" class="svc-btn" onclick="event.stopPropagation()">
-            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="10" cy="10" r="3"/>
-              <circle cx="10" cy="26" r="3"/>
-              <circle cx="26" cy="18" r="3"/>
-              <path d="M13 10h6l7 8"/>
-              <path d="M13 26h6l7-8"/>
-              <path d="M23 18h-6"/>
-            </svg>
-            <span class="svc-label">EventBridge</span>
-          </a>
-
-          <a href="domain_five/aws-health-dashboard-dopc02.html" class="svc-btn" onclick="event.stopPropagation()">
-            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="18" cy="18" r="13"/>
-              <path d="M4 18h5l3-8 5 16 4-10 3 6 4-4h4"/>
-            </svg>
-            <span class="svc-label">AWS Health Dashboard</span>
-          </a>
-
-          <a href="domain_five/instance-status-check-dopc02.html" class="svc-btn" onclick="event.stopPropagation()">
-            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="18" cy="18" r="13"/>
-              <path d="M11 18l5 5 9-10"/>
-            </svg>
-            <span class="svc-label">Instance Status Check</span>
-          </a>
-
-          <a href="domain_five/cloudtrail-dopc02.html" class="svc-btn" onclick="event.stopPropagation()">
-            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="7" y="5" width="22" height="26" rx="2"/>
-              <path d="M12 12h12"/>
-              <path d="M12 17h12"/>
-              <path d="M12 22h8"/>
-              <circle cx="26" cy="27" r="5" fill="none"/>
-              <path d="M24 27l1.5 1.5 2.5-2.5"/>
-            </svg>
-            <span class="svc-label">CloudTrail</span>
-          </a>
-
-          <a href="domain_five/sqs-dopc02.html" class="svc-btn" onclick="event.stopPropagation()">
-            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="4" y="8" width="22" height="6" rx="2"/>
-              <rect x="4" y="16" width="22" height="6" rx="2"/>
-              <rect x="4" y="24" width="22" height="6" rx="2"/>
-              <path d="M28 11h4"/>
-              <path d="M29 9l3 2-3 2"/>
-              <path d="M28 19h4"/>
-              <path d="M29 17l3 2-3 2"/>
-              <path d="M28 27h4"/>
-              <path d="M29 25l3 2-3 2"/>
-            </svg>
-            <span class="svc-label">SQS</span>
-          </a>
-
-          <a href="domain_five/sns-dopc02.html" class="svc-btn" onclick="event.stopPropagation()">
-            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M18 5a10 10 0 0 1 10 10v5l3 4H5l3-4v-5A10 10 0 0 1 18 5z"/>
-              <path d="M14 28a4 4 0 0 0 8 0"/>
-            </svg>
-            <span class="svc-label">SNS</span>
-          </a>
-
-          <a href="domain_five/xray-dopc02.html" class="svc-btn" onclick="event.stopPropagation()">
-            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="5" y="7" width="26" height="22" rx="2"/>
-              <path d="M5 14h26"/>
-              <path d="M12 20l3 4 6-8 3 4"/>
-              <circle cx="28" cy="11" r="1.5" fill="currentColor" stroke="none"/>
-            </svg>
-            <span class="svc-label">X-Ray</span>
-          </a>
-
-        </div>
-      </div>
-    </div>
-
-    <!-- Domain 6: Security & Compliance — ACTIVE -->
-    <div class="domain-card active" style="--i:5; grid-column: 1 / -1;" onclick="toggleDomain(this)">
-      <div class="domain-header">
-        <span class="domain-num">06</span>
-        <div class="domain-info">
-          <h2>Security &amp; Compliance</h2>
-          <span class="domain-weight">13% of exam</span>
-        </div>
-        <span class="domain-chevron">&#9662;</span>
-      </div>
-      <div class="domain-body">
-        <hr class="domain-divider">
-        <div class="service-grid">
-
-          <a href="domain_six/aws-config-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
-            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="5" y="5" width="26" height="26" rx="2"/>
-              <path d="M5 13h26"/>
-              <path d="M13 13v18"/>
-              <circle cx="9" cy="9" r="1.5" fill="currentColor" stroke="none"/>
-              <path d="M18 20h7"/>
-              <path d="M18 25h5"/>
-            </svg>
-            <span class="svc-label">AWS Config</span>
-          </a>
-
-          <a href="domain_six/aws-control-tower-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
-            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M18 4l14 7v14L18 32 4 25V11L18 4z"/>
-              <path d="M18 4v28"/>
-              <path d="M4 11l14 7 14-7"/>
-              <circle cx="18" cy="18" r="3" fill="currentColor" stroke="none"/>
-            </svg>
-            <span class="svc-label">Control Tower</span>
-          </a>
-
-          <a href="domain_six/aws-detective-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
-            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="16" cy="16" r="10"/>
-              <path d="M24 24l8 8"/>
-              <path d="M13 13l6 6"/>
-              <path d="M19 13l-6 6"/>
-            </svg>
-            <span class="svc-label">Detective</span>
-          </a>
-
-          <a href="domain_six/aws-firewall-manager-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
-            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M18 4L6 9v10c0 7 5.4 13.5 12 15 6.6-1.5 12-8 12-15V9L18 4z"/>
-              <path d="M12 18l4 4 8-8"/>
-            </svg>
-            <span class="svc-label">Firewall Manager</span>
-          </a>
-
-          <a href="domain_six/aws-guardduty-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
-            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M18 4L6 9v10c0 7 5.4 13.5 12 15 6.6-1.5 12-8 12-15V9L18 4z"/>
-              <circle cx="18" cy="18" r="4"/>
-              <path d="M18 14v4"/>
-              <circle cx="18" cy="21" r="1" fill="currentColor" stroke="none"/>
-            </svg>
-            <span class="svc-label">GuardDuty</span>
-          </a>
-
-          <a href="domain_six/aws-iam-identity-center-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
-            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="18" cy="12" r="5"/>
-              <path d="M7 32c0-6.1 4.9-11 11-11s11 4.9 11 11"/>
-              <path d="M24 18l4-4"/>
-              <path d="M26 12h4"/>
-              <path d="M24 22l4 4"/>
-            </svg>
-            <span class="svc-label">IAM Identity Center</span>
-          </a>
-
-          <a href="domain_six/aws-inspector-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
-            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="15" cy="15" r="9"/>
-              <path d="M22 22l10 10"/>
-              <path d="M11 15h8"/>
-              <path d="M15 11v8"/>
-            </svg>
-            <span class="svc-label">Inspector</span>
-          </a>
-
-          <a href="domain_six/aws-organizations-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
-            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="13" y="4" width="10" height="7" rx="2"/>
-              <rect x="3" y="25" width="9" height="7" rx="2"/>
-              <rect x="14" y="25" width="9" height="7" rx="2"/>
-              <rect x="24" y="25" width="9" height="7" rx="2"/>
-              <path d="M18 11v7"/>
-              <path d="M7 25v-7h22v7"/>
-            </svg>
-            <span class="svc-label">Organizations</span>
-          </a>
-
-          <a href="domain_six/aws-secrets-manager-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
-            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="8" y="16" width="20" height="16" rx="2"/>
-              <path d="M12 16v-4a6 6 0 0 1 12 0v4"/>
-              <circle cx="18" cy="24" r="2.5" fill="currentColor" stroke="none"/>
-              <path d="M18 26.5v3"/>
-            </svg>
-            <span class="svc-label">Secrets Manager</span>
-          </a>
-
-          <a href="domain_six/aws-trusted-advisor-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
-            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="18" cy="10" r="5"/>
-              <path d="M10 28c0-4.4 3.6-8 8-8s8 3.6 8 8"/>
-              <path d="M18 22v6"/>
-              <path d="M14 26h8"/>
-              <circle cx="18" cy="10" r="2" fill="currentColor" stroke="none"/>
-            </svg>
-            <span class="svc-label">Trusted Advisor</span>
-          </a>
-
-          <a href="domain_six/aws-waf-dop-c02.html" class="svc-btn" onclick="event.stopPropagation()">
-            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M18 4L6 9v10c0 7 5.4 13.5 12 15 6.6-1.5 12-8 12-15V9L18 4z"/>
-              <path d="M13 16l3 3 7-7"/>
-              <path d="M10 22h16"/>
-            </svg>
-            <span class="svc-label">WAF</span>
-          </a>
-
-        </div>
-      </div>
-    </div>
-
-  </div>
-
-  <div class="footer">DOP-C02 &middot; AWS Certified DevOps Engineer — Professional</div>
-</main>
-
-<script>
-function toggleDomain(card) {
-  var body = card.querySelector('.domain-body');
-  if (!body) return;
-  var isOpen = card.classList.contains('open');
-  if (isOpen) {
-    body.style.maxHeight = body.scrollHeight + 'px';
-    body.offsetHeight; // force reflow so transition fires
-    body.style.maxHeight = '0';
-    card.classList.remove('open');
-  } else {
-    body.style.maxHeight = body.scrollHeight + 'px';
-    card.classList.add('open');
-    body.addEventListener('transitionend', function handler() {
-      body.style.maxHeight = 'none';
-      body.removeEventListener('transitionend', handler);
-    });
-  }
-}
-</script>
+  <script>
+    function toggleDomain(card) {
+      var body = card.querySelector('.domain-body');
+      if (!body) return;
+      var isOpen = card.classList.contains('open');
+      if (isOpen) {
+        body.style.maxHeight = body.scrollHeight + 'px';
+        body.offsetHeight; // force reflow so transition fires
+        body.style.maxHeight = '0';
+        card.classList.remove('open');
+      } else {
+        body.style.maxHeight = body.scrollHeight + 'px';
+        card.classList.add('open');
+        body.addEventListener('transitionend', function handler() {
+          body.style.maxHeight = 'none';
+          body.removeEventListener('transitionend', handler);
+        });
+      }
+    }
+  </script>
 </body>
+
 </html>

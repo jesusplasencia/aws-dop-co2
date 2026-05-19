@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS Glue — DOP-C02 Study Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Syne+Mono&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:       #0d1f0f;
+    --bg2:      #111f13;
+    --surface:  #162018;
+    --surface2: #1c2b1e;
+    --border:   #243827;
+    --ink:      #d4e8d0;
+    --muted:    #5a7a5c;
+    --accent:   #4ade80;
+    --accent2:  #86efac;
+    --amber:    #fbbf24;
+    --red:      #f87171;
+    --blue:     #60a5fa;
+    --rule:     #1e3022;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Lora', serif;
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  /* SCANLINE TEXTURE */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.07) 2px,
+      rgba(0,0,0,0.07) 4px
+    );
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* PAGE LOAD */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  main > * { animation: fadeIn 0.45s ease both; }
+  main > *:nth-child(1)  { animation-delay: 0.04s; }
+  main > *:nth-child(2)  { animation-delay: 0.09s; }
+  main > *:nth-child(3)  { animation-delay: 0.14s; }
+  main > *:nth-child(4)  { animation-delay: 0.19s; }
+  main > *:nth-child(5)  { animation-delay: 0.24s; }
+  main > *:nth-child(6)  { animation-delay: 0.29s; }
+  main > *:nth-child(7)  { animation-delay: 0.34s; }
+  main > *:nth-child(8)  { animation-delay: 0.39s; }
+  main > *:nth-child(9)  { animation-delay: 0.44s; }
+  main > *:nth-child(10) { animation-delay: 0.49s; }
+
+  /* HEADER */
+  header {
+    padding: 40px 48px 32px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+  }
+  header::after {
+    content: 'ETL';
+    position: absolute;
+    right: 30px; top: -10px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 140px;
+    color: rgba(74,222,128,0.04);
+    letter-spacing: -6px;
+    pointer-events: none;
+  }
+  .badge {
+    font-family: 'Syne Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    color: var(--accent);
+    border: 1px solid rgba(74,222,128,0.25);
+    padding: 3px 10px;
+    border-radius: 2px;
+    display: inline-block;
+    margin-bottom: 14px;
+    text-transform: uppercase;
+  }
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 44px;
+    color: #fff;
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+  h1 span { color: var(--accent); }
+  .tagline {
+    font-family: 'Syne Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 10px;
+    letter-spacing: 0.04em;
+  }
+
+  /* MAIN */
+  main {
+    max-width: 1020px;
+    margin: 0 auto;
+    padding: 32px 48px 64px;
+    display: grid;
+    gap: 20px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* CARD */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .card:hover { border-color: rgba(74,222,128,0.2); }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+  .card-icon {
+    width: 26px; height: 26px;
+    border-radius: 3px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; flex-shrink: 0;
+  }
+  .ic-g  { background: rgba(74,222,128,0.12); }
+  .ic-a  { background: rgba(251,191,36,0.12); }
+  .ic-b  { background: rgba(96,165,250,0.12); }
+  .ic-r  { background: rgba(248,113,113,0.12); }
+  .ic-t  { background: rgba(52,211,153,0.12); }
+
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent2);
+  }
+  .card-body { padding: 20px; }
+
+  /* DEFINITION */
+  .def {
+    border-left: 3px solid var(--accent);
+    padding: 12px 16px;
+    background: rgba(74,222,128,0.05);
+    border-radius: 0 3px 3px 0;
+    font-size: 14px;
+    margin-bottom: 16px;
+    color: var(--ink);
+    font-style: italic;
+  }
+  .def strong { font-style: normal; color: var(--accent); }
+
+  /* BULLETS */
+  ul.pts { list-style: none; display: grid; gap: 8px; }
+  ul.pts li {
+    display: flex; align-items: flex-start; gap: 10px;
+    font-size: 13.5px; color: #b2cbb0;
+  }
+  ul.pts li::before {
+    content: '›';
+    color: var(--accent);
+    font-size: 16px;
+    line-height: 1.3;
+    flex-shrink: 0;
+  }
+  ul.pts li strong { color: var(--ink); font-style: normal; }
+
+  /* TABLE */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead tr { background: var(--surface2); }
+  th {
+    text-align: left;
+    padding: 9px 16px;
+    font-family: 'Syne Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--rule);
+    color: #b2cbb0;
+    vertical-align: top;
+  }
+  tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: rgba(255,255,255,0.02); }
+  td.mono { font-family: 'Syne Mono', monospace; font-size: 11.5px; color: var(--blue); }
+  td.yes  { color: var(--accent); font-weight: 600; font-family: 'Syne', sans-serif; }
+  td.no   { color: var(--red);    font-weight: 600; font-family: 'Syne', sans-serif; }
+  td.note { color: var(--amber);  font-style: italic; }
+
+  /* TWO-COL */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 680px) { .two-col { grid-template-columns: 1fr; } }
+
+  /* PILL */
+  .pill {
+    display: inline-block;
+    font-family: 'Syne Mono', monospace;
+    font-size: 11px;
+    padding: 2px 9px;
+    border-radius: 2px;
+    margin: 2px 3px 2px 0;
+  }
+  .p-green { background: rgba(74,222,128,0.10); color: var(--accent);  border: 1px solid rgba(74,222,128,0.2); }
+  .p-blue  { background: rgba(96,165,250,0.10); color: var(--blue);   border: 1px solid rgba(96,165,250,0.2); }
+  .p-amber { background: rgba(251,191,36,0.10); color: var(--amber);  border: 1px solid rgba(251,191,36,0.2); }
+
+  /* WARN / NOTE */
+  .warn {
+    background: rgba(251,191,36,0.07);
+    border: 1px solid rgba(251,191,36,0.2);
+    border-radius: 3px;
+    padding: 11px 15px;
+    font-size: 13px;
+    color: #e8c97a;
+    margin-top: 14px;
+  }
+  .warn strong { color: var(--amber); }
+
+  .info {
+    background: rgba(96,165,250,0.06);
+    border: 1px solid rgba(96,165,250,0.18);
+    border-radius: 3px;
+    padding: 11px 15px;
+    font-size: 13px;
+    color: #93c5fd;
+    margin-top: 12px;
+  }
+  .info strong { color: var(--blue); }
+
+  /* EXAM BOX */
+  .exam-box {
+    background: rgba(74,222,128,0.04);
+    border: 1.5px solid rgba(74,222,128,0.2);
+    border-radius: 3px;
+    padding: 20px 22px;
+  }
+  .exam-label {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 11px;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    margin-bottom: 14px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .exam-box ul.pts li::before { color: var(--accent); }
+  .exam-box ul.pts li { color: #c8e8c4; }
+
+  /* PIPELINE / FLOW */
+  .flow {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0;
+    padding: 6px 0;
+  }
+  .flow-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 7px 13px;
+    font-family: 'Syne Mono', monospace;
+    font-size: 11.5px;
+    color: var(--ink);
+    text-align: center;
+    line-height: 1.3;
+  }
+  .flow-box small { display: block; color: var(--muted); font-size: 10px; }
+  .flow-box.hi { background: rgba(74,222,128,0.1); border-color: rgba(74,222,128,0.25); color: var(--accent); }
+  .flow-box.hi2 { background: rgba(251,191,36,0.08); border-color: rgba(251,191,36,0.2); color: var(--amber); }
+  .arrow { color: var(--accent); padding: 0 7px; font-size: 17px; line-height: 1; flex-shrink: 0; }
+
+  code {
+    font-family: 'Syne Mono', monospace;
+    font-size: 12px;
+    background: rgba(255,255,255,0.06);
+    padding: 1px 6px;
+    border-radius: 2px;
+    color: var(--blue);
+  }
+
+  .section-lbl {
+    font-family: 'Syne Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 10px;
+  }
+
+  .limit-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 0; border-bottom: 1px solid var(--rule);
+    font-size: 13px; color: #b2cbb0;
+  }
+  .limit-row:last-child { border-bottom: none; }
+  .limit-val { font-family: 'Syne Mono', monospace; color: var(--accent); font-weight: 500; }
+
+  hr.div { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="../index.html" style="position:absolute;top:18px;right:20px;font-family:'Syne Mono',monospace;font-size:11px;color:var(--accent);border:1px solid rgba(74,222,128,0.25);padding:5px 13px;border-radius:2px;text-decoration:none;letter-spacing:0.1em;z-index:2;transition:background 0.2s;" onmouseover="this.style.background='rgba(74,222,128,0.08)'" onmouseout="this.style.background='transparent'">← Home</a>
+  <div class="badge">DOP-C02 · AWS DevOps Professional</div>
+  <h1>AWS <span>Glue</span></h1>
+  <p class="tagline">Serverless ETL · Data Catalog · Job Orchestration · Parquet Conversion</p>
+</header>
+
+<main>
+
+  <!-- WHAT IS IT -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon ic-g">🔗</div>
+      <span class="card-title">What is AWS Glue?</span>
+    </div>
+    <div class="card-body">
+      <div class="def">
+        A fully <strong>serverless, managed ETL</strong> (Extract, Transform, Load) service that prepares and transforms data for analytics. No infrastructure to provision, patch, or manage.
+      </div>
+      <ul class="pts">
+        <li><strong>Core job:</strong> move data from sources → transform/enrich it → load into a target (Redshift, S3, RDS, etc.)</li>
+        <li><strong>Scripted in Python or Scala</strong> — Glue auto-generates ETL scripts which you can customize</li>
+        <li><strong>Runs on Apache Spark</strong> under the hood (distributed processing, no cluster management)</li>
+        <li><strong>Glue Data Catalog</strong> — central metadata repository; acts as a Hive-compatible metastore for Athena, Redshift Spectrum, and EMR</li>
+        <li>DOP-C02 weight: <strong>moderate</strong> — tested mainly through data pipeline architecture scenarios</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- CORE COMPONENTS -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon ic-g">🧩</div>
+      <span class="card-title">Core Components</span>
+    </div>
+    <div class="card-body" style="padding:0">
+      <table>
+        <thead><tr><th>Component</th><th>What It Is</th><th>Key Detail</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>Glue Data Catalog</strong></td>
+            <td>Central metadata store (databases, tables, schemas, partitions)</td>
+            <td>Shared by Athena, Redshift Spectrum, EMR — the "glue" between services</td>
+          </tr>
+          <tr>
+            <td><strong>Glue Crawlers</strong></td>
+            <td>Scan data sources, infer schema, and populate the Data Catalog automatically</td>
+            <td>Runs on-demand or on schedule; supports S3, RDS, DynamoDB, JDBC</td>
+          </tr>
+          <tr>
+            <td><strong>Glue ETL Jobs</strong></td>
+            <td>Spark-based scripts that extract, transform, and load data</td>
+            <td>Python Shell or Spark; auto-generated or custom scripts</td>
+          </tr>
+          <tr>
+            <td><strong>Glue Triggers</strong></td>
+            <td>Start ETL jobs on a schedule, on-demand, or based on job events</td>
+            <td>Schedule (cron), On-demand, or Job-completion event chains</td>
+          </tr>
+          <tr>
+            <td><strong>Glue Workflows</strong></td>
+            <td>Orchestrate multiple crawlers and ETL jobs as a DAG pipeline</td>
+            <td>Visual editor; replaces manual chaining of Lambda triggers</td>
+          </tr>
+          <tr>
+            <td><strong>Glue DataBrew</strong></td>
+            <td>Visual, no-code data preparation tool</td>
+            <td>For analysts; not for automated pipelines</td>
+          </tr>
+          <tr>
+            <td><strong>Glue Elastic Views</strong></td>
+            <td>Build materialized views that combine data across data stores</td>
+            <td>SQL-based; auto-updated when source changes</td>
+          </tr>
+          <tr>
+            <td><strong>Glue Studio</strong></td>
+            <td>Visual drag-and-drop interface to build ETL jobs</td>
+            <td>Generates Spark code; good for non-developers</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- DATA SOURCES & TARGETS -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon ic-b">🔌</div>
+      <span class="card-title">Supported Sources & Targets</span>
+    </div>
+    <div class="card-body">
+      <div class="two-col">
+        <div>
+          <div class="section-lbl">Common Sources</div>
+          <div>
+            <span class="pill p-green">Amazon S3</span>
+            <span class="pill p-green">Amazon RDS</span>
+            <span class="pill p-green">Amazon Aurora</span>
+            <span class="pill p-green">Amazon Redshift</span>
+            <span class="pill p-green">Amazon DynamoDB</span>
+            <span class="pill p-green">Amazon Kinesis</span>
+            <span class="pill p-green">Apache Kafka / MSK</span>
+            <span class="pill p-green">JDBC (on-prem DBs)</span>
+          </div>
+        </div>
+        <div>
+          <div class="section-lbl">Common Targets</div>
+          <div>
+            <span class="pill p-blue">Amazon S3 (Parquet/ORC)</span>
+            <span class="pill p-blue">Amazon Redshift</span>
+            <span class="pill p-blue">Amazon RDS / Aurora</span>
+            <span class="pill p-blue">Amazon DynamoDB</span>
+            <span class="pill p-blue">Amazon OpenSearch</span>
+            <span class="pill p-blue">JDBC targets</span>
+          </div>
+        </div>
+      </div>
+      <div class="warn">
+        <strong>Exam pattern:</strong> Glue is the <strong>recommended ETL layer</strong> when moving data into Redshift or converting raw S3 files to Parquet for Athena. It sits between S3 and your analytics service.
+      </div>
+    </div>
+  </div>
+
+  <!-- PARQUET CONVERSION PATTERN -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon ic-a">📦</div>
+      <span class="card-title">Key Pattern — CSV → Parquet Conversion</span>
+    </div>
+    <div class="card-body">
+      <div class="section-lbl" style="margin-bottom:14px">Most-tested Glue architecture in DOP-C02</div>
+      <div class="flow">
+        <div class="flow-box">S3 PUT<br><small>raw CSV / JSON</small></div>
+        <div class="arrow">→</div>
+        <div class="flow-box hi2">S3 Event / EventBridge<br><small>trigger</small></div>
+        <div class="arrow">→</div>
+        <div class="flow-box hi">Glue ETL Job<br><small>CSV → Parquet</small></div>
+        <div class="arrow">→</div>
+        <div class="flow-box">Output S3 Bucket<br><small>Parquet files</small></div>
+        <div class="arrow">→</div>
+        <div class="flow-box">Amazon Athena<br><small>analyze</small></div>
+      </div>
+      <hr class="div">
+      <ul class="pts">
+        <li><strong>Why Parquet?</strong> — columnar format; dramatically reduces Athena query cost (charged per TB scanned) and speeds up reads</li>
+        <li><strong>Trigger options:</strong> S3 Event Notification → Lambda → start Glue Job, <em>or</em> EventBridge rule → Glue Job directly</li>
+        <li><strong>Glue Crawler</strong> runs after conversion to update the Data Catalog with the new Parquet schema and partitions</li>
+        <li><strong>Partitioning</strong> — Glue can write output partitioned by date/region (e.g., <code>year=2024/month=01/</code>) to further cut Athena scan costs</li>
+      </ul>
+      <div class="info">
+        <strong>Parquet vs ORC:</strong> Both are columnar. Parquet is preferred for Athena/Spark; ORC is preferred for Hive/EMR. Either reduces cost vs CSV/JSON.
+      </div>
+    </div>
+  </div>
+
+  <!-- GLUE DATA CATALOG -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon ic-g">📚</div>
+      <span class="card-title">Glue Data Catalog — Central Metadata Store</span>
+    </div>
+    <div class="card-body">
+      <div class="def">
+        The <strong>Glue Data Catalog</strong> is a persistent metadata repository containing table definitions, schema, partition info, and connection details. It is the <strong>single source of truth</strong> for data discovery across your AWS analytics stack.
+      </div>
+      <div class="two-col">
+        <div>
+          <div class="section-lbl">Services that use it</div>
+          <ul class="pts">
+            <li><strong>Amazon Athena</strong> — queries tables defined in the catalog against S3</li>
+            <li><strong>Amazon Redshift Spectrum</strong> — queries external S3 tables via catalog</li>
+            <li><strong>Amazon EMR</strong> — uses catalog as Hive metastore</li>
+            <li><strong>AWS Lake Formation</strong> — governs access to catalog resources</li>
+          </ul>
+        </div>
+        <div>
+          <div class="section-lbl">Glue Crawler details</div>
+          <ul class="pts">
+            <li>Automatically infers <strong>schema and data types</strong> from raw files</li>
+            <li>Detects <strong>partitions</strong> from S3 folder structure</li>
+            <li>Handles <strong>schema evolution</strong> — adds new columns on next run</li>
+            <li>Supports <strong>incremental crawling</strong> to skip unchanged S3 objects</li>
+          </ul>
+        </div>
+      </div>
+      <div class="warn">
+        <strong>Exam note:</strong> When a scenario says "make S3 data queryable by Athena" → the answer involves <strong>Glue Crawler + Glue Data Catalog</strong>, not manual table creation.
+      </div>
+    </div>
+  </div>
+
+  <!-- JOB TYPES & TRIGGERS -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon ic-a">⚙️</div>
+      <span class="card-title">ETL Job Types & Trigger Modes</span>
+    </div>
+    <div class="card-body">
+      <div class="section-lbl">Job Types</div>
+      <table style="margin-bottom:16px">
+        <thead><tr><th>Type</th><th>Runtime</th><th>Use Case</th><th>Max Duration</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>Spark ETL</strong></td>
+            <td class="mono">Apache Spark</td>
+            <td>Large-scale distributed data transformation</td>
+            <td class="mono">48 hours</td>
+          </tr>
+          <tr>
+            <td><strong>Spark Streaming</strong></td>
+            <td class="mono">Spark Structured Streaming</td>
+            <td>Near-real-time ETL from Kinesis / Kafka</td>
+            <td class="note">Continuous</td>
+          </tr>
+          <tr>
+            <td><strong>Python Shell</strong></td>
+            <td class="mono">Python 3</td>
+            <td>Small/simple jobs; lightweight transforms; no Spark overhead</td>
+            <td class="mono">60 minutes</td>
+          </tr>
+          <tr>
+            <td><strong>Ray</strong></td>
+            <td class="mono">Ray framework</td>
+            <td>Python-centric distributed compute (ML workloads)</td>
+            <td class="mono">48 hours</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="section-lbl">Trigger Modes</div>
+      <ul class="pts">
+        <li><strong>Scheduled</strong> — cron expression (e.g., every 6 hours)</li>
+        <li><strong>On-Demand</strong> — manually started via console, CLI, or API</li>
+        <li><strong>Job Event Trigger</strong> — start Job B when Job A succeeds/fails; enables job chaining without Lambda</li>
+        <li><strong>EventBridge</strong> — trigger a Glue job from any AWS event (S3 PUT, DynamoDB stream, etc.)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- GLUE vs ALTERNATIVES -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon ic-b">⚖️</div>
+      <span class="card-title">AWS Glue vs Related Services</span>
+    </div>
+    <div class="card-body" style="padding:0">
+      <table>
+        <thead><tr><th>Service</th><th>Purpose</th><th>Choose When</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>AWS Glue</strong></td>
+            <td>Serverless ETL, schema discovery, data catalog</td>
+            <td>Batch/streaming ETL without managing Spark clusters</td>
+          </tr>
+          <tr>
+            <td><strong>Amazon EMR</strong></td>
+            <td>Managed Hadoop/Spark cluster for big data</td>
+            <td>Full control over Spark config; complex iterative ML; custom Hadoop ecosystem</td>
+          </tr>
+          <tr>
+            <td><strong>AWS Data Pipeline</strong></td>
+            <td>Legacy orchestration of data movement between AWS services</td>
+            <td>Legacy; Glue Workflows is the modern replacement</td>
+          </tr>
+          <tr>
+            <td><strong>AWS Step Functions</strong></td>
+            <td>General-purpose serverless workflow orchestration</td>
+            <td>Orchestrate Glue jobs <em>alongside</em> Lambda, ECS, etc. in complex pipelines</td>
+          </tr>
+          <tr>
+            <td><strong>Amazon Kinesis Data Firehose</strong></td>
+            <td>Streaming data delivery to S3/Redshift/OpenSearch</td>
+            <td>Simple stream → storage delivery; Glue handles transformation within Firehose too</td>
+          </tr>
+          <tr>
+            <td><strong>AWS Lake Formation</strong></td>
+            <td>Fine-grained data lake access control on top of Glue Catalog</td>
+            <td>Governs who can query which tables/columns in the catalog</td>
+          </tr>
+        </tbody>
+      </table>
+      <div style="padding:14px 16px">
+        <div class="info">
+          <strong>Glue + Firehose:</strong> Kinesis Firehose can invoke a <strong>Glue schema registry</strong> to validate and convert streaming data to Parquet/ORC before landing in S3 — no separate ETL job needed for format conversion.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GLUE STREAMING -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon ic-t">🌊</div>
+      <span class="card-title">Glue Streaming ETL</span>
+    </div>
+    <div class="card-body">
+      <div class="def">
+        Glue Streaming ETL consumes data from <strong>Kinesis Data Streams</strong> or <strong>Apache Kafka (MSK)</strong> and processes it in micro-batches — enabling near-real-time pipeline processing without a persistent cluster.
+      </div>
+      <div class="flow" style="margin-bottom:14px">
+        <div class="flow-box hi2">Kinesis Data Streams<br><small>or MSK / Kafka</small></div>
+        <div class="arrow">→</div>
+        <div class="flow-box hi">Glue Streaming Job<br><small>micro-batch Spark</small></div>
+        <div class="arrow">→</div>
+        <div class="flow-box">S3 / Redshift<br><small>enriched output</small></div>
+      </div>
+      <ul class="pts">
+        <li>Runs <strong>continuously</strong> — the job does not terminate; processes new data as it arrives</li>
+        <li>Supports <strong>checkpointing</strong> to resume from last position on job restart</li>
+        <li>Can join streaming data against <strong>static reference tables</strong> in the Data Catalog</li>
+        <li>Billed per DPU-second while the job is running (continuous cost)</li>
+      </ul>
+      <div class="warn">
+        <strong>Exam pattern:</strong> "Near-real-time transformation of Kinesis stream data before loading to S3 or Redshift" → <strong>Glue Streaming ETL</strong> (not Lambda; Lambda has 15-min limit and no Spark scale).
+      </div>
+    </div>
+  </div>
+
+  <!-- LIMITS / PRICING -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon ic-r">📏</div>
+      <span class="card-title">Pricing Model & Key Limits</span>
+    </div>
+    <div class="card-body">
+      <div class="section-lbl" style="margin-bottom:10px">Pricing</div>
+      <ul class="pts" style="margin-bottom:16px">
+        <li><strong>DPU (Data Processing Unit)</strong> — Glue's compute unit; 1 DPU = 4 vCPU + 16 GB RAM</li>
+        <li>Billed per <strong>DPU-hour</strong> (rounded to the nearest second); minimum 1 minute</li>
+        <li>Crawlers billed per <strong>DPU-hour</strong> separately from ETL jobs</li>
+        <li>Glue Data Catalog: first 1M objects free; then per 100K objects/month</li>
+        <li><strong>No charge</strong> when jobs are idle (serverless — only pay when running)</li>
+      </ul>
+      <div class="section-lbl" style="margin-bottom:10px">Key Limits</div>
+      <div class="limit-row"><span>Max concurrent Glue ETL jobs per account</span><span class="limit-val">200 (default, adjustable)</span></div>
+      <div class="limit-row"><span>Max job timeout (Spark / Ray)</span><span class="limit-val">48 hours</span></div>
+      <div class="limit-row"><span>Max job timeout (Python Shell)</span><span class="limit-val">60 minutes</span></div>
+      <div class="limit-row"><span>Max DPUs per Spark job</span><span class="limit-val">100 (default)</span></div>
+      <div class="limit-row"><span>Data Catalog databases per account</span><span class="limit-val">10,000</span></div>
+      <div class="limit-row"><span>Tables per database in catalog</span><span class="limit-val">200,000</span></div>
+    </div>
+  </div>
+
+  <!-- EXAM TIPS -->
+  <div class="exam-box">
+    <div class="exam-label">⭐ Exam Focus — DOP-C02 Scenario Patterns</div>
+    <ul class="pts">
+      <li><strong>"Convert CSV files in S3 to Parquet for cost-efficient Athena queries"</strong> → Glue ETL Job (CSV → Parquet) + Glue Crawler to update catalog</li>
+      <li><strong>"Make S3 data discoverable/queryable without writing DDL manually"</strong> → Run a <strong>Glue Crawler</strong>; it populates the Data Catalog automatically</li>
+      <li><strong>"ETL pipeline should start automatically when new data lands in S3"</strong> → S3 Event Notification → EventBridge → trigger Glue Job (or Lambda → <code>StartJobRun</code> API)</li>
+      <li><strong>"Chain multiple ETL steps — crawler, then transform, then load"</strong> → Use <strong>Glue Workflow</strong> with job event triggers (no Lambda needed)</li>
+      <li><strong>"Transform Kinesis stream data before storing in Redshift"</strong> → <strong>Glue Streaming ETL</strong> job (continuous Spark Structured Streaming)</li>
+      <li><strong>"Glue vs EMR"</strong> → Glue for serverless simplicity; EMR for full Spark/Hadoop control, custom libraries, iterative ML</li>
+      <li><strong>"Glue ETL script language"</strong> → Python (PySpark) or Scala — auto-generated but customizable</li>
+      <li><strong>Glue Data Catalog = shared metastore</strong> → Athena, Redshift Spectrum, and EMR all read from it; one schema update propagates everywhere</li>
+      <li><strong>"Schema validation on Kinesis stream"</strong> → <strong>Glue Schema Registry</strong> — define and enforce Avro/JSON schemas on producers/consumers</li>
+    </ul>
+  </div>
+
+</main>
+</body>
+</html>

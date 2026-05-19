@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS Tag Editor — DOP-C02 Study Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --surface2: #1a2235;
+    --border: #1f2d45;
+    --accent: #f59e0b;
+    --accent2: #3b82f6;
+    --accent3: #10b981;
+    --danger: #ef4444;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --tag-bg: #1e3a5f;
+    --tag-text: #93c5fd;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 32px 40px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -80px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(245,158,11,0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .badge {
+    display: inline-block;
+    background: rgba(245,158,11,0.12);
+    border: 1px solid rgba(245,158,11,0.3);
+    color: var(--accent);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    padding: 3px 10px;
+    border-radius: 3px;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+  }
+  h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.02em;
+  }
+  h1 span { color: var(--accent); }
+  .subtitle {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 4px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  /* LAYOUT */
+  main {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 32px 40px 60px;
+    display: grid;
+    gap: 20px;
+  }
+
+  /* CARDS */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+  .card-icon {
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .icon-amber { background: rgba(245,158,11,0.15); }
+  .icon-blue  { background: rgba(59,130,246,0.15); }
+  .icon-green { background: rgba(16,185,129,0.15); }
+  .icon-red   { background: rgba(239,68,68,0.15); }
+  .icon-purple{ background: rgba(139,92,246,0.15); }
+
+  .card-title {
+    font-weight: 600;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #fff;
+  }
+  .card-body { padding: 20px; }
+
+  /* DEFINITION BOX */
+  .definition {
+    background: var(--surface2);
+    border-left: 3px solid var(--accent);
+    padding: 14px 18px;
+    border-radius: 0 6px 6px 0;
+    font-size: 14px;
+    color: var(--text);
+    margin-bottom: 16px;
+  }
+
+  /* BULLETS */
+  ul.points {
+    list-style: none;
+    display: grid;
+    gap: 8px;
+  }
+  ul.points li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 13.5px;
+    color: #cbd5e1;
+  }
+  ul.points li::before {
+    content: '▸';
+    color: var(--accent);
+    font-size: 11px;
+    margin-top: 3px;
+    flex-shrink: 0;
+  }
+  ul.points li strong { color: #fff; }
+
+  /* TWO-COLUMN */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  @media (max-width: 640px) { .two-col { grid-template-columns: 1fr; } }
+
+  /* TABLE */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  thead tr {
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+  th {
+    text-align: left;
+    padding: 10px 14px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    color: #cbd5e1;
+    vertical-align: top;
+  }
+  tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: rgba(255,255,255,0.02); }
+  td.mono { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--tag-text); }
+  td.yes { color: var(--accent3); font-weight: 600; }
+  td.no  { color: var(--danger);  font-weight: 600; }
+
+  /* PILL TAGS */
+  .tag-pill {
+    display: inline-block;
+    background: var(--tag-bg);
+    color: var(--tag-text);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin: 2px 3px 2px 0;
+    border: 1px solid rgba(59,130,246,0.2);
+  }
+
+  /* EXAM CALLOUT */
+  .exam-box {
+    background: rgba(245,158,11,0.05);
+    border: 1px solid rgba(245,158,11,0.25);
+    border-radius: 8px;
+    padding: 16px 20px;
+  }
+  .exam-box .exam-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+  .exam-box ul.points li::before { color: var(--accent); }
+
+  /* WARN BOX */
+  .warn-box {
+    background: rgba(239,68,68,0.05);
+    border: 1px solid rgba(239,68,68,0.2);
+    border-radius: 6px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #fca5a5;
+    margin-top: 14px;
+  }
+  .warn-box strong { color: #ef4444; }
+
+  /* STEP FLOW */
+  .steps {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .step {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .step-num {
+    background: var(--accent);
+    color: #000;
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 700;
+    font-size: 12px;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .step-text { font-size: 13.5px; color: #cbd5e1; padding-top: 2px; }
+  .step-text strong { color: #fff; }
+
+  /* INLINE CODE */
+  code {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    background: rgba(255,255,255,0.07);
+    padding: 1px 6px;
+    border-radius: 3px;
+    color: #a5f3fc;
+  }
+
+  /* LIMIT ROW */
+  .limit-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .limit-row:last-child { border-bottom: none; }
+  .limit-val {
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* SECTION LABEL */
+  .section-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 10px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="../index.html" style="position:absolute;top:18px;right:20px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--accent);border:1px solid rgba(245,158,11,0.3);padding:5px 13px;border-radius:3px;text-decoration:none;letter-spacing:0.1em;z-index:2;transition:background 0.2s;" onmouseover="this.style.background='rgba(245,158,11,0.08)'" onmouseout="this.style.background='transparent'">← Home</a>
+  <div class="badge">DOP-C02 · AWS DevOps Professional</div>
+  <h1>AWS <span>Tag Editor</span></h1>
+  <p class="subtitle">Resource Group Tagging · Bulk Management · Cross-Region</p>
+</header>
+
+<main>
+
+  <!-- WHAT IS IT -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon icon-amber">🏷</div>
+      <span class="card-title">What is AWS Tag Editor?</span>
+    </div>
+    <div class="card-body">
+      <div class="definition">
+        A centralized AWS console tool that allows you to <strong>search, add, edit, and delete tags</strong> across multiple AWS resources and regions simultaneously — without accessing each service individually.
+      </div>
+      <ul class="points">
+        <li>Accessible via <strong>AWS Resource Groups → Tag Editor</strong> in the console</li>
+        <li>Operates across <strong>all AWS Regions</strong> in a single search query</li>
+        <li>Supports tagging of <strong>tagged and untagged</strong> resources</li>
+        <li>No extra cost — Tag Editor is a <strong>free feature</strong></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- HOW TO USE -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon icon-blue">⚙️</div>
+      <span class="card-title">Workflow — How It Works</span>
+    </div>
+    <div class="card-body">
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-text"><strong>Select Regions</strong> — choose one or multiple AWS regions to scope the search</div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-text"><strong>Select Resource Types</strong> — filter by service type (e.g., <code>AWS::EC2::Instance</code>, <code>AWS::S3::Bucket</code>) or leave as "All supported resource types"</div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-text"><strong>Filter by Tags (optional)</strong> — enter a key and/or value to narrow results; searches for both tagged and untagged resources</div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-text"><strong>Search Resources</strong> — results list all matching resources with their ARN and current tags</div>
+        </div>
+        <div class="step">
+          <div class="step-num">5</div>
+          <div class="step-text"><strong>Select resources</strong> and apply bulk <strong>Add / Edit / Remove</strong> tag operations</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CAPABILITIES TABLE -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon icon-green">✅</div>
+      <span class="card-title">Tag Operations</span>
+    </div>
+    <div class="card-body" style="padding:0">
+      <table>
+        <thead>
+          <tr>
+            <th>Operation</th>
+            <th>Description</th>
+            <th>Bulk?</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Add Tag</strong></td>
+            <td>Add a new key-value pair to selected resources</td>
+            <td class="yes">Yes</td>
+          </tr>
+          <tr>
+            <td><strong>Update Tag</strong></td>
+            <td>Overwrite the value of an existing tag key</td>
+            <td class="yes">Yes</td>
+          </tr>
+          <tr>
+            <td><strong>Delete Tag</strong></td>
+            <td>Remove a tag key (and its value) from selected resources</td>
+            <td class="yes">Yes</td>
+          </tr>
+          <tr>
+            <td><strong>Search Untagged</strong></td>
+            <td>Find resources that have no tags at all</td>
+            <td class="yes">Yes</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- LIMITS -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon icon-red">📏</div>
+      <span class="card-title">Tag Limits & Constraints</span>
+    </div>
+    <div class="card-body">
+      <div class="limit-row"><span>Max tags per resource</span><span class="limit-val">50</span></div>
+      <div class="limit-row"><span>Max key length</span><span class="limit-val">128 Unicode characters</span></div>
+      <div class="limit-row"><span>Max value length</span><span class="limit-val">256 Unicode characters</span></div>
+      <div class="limit-row"><span>Key prefix restriction</span><span class="limit-val"><code>aws:</code> prefix reserved by AWS</span></div>
+      <div class="limit-row"><span>Case sensitivity</span><span class="limit-val">Keys and values ARE case-sensitive</span></div>
+      <div class="limit-row"><span>Max results per search</span><span class="limit-val">100,000 resources</span></div>
+      <div class="warn-box">
+        <strong>⚠ Exam note:</strong> Tags beginning with <code>aws:</code> are created by AWS services and <strong>cannot be edited or deleted</strong> via Tag Editor. They do not count toward the 50-tag limit.
+      </div>
+    </div>
+  </div>
+
+  <!-- SUPPORTED RESOURCES -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon icon-blue">🗂</div>
+      <span class="card-title">Supported Resource Types (Common Exam Examples)</span>
+    </div>
+    <div class="card-body">
+      <div class="section-label">Commonly tested resource types</div>
+      <div>
+        <span class="tag-pill">AWS::EC2::Instance</span>
+        <span class="tag-pill">AWS::EC2::Volume</span>
+        <span class="tag-pill">AWS::EC2::VPC</span>
+        <span class="tag-pill">AWS::S3::Bucket</span>
+        <span class="tag-pill">AWS::RDS::DBInstance</span>
+        <span class="tag-pill">AWS::Lambda::Function</span>
+        <span class="tag-pill">AWS::CloudFormation::Stack</span>
+        <span class="tag-pill">AWS::ECS::Cluster</span>
+        <span class="tag-pill">AWS::IAM::Role</span>
+        <span class="tag-pill">AWS::SNS::Topic</span>
+        <span class="tag-pill">AWS::SQS::Queue</span>
+        <span class="tag-pill">AWS::DynamoDB::Table</span>
+      </div>
+      <div class="warn-box" style="margin-top:14px">
+        <strong>Not all resources support tagging.</strong> Some services/resource types are excluded. Tag Editor only lists supported types. IAM resources (users, groups) have limited tag support.
+      </div>
+    </div>
+  </div>
+
+  <!-- TAG EDITOR vs OTHER TOOLS -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon icon-purple">⚖️</div>
+      <span class="card-title">Tag Editor vs Related Services</span>
+    </div>
+    <div class="card-body" style="padding:0">
+      <table>
+        <thead>
+          <tr>
+            <th>Tool / Service</th>
+            <th>Purpose</th>
+            <th>Key Difference</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Tag Editor</strong></td>
+            <td>Bulk search & manage tags across services/regions</td>
+            <td>Console UI, ad-hoc management</td>
+          </tr>
+          <tr>
+            <td><strong>Resource Groups</strong></td>
+            <td>Group resources by tags for operational views</td>
+            <td>Logical grouping, not tag editing</td>
+          </tr>
+          <tr>
+            <td><strong>AWS Config</strong></td>
+            <td>Audit resource configuration compliance (including tags)</td>
+            <td>Detect non-compliance, not bulk edit</td>
+          </tr>
+          <tr>
+            <td><strong>CloudFormation</strong></td>
+            <td>Tag resources at provision time via templates</td>
+            <td>Infrastructure-as-code, not retroactive</td>
+          </tr>
+          <tr>
+            <td><strong>Service Control Policies (SCP)</strong></td>
+            <td>Enforce tagging requirements at org level</td>
+            <td>Preventive control, not an editor</td>
+          </tr>
+          <tr>
+            <td><strong>AWS Organizations Tag Policies</strong></td>
+            <td>Define allowed tag keys/values across org</td>
+            <td>Governance/standardization layer</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- USE CASES -->
+  <div class="two-col">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon icon-green">💡</div>
+        <span class="card-title">Primary Use Cases</span>
+      </div>
+      <div class="card-body">
+        <ul class="points">
+          <li><strong>Cost Allocation</strong> — tag resources by project/team for billing breakdown via Cost Explorer</li>
+          <li><strong>Environment Management</strong> — tag <code>Environment: Prod/Dev/Staging</code> across all resource types</li>
+          <li><strong>Compliance Auditing</strong> — find untagged resources before a compliance review</li>
+          <li><strong>Retroactive Tagging</strong> — apply tags to existing resources that were deployed without them</li>
+          <li><strong>Bulk Remediation</strong> — fix incorrect or inconsistent tag values across hundreds of resources at once</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon icon-red">🚫</div>
+        <span class="card-title">Limitations</span>
+      </div>
+      <div class="card-body">
+        <ul class="points">
+          <li><strong>Not automated</strong> — Tag Editor is a manual console tool; use <code>aws resourcegroupstaggingapi</code> CLI/SDK for automation</li>
+          <li><strong>No enforcement</strong> — cannot prevent untagged deployments (use SCPs or Tag Policies instead)</li>
+          <li><strong>No history / audit log</strong> — changes are not tracked in Tag Editor itself (CloudTrail logs the API calls)</li>
+          <li><strong>Eventual consistency</strong> — newly created resources may take a few minutes to appear in search results</li>
+          <li><strong>Permission-dependent</strong> — requires <code>tag:GetResources</code>, <code>tag:TagResources</code>, <code>tag:UntagResources</code> IAM permissions</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- IAM PERMISSIONS -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon icon-amber">🔐</div>
+      <span class="card-title">Required IAM Permissions</span>
+    </div>
+    <div class="card-body">
+      <table>
+        <thead><tr><th>Action</th><th>IAM Permission</th><th>What It Allows</th></tr></thead>
+        <tbody>
+          <tr><td>Search/Read</td><td class="mono">tag:GetResources</td><td>Find resources by tag filters</td></tr>
+          <tr><td>Add/Update tags</td><td class="mono">tag:TagResources</td><td>Apply tags to selected resources</td></tr>
+          <tr><td>Delete tags</td><td class="mono">tag:UntagResources</td><td>Remove tags from selected resources</td></tr>
+          <tr><td>View tag keys</td><td class="mono">tag:GetTagKeys</td><td>List all tag keys in the account</td></tr>
+          <tr><td>View tag values</td><td class="mono">tag:GetTagValues</td><td>List all values for a given key</td></tr>
+        </tbody>
+      </table>
+      <div class="warn-box">
+        You also need permissions on the <strong>underlying resources</strong> (e.g., <code>ec2:CreateTags</code>, <code>s3:PutBucketTagging</code>). Tag Editor calls the resource-specific API on your behalf.
+      </div>
+    </div>
+  </div>
+
+  <!-- EXAM TIPS -->
+  <div class="exam-box">
+    <div class="exam-label">⭐ Exam Focus — What DOP-C02 Tests</div>
+    <ul class="points">
+      <li><strong>Scenario: "Find all untagged EC2 instances across all regions"</strong> → Answer: Use Tag Editor, select all regions, resource type <code>AWS::EC2::Instance</code>, leave tag filter empty and check "Untagged only"</li>
+      <li><strong>Scenario: "Bulk-update a tag value from Dev to Production for 200 resources"</strong> → Answer: Tag Editor — search by the old tag value, select all, use Edit Tag to update in bulk</li>
+      <li><strong>Enforce tagging at creation</strong> → Tag Editor cannot prevent; use <strong>AWS Organizations Tag Policies</strong> or <strong>SCPs</strong></li>
+      <li><strong>Automate tagging via code</strong> → Use <code>resourcegroupstaggingapi</code> SDK, not Tag Editor (console-only)</li>
+      <li><strong>Audit who changed tags</strong> → <strong>AWS CloudTrail</strong> records <code>TagResources</code> / <code>UntagResources</code> API calls</li>
+      <li><strong>Tag Editor + Resource Groups</strong> — after tagging, create a Resource Group filtered by that tag for operational dashboards (Systems Manager, CloudWatch)</li>
+      <li><strong>Cost visibility</strong> — tags applied via Tag Editor appear in <strong>AWS Cost Explorer</strong> after 24h activation as a cost allocation tag</li>
+    </ul>
+  </div>
+
+</main>
+
+</body>
+</html>

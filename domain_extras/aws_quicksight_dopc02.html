@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS QuickSight — DOP-C02 Study Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:       #f5f2eb;
+    --surface:  #ffffff;
+    --surface2: #faf8f3;
+    --border:   #e2ddd3;
+    --ink:      #1a1612;
+    --muted:    #8a8070;
+    --accent:   #c45c1a;
+    --accent2:  #2563a8;
+    --accent3:  #1a7a4a;
+    --warn:     #b45309;
+    --tag-bg:   #eef4ff;
+    --tag-text: #2563a8;
+    --rule:     #d4cfc5;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    line-height: 1.65;
+  }
+
+  /* PAGE LOAD ANIMATION */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  main > * {
+    animation: fadeUp 0.5s ease both;
+  }
+  main > *:nth-child(1)  { animation-delay: 0.05s; }
+  main > *:nth-child(2)  { animation-delay: 0.10s; }
+  main > *:nth-child(3)  { animation-delay: 0.15s; }
+  main > *:nth-child(4)  { animation-delay: 0.20s; }
+  main > *:nth-child(5)  { animation-delay: 0.25s; }
+  main > *:nth-child(6)  { animation-delay: 0.30s; }
+  main > *:nth-child(7)  { animation-delay: 0.35s; }
+  main > *:nth-child(8)  { animation-delay: 0.40s; }
+  main > *:nth-child(9)  { animation-delay: 0.45s; }
+
+  /* HEADER */
+  header {
+    background: var(--ink);
+    color: #f5f2eb;
+    padding: 40px 48px 32px;
+    position: relative;
+    overflow: hidden;
+  }
+  header::after {
+    content: 'QuickSight';
+    position: absolute;
+    right: -20px; bottom: -30px;
+    font-family: 'DM Serif Display', serif;
+    font-size: 120px;
+    color: rgba(255,255,255,0.04);
+    white-space: nowrap;
+    pointer-events: none;
+    letter-spacing: -4px;
+  }
+  .badge {
+    display: inline-block;
+    border: 1px solid rgba(196,92,26,0.6);
+    color: #e8855a;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    padding: 3px 10px;
+    border-radius: 2px;
+    margin-bottom: 14px;
+    text-transform: uppercase;
+  }
+  h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 42px;
+    font-weight: 400;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+  }
+  h1 em {
+    font-style: italic;
+    color: #e8855a;
+  }
+  .tagline {
+    margin-top: 10px;
+    color: #a89e90;
+    font-size: 13px;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.03em;
+  }
+
+  /* MAIN LAYOUT */
+  main {
+    max-width: 1020px;
+    margin: 0 auto;
+    padding: 36px 48px 64px;
+    display: grid;
+    gap: 22px;
+  }
+
+  /* CARDS */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    transition: box-shadow 0.2s;
+  }
+  .card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 13px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+  .card-icon {
+    width: 26px; height: 26px;
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+  .ic-orange { background: #fff0e8; }
+  .ic-blue   { background: #eef4ff; }
+  .ic-green  { background: #edfaf3; }
+  .ic-red    { background: #fff0f0; }
+  .ic-brown  { background: #f5f0e8; }
+  .ic-teal   { background: #edfaf8; }
+
+  .card-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink);
+  }
+
+  .card-body { padding: 20px; }
+
+  /* DEFINITION */
+  .definition {
+    border-left: 3px solid var(--accent);
+    padding: 12px 16px;
+    background: #fff8f4;
+    border-radius: 0 4px 4px 0;
+    font-size: 14px;
+    margin-bottom: 16px;
+    color: var(--ink);
+  }
+  .definition strong { color: var(--accent); }
+
+  /* BULLETS */
+  ul.pts { list-style: none; display: grid; gap: 8px; }
+  ul.pts li {
+    display: flex; align-items: flex-start; gap: 10px;
+    font-size: 13.5px; color: #2e2a24;
+  }
+  ul.pts li::before {
+    content: '—';
+    color: var(--accent);
+    font-weight: 600;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  ul.pts li strong { color: var(--ink); }
+
+  /* TABLE */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  thead tr { background: var(--surface2); }
+  th {
+    text-align: left;
+    padding: 10px 16px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    font-weight: 500;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+    color: #2e2a24;
+  }
+  tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: var(--surface2); }
+  td.mono { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--accent2); }
+  td.yes  { color: var(--accent3); font-weight: 600; }
+  td.no   { color: #c0392b; font-weight: 600; }
+  td.warn { color: var(--warn); font-weight: 600; }
+
+  /* TWO COL */
+  .two-col {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 22px;
+  }
+  @media (max-width: 680px) { .two-col { grid-template-columns: 1fr; } }
+
+  /* PILL */
+  .pill {
+    display: inline-block;
+    background: var(--tag-bg);
+    color: var(--tag-text);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    padding: 2px 9px;
+    border-radius: 3px;
+    margin: 2px 3px 2px 0;
+    border: 1px solid #c7d9f5;
+  }
+  .pill-orange {
+    background: #fff0e8; color: var(--accent);
+    border-color: #f5c4a0;
+  }
+  .pill-green {
+    background: #edfaf3; color: var(--accent3);
+    border-color: #a7dfc2;
+  }
+
+  /* EXAM BOX */
+  .exam-box {
+    background: #fffbf5;
+    border: 1.5px solid #e8c88a;
+    border-radius: 4px;
+    padding: 18px 22px;
+  }
+  .exam-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--warn);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: 500;
+    margin-bottom: 12px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .exam-box ul.pts li::before { color: var(--warn); }
+
+  /* WARN */
+  .warn-box {
+    background: #fff8f0;
+    border: 1px solid #f5c4a0;
+    border-radius: 4px;
+    padding: 11px 15px;
+    font-size: 13px;
+    color: #7a3a10;
+    margin-top: 14px;
+  }
+  .warn-box strong { color: var(--accent); }
+
+  /* NOTE */
+  .note {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 11px 15px;
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 12px;
+  }
+
+  /* ARCH DIAGRAM */
+  .arch {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    flex-wrap: wrap;
+    padding: 10px 0;
+  }
+  .arch-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 8px 14px;
+    font-size: 12px;
+    font-family: 'DM Mono', monospace;
+    color: var(--ink);
+    text-align: center;
+    white-space: nowrap;
+  }
+  .arch-arrow {
+    font-size: 18px;
+    color: var(--accent);
+    padding: 0 6px;
+    line-height: 1;
+  }
+  .arch-box.highlight {
+    background: #fff0e8;
+    border-color: #f5c4a0;
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  /* LIMIT ROWS */
+  .limit-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 9px 0; border-bottom: 1px solid var(--rule);
+    font-size: 13px;
+  }
+  .limit-row:last-child { border-bottom: none; }
+  .limit-val {
+    font-family: 'DM Mono', monospace;
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  code {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    background: #f0ece4;
+    padding: 1px 6px;
+    border-radius: 3px;
+    color: var(--accent2);
+  }
+
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 10px;
+  }
+
+  hr.divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 14px 0;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="../index.html" style="position:absolute;top:18px;right:20px;font-family:'DM Mono',monospace;font-size:11px;color:#e8855a;border:1px solid rgba(196,92,26,0.4);padding:5px 13px;border-radius:2px;text-decoration:none;letter-spacing:0.1em;z-index:2;transition:background 0.2s;" onmouseover="this.style.background='rgba(196,92,26,0.1)'" onmouseout="this.style.background='transparent'">← Home</a>
+  <div class="badge">DOP-C02 · AWS DevOps Professional</div>
+  <h1>AWS <em>QuickSight</em></h1>
+  <p class="tagline">Serverless BI · ML Insights · Interactive Dashboards · Per-Session Pricing</p>
+</header>
+
+<main>
+
+  <!-- DEFINITION -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon ic-orange">📊</div>
+      <span class="card-title">What is AWS QuickSight?</span>
+    </div>
+    <div class="card-body">
+      <div class="definition">
+        A <strong>serverless, ML-powered Business Intelligence (BI)</strong> service that lets you create interactive dashboards, perform ad-hoc analysis, and share insights — without managing any infrastructure. Scales automatically, charges <strong>per-session</strong>, and can be embedded in applications.
+      </div>
+      <ul class="pts">
+        <li><strong>Not a DevOps-core service</strong> — tested in DOP-C02 primarily in the context of <strong>monitoring dashboards, cost visualization, and operational analytics</strong> fed by AWS data sources</li>
+        <li><strong>Fully managed</strong> — no servers, no clusters, no patching; scales to tens of thousands of users automatically</li>
+        <li><strong>ML-powered</strong> — built-in anomaly detection, forecasting, and natural language queries (Q feature)</li>
+        <li><strong>Embeddable</strong> — dashboards can be embedded in custom applications via the <code>GetEmbedUrl</code> API</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- DATA SOURCES -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon ic-blue">🔌</div>
+      <span class="card-title">Data Sources — Integrations</span>
+    </div>
+    <div class="card-body">
+      <div class="section-label">AWS-Native Sources</div>
+      <div style="margin-bottom:14px">
+        <span class="pill-orange pill">Amazon RDS</span>
+        <span class="pill-orange pill">Amazon Aurora</span>
+        <span class="pill-orange pill">Amazon Redshift</span>
+        <span class="pill-orange pill">Amazon Athena</span>
+        <span class="pill-orange pill">Amazon S3</span>
+        <span class="pill-orange pill">AWS IoT Analytics</span>
+        <span class="pill-orange pill">Amazon OpenSearch</span>
+        <span class="pill-orange pill">Amazon Timestream</span>
+      </div>
+      <div class="section-label">Third-Party / Other</div>
+      <div style="margin-bottom:14px">
+        <span class="pill">Salesforce</span>
+        <span class="pill">Jira</span>
+        <span class="pill">ServiceNow</span>
+        <span class="pill">MySQL / PostgreSQL</span>
+        <span class="pill">SQL Server</span>
+        <span class="pill">Snowflake</span>
+        <span class="pill">Teradata</span>
+        <span class="pill">CSV / Excel (S3 upload)</span>
+      </div>
+      <div class="warn-box">
+        <strong>Exam pattern:</strong> Scenario involves querying S3 data lakes or Redshift warehouses for dashboards → QuickSight + Athena (S3) or QuickSight + Redshift are the canonical answers.
+      </div>
+    </div>
+  </div>
+
+  <!-- SPICE -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon ic-teal">⚡</div>
+      <span class="card-title">SPICE — In-Memory Engine</span>
+    </div>
+    <div class="card-body">
+      <div class="definition">
+        <strong>SPICE</strong> = <strong>S</strong>uper-fast, <strong>P</strong>arallel, <strong>I</strong>n-memory <strong>C</strong>alculation <strong>E</strong>ngine. QuickSight's proprietary in-memory data store that dramatically accelerates query performance.
+      </div>
+      <ul class="pts">
+        <li><strong>Data is imported</strong> into SPICE from a source (S3, RDS, Redshift, etc.) and cached — queries run against SPICE, not the source database</li>
+        <li><strong>Reduces load</strong> on underlying data sources and speeds up dashboard rendering</li>
+        <li><strong>Auto-scales</strong> to handle concurrent readers without performance degradation</li>
+        <li><strong>Refresh schedule</strong> — SPICE datasets can be refreshed on a schedule (hourly, daily, weekly) or via the <code>CreateIngestion</code> API call</li>
+        <li><strong>10 GB per user</strong> included in Standard Edition; Enterprise adds more capacity</li>
+        <li>Direct Query mode (no SPICE) is also supported — queries go live to the source each time; slower but always fresh</li>
+      </ul>
+      <div class="warn-box">
+        <strong>Exam trap:</strong> If the scenario says "near-real-time data" → use <strong>Direct Query</strong> mode or schedule frequent SPICE refreshes. SPICE alone is not real-time.
+      </div>
+    </div>
+  </div>
+
+  <!-- EDITIONS & PRICING -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon ic-brown">💰</div>
+      <span class="card-title">Editions & Pricing Model</span>
+    </div>
+    <div class="card-body" style="padding:0">
+      <table>
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th>Standard Edition</th>
+            <th>Enterprise Edition</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Target</td>
+            <td>Individual analysts</td>
+            <td>Teams, enterprises, SaaS embedding</td>
+          </tr>
+          <tr>
+            <td>Pricing model</td>
+            <td class="mono">Per-user/month</td>
+            <td class="mono">Per-user + per-session readers</td>
+          </tr>
+          <tr>
+            <td>Row-Level Security (RLS)</td>
+            <td class="no">No</td>
+            <td class="yes">Yes</td>
+          </tr>
+          <tr>
+            <td>Column-Level Security (CLS)</td>
+            <td class="no">No</td>
+            <td class="yes">Yes</td>
+          </tr>
+          <tr>
+            <td>Active Directory integration</td>
+            <td class="no">No</td>
+            <td class="yes">Yes</td>
+          </tr>
+          <tr>
+            <td>Encryption at rest (SPICE)</td>
+            <td class="no">No</td>
+            <td class="yes">Yes</td>
+          </tr>
+          <tr>
+            <td>VPC connectivity</td>
+            <td class="no">No</td>
+            <td class="yes">Yes</td>
+          </tr>
+          <tr>
+            <td>ML Insights</td>
+            <td class="warn">Limited</td>
+            <td class="yes">Full (anomaly, forecasting)</td>
+          </tr>
+          <tr>
+            <td>Embedding dashboards</td>
+            <td class="warn">Limited</td>
+            <td class="yes">Yes (public + private)</td>
+          </tr>
+        </tbody>
+      </table>
+      <div style="padding:14px 16px">
+        <div class="section-label">Pricing Concept</div>
+        <ul class="pts">
+          <li><strong>Authors</strong> — create/edit dashboards; pay per-user/month (higher rate)</li>
+          <li><strong>Readers</strong> — view dashboards only; pay <strong>per-session</strong> (capped at ~$5/month max per reader)</li>
+          <li>Per-session pricing makes QuickSight very cost-efficient for <strong>large audiences with occasional access</strong></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECURITY -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon ic-red">🔐</div>
+      <span class="card-title">Security & Access Control</span>
+    </div>
+    <div class="card-body">
+      <div class="two-col">
+        <div>
+          <div class="section-label">Authentication</div>
+          <ul class="pts">
+            <li><strong>IAM users</strong> — federated access via IAM roles</li>
+            <li><strong>QuickSight-managed users</strong> — email/password accounts</li>
+            <li><strong>Active Directory</strong> — Enterprise only, via AWS Directory Service</li>
+            <li><strong>SAML 2.0</strong> — SSO federation (Enterprise)</li>
+          </ul>
+        </div>
+        <div>
+          <div class="section-label">Data Security</div>
+          <ul class="pts">
+            <li><strong>Row-Level Security (RLS)</strong> — restrict rows per user/group via a dataset rule (Enterprise)</li>
+            <li><strong>Column-Level Security (CLS)</strong> — restrict specific columns (Enterprise)</li>
+            <li><strong>VPC connection</strong> — connect to private RDS/Redshift without public exposure (Enterprise)</li>
+            <li><strong>Encryption</strong> — TLS in transit; SPICE encrypted at rest (Enterprise)</li>
+          </ul>
+        </div>
+      </div>
+      <div class="warn-box" style="margin-top:16px">
+        <strong>Exam pattern — RLS:</strong> Scenario says "users should only see data relevant to their department/region" → answer is QuickSight <strong>Row-Level Security</strong>, requires Enterprise Edition.
+      </div>
+    </div>
+  </div>
+
+  <!-- ML FEATURES -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon ic-teal">🤖</div>
+      <span class="card-title">ML-Powered Features</span>
+    </div>
+    <div class="card-body">
+      <table>
+        <thead><tr><th>Feature</th><th>What It Does</th><th>Exam Signal</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>ML Insights</strong></td>
+            <td>Auto-detects anomalies and key drivers in data, surfaces them as narrative text on dashboards</td>
+            <td>No SQL / no custom model needed</td>
+          </tr>
+          <tr>
+            <td><strong>Anomaly Detection</strong></td>
+            <td>Uses Random Cut Forest algorithm; finds outliers across dimensions automatically</td>
+            <td>"Detect unusual spikes" → QuickSight anomaly</td>
+          </tr>
+          <tr>
+            <td><strong>Forecasting</strong></td>
+            <td>Time-series forecasting with confidence intervals, built directly into visualizations</td>
+            <td>No SageMaker needed for basic forecasts</td>
+          </tr>
+          <tr>
+            <td><strong>QuickSight Q</strong></td>
+            <td>Natural language query — type a business question, get a visual answer instantly</td>
+            <td>"Business users ask questions in plain English"</td>
+          </tr>
+          <tr>
+            <td><strong>Auto-Narratives</strong></td>
+            <td>Auto-generated written summaries of chart data added to dashboards</td>
+            <td>Accessibility / non-technical stakeholders</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ARCHITECTURE FLOW -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon ic-orange">🏗</div>
+      <span class="card-title">Typical Architecture — Data Flow</span>
+    </div>
+    <div class="card-body">
+      <div class="section-label" style="margin-bottom:16px">S3 Data Lake Analytics Pattern (most tested)</div>
+      <div class="arch">
+        <div class="arch-box">S3 (raw data)</div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-box">AWS Glue<br><span style="font-size:10px;color:#8a8070">catalog / ETL</span></div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-box">Amazon Athena<br><span style="font-size:10px;color:#8a8070">SQL on S3</span></div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-box highlight">QuickSight<br><span style="font-size:10px">Dashboard</span></div>
+      </div>
+      <hr class="divider">
+      <div class="section-label" style="margin-bottom:16px">Warehouse Pattern</div>
+      <div class="arch">
+        <div class="arch-box">Transactional DBs<br><span style="font-size:10px;color:#8a8070">RDS / Aurora</span></div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-box">Amazon Redshift<br><span style="font-size:10px;color:#8a8070">DW / Spectrum</span></div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-box highlight">QuickSight<br><span style="font-size:10px">Dashboard</span></div>
+      </div>
+      <hr class="divider">
+      <div class="section-label" style="margin-bottom:16px">Operational Monitoring Pattern</div>
+      <div class="arch">
+        <div class="arch-box">CloudWatch Metrics<br><span style="font-size:10px;color:#8a8070">Logs → S3 export</span></div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-box">Athena / Redshift</div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-box highlight">QuickSight<br><span style="font-size:10px">Ops Dashboard</span></div>
+      </div>
+      <div class="note">QuickSight does <strong>not</strong> connect directly to CloudWatch. CloudWatch logs must be exported to S3 first, then queried via Athena or fed into Redshift.</div>
+    </div>
+  </div>
+
+  <!-- QUICKSIGHT vs ALTERNATIVES -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon ic-blue">⚖️</div>
+      <span class="card-title">QuickSight vs Related AWS Services</span>
+    </div>
+    <div class="card-body" style="padding:0">
+      <table>
+        <thead><tr><th>Service</th><th>Purpose</th><th>When to Choose</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>QuickSight</strong></td>
+            <td>BI dashboards, ad-hoc analysis, embedded analytics</td>
+            <td>Business users need visual reports from AWS data</td>
+          </tr>
+          <tr>
+            <td><strong>CloudWatch Dashboards</strong></td>
+            <td>Operational metrics monitoring</td>
+            <td>DevOps/infra team monitoring; no BI needed</td>
+          </tr>
+          <tr>
+            <td><strong>Athena</strong></td>
+            <td>SQL query engine on S3</td>
+            <td>Data source FOR QuickSight; raw analysis by engineers</td>
+          </tr>
+          <tr>
+            <td><strong>Redshift</strong></td>
+            <td>Data warehouse</td>
+            <td>Large-scale analytical queries; data source for QuickSight</td>
+          </tr>
+          <tr>
+            <td><strong>OpenSearch Dashboards</strong></td>
+            <td>Log search & visualization (Kibana-like)</td>
+            <td>Log analytics, full-text search; not BI reporting</td>
+          </tr>
+          <tr>
+            <td><strong>Grafana (Managed)</strong></td>
+            <td>Operational metrics visualization</td>
+            <td>Multi-source metrics (CloudWatch, Prometheus, etc.)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- LIMITS -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon ic-red">📏</div>
+      <span class="card-title">Key Limits & Quotas</span>
+    </div>
+    <div class="card-body">
+      <div class="limit-row"><span>SPICE capacity (Standard)</span><span class="limit-val">10 GB / user</span></div>
+      <div class="limit-row"><span>Max datasets per analysis</span><span class="limit-val">20</span></div>
+      <div class="limit-row"><span>Max visuals per dashboard</span><span class="limit-val">30</span></div>
+      <div class="limit-row"><span>Max columns per dataset</span><span class="limit-val">2,000</span></div>
+      <div class="limit-row"><span>Max rows per SPICE import</span><span class="limit-val">500 million</span></div>
+      <div class="limit-row"><span>Reader session cap (Enterprise)</span><span class="limit-val">~$5/month max per reader</span></div>
+      <div class="limit-row"><span>SPICE refresh frequency</span><span class="limit-val">Min. every 15 minutes (scheduled)</span></div>
+    </div>
+  </div>
+
+  <!-- EXAM TIPS -->
+  <div class="exam-box">
+    <div class="exam-label">⭐ Exam Focus — DOP-C02 Scenario Patterns</div>
+    <ul class="pts">
+      <li><strong>"Visualize AWS Cost & Usage data by team/project"</strong> → Export CUR (Cost & Usage Report) to S3 → Athena → <strong>QuickSight</strong></li>
+      <li><strong>"Business stakeholders need dashboards on S3 data without writing SQL"</strong> → S3 → Athena → QuickSight (with SPICE for performance)</li>
+      <li><strong>"Each sales rep should only see their own region's data"</strong> → QuickSight Enterprise + <strong>Row-Level Security (RLS)</strong></li>
+      <li><strong>"Dashboard is slow because it queries Redshift on every load"</strong> → Enable <strong>SPICE import</strong> to cache the dataset</li>
+      <li><strong>"Detect anomalies in deployment metrics automatically"</strong> → QuickSight <strong>ML Insights / Anomaly Detection</strong> (no SageMaker needed)</li>
+      <li><strong>"Embed dashboards in an internal portal for 10,000 employees"</strong> → QuickSight Enterprise + <code>GetEmbedUrl</code> API + <strong>per-session reader pricing</strong></li>
+      <li><strong>"Connect QuickSight to private RDS inside a VPC"</strong> → Enterprise Edition + <strong>VPC connection</strong> (private subnet)</li>
+      <li><strong>QuickSight ≠ real-time</strong> — for real-time operational metrics use <strong>CloudWatch</strong> or <strong>Grafana</strong>; QuickSight is for BI/reporting workloads</li>
+    </ul>
+  </div>
+
+</main>
+
+</body>
+</html>
