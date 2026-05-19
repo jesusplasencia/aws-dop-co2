@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Amazon Detective — DOP-C02 Study Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a; --surface: #111827; --surface2: #1a2235; --border: #1e3a5f;
+    --accent: #f59e0b; --accent2: #38bdf8; --accent3: #4ade80;
+    --danger: #f87171; --purple: #a78bfa; --orange: #fb923c;
+    --muted: #64748b; --text: #e2e8f0; --text-dim: #94a3b8;
+    --mono: 'IBM Plex Mono', monospace; --sans: 'IBM Plex Sans', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 14px; line-height: 1.6; }
+  body::before {
+    content: ''; position: fixed; inset: 0;
+    background-image: linear-gradient(rgba(56,189,248,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(56,189,248,.03) 1px,transparent 1px);
+    background-size: 40px 40px; pointer-events: none; z-index: 0;
+  }
+  .page { position: relative; z-index: 1; max-width: 960px; margin: 0 auto; padding: 40px 24px 80px; }
+
+  header { border-left: 3px solid var(--accent); padding-left: 20px; margin-bottom: 48px; }
+  .exam-tag { font-family: var(--mono); font-size: 11px; color: var(--accent); letter-spacing: .15em; text-transform: uppercase; margin-bottom: 8px; }
+  h1 { font-size: 32px; font-weight: 700; color: #fff; letter-spacing: -.5px; }
+  h1 span { color: var(--accent2); }
+  .subtitle { color: var(--text-dim); font-size: 13px; margin-top: 8px; font-family: var(--mono); }
+
+  section { margin-bottom: 36px; }
+  .section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  .section-num { font-family: var(--mono); font-size: 11px; color: var(--accent); background: rgba(245,158,11,.1); border: 1px solid rgba(245,158,11,.3); padding: 2px 8px; border-radius: 3px; }
+  h2 { font-size: 16px; font-weight: 700; color: #fff; letter-spacing: .02em; text-transform: uppercase; }
+  h3 { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 10px; text-transform: uppercase; letter-spacing: .05em; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 18px 20px; margin-bottom: 12px; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+
+  .key-box { background: linear-gradient(135deg,rgba(56,189,248,.06),rgba(56,189,248,.02)); border: 1px solid rgba(56,189,248,.25); border-radius: 6px; padding: 16px 20px; margin-bottom: 12px; }
+  .key-box .label { font-family: var(--mono); font-size: 10px; color: var(--accent2); letter-spacing: .12em; text-transform: uppercase; margin-bottom: 6px; }
+
+  .warn-box { background: rgba(248,113,113,.06); border: 1px solid rgba(248,113,113,.25); border-radius: 6px; padding: 12px 16px; margin-bottom: 12px; display: flex; gap: 10px; align-items: flex-start; }
+  .warn-box .icon { color: var(--danger); flex-shrink: 0; margin-top: 1px; }
+  .warn-box p { color: var(--text-dim); font-size: 13px; }
+  .warn-box strong { color: var(--danger); }
+
+  .ok-box { background: rgba(74,222,128,.05); border: 1px solid rgba(74,222,128,.2); border-radius: 6px; padding: 12px 16px; margin-bottom: 12px; display: flex; gap: 10px; align-items: flex-start; }
+  .ok-box .icon { color: var(--accent3); flex-shrink: 0; margin-top: 1px; }
+  .ok-box p { color: var(--text-dim); font-size: 13px; }
+  .ok-box strong { color: var(--accent3); }
+
+  ul.clean { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+  ul.clean li { display: flex; gap: 10px; color: var(--text-dim); font-size: 13px; align-items: flex-start; }
+  ul.clean li::before { content: '→'; color: var(--accent2); font-family: var(--mono); flex-shrink: 0; margin-top: 1px; }
+  ul.clean li strong { color: var(--text); }
+
+  .pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  .pill { font-family: var(--mono); font-size: 11px; padding: 3px 10px; border-radius: 20px; border: 1px solid; }
+  .pill.blue   { color: var(--accent2); border-color: rgba(56,189,248,.3);  background: rgba(56,189,248,.07); }
+  .pill.amber  { color: var(--accent);  border-color: rgba(245,158,11,.3);  background: rgba(245,158,11,.07); }
+  .pill.green  { color: var(--accent3); border-color: rgba(74,222,128,.3);  background: rgba(74,222,128,.07); }
+  .pill.red    { color: var(--danger);  border-color: rgba(248,113,113,.3); background: rgba(248,113,113,.07); }
+  .pill.purple { color: var(--purple);  border-color: rgba(167,139,250,.3); background: rgba(167,139,250,.07); }
+
+  /* Workflow steps */
+  .steps { display: flex; flex-direction: column; gap: 0; }
+  .step-row { display: flex; gap: 0; }
+  .step-line { display: flex; flex-direction: column; align-items: center; width: 32px; flex-shrink: 0; }
+  .step-circle { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 11px; font-weight: 600; flex-shrink: 0; }
+  .step-connector { flex: 1; width: 1px; background: var(--border); min-height: 16px; }
+  .step-body { padding: 0 0 16px 12px; flex: 1; padding-top: 4px; }
+  .step-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+  .step-desc { font-size: 12px; color: var(--text-dim); }
+  .step-circle.detect  { background: rgba(248,113,113,.15); border: 1px solid rgba(248,113,113,.4); color: var(--danger); }
+  .step-circle.ingest  { background: rgba(56,189,248,.12);  border: 1px solid rgba(56,189,248,.4);  color: var(--accent2); }
+  .step-circle.graph   { background: rgba(167,139,250,.12); border: 1px solid rgba(167,139,250,.4); color: var(--purple); }
+  .step-circle.invest  { background: rgba(245,158,11,.12);  border: 1px solid rgba(245,158,11,.4);  color: var(--accent); }
+  .step-circle.resolve { background: rgba(74,222,128,.1);   border: 1px solid rgba(74,222,128,.4);  color: var(--accent3); }
+
+  /* Data source items */
+  .ds-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); gap: 10px; margin-bottom: 12px; }
+  .ds-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 5px; padding: 12px 14px; }
+  .ds-item .ds-label { font-family: var(--mono); font-size: 11px; font-weight: 600; margin-bottom: 4px; color: var(--accent2); }
+  .ds-item p { font-size: 11px; color: var(--text-dim); }
+
+  /* Role comparison cards */
+  .role-card { border-radius: 6px; padding: 16px 18px; }
+  .role-card.detect { background: rgba(248,113,113,.05); border: 1px solid rgba(248,113,113,.25); }
+  .role-card.invest { background: rgba(56,189,248,.05);  border: 1px solid rgba(56,189,248,.25); }
+  .role-card.triage { background: rgba(167,139,248,.05); border: 1px solid rgba(167,139,250,.25); }
+  .role-card h3 { margin-bottom: 8px; }
+  .role-card.detect h3 { color: var(--danger); }
+  .role-card.invest h3 { color: var(--accent2); }
+  .role-card.triage h3 { color: var(--purple); }
+
+  /* Compare table */
+  .compare-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 12px; }
+  .compare-table th { background: var(--surface2); color: var(--accent2); font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; padding: 10px 14px; text-align: left; border: 1px solid var(--border); }
+  .compare-table td { padding: 9px 14px; border: 1px solid var(--border); color: var(--text-dim); vertical-align: top; }
+  .compare-table tr:nth-child(even) td { background: rgba(255,255,255,.02); }
+  .compare-table td:first-child { color: var(--text); font-weight: 600; font-size: 12px; white-space: nowrap; }
+
+  /* Cheat grid */
+  .cheat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  @media (max-width: 640px) {
+    .two-col, .three-col, .cheat-grid { grid-template-columns: 1fr; }
+    h1 { font-size: 24px; }
+  }
+  .home-btn { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--purple); background: rgba(167,139,250,.1); border: 1px solid rgba(167,139,250,.3); padding: 5px 12px; border-radius: 3px; text-decoration: none; letter-spacing: .5px; transition: all .15s; }
+  .home-btn:hover { background: var(--purple); color: #fff; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <div class="exam-tag">DOP-C02 · Security · Low Frequency — Know the Distinction</div>
+    <h1>Amazon <span>Detective</span></h1>
+    <div class="subtitle">Root Cause Analysis · ML Graphs · Security Investigation · Post-Finding Forensics</div>
+    <a href="../index.html" class="home-btn">&#8592; Home</a>
+  </header>
+
+  <!-- 1. CORE CONCEPT -->
+  <section>
+    <div class="section-header"><span class="section-num">01</span><h2>Core Concept</h2></div>
+
+    <div class="key-box">
+      <div class="label">Exam One-liner</div>
+      <p>Amazon Detective is a <strong>post-detection forensic investigation tool</strong>. It does not detect threats — GuardDuty, Macie, and Security Hub do that. Detective answers <em>"why did this happen and what was affected?"</em> by building a <strong>persistent ML-based behavior graph</strong> from ingested event data.</p>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <h3>What Detective does</h3>
+        <ul class="clean">
+          <li>Automatically <strong>collects and processes</strong> VPC Flow Logs, CloudTrail, GuardDuty findings</li>
+          <li>Builds a <strong>behavior graph</strong> — a time-series model of entity relationships and activity</li>
+          <li>Uses <strong>ML and statistical analysis</strong> to establish baselines and flag deviations</li>
+          <li>Produces <strong>interactive visualizations</strong> — who did what, from where, when</li>
+          <li>Retains up to <strong>1 year</strong> of aggregated data for trend analysis</li>
+          <li>Surfaces <strong>related findings and context</strong> across IP, account, role, instance</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>What Detective does NOT do</h3>
+        <ul class="clean">
+          <li><strong>Does not detect threats</strong> — it investigates findings already raised</li>
+          <li><strong>Does not block or remediate</strong> — purely analytical / read-only</li>
+          <li><strong>Does not replace CloudTrail, VPC Flow Logs</strong> — it ingests them independently</li>
+          <li>Does not generate alerts or send notifications</li>
+          <li><strong>Does not query raw logs</strong> directly — it works on the processed behavior graph</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="warn-box">
+      <span class="icon">⚠</span>
+      <p><strong>Core exam trap:</strong> GuardDuty <em>finds</em> the threat. Detective <em>investigates</em> it. If a question asks "identify root cause," "investigate suspicious activity," or "understand scope of a compromise" → <strong>Amazon Detective</strong>, not GuardDuty.</p>
+    </div>
+  </section>
+
+  <!-- 2. HOW IT WORKS -->
+  <section>
+    <div class="section-header"><span class="section-num">02</span><h2>How It Works</h2></div>
+
+    <div class="steps">
+      <div class="step-row">
+        <div class="step-line">
+          <div class="step-circle detect">1</div>
+          <div class="step-connector"></div>
+        </div>
+        <div class="step-body">
+          <div class="step-title">Security finding raised</div>
+          <div class="step-desc">GuardDuty, Macie, or Security Hub identifies a potential issue (e.g. compromised EC2, unusual IAM activity)</div>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-line">
+          <div class="step-circle ingest">2</div>
+          <div class="step-connector"></div>
+        </div>
+        <div class="step-body">
+          <div class="step-title">Detective continuously ingests event data</div>
+          <div class="step-desc">VPC Flow Logs, CloudTrail management/data events, GuardDuty findings — ingested automatically, no manual setup per source</div>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-line">
+          <div class="step-circle graph">3</div>
+          <div class="step-connector"></div>
+        </div>
+        <div class="step-body">
+          <div class="step-title">Behavior graph built with ML</div>
+          <div class="step-desc">Entities (IPs, IAM users, EC2 instances, roles) are modeled with their normal activity patterns over time. Deviations are surfaced automatically.</div>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-line">
+          <div class="step-circle invest">4</div>
+          <div class="step-connector"></div>
+        </div>
+        <div class="step-body">
+          <div class="step-title">Analyst pivots from finding to graph</div>
+          <div class="step-desc">From a GuardDuty finding, analyst opens Detective to see: which IPs communicated with the instance, what API calls were made, which roles were involved, what was unusual vs baseline</div>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-line">
+          <div class="step-circle resolve">5</div>
+        </div>
+        <div class="step-body">
+          <div class="step-title">Root cause identified → action taken</div>
+          <div class="step-desc">Analyst determines blast radius, affected resources, and entry point — then initiates remediation (quarantine, credential revocation, etc.)</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. DATA SOURCES -->
+  <section>
+    <div class="section-header"><span class="section-num">03</span><h2>Data Sources</h2></div>
+
+    <div class="ds-grid">
+      <div class="ds-item">
+        <div class="ds-label">VPC Flow Logs</div>
+        <p>Network traffic patterns — connections, ports, bytes transferred. Maps IP-to-instance communications.</p>
+      </div>
+      <div class="ds-item">
+        <div class="ds-label">CloudTrail</div>
+        <p>API calls, console actions, IAM activity. Tracks who called what API, from where, at what time.</p>
+      </div>
+      <div class="ds-item">
+        <div class="ds-label">GuardDuty Findings</div>
+        <p>Enriches existing findings with behavioral context. Correlates findings to the same entity over time.</p>
+      </div>
+      <div class="ds-item">
+        <div class="ds-label">EKS Audit Logs</div>
+        <p>Kubernetes API activity — maps K8s user/role actions for cluster investigations.</p>
+      </div>
+    </div>
+
+    <div class="ok-box">
+      <span class="icon">💡</span>
+      <p>Detective ingests these sources <strong>automatically</strong> once enabled — you do not need to configure CloudTrail or VPC Flow Logs delivery separately. Data is retained for <strong>up to 1 year</strong> in the behavior graph, enabling long-term trend analysis.</p>
+    </div>
+  </section>
+
+  <!-- 4. BEHAVIOR GRAPH & VISUALIZATIONS -->
+  <section>
+    <div class="section-header"><span class="section-num">04</span><h2>Behavior Graph &amp; Visualizations</h2></div>
+
+    <div class="key-box">
+      <div class="label">Exam Key</div>
+      <p>The <strong>behavior graph</strong> is Detective's core data structure — a time-series model linking <strong>entities</strong> (AWS accounts, IAM users/roles, EC2 instances, IPs, S3 buckets) and their interactions. Visualizations let analysts navigate entity relationships without writing queries.</p>
+    </div>
+
+    <div class="three-col">
+      <div class="card">
+        <h3>IP address panel</h3>
+        <ul class="clean">
+          <li>Which EC2 instances communicated with this IP</li>
+          <li>Volume of traffic over time vs baseline</li>
+          <li>Geo-location and threat intelligence context</li>
+          <li>First seen / last seen timestamps</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>IAM user / role panel</h3>
+        <ul class="clean">
+          <li>All API calls made by the entity</li>
+          <li>Normal vs anomalous API call frequency</li>
+          <li>New APIs called never used before</li>
+          <li>Assumed roles and cross-account activity</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>EC2 instance panel</h3>
+        <ul class="clean">
+          <li>All inbound/outbound network connections</li>
+          <li>Associated GuardDuty findings</li>
+          <li>Port activity over time</li>
+          <li>Processes (if SSM agent data available)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Key investigation questions Detective answers</h3>
+      <div class="pills">
+        <span class="pill blue">Is this API call normal for this IAM user?</span>
+        <span class="pill blue">Has this IP communicated before?</span>
+        <span class="pill amber">What else did the compromised role access?</span>
+        <span class="pill amber">When did anomalous behavior start?</span>
+        <span class="pill green">How many resources were affected?</span>
+        <span class="pill green">Was this a one-time event or ongoing pattern?</span>
+        <span class="pill purple">What was the blast radius of this finding?</span>
+        <span class="pill red">Which account/region is the entry point?</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. MULTI-ACCOUNT -->
+  <section>
+    <div class="section-header"><span class="section-num">05</span><h2>Multi-Account &amp; Organizations</h2></div>
+
+    <div class="two-col">
+      <div class="card">
+        <h3>Account model</h3>
+        <ul class="clean">
+          <li>One account is the <strong>Administrator (behavior graph owner)</strong></li>
+          <li>Other accounts are <strong>member accounts</strong> — their data is ingested into the admin graph</li>
+          <li>Integrates with <strong>AWS Organizations</strong> — auto-enroll member accounts</li>
+          <li>Administrator sees a <strong>unified behavior graph</strong> across all member accounts</li>
+          <li>Member accounts cannot access the behavior graph — only the admin can</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Integration with GuardDuty</h3>
+        <ul class="clean">
+          <li>From a GuardDuty finding, analysts can <strong>pivot directly into Detective</strong> with one click</li>
+          <li>Detective pre-populates the investigation with the relevant entities from the finding</li>
+          <li>Both services support the same <strong>delegated administrator</strong> account pattern</li>
+          <li>GuardDuty findings appear as <strong>enriched entities</strong> in Detective's graph — with historical context</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. DETECTIVE vs THE SECURITY STACK -->
+  <section>
+    <div class="section-header"><span class="section-num">06</span><h2>Detective in the Security Stack ★ Most Tested</h2></div>
+
+    <p style="color:var(--text-dim);font-size:13px;margin-bottom:14px;">The exam tests whether you know <strong>which service handles which phase</strong> of a security incident lifecycle.</p>
+
+    <div class="three-col" style="margin-bottom:14px;">
+      <div class="role-card detect">
+        <h3>Detect</h3>
+        <ul class="clean">
+          <li><strong>GuardDuty</strong> — runtime threat detection (ML, anomaly, threat intel)</li>
+          <li><strong>AWS Macie</strong> — sensitive data exposure in S3</li>
+          <li><strong>AWS Inspector</strong> — vulnerabilities (CVEs) in EC2/Lambda/containers</li>
+          <li><strong>Security Hub</strong> — aggregated findings dashboard</li>
+        </ul>
+      </div>
+      <div class="role-card invest">
+        <h3>Investigate</h3>
+        <ul class="clean">
+          <li><strong>Amazon Detective</strong> — root cause analysis, blast radius, behavior graph</li>
+          <li>Answers "what happened, how, who was involved"</li>
+          <li>ML visualizations of entity relationships</li>
+          <li>Up to 1 year of behavioral history</li>
+        </ul>
+      </div>
+      <div class="role-card triage">
+        <h3>Respond</h3>
+        <ul class="clean">
+          <li><strong>EventBridge + Lambda</strong> — automated remediation</li>
+          <li><strong>WAF / Security Groups / NACLs</strong> — block traffic</li>
+          <li><strong>IAM</strong> — revoke credentials</li>
+          <li><strong>AWS Systems Manager</strong> — patch, isolate instances</li>
+        </ul>
+      </div>
+    </div>
+
+    <table class="compare-table">
+      <thead><tr><th>Service</th><th>Phase</th><th>Core capability</th><th>Key distinction</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>GuardDuty</td>
+          <td style="color:var(--danger);">Detect</td>
+          <td>Threat detection via ML on CloudTrail, VPC Flow Logs, DNS</td>
+          <td>Generates findings. Does not investigate or remediate.</td>
+        </tr>
+        <tr>
+          <td>Amazon Detective</td>
+          <td style="color:var(--accent2);">Investigate</td>
+          <td>Root cause analysis via behavior graph and ML visualizations</td>
+          <td>Answers "why" and "how far." No detection, no blocking.</td>
+        </tr>
+        <tr>
+          <td>Security Hub</td>
+          <td style="color:var(--purple);">Aggregate</td>
+          <td>Normalize and centralize findings from multiple sources</td>
+          <td>SIEM-like view. Does not detect or investigate independently.</td>
+        </tr>
+        <tr>
+          <td>AWS Macie</td>
+          <td style="color:var(--danger);">Detect</td>
+          <td>Sensitive data (PII) classification in S3</td>
+          <td>Data classification only. Not threat behavior detection.</td>
+        </tr>
+        <tr>
+          <td>AWS Inspector</td>
+          <td style="color:var(--danger);">Detect</td>
+          <td>Vulnerability scanning (CVEs) in EC2, Lambda, containers</td>
+          <td>Pre-exploit vulnerability assessment. Not runtime detection.</td>
+        </tr>
+        <tr>
+          <td>CloudTrail</td>
+          <td style="color:var(--muted);">Audit</td>
+          <td>Record all API calls for compliance and forensics</td>
+          <td>Raw log storage. Detective and GuardDuty consume CloudTrail data.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 7. EXAM CHEAT SHEET -->
+  <section>
+    <div class="section-header"><span class="section-num">07</span><h2>Exam Cheat Sheet</h2></div>
+
+    <div class="cheat-grid">
+      <div class="warn-box" style="margin:0;">
+        <span class="icon">⚠</span>
+        <p><strong>"Root cause" or "investigate" in the question → Amazon Detective.</strong> Not GuardDuty, not CloudTrail.</p>
+      </div>
+      <div class="warn-box" style="margin:0;">
+        <span class="icon">⚠</span>
+        <p>Detective <strong>does not detect, block, or remediate.</strong> It is purely an investigation and analysis tool.</p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p>Detective ingests: <strong>VPC Flow Logs + CloudTrail + GuardDuty findings + EKS Audit Logs</strong> automatically.</p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p>Retains <strong>up to 1 year</strong> of behavioral data — enables long-term pattern analysis and baseline establishment.</p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p><strong>Behavior graph</strong> is the core concept — ML-based entity relationship model, not raw log queries.</p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p>From a GuardDuty finding you can <strong>pivot directly into Detective</strong> — one-click investigation launch.</p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p>Multi-account: one <strong>Administrator account</strong> owns the graph. Member accounts' data flows in automatically.</p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p>Security incident phases: GuardDuty <strong>detects</strong> → Detective <strong>investigates</strong> → Lambda/WAF <strong>responds</strong>.</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

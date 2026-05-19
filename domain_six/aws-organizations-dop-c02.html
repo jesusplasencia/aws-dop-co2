@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS Organizations — DOP-C02 Study Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --surface2: #1a2235;
+    --border: #1e3a5f;
+    --accent: #f59e0b;
+    --accent2: #38bdf8;
+    --accent3: #4ade80;
+    --danger: #f87171;
+    --muted: #64748b;
+    --text: #e2e8f0;
+    --text-dim: #94a3b8;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(56,189,248,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(56,189,248,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .page {
+    position: relative;
+    z-index: 1;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+  header {
+    border-left: 3px solid var(--accent);
+    padding-left: 20px;
+    margin-bottom: 48px;
+  }
+  .exam-tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  h1 { font-size: 32px; font-weight: 700; color: #fff; letter-spacing: -0.5px; }
+  h1 span { color: var(--accent2); }
+  .subtitle { color: var(--text-dim); font-size: 13px; margin-top: 8px; font-family: var(--mono); }
+  section { margin-bottom: 36px; }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    background: rgba(245,158,11,0.1);
+    border: 1px solid rgba(245,158,11,0.3);
+    padding: 2px 8px;
+    border-radius: 3px;
+  }
+  h2 { font-size: 16px; font-weight: 700; color: #fff; letter-spacing: 0.02em; text-transform: uppercase; }
+  h3 { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 18px 20px; margin-bottom: 12px; }
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .key-box {
+    background: linear-gradient(135deg, rgba(56,189,248,0.06), rgba(56,189,248,0.02));
+    border: 1px solid rgba(56,189,248,0.25);
+    border-radius: 6px;
+    padding: 16px 20px;
+    margin-bottom: 12px;
+  }
+  .key-box .label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--accent2);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .warn-box {
+    background: rgba(248,113,113,0.06);
+    border: 1px solid rgba(248,113,113,0.25);
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin-bottom: 12px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .warn-box .icon { color: var(--danger); flex-shrink: 0; margin-top: 1px; }
+  .warn-box p { color: var(--text-dim); font-size: 13px; }
+  .warn-box strong { color: var(--danger); }
+  .ok-box {
+    background: rgba(74,222,128,0.05);
+    border: 1px solid rgba(74,222,128,0.2);
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin-bottom: 12px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .ok-box .icon { color: var(--accent3); flex-shrink: 0; margin-top: 1px; }
+  .ok-box p { color: var(--text-dim); font-size: 13px; }
+  .ok-box strong { color: var(--accent3); }
+  ul.clean { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+  ul.clean li { display: flex; gap: 10px; color: var(--text-dim); font-size: 13px; align-items: flex-start; }
+  ul.clean li::before { content: '→'; color: var(--accent2); font-family: var(--mono); flex-shrink: 0; margin-top: 1px; }
+  ul.clean li strong { color: var(--text); }
+  .pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .pill { font-family: var(--mono); font-size: 11px; padding: 3px 10px; border-radius: 20px; border: 1px solid; }
+  .pill.blue  { color: var(--accent2); border-color: rgba(56,189,248,0.3); background: rgba(56,189,248,0.07); }
+  .pill.amber { color: var(--accent);  border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.07); }
+  .pill.green { color: var(--accent3); border-color: rgba(74,222,128,0.3); background: rgba(74,222,128,0.07); }
+  .pill.red   { color: var(--danger);  border-color: rgba(248,113,113,0.3); background: rgba(248,113,113,0.07); }
+
+  /* OU Tree */
+  .ou-tree {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 20px;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 2;
+  }
+  .ou-root  { color: #fff; font-weight: 600; }
+  .ou-mgmt  { color: var(--accent); margin-left: 20px; }
+  .ou-ou    { color: var(--accent2); margin-left: 40px; }
+  .ou-acct  { color: var(--text-dim); margin-left: 60px; }
+  .ou-acct2 { color: var(--text-dim); margin-left: 80px; }
+  .tree-prefix { color: var(--muted); }
+
+  /* SCP inheritance diagram */
+  .scp-diagram {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .scp-row {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+  }
+  .scp-row:last-child { border-bottom: none; }
+  .scp-label {
+    padding: 10px 14px;
+    background: var(--surface2);
+    color: var(--text-dim);
+    font-family: var(--mono);
+    font-size: 11px;
+    border-right: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+  }
+  .scp-label.root   { color: #fff; font-weight: 600; }
+  .scp-label.mgmt   { color: var(--accent); }
+  .scp-label.ou     { color: var(--accent2); }
+  .scp-label.acct   { color: var(--text-dim); }
+  .scp-content { padding: 10px 14px; color: var(--text-dim); font-size: 12px; }
+  .scp-content .allow { color: var(--accent3); font-weight: 600; }
+  .scp-content .deny  { color: var(--danger); font-weight: 600; }
+
+  /* Code */
+  .code-block {
+    background: #070c18;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px 16px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: #7dd3fc;
+    overflow-x: auto;
+    line-height: 1.7;
+    margin-bottom: 12px;
+  }
+  .code-block .kw  { color: #f472b6; }
+  .code-block .val { color: #a5f3fc; }
+  .code-block .str { color: #86efac; }
+  .code-block .cm  { color: #475569; }
+  .code-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 6px;
+  }
+
+  /* Steps */
+  .steps { display: flex; flex-direction: column; gap: 8px; }
+  .step {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 16px;
+  }
+  .step-num {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent2);
+    background: rgba(56,189,248,0.1);
+    border: 1px solid rgba(56,189,248,0.3);
+    border-radius: 50%;
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .step p { color: var(--text-dim); font-size: 13px; }
+  .step p strong { color: var(--text); }
+
+  /* Compare table */
+  .compare-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .compare-table th {
+    background: var(--surface2);
+    color: var(--accent2);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 10px 14px;
+    text-align: left;
+    border: 1px solid var(--border);
+  }
+  .compare-table td {
+    padding: 9px 14px;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    vertical-align: top;
+  }
+  .compare-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+  .compare-table td:first-child { color: var(--text); font-weight: 600; font-size: 12px; white-space: nowrap; }
+
+  /* Feature mode cards */
+  .mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .mode-card {
+    border-radius: 6px;
+    padding: 16px 18px;
+  }
+  .mode-card.billing {
+    background: rgba(100,116,139,0.08);
+    border: 1px solid rgba(100,116,139,0.3);
+  }
+  .mode-card.full {
+    background: rgba(56,189,248,0.05);
+    border: 1px solid rgba(56,189,248,0.3);
+  }
+  .mode-card h3 { margin-bottom: 10px; }
+  .mode-card.full h3 { color: var(--accent2); }
+  .mode-card.billing h3 { color: var(--muted); }
+
+  /* Cheat sheet grid */
+  .cheat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  @media (max-width: 640px) {
+    .two-col, .mode-grid, .cheat-grid { grid-template-columns: 1fr; }
+    .card-grid { grid-template-columns: 1fr; }
+    h1 { font-size: 24px; }
+    .scp-row { grid-template-columns: 110px 1fr; }
+  }
+  .home-btn { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--purple); background: rgba(167,139,250,.1); border: 1px solid rgba(167,139,250,.3); padding: 5px 12px; border-radius: 3px; text-decoration: none; letter-spacing: .5px; transition: all .15s; }
+  .home-btn:hover { background: var(--purple); color: #fff; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <header>
+    <div class="exam-tag">DOP-C02 · Management &amp; Governance · High-Frequency Topic</div>
+    <h1>AWS <span>Organizations</span></h1>
+    <div class="subtitle">Multi-Account · SCPs · Consolidated Billing · OU Structure</div>
+    <a href="../index.html" class="home-btn">&#8592; Home</a>
+  </header>
+
+  <!-- 1. CORE CONCEPTS -->
+  <section>
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <h2>Core Concepts &amp; Structure</h2>
+    </div>
+
+    <div class="key-box">
+      <div class="label">Exam One-liner</div>
+      <p>AWS Organizations lets you <strong>centrally manage multiple AWS accounts</strong> — grouping them into Organizational Units (OUs) with a hierarchical structure, applying governance via SCPs, and consolidating billing.</p>
+    </div>
+
+    <div class="two-col" style="margin-bottom:12px;">
+      <div class="ou-tree">
+        <div class="ou-root">🏢 Root OU</div>
+        <div class="ou-mgmt"><span class="tree-prefix">├─ </span>Management Account</div>
+        <div class="ou-ou"><span class="tree-prefix">├─ </span>OU (Dev)</div>
+        <div class="ou-acct"><span class="tree-prefix">├─ </span>Member Account A</div>
+        <div class="ou-acct"><span class="tree-prefix">└─ </span>Member Account B</div>
+        <div class="ou-ou"><span class="tree-prefix">└─ </span>OU (Prod)</div>
+        <div class="ou-acct"><span class="tree-prefix">├─ </span>OU (HR)</div>
+        <div class="ou-acct2"><span class="tree-prefix">├─ </span>Account C</div>
+        <div class="ou-acct2"><span class="tree-prefix">└─ </span>Account D</div>
+        <div class="ou-acct"><span class="tree-prefix">└─ </span>OU (Finance)</div>
+        <div class="ou-acct2"><span class="tree-prefix">├─ </span>Account E</div>
+        <div class="ou-acct2"><span class="tree-prefix">└─ </span>Account F</div>
+      </div>
+      <div class="card">
+        <h3>Hierarchy rules</h3>
+        <ul class="clean">
+          <li><strong>Root</strong> — top-level container; SCPs applied here affect all OUs and accounts</li>
+          <li><strong>Management Account</strong> — creates the org, <em>not affected by SCPs</em></li>
+          <li><strong>OUs</strong> — can be nested; accounts inherit SCPs from all parent OUs</li>
+          <li><strong>Member Accounts</strong> — can belong to only one OU at a time</li>
+          <li>OUs can contain both <strong>accounts and other OUs</strong> (up to 5 levels deep)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Why use multiple accounts?</h3>
+      <div class="pills">
+        <span class="pill blue">Isolation per department / cost center</span>
+        <span class="pill blue">Environment separation (Dev / Prod)</span>
+        <span class="pill amber">Regulatory / compliance boundaries via SCP</span>
+        <span class="pill amber">Per-account service limits</span>
+        <span class="pill green">Centralized logging (CloudTrail → S3)</span>
+        <span class="pill green">Blast radius reduction</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. OrganizationAccountAccessRole -->
+  <section>
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <h2>OrganizationAccountAccessRole</h2>
+    </div>
+
+    <div class="key-box">
+      <div class="label">Exam Key</div>
+      <p>An IAM role automatically created in every <strong>new</strong> member account. The Management Account assumes it via <code>sts:AssumeRole</code> to perform admin tasks across member accounts.</p>
+    </div>
+
+    <div class="card-grid">
+      <div class="card">
+        <h3>Behavior</h3>
+        <ul class="clean">
+          <li>Grants <strong>full administrator</strong> permissions in the member account to the Management Account</li>
+          <li>Assumed via the <strong>AssumeRole API</strong> from the Management Account</li>
+          <li><strong>Auto-created</strong> for accounts created via Organizations</li>
+          <li><strong>Must be created manually</strong> for existing invited accounts</li>
+          <li>Used for tasks like creating IAM users, setting up Config, enabling services</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Cross-account access pattern</h3>
+        <ul class="clean">
+          <li>Management Account IAM user/role calls <strong>sts:AssumeRole</strong></li>
+          <li>Target: <code>arn:aws:iam::MEMBER_ID:role/OrganizationAccountAccessRole</code></li>
+          <li>Returns temporary credentials scoped to member account</li>
+          <li>This is the standard pattern for <strong>central account administration</strong></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="warn-box">
+      <span class="icon">⚠</span>
+      <p><strong>Exam trap:</strong> If you <em>invite</em> an existing account into your organization, the role is <strong>NOT</strong> automatically created — you must create it manually in that account.</p>
+    </div>
+  </section>
+
+  <!-- 3. FEATURE MODES -->
+  <section>
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <h2>Feature Modes</h2>
+    </div>
+
+    <div class="mode-grid">
+      <div class="mode-card billing">
+        <h3>Consolidated Billing Only</h3>
+        <ul class="clean">
+          <li>Single payment method for all accounts</li>
+          <li>Pricing benefits from aggregated usage (volume discounts)</li>
+          <li>Reserved Instance &amp; Savings Plans sharing</li>
+          <li><strong>No SCP support</strong></li>
+        </ul>
+      </div>
+      <div class="mode-card full">
+        <h3>All Features ★ (Default)</h3>
+        <ul class="clean">
+          <li>Includes everything in Consolidated Billing</li>
+          <li>Enables <strong>Service Control Policies (SCPs)</strong></li>
+          <li>Invited accounts must <strong>explicitly approve</strong></li>
+          <li>Can apply SCP to <strong>prevent accounts from leaving</strong> the org</li>
+          <li><strong>Cannot switch back</strong> to Consolidated Billing only</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. RESERVED INSTANCES & BILLING -->
+  <section>
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <h2>Reserved Instances &amp; Consolidated Billing</h2>
+    </div>
+
+    <div class="card">
+      <ul class="clean">
+        <li>Consolidated billing treats <strong>all accounts as one</strong> for pricing tiers and RI discounts</li>
+        <li>All accounts can benefit from RIs or Savings Plans purchased by <strong>any account</strong> in the org</li>
+        <li>Management Account can <strong>turn off RI / Savings Plans sharing</strong> for any account</li>
+        <li>To share a discount, <strong>both accounts must have sharing turned on</strong></li>
+        <li>Volume discounts (S3, Data Transfer) are computed across the <strong>entire organization</strong></li>
+      </ul>
+    </div>
+
+    <div class="ok-box">
+      <span class="icon">💡</span>
+      <p><strong>Pattern:</strong> Purchase RIs in a central account and let all member accounts benefit — cost optimization without duplicating reservations.</p>
+    </div>
+  </section>
+
+  <!-- 5. MOVING ACCOUNTS -->
+  <section>
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <h2>Moving Accounts Between Organizations</h2>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <p>The <strong>member account must leave</strong> the old organization (or the old org removes it)</p>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <p>The <strong>new organization sends an invite</strong> to the member account</p>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <p>The <strong>member account accepts the invite</strong> and joins the new organization</p>
+      </div>
+    </div>
+
+    <div class="warn-box" style="margin-top:12px;">
+      <span class="icon">⚠</span>
+      <p><strong>Remember:</strong> An account can only belong to <strong>one organization</strong> at a time. It must fully leave the old org before it can join another. An SCP can <strong>prevent accounts from leaving</strong> — use this to enforce membership.</p>
+    </div>
+  </section>
+
+  <!-- 6. SCPs — MAIN SECTION -->
+  <section>
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <h2>Service Control Policies (SCP) ★ Most Tested</h2>
+    </div>
+
+    <div class="key-box">
+      <div class="label">Exam One-liner</div>
+      <p>SCPs define the <strong>maximum permissions boundary</strong> for accounts and OUs. They do not grant permissions — they restrict what IAM can allow. An action must be permitted by both the SCP <em>and</em> an IAM policy to succeed.</p>
+    </div>
+
+    <div class="card-grid">
+      <div class="card">
+        <h3>What SCPs do</h3>
+        <ul class="clean">
+          <li>Define <strong>allowlist or blocklist</strong> of IAM actions</li>
+          <li>Applied at <strong>OU or Account</strong> level</li>
+          <li>Affect <strong>all Users, Roles, and root user</strong> in the account</li>
+          <li>Inherited hierarchically — child OUs/accounts get intersection of all parent SCPs</li>
+          <li>Require an <strong>explicit Allow</strong> from Root through each OU in the path</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>What SCPs do NOT do</h3>
+        <ul class="clean">
+          <li><strong>Do not apply</strong> to the Management Account — ever</li>
+          <li><strong>Do not affect service-linked roles</strong> (e.g. Config, GuardDuty integration roles)</li>
+          <li><strong>Do not grant permissions</strong> — only restrict them</li>
+          <li>Do not affect the <strong>Organizations service itself</strong> in the management account</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- SCP Inheritance example -->
+    <div style="margin-bottom:12px;">
+      <div class="code-label">SCP Inheritance — how the hierarchy resolves</div>
+      <div class="scp-diagram">
+        <div class="scp-row">
+          <div class="scp-label root">Root OU</div>
+          <div class="scp-content">SCP: <span class="allow">FullAWSAccess</span> (Allow *) — default; applies to everything below</div>
+        </div>
+        <div class="scp-row">
+          <div class="scp-label mgmt">Mgmt Account</div>
+          <div class="scp-content"><span class="allow">No SCPs apply</span> — management account is always exempt</div>
+        </div>
+        <div class="scp-row">
+          <div class="scp-label ou">OU (Sandbox)</div>
+          <div class="scp-content">Additional SCPs: <span class="deny">Deny S3</span>, <span class="allow">Allow EC2</span></div>
+        </div>
+        <div class="scp-row">
+          <div class="scp-label acct">Account A (in Sandbox)</div>
+          <div class="scp-content">Effective: <span class="allow">Everything allowed</span> <span class="deny">EXCEPT S3</span> (inherited from Sandbox OU) <span class="deny">EXCEPT EC2</span> if Sandbox also denies</div>
+        </div>
+        <div class="scp-row">
+          <div class="scp-label ou">OU (Workloads → Prod)</div>
+          <div class="scp-content"><span class="allow">FullAWSAccess</span> — no additional restrictions</div>
+        </div>
+        <div class="scp-row">
+          <div class="scp-label acct">Accounts E &amp; F (in Prod)</div>
+          <div class="scp-content"><span class="allow">Can do anything</span> — no deny SCPs in their path</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCP strategies -->
+    <div class="two-col">
+      <div>
+        <div class="code-label">Blocklist strategy (deny specific actions)</div>
+        <div class="code-block"><span class="cm">// Allow everything, then deny specific services</span>
+{
+  <span class="kw">"Statement"</span>: [
+    {
+      <span class="kw">"Effect"</span>: <span class="str">"Allow"</span>,
+      <span class="kw">"Action"</span>: <span class="str">"*"</span>,
+      <span class="kw">"Resource"</span>: <span class="str">"*"</span>
+    },
+    {
+      <span class="kw">"Sid"</span>: <span class="str">"DenyDynamoDB"</span>,
+      <span class="kw">"Effect"</span>: <span class="str">"Deny"</span>,
+      <span class="kw">"Action"</span>: <span class="str">"dynamodb:*"</span>,
+      <span class="kw">"Resource"</span>: <span class="str">"*"</span>
+    }
+  ]
+}</div>
+      </div>
+      <div>
+        <div class="code-label">Allowlist strategy (permit only specific services)</div>
+        <div class="code-block"><span class="cm">// Remove FullAWSAccess, then allow only these</span>
+{
+  <span class="kw">"Statement"</span>: [
+    {
+      <span class="kw">"Effect"</span>: <span class="str">"Allow"</span>,
+      <span class="kw">"Action"</span>: [
+        <span class="str">"ec2:*"</span>,
+        <span class="str">"cloudwatch:*"</span>
+      ],
+      <span class="kw">"Resource"</span>: <span class="str">"*"</span>
+    }
+  ]
+}</div>
+      </div>
+    </div>
+
+    <div class="warn-box">
+      <span class="icon">⚠</span>
+      <p><strong>Default SCP:</strong> Every new account/OU inherits a <code>FullAWSAccess</code> allow-all policy. You must <strong>explicitly add deny SCPs</strong> or <strong>remove FullAWSAccess and replace with allowlist</strong> to restrict permissions.</p>
+    </div>
+
+    <div class="card">
+      <h3>Common SCP use cases for exam</h3>
+      <ul class="clean">
+        <li><strong>Deny leaving org</strong> — <code>Deny organizations:LeaveOrganization</code> on all member OUs</li>
+        <li><strong>Region lock</strong> — deny all actions unless <code>aws:RequestedRegion</code> matches allowed regions</li>
+        <li><strong>Prevent disabling security services</strong> — deny <code>cloudtrail:StopLogging</code>, <code>config:DeleteConfigurationRecorder</code>, <code>guardduty:DeleteDetector</code></li>
+        <li><strong>Restrict to approved instance types</strong> — deny <code>ec2:RunInstances</code> unless instance type matches</li>
+        <li><strong>Enforce PCI compliance</strong> — deny services not in PCI scope explicitly</li>
+        <li><strong>Require MFA</strong> — deny all actions unless <code>aws:MultiFactorAuthPresent</code> is true</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 7. MULTI-ACCOUNT STRATEGIES -->
+  <section>
+    <div class="section-header">
+      <span class="section-num">07</span>
+      <h2>Multi-Account Strategies</h2>
+    </div>
+
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>Strategy</th>
+          <th>OU Structure</th>
+          <th>Best For</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Business Unit</td>
+          <td>Sales OU → Sales Acct 1 &amp; 2; Retail OU → …; Finance OU → …</td>
+          <td>Large enterprises with distinct business lines needing billing separation</td>
+        </tr>
+        <tr>
+          <td>Environmental Lifecycle</td>
+          <td>Prod OU, Dev OU, Test OU — each with member accounts</td>
+          <td>Software teams; enforces blast radius isolation between environments</td>
+        </tr>
+        <tr>
+          <td>Project-Based</td>
+          <td>Project 1 OU, Project 2 OU, Project 3 OU</td>
+          <td>Agencies / consultancies with client or project isolation requirements</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="card" style="margin-top:12px;">
+      <h3>Centralized logging architecture (exam pattern)</h3>
+      <ul class="clean">
+        <li><strong>CloudTrail</strong> enabled on all accounts → logs sent to a <strong>central S3 account</strong></li>
+        <li><strong>CloudWatch Logs</strong> from all accounts → forwarded to a <strong>central logging account</strong></li>
+        <li>Use <strong>S3 bucket policy</strong> in the logging account to allow cross-account writes</li>
+        <li>Security team has read access only to the central account — member accounts cannot delete logs</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 8. AWS SERVICES INTEGRATION -->
+  <section>
+    <div class="section-header">
+      <span class="section-num">08</span>
+      <h2>Services That Integrate with Organizations</h2>
+    </div>
+
+    <div class="card-grid">
+      <div class="card">
+        <h3>Governance &amp; Security</h3>
+        <ul class="clean">
+          <li><strong>AWS Config</strong> — Aggregators, Org Rules, Conformance Packs</li>
+          <li><strong>AWS CloudTrail</strong> — Org-level trail covers all accounts</li>
+          <li><strong>AWS GuardDuty</strong> — Org-level threat detection, delegated admin</li>
+          <li><strong>AWS Security Hub</strong> — Aggregated security findings across accounts</li>
+          <li><strong>AWS IAM Access Analyzer</strong> — Org-level external access analysis</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Operations &amp; Deployment</h3>
+        <ul class="clean">
+          <li><strong>CloudFormation StackSets</strong> — deploy stacks to multiple accounts/regions</li>
+          <li><strong>AWS SSO / IAM Identity Center</strong> — centralized access management</li>
+          <li><strong>AWS RAM</strong> — share resources (VPCs, Transit Gateways) org-wide</li>
+          <li><strong>Service Catalog</strong> — share portfolios across accounts</li>
+          <li><strong>Firewall Manager</strong> — org-level WAF and Security Group policies</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="ok-box">
+      <span class="icon">💡</span>
+      <p><strong>Delegated Administrator pattern:</strong> Instead of using the Management Account for every service, designate a <strong>member account</strong> as the admin for services like GuardDuty, Security Hub, Config, and Firewall Manager. This is AWS best practice — keep the Management Account clean.</p>
+    </div>
+  </section>
+
+  <!-- 9. TAG POLICIES -->
+  <section>
+    <div class="section-header">
+      <span class="section-num">09</span>
+      <h2>Tag Policies &amp; Other Policy Types</h2>
+    </div>
+
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>Policy Type</th>
+          <th>Purpose</th>
+          <th>Key Detail</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>SCP</td>
+          <td>Restrict IAM permissions boundary</td>
+          <td>Does not grant permissions; does not affect Management Account</td>
+        </tr>
+        <tr>
+          <td>Tag Policy</td>
+          <td>Enforce tagging standards across accounts</td>
+          <td>Define allowed tag keys/values; non-compliant resources are flagged (not blocked by default)</td>
+        </tr>
+        <tr>
+          <td>Backup Policy</td>
+          <td>Enforce AWS Backup plans across accounts</td>
+          <td>Applied org-wide; ensures compliance with backup requirements</td>
+        </tr>
+        <tr>
+          <td>AI Services Opt-out</td>
+          <td>Control AWS AI service data usage</td>
+          <td>Opt accounts out of using their data to train AWS AI models</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 10. EXAM CHEAT SHEET -->
+  <section>
+    <div class="section-header">
+      <span class="section-num">10</span>
+      <h2>Exam Cheat Sheet</h2>
+    </div>
+
+    <div class="cheat-grid">
+      <div class="warn-box" style="margin:0;">
+        <span class="icon">✗</span>
+        <p>SCPs <strong>never apply</strong> to the Management Account — not even a Deny at root level</p>
+      </div>
+      <div class="warn-box" style="margin:0;">
+        <span class="icon">✗</span>
+        <p>SCPs <strong>don't affect service-linked roles</strong> — these always bypass SCPs</p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p>Default SCP is <strong>FullAWSAccess</strong> (allow all). You must explicitly add restrictions</p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p><strong>Both</strong> SCP and IAM policy must allow an action — most restrictive wins</p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p><strong>OrganizationAccountAccessRole</strong> auto-created for new accounts; manual for invited ones</p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p>All Features mode <strong>cannot revert</strong> to Consolidated Billing only</p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p><strong>Delegated Administrator</strong> — use member accounts to administer org services (not management acct)</p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p>RI/Savings Plans sharing: <strong>both accounts</strong> must have sharing enabled</p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p><strong>CloudFormation StackSets</strong> — primary tool to deploy resources across org accounts/regions</p>
+      </div>
+      <div class="warn-box" style="margin:0;">
+        <span class="icon">✗</span>
+        <p>Account can only be in <strong>one organization</strong> at a time — must leave old org first</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

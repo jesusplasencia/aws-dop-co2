@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS GuardDuty — DOP-C02 Study Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a; --surface: #111827; --surface2: #1a2235; --border: #1e3a5f;
+    --accent: #f59e0b; --accent2: #38bdf8; --accent3: #4ade80;
+    --danger: #f87171; --purple: #a78bfa; --orange: #fb923c;
+    --muted: #64748b; --text: #e2e8f0; --text-dim: #94a3b8;
+    --mono: 'IBM Plex Mono', monospace; --sans: 'IBM Plex Sans', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 14px; line-height: 1.6; }
+  body::before {
+    content: ''; position: fixed; inset: 0;
+    background-image: linear-gradient(rgba(56,189,248,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(56,189,248,.03) 1px,transparent 1px);
+    background-size: 40px 40px; pointer-events: none; z-index: 0;
+  }
+  .page { position: relative; z-index: 1; max-width: 960px; margin: 0 auto; padding: 40px 24px 80px; }
+
+  header { border-left: 3px solid var(--accent); padding-left: 20px; margin-bottom: 48px; }
+  .exam-tag { font-family: var(--mono); font-size: 11px; color: var(--accent); letter-spacing: .15em; text-transform: uppercase; margin-bottom: 8px; }
+  h1 { font-size: 32px; font-weight: 700; color: #fff; letter-spacing: -.5px; }
+  h1 span { color: var(--accent2); }
+  .subtitle { color: var(--text-dim); font-size: 13px; margin-top: 8px; font-family: var(--mono); }
+
+  section { margin-bottom: 36px; }
+  .section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  .section-num { font-family: var(--mono); font-size: 11px; color: var(--accent); background: rgba(245,158,11,.1); border: 1px solid rgba(245,158,11,.3); padding: 2px 8px; border-radius: 3px; }
+  h2 { font-size: 16px; font-weight: 700; color: #fff; letter-spacing: .02em; text-transform: uppercase; }
+  h3 { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 10px; text-transform: uppercase; letter-spacing: .05em; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 18px 20px; margin-bottom: 12px; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); gap: 12px; margin-bottom: 12px; }
+
+  .key-box { background: linear-gradient(135deg,rgba(56,189,248,.06),rgba(56,189,248,.02)); border: 1px solid rgba(56,189,248,.25); border-radius: 6px; padding: 16px 20px; margin-bottom: 12px; }
+  .key-box .label { font-family: var(--mono); font-size: 10px; color: var(--accent2); letter-spacing: .12em; text-transform: uppercase; margin-bottom: 6px; }
+
+  .warn-box { background: rgba(248,113,113,.06); border: 1px solid rgba(248,113,113,.25); border-radius: 6px; padding: 12px 16px; margin-bottom: 12px; display: flex; gap: 10px; align-items: flex-start; }
+  .warn-box .icon { color: var(--danger); flex-shrink: 0; margin-top: 1px; }
+  .warn-box p { color: var(--text-dim); font-size: 13px; }
+  .warn-box strong { color: var(--danger); }
+
+  .ok-box { background: rgba(74,222,128,.05); border: 1px solid rgba(74,222,128,.2); border-radius: 6px; padding: 12px 16px; margin-bottom: 12px; display: flex; gap: 10px; align-items: flex-start; }
+  .ok-box .icon { color: var(--accent3); flex-shrink: 0; margin-top: 1px; }
+  .ok-box p { color: var(--text-dim); font-size: 13px; }
+  .ok-box strong { color: var(--accent3); }
+
+  ul.clean { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+  ul.clean li { display: flex; gap: 10px; color: var(--text-dim); font-size: 13px; align-items: flex-start; }
+  ul.clean li::before { content: '→'; color: var(--accent2); font-family: var(--mono); flex-shrink: 0; margin-top: 1px; }
+  ul.clean li strong { color: var(--text); }
+
+  .pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  .pill { font-family: var(--mono); font-size: 11px; padding: 3px 10px; border-radius: 20px; border: 1px solid; }
+  .pill.blue   { color: var(--accent2); border-color: rgba(56,189,248,.3);  background: rgba(56,189,248,.07); }
+  .pill.amber  { color: var(--accent);  border-color: rgba(245,158,11,.3);  background: rgba(245,158,11,.07); }
+  .pill.green  { color: var(--accent3); border-color: rgba(74,222,128,.3);  background: rgba(74,222,128,.07); }
+  .pill.red    { color: var(--danger);  border-color: rgba(248,113,113,.3); background: rgba(248,113,113,.07); }
+  .pill.purple { color: var(--purple);  border-color: rgba(167,139,250,.3); background: rgba(167,139,250,.07); }
+  .pill.orange { color: var(--orange);  border-color: rgba(251,146,60,.3);  background: rgba(251,146,60,.07); }
+
+  /* Data sources grid */
+  .ds-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); gap: 10px; margin-bottom: 12px; }
+  .ds-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 5px; padding: 12px 14px; }
+  .ds-item .ds-label { font-family: var(--mono); font-size: 11px; font-weight: 600; margin-bottom: 4px; }
+  .ds-item p { font-size: 11px; color: var(--text-dim); }
+  .ds-item.always .ds-label { color: var(--accent3); }
+  .ds-item.optional .ds-label { color: var(--accent); }
+
+  /* Finding type cards */
+  .ft-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+  .ft-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 5px; padding: 12px 14px; }
+  .ft-card .ft-resource { font-family: var(--mono); font-size: 11px; font-weight: 600; margin-bottom: 6px; }
+  .ft-card.ec2     .ft-resource { color: var(--accent); }
+  .ft-card.iam     .ft-resource { color: var(--danger); }
+  .ft-card.k8s     .ft-resource { color: var(--accent2); }
+  .ft-card.malware .ft-resource { color: var(--purple); }
+  .ft-card.rds     .ft-resource { color: var(--accent3); }
+  .ft-card.s3      .ft-resource { color: var(--orange); }
+  .ft-example { font-family: var(--mono); font-size: 10px; color: var(--muted); background: rgba(255,255,255,.03); border: 1px solid var(--border); border-radius: 3px; padding: 4px 8px; margin-top: 6px; display: block; }
+
+  /* Finding convention */
+  .finding-conv { display: flex; flex-wrap: wrap; gap: 6px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; font-family: var(--mono); font-size: 12px; margin-bottom: 12px; align-items: center; }
+  .fc-part { padding: 4px 10px; border-radius: 3px; font-size: 11px; white-space: nowrap; }
+  .fc-part.tp { background: rgba(248,113,113,.12); border: 1px solid rgba(248,113,113,.3); color: var(--danger); }
+  .fc-part.rt { background: rgba(245,158,11,.1);  border: 1px solid rgba(245,158,11,.3); color: var(--accent); }
+  .fc-part.tf { background: rgba(56,189,248,.08); border: 1px solid rgba(56,189,248,.3); color: var(--accent2); }
+  .fc-part.dm { background: rgba(74,222,128,.07); border: 1px solid rgba(74,222,128,.3); color: var(--accent3); }
+  .fc-sep { color: var(--muted); }
+
+  /* Severity bar */
+  .sev-bar { display: flex; height: 32px; border-radius: 5px; overflow: hidden; margin-bottom: 8px; }
+  .sev-seg { display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 11px; font-weight: 600; }
+  .sev-seg.low  { background: rgba(74,222,128,.2);  border: 1px solid rgba(74,222,128,.3);  color: var(--accent3); flex: 4; }
+  .sev-seg.med  { background: rgba(245,158,11,.2);  border: 1px solid rgba(245,158,11,.3);  color: var(--accent); flex: 3; }
+  .sev-seg.high { background: rgba(248,113,113,.2); border: 1px solid rgba(248,113,113,.3); color: var(--danger); flex: 3; }
+
+  /* Flow */
+  .flow { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; font-size: 12px; margin-bottom: 12px; }
+  .fn { background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 5px 12px; color: var(--text); font-family: var(--mono); font-size: 11px; white-space: nowrap; }
+  .fn.hi  { border-color: rgba(56,189,248,.5);  color: var(--accent2); }
+  .fn.act { border-color: rgba(74,222,128,.4);  color: var(--accent3); }
+  .fn.pur { border-color: rgba(167,139,250,.4); color: var(--purple); }
+  .fn.trg { border-color: rgba(245,158,11,.4);  color: var(--accent); }
+  .fn.red { border-color: rgba(248,113,113,.4); color: var(--danger); }
+  .fa { color: var(--muted); font-size: 14px; }
+
+  /* Compare table */
+  .compare-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 12px; }
+  .compare-table th { background: var(--surface2); color: var(--accent2); font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; padding: 10px 14px; text-align: left; border: 1px solid var(--border); }
+  .compare-table td { padding: 9px 14px; border: 1px solid var(--border); color: var(--text-dim); vertical-align: top; }
+  .compare-table tr:nth-child(even) td { background: rgba(255,255,255,.02); }
+  .compare-table td:first-child { color: var(--text); font-weight: 600; font-size: 12px; white-space: nowrap; }
+
+  /* Cheat grid */
+  .cheat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  @media (max-width: 640px) {
+    .two-col, .cheat-grid, .ft-grid { grid-template-columns: 1fr; }
+    h1 { font-size: 24px; }
+  }
+  .home-btn { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--purple); background: rgba(167,139,250,.1); border: 1px solid rgba(167,139,250,.3); padding: 5px 12px; border-radius: 3px; text-decoration: none; letter-spacing: .5px; transition: all .15s; }
+  .home-btn:hover { background: var(--purple); color: #fff; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <div class="exam-tag">DOP-C02 · Security · Medium Frequency</div>
+    <h1>AWS <span>GuardDuty</span></h1>
+    <div class="subtitle">Threat Detection · ML · Findings · Multi-Account · Automated Response</div>
+    <a href="../index.html" class="home-btn">&#8592; Home</a>
+  </header>
+
+  <!-- 1. CORE CONCEPT -->
+  <section>
+    <div class="section-header"><span class="section-num">01</span><h2>Core Concept</h2></div>
+
+    <div class="key-box">
+      <div class="label">Exam One-liner</div>
+      <p>GuardDuty is an <strong>intelligent threat detection service</strong> that continuously analyzes AWS data sources using ML, anomaly detection, and threat intelligence feeds — with <strong>no agents to install</strong>. It generates <em>Findings</em> for suspicious activity, which you act on via EventBridge.</p>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <h3>Key characteristics</h3>
+        <ul class="clean">
+          <li>Enabled with <strong>one click</strong> — 30-day free trial, no software to install</li>
+          <li>Pulls data <strong>independently</strong> from CloudTrail, VPC Flow Logs, DNS Logs — does NOT read your existing log groups</li>
+          <li>Uses <strong>ML + anomaly detection + 3rd-party threat intel</strong> (e.g. CrowdStrike, Proofpoint IP/domain lists)</li>
+          <li>Dedicated finding type for <strong>CryptoCurrency mining</strong> attacks</li>
+          <li>Generate <strong>sample findings</strong> to test your EventBridge automations before real incidents</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>What GuardDuty does NOT do</h3>
+        <ul class="clean">
+          <li><strong>Does not block traffic</strong> — it only detects and reports. Use WAF/SGs/NACLs to block.</li>
+          <li><strong>Does not read your CloudWatch log groups</strong> — it gets an independent stream from the service APIs</li>
+          <li><strong>Does not require CloudTrail to be enabled</strong> — GuardDuty creates its own independent feed</li>
+          <li>Does not auto-remediate — you build automation via EventBridge</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. DATA SOURCES -->
+  <section>
+    <div class="section-header"><span class="section-num">02</span><h2>Data Sources</h2></div>
+
+    <p style="color:var(--text-dim);font-size:13px;margin-bottom:12px;">GuardDuty pulls independent streams — enabling CloudTrail or Flow Logs in your account is <strong>not required</strong> for GuardDuty to analyze them.</p>
+
+    <h3 style="margin-bottom:8px;">Always-On (included by default)</h3>
+    <div class="ds-grid">
+      <div class="ds-item always">
+        <div class="ds-label">CloudTrail Management Events</div>
+        <p>Unusual API calls, unauthorized deployments, CreateVPC, CreateTrail, StopLogging…</p>
+      </div>
+      <div class="ds-item always">
+        <div class="ds-label">CloudTrail S3 Data Events</div>
+        <p>GetObject, PutObject, DeleteObject on S3 — detect unusual S3 access patterns</p>
+      </div>
+      <div class="ds-item always">
+        <div class="ds-label">VPC Flow Logs</div>
+        <p>Unusual internal traffic, unexpected port scans, communication with known malicious IPs</p>
+      </div>
+      <div class="ds-item always">
+        <div class="ds-label">DNS Logs</div>
+        <p>Compromised EC2 sending encoded data via DNS queries (DNS tunneling / exfiltration)</p>
+      </div>
+    </div>
+
+    <h3 style="margin-bottom:8px;">Optional Features (extra cost, enabled per account)</h3>
+    <div class="ds-grid">
+      <div class="ds-item optional">
+        <div class="ds-label">EKS Audit Logs</div>
+        <p>K8s API activity — detect malicious callers, privilege escalation in clusters</p>
+      </div>
+      <div class="ds-item optional">
+        <div class="ds-label">RDS &amp; Aurora Login Activity</div>
+        <p>Anomalous database login attempts, unusual login patterns</p>
+      </div>
+      <div class="ds-item optional">
+        <div class="ds-label">EBS Malware Protection</div>
+        <p>On-demand malware scan of EBS volumes attached to EC2/ECS — scans on new finding</p>
+      </div>
+      <div class="ds-item optional">
+        <div class="ds-label">Lambda Network Activity</div>
+        <p>Network calls from Lambda functions — detect unusual outbound connections</p>
+      </div>
+      <div class="ds-item optional">
+        <div class="ds-label">S3 Data Events (extended)</div>
+        <p>All S3 API operations for deeper data access monitoring</p>
+      </div>
+    </div>
+
+    <div class="warn-box">
+      <span class="icon">⚠</span>
+      <p><strong>Exam trap:</strong> GuardDuty pulls an <em>independent stream</em> of CloudTrail and Flow Log data. Even if you delete your CloudTrail trail, GuardDuty still receives events. Disabling GuardDuty itself (not CloudTrail) stops detection.</p>
+    </div>
+  </section>
+
+  <!-- 3. FINDINGS -->
+  <section>
+    <div class="section-header"><span class="section-num">03</span><h2>Findings</h2></div>
+
+    <div class="key-box">
+      <div class="label">Exam Key</div>
+      <p>A <strong>Finding</strong> is a potential security issue. Every finding has a <strong>severity score 0.1–8+</strong>, a structured naming convention, and is published to both the <strong>administrator account</strong> and the <strong>originating member account</strong>.</p>
+    </div>
+
+    <!-- Severity -->
+    <h3 style="margin-bottom:8px;">Severity Scale</h3>
+    <div class="sev-bar">
+      <div class="sev-seg low">Low  0.1–3.9</div>
+      <div class="sev-seg med">Medium  4.0–6.9</div>
+      <div class="sev-seg high">High  7.0–8.9+</div>
+    </div>
+    <p style="color:var(--text-dim);font-size:12px;margin-bottom:16px;">High severity → treat as active threat. Medium → investigate. Low → informational.</p>
+
+    <!-- Naming convention -->
+    <h3 style="margin-bottom:8px;">Finding Naming Convention</h3>
+    <div class="finding-conv">
+      <span class="fc-part tp">ThreatPurpose</span>
+      <span class="fc-sep">:</span>
+      <span class="fc-part rt">ResourceTypeAffected</span>
+      <span class="fc-sep">/</span>
+      <span class="fc-part tf">ThreatFamilyName</span>
+      <span class="fc-sep">.</span>
+      <span class="fc-part dm">DetectionMechanism!Artifact</span>
+    </div>
+    <div class="two-col">
+      <div class="card" style="margin-bottom:0;">
+        <ul class="clean">
+          <li><strong>ThreatPurpose</strong> — primary goal: <code>Backdoor</code>, <code>CryptoCurrency</code>, <code>Trojan</code>, <code>UnauthorizedAccess</code>, <code>Stealth</code>, <code>Policy</code></li>
+          <li><strong>ResourceTypeAffected</strong> — target: <code>EC2</code>, <code>IAMUser</code>, <code>S3</code>, <code>Kubernetes</code>, <code>RDS</code>, <code>ECS</code></li>
+          <li><strong>ThreatFamilyName</strong> — activity: <code>SSHBruteForce</code>, <code>NetworkPortUnusual</code>, <code>MaliciousIPCaller</code></li>
+        </ul>
+      </div>
+      <div class="card" style="margin-bottom:0;">
+        <ul class="clean">
+          <li><strong>DetectionMechanism</strong> — how detected: <code>Tcp</code>, <code>Udp</code>, <code>DNS</code></li>
+          <li><strong>Artifact</strong> — element used: <code>DNS</code>, <code>CustomThreatIntel</code></li>
+        </ul>
+        <div style="margin-top:12px;">
+          <div class="ft-example">CryptoCurrency:EC2/BitcoinToo.B!DNS</div>
+          <div class="ft-example">UnauthorizedAccess:EC2/SSHBruteForce</div>
+          <div class="ft-example">Stealth:IAMUser/CloudTrailLoggingDisabled</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. FINDING TYPES BY RESOURCE -->
+  <section>
+    <div class="section-header"><span class="section-num">04</span><h2>Finding Types by Resource</h2></div>
+
+    <div class="ft-grid">
+      <div class="ft-card ec2">
+        <div class="ft-resource">EC2 Findings</div>
+        <ul class="clean">
+          <li>SSH/RDP brute force attempts</li>
+          <li>CryptoCurrency mining via DNS</li>
+          <li>Unusual network traffic, port scanning</li>
+          <li>Communication with known C&amp;C servers</li>
+        </ul>
+        <span class="ft-example">UnauthorizedAccess:EC2/SSHBruteForce</span>
+        <span class="ft-example">CryptoCurrency:EC2/BitcoinToo.B!DNS</span>
+      </div>
+      <div class="ft-card iam">
+        <div class="ft-resource">IAM Findings</div>
+        <ul class="clean">
+          <li>CloudTrail logging disabled</li>
+          <li>Root credential usage</li>
+          <li>Anomalous API calls from unusual locations</li>
+          <li>Password policy weakened</li>
+        </ul>
+        <span class="ft-example">Stealth:IAMUser/CloudTrailLoggingDisabled</span>
+        <span class="ft-example">Policy:IAMUser/RootCredentialUsage</span>
+      </div>
+      <div class="ft-card k8s">
+        <div class="ft-resource">Kubernetes (EKS) Findings</div>
+        <ul class="clean">
+          <li>Malicious IP caller to K8s API</li>
+          <li>Privilege escalation in cluster</li>
+          <li>Anonymous access to API server</li>
+          <li>Exec into pods from unusual IP</li>
+        </ul>
+        <span class="ft-example">CredentialAccess:Kubernetes/MaliciousIPCaller</span>
+      </div>
+      <div class="ft-card malware">
+        <div class="ft-resource">Malware Protection Findings</div>
+        <ul class="clean">
+          <li>Suspicious file detected on EBS volume</li>
+          <li>Covers EC2 and ECS workloads</li>
+          <li>Triggered on new GuardDuty finding, then EBS snapshot scanned</li>
+        </ul>
+        <span class="ft-example">Execution:EC2/SuspiciousFile</span>
+        <span class="ft-example">Execution:ECS/SuspiciousFile</span>
+      </div>
+      <div class="ft-card rds">
+        <div class="ft-resource">RDS Protection Findings</div>
+        <ul class="clean">
+          <li>Anomalous database login behavior</li>
+          <li>Successful login after many failures (brute force)</li>
+          <li>Login from known malicious IP</li>
+        </ul>
+        <span class="ft-example">CredentialAccess:RDS/AnomalousBehavior.SuccessfulLogin</span>
+      </div>
+      <div class="ft-card s3">
+        <div class="ft-resource">S3 Findings</div>
+        <ul class="clean">
+          <li>Public access block disabled on bucket</li>
+          <li>Pentest tools accessing S3</li>
+          <li>Anomalous data access patterns</li>
+          <li>Known malicious IP accessing data</li>
+        </ul>
+        <span class="ft-example">Policy:S3/AccountBlockPublicAccessDisabled</span>
+        <span class="ft-example">PenTest:S3/KaliLinux</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. MULTI-ACCOUNT -->
+  <section>
+    <div class="section-header"><span class="section-num">05</span><h2>Multi-Account Strategy</h2></div>
+
+    <div class="key-box">
+      <div class="label">Exam Key</div>
+      <p>In an AWS Organization, designate a <strong>member account as GuardDuty Delegated Administrator</strong> — not the management account. This admin account centrally manages GuardDuty across all org accounts and aggregates all findings.</p>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <h3>Two ways to associate member accounts</h3>
+        <ul class="clean">
+          <li><strong>Via AWS Organizations</strong> — auto-enrolls all current and future accounts; recommended</li>
+          <li><strong>GuardDuty invitation</strong> — manually invite specific accounts; for accounts outside the org</li>
+        </ul>
+        <h3 style="margin-top:14px;">Admin account capabilities</h3>
+        <ul class="clean">
+          <li>Add and remove member accounts</li>
+          <li>Enable/disable GuardDuty in member accounts</li>
+          <li>Manage <strong>suppression rules</strong> — suppress known-safe findings</li>
+          <li>Manage <strong>trusted IP lists</strong> — IPs that never trigger findings</li>
+          <li>Manage <strong>threat lists</strong> — custom malicious IP/domain lists</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Findings aggregation</h3>
+        <ul class="clean">
+          <li>Findings published to <strong>both</strong> the admin account and the originating member account</li>
+          <li>Admin account sees findings from all member accounts in one pane</li>
+          <li>Member accounts can only see their own findings</li>
+          <li>EventBridge rules in the <strong>admin account</strong> can react to findings from all accounts</li>
+          <li>Use <strong>Finding Aggregation</strong> to pull findings from multiple regions into one region</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="warn-box">
+      <span class="icon">⚠</span>
+      <p><strong>Exam trap:</strong> The GuardDuty Delegated Administrator is a <strong>member account</strong>, not the management account. Member accounts <strong>cannot disable GuardDuty</strong> once enrolled via Organizations — only the admin account can.</p>
+    </div>
+  </section>
+
+  <!-- 6. AUTOMATED RESPONSE -->
+  <section>
+    <div class="section-header"><span class="section-num">06</span><h2>Findings Automated Response</h2></div>
+
+    <div class="code-label" style="font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;">Standard response pipeline</div>
+    <div class="flow">
+      <span class="fn red">GuardDuty Finding</span>
+      <span class="fa">→</span>
+      <span class="fn hi">EventBridge Rule</span>
+      <span class="fa">→</span>
+      <span class="fn trg">SNS → email/Slack/PagerDuty</span>
+    </div>
+    <div class="flow" style="margin-top:-6px;">
+      <span class="fn red">GuardDuty Finding</span>
+      <span class="fa">→</span>
+      <span class="fn hi">EventBridge Rule</span>
+      <span class="fa">→</span>
+      <span class="fn act">Lambda → auto-remediate</span>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <h3>Common automated response patterns</h3>
+        <ul class="clean">
+          <li><strong>EC2 compromise</strong> → Lambda isolates instance (remove from SG, snapshot EBS)</li>
+          <li><strong>IAM credential leaked</strong> → Lambda revokes all sessions, disables access key</li>
+          <li><strong>S3 bucket made public</strong> → Lambda re-enables Block Public Access</li>
+          <li><strong>CryptoCurrency finding</strong> → Lambda terminates instance, notifies ops team</li>
+          <li><strong>CloudTrail disabled</strong> → Lambda re-enables CloudTrail</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Suppression rules</h3>
+        <ul class="clean">
+          <li>Filter out known-safe findings to reduce noise</li>
+          <li>Define by: finding type, resource, region, severity, tags</li>
+          <li>Suppressed findings are <strong>archived, not deleted</strong> — still visible if needed</li>
+          <li>Example: suppress <code>Recon:EC2/PortProbeUnprotectedPort</code> for dev accounts</li>
+          <li>Only the <strong>admin account</strong> can create org-wide suppression rules</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="ok-box">
+      <span class="icon">💡</span>
+      <p><strong>Sample findings:</strong> GuardDuty can generate synthetic sample findings for every finding type — use this to validate your EventBridge rules and Lambda automations before a real incident occurs. Critical for testing runbooks.</p>
+    </div>
+  </section>
+
+  <!-- 7. CLOUDFORMATION DEPLOYMENT -->
+  <section>
+    <div class="section-header"><span class="section-num">07</span><h2>CloudFormation Deployment Pattern</h2></div>
+
+    <div class="key-box">
+      <div class="label">Exam Key</div>
+      <p>Deploying GuardDuty via CloudFormation requires a <strong>Custom Resource (Lambda)</strong> to handle the idempotency problem — the native <code>AWS::GuardDuty::Detector</code> resource fails if GuardDuty is already enabled. Use StackSets to deploy org-wide.</p>
+    </div>
+
+    <div class="flow">
+      <span class="fn trg">CFN Stack / StackSet</span>
+      <span class="fa">→</span>
+      <span class="fn hi">Custom Resource</span>
+      <span class="fa">→</span>
+      <span class="fn act">Lambda: check if enabled</span>
+      <span class="fa">→</span>
+      <span class="fn act">Enable only if NOT already on</span>
+      <span class="fa">→</span>
+      <span class="fn hi">GuardDuty Detector ✓</span>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <h3>Why Custom Resource is needed</h3>
+        <ul class="clean">
+          <li><code>AWS::GuardDuty::Detector</code> <strong>fails with error</strong> if GuardDuty already enabled in that account</li>
+          <li>Using a Lambda Custom Resource allows <strong>conditional logic</strong> before creating</li>
+          <li>Lambda checks <code>guardduty:ListDetectors</code> → if empty, enable; if exists, skip</li>
+          <li>This makes the deployment <strong>idempotent</strong> — safe to re-run across all accounts</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Org-wide deployment</h3>
+        <ul class="clean">
+          <li>Use <strong>CloudFormation StackSets</strong> to deploy the Custom Resource to all accounts</li>
+          <li>Deploy from the management or delegated admin account</li>
+          <li>Target by OU or all accounts in the org</li>
+          <li>Alternative: use <strong>Firewall Manager</strong> — simpler but less customizable</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. GUARDDUTY vs SECURITY HUB vs INSPECTOR vs MACIE -->
+  <section>
+    <div class="section-header"><span class="section-num">08</span><h2>GuardDuty vs Related Security Services</h2></div>
+
+    <table class="compare-table">
+      <thead><tr><th>Service</th><th>What it detects</th><th>Data sources</th><th>Key distinction</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>GuardDuty</td>
+          <td>Active threats, anomalous behavior, compromised resources</td>
+          <td>CloudTrail, VPC Flow Logs, DNS, EKS, RDS, Lambda</td>
+          <td>Runtime threat detection using ML. Finds active attacks.</td>
+        </tr>
+        <tr>
+          <td>AWS Inspector</td>
+          <td>Vulnerabilities in EC2, Lambda, container images</td>
+          <td>EC2 OS packages, ECR images, Lambda code</td>
+          <td>Vulnerability scanning (CVEs). Not runtime — finds weaknesses before exploitation.</td>
+        </tr>
+        <tr>
+          <td>AWS Macie</td>
+          <td>Sensitive data (PII, credentials) in S3</td>
+          <td>S3 object content</td>
+          <td>Data classification. Finds where sensitive data lives, not threats.</td>
+        </tr>
+        <tr>
+          <td>Security Hub</td>
+          <td>Aggregated findings from multiple services</td>
+          <td>GuardDuty, Inspector, Macie, Config, Firewall Manager</td>
+          <td>SIEM-like aggregation and normalization. Correlates findings, doesn't detect independently.</td>
+        </tr>
+        <tr>
+          <td>AWS Config</td>
+          <td>Resource configuration drift / non-compliance</td>
+          <td>Config recorder</td>
+          <td>Configuration compliance over time. Not threat detection.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 9. EXAM CHEAT SHEET -->
+  <section>
+    <div class="section-header"><span class="section-num">09</span><h2>Exam Cheat Sheet</h2></div>
+
+    <div class="cheat-grid">
+      <div class="warn-box" style="margin:0;">
+        <span class="icon">⚠</span>
+        <p><strong>GuardDuty does NOT block.</strong> It detects and reports. You automate response via EventBridge → Lambda.</p>
+      </div>
+      <div class="warn-box" style="margin:0;">
+        <span class="icon">⚠</span>
+        <p>GuardDuty pulls <strong>independent data streams</strong> — disabling CloudTrail doesn't stop GuardDuty from seeing events.</p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p>Findings published to <strong>both</strong> admin account and originating member account simultaneously.</p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p>Delegated Admin = <strong>member account</strong>, not management account. Members can't disable GuardDuty once enrolled.</p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p><strong>CryptoCurrency</strong> attacks have a dedicated finding type — this is tested as a GuardDuty unique capability.</p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p><strong>DNS tunneling</strong> (data exfil via DNS) detected via DNS Logs data source — unique to GuardDuty.</p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p>CFN deployment: use <strong>Custom Resource (Lambda)</strong> for idempotent enabling. Native resource fails if already enabled.</p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p>Suppression rules: <strong>archive</strong> known-safe findings, not delete. Admin-only for org-wide rules.</p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p><strong>Sample findings</strong> = test your automations. Generate synthetically before real incidents.</p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p>Severity: Low 0.1–3.9 / Medium 4.0–6.9 / High 7.0–8.9+. High = active threat requiring immediate action.</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

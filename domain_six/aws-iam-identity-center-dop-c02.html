@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IAM Identity Center — DOP-C02 Study Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --surface2: #1a2235;
+    --border: #1e3a5f;
+    --accent: #f59e0b;
+    --accent2: #38bdf8;
+    --accent3: #4ade80;
+    --danger: #f87171;
+    --purple: #a78bfa;
+    --muted: #64748b;
+    --text: #e2e8f0;
+    --text-dim: #94a3b8;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 14px; line-height: 1.6; }
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(56,189,248,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(56,189,248,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none; z-index: 0;
+  }
+  .page { position: relative; z-index: 1; max-width: 960px; margin: 0 auto; padding: 40px 24px 80px; }
+
+  header { border-left: 3px solid var(--accent); padding-left: 20px; margin-bottom: 48px; }
+  .exam-tag { font-family: var(--mono); font-size: 11px; color: var(--accent); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 8px; }
+  h1 { font-size: 32px; font-weight: 700; color: #fff; letter-spacing: -0.5px; }
+  h1 span { color: var(--accent2); }
+  .subtitle { color: var(--text-dim); font-size: 13px; margin-top: 8px; font-family: var(--mono); }
+
+  section { margin-bottom: 36px; }
+  .section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  .section-num { font-family: var(--mono); font-size: 11px; color: var(--accent); background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3); padding: 2px 8px; border-radius: 3px; }
+  h2 { font-size: 16px; font-weight: 700; color: #fff; letter-spacing: 0.02em; text-transform: uppercase; }
+  h3 { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 18px 20px; margin-bottom: 12px; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+
+  .key-box { background: linear-gradient(135deg,rgba(56,189,248,0.06),rgba(56,189,248,0.02)); border: 1px solid rgba(56,189,248,0.25); border-radius: 6px; padding: 16px 20px; margin-bottom: 12px; }
+  .key-box .label { font-family: var(--mono); font-size: 10px; color: var(--accent2); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 6px; }
+
+  .warn-box { background: rgba(248,113,113,0.06); border: 1px solid rgba(248,113,113,0.25); border-radius: 6px; padding: 12px 16px; margin-bottom: 12px; display: flex; gap: 10px; align-items: flex-start; }
+  .warn-box .icon { color: var(--danger); flex-shrink: 0; margin-top: 1px; }
+  .warn-box p { color: var(--text-dim); font-size: 13px; }
+  .warn-box strong { color: var(--danger); }
+
+  .ok-box { background: rgba(74,222,128,0.05); border: 1px solid rgba(74,222,128,0.2); border-radius: 6px; padding: 12px 16px; margin-bottom: 12px; display: flex; gap: 10px; align-items: flex-start; }
+  .ok-box .icon { color: var(--accent3); flex-shrink: 0; margin-top: 1px; }
+  .ok-box p { color: var(--text-dim); font-size: 13px; }
+  .ok-box strong { color: var(--accent3); }
+
+  ul.clean { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+  ul.clean li { display: flex; gap: 10px; color: var(--text-dim); font-size: 13px; align-items: flex-start; }
+  ul.clean li::before { content: '→'; color: var(--accent2); font-family: var(--mono); flex-shrink: 0; margin-top: 1px; }
+  ul.clean li strong { color: var(--text); }
+
+  .pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  .pill { font-family: var(--mono); font-size: 11px; padding: 3px 10px; border-radius: 20px; border: 1px solid; }
+  .pill.blue   { color: var(--accent2); border-color: rgba(56,189,248,0.3);  background: rgba(56,189,248,0.07); }
+  .pill.amber  { color: var(--accent);  border-color: rgba(245,158,11,0.3);  background: rgba(245,158,11,0.07); }
+  .pill.green  { color: var(--accent3); border-color: rgba(74,222,128,0.3);  background: rgba(74,222,128,0.07); }
+  .pill.red    { color: var(--danger);  border-color: rgba(248,113,113,0.3); background: rgba(248,113,113,0.07); }
+  .pill.purple { color: var(--purple);  border-color: rgba(167,139,250,0.3); background: rgba(167,139,250,0.07); }
+
+  /* IdP comparison cards */
+  .idp-card { border-radius: 6px; padding: 16px 18px; }
+  .idp-card.builtin  { background: rgba(56,189,248,0.05);  border: 1px solid rgba(56,189,248,0.25); }
+  .idp-card.ad       { background: rgba(245,158,11,0.05);  border: 1px solid rgba(245,158,11,0.25); }
+  .idp-card.saml     { background: rgba(167,139,250,0.05); border: 1px solid rgba(167,139,250,0.25); }
+  .idp-card h3 { margin-bottom: 8px; }
+  .idp-card.builtin h3 { color: var(--accent2); }
+  .idp-card.ad h3      { color: var(--accent); }
+  .idp-card.saml h3    { color: var(--purple); }
+
+  /* Auth flow */
+  .flow { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; font-size: 12px; margin-bottom: 12px; }
+  .flow-node { background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 5px 12px; color: var(--text); font-family: var(--mono); font-size: 11px; white-space: nowrap; }
+  .flow-node.hi  { border-color: rgba(56,189,248,0.5);  color: var(--accent2); }
+  .flow-node.act { border-color: rgba(74,222,128,0.4);  color: var(--accent3); }
+  .flow-node.pur { border-color: rgba(167,139,250,0.4); color: var(--purple); }
+  .flow-node.trg { border-color: rgba(245,158,11,0.4);  color: var(--accent); }
+  .flow-arrow { color: var(--muted); font-size: 14px; }
+
+  /* Permission Set diagram */
+  .ps-diagram { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; align-items: center; gap: 8px; padding: 16px 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; margin-bottom: 12px; }
+  .ps-box { background: var(--surface2); border: 1px solid var(--border); border-radius: 5px; padding: 10px 12px; text-align: center; }
+  .ps-box .ps-label { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
+  .ps-box p { font-size: 11px; color: var(--text-dim); }
+  .ps-box.user .ps-label  { color: var(--accent2); }
+  .ps-box.pset .ps-label  { color: var(--accent); }
+  .ps-box.acct .ps-label  { color: var(--accent3); }
+  .ps-arrow { color: var(--muted); font-size: 20px; text-align: center; }
+
+  /* Code */
+  .code-block { background: #070c18; border: 1px solid var(--border); border-radius: 6px; padding: 14px 16px; font-family: var(--mono); font-size: 12px; color: #7dd3fc; overflow-x: auto; line-height: 1.7; margin-bottom: 12px; }
+  .code-block .kw  { color: #f472b6; }
+  .code-block .val { color: #a5f3fc; }
+  .code-block .str { color: #86efac; }
+  .code-block .cm  { color: #475569; }
+  .code-block .key { color: #fbbf24; }
+  .code-block .var { color: #fb923c; }
+  .code-label { font-family: var(--mono); font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+
+  /* Compare table */
+  .compare-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 12px; }
+  .compare-table th { background: var(--surface2); color: var(--accent2); font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; padding: 10px 14px; text-align: left; border: 1px solid var(--border); }
+  .compare-table td { padding: 9px 14px; border: 1px solid var(--border); color: var(--text-dim); vertical-align: top; }
+  .compare-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+  .compare-table td:first-child { color: var(--text); font-weight: 600; font-size: 12px; white-space: nowrap; }
+
+  /* MFA modes */
+  .mfa-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .mfa-card { border-radius: 6px; padding: 16px 18px; }
+  .mfa-card.always  { background: rgba(248,113,113,0.06); border: 1px solid rgba(248,113,113,0.25); }
+  .mfa-card.context { background: rgba(74,222,128,0.05);  border: 1px solid rgba(74,222,128,0.2); }
+  .mfa-card h3 { margin-bottom: 8px; }
+  .mfa-card.always h3  { color: var(--danger); }
+  .mfa-card.context h3 { color: var(--accent3); }
+
+  /* Cheat grid */
+  .cheat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  @media (max-width: 640px) {
+    .two-col, .three-col, .mfa-grid, .cheat-grid { grid-template-columns: 1fr; }
+    .ps-diagram { grid-template-columns: 1fr; }
+    h1 { font-size: 24px; }
+  }
+  .home-btn { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--purple); background: rgba(167,139,250,.1); border: 1px solid rgba(167,139,250,.3); padding: 5px 12px; border-radius: 3px; text-decoration: none; letter-spacing: .5px; transition: all .15s; }
+  .home-btn:hover { background: var(--purple); color: #fff; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <header>
+    <div class="exam-tag">DOP-C02 · Security &amp; Identity · Medium Frequency</div>
+    <h1>IAM <span>Identity Center</span></h1>
+    <div class="subtitle">SSO · Permission Sets · ABAC · SCIM · MFA · External IdP</div>
+    <a href="../index.html" class="home-btn">&#8592; Home</a>
+  </header>
+
+  <!-- 1. CORE CONCEPT -->
+  <section>
+    <div class="section-header"><span class="section-num">01</span><h2>Core Concept</h2></div>
+
+    <div class="key-box">
+      <div class="label">Exam One-liner</div>
+      <p>IAM Identity Center (successor to AWS SSO) provides <strong>centralized single sign-on</strong> across all AWS accounts in an Organization and SAML 2.0 applications — using one set of credentials managed from one place, with access controlled via <strong>Permission Sets</strong>.</p>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <h3>What it covers (one login for)</h3>
+        <ul class="clean">
+          <li><strong>All AWS accounts</strong> in your AWS Organization</li>
+          <li><strong>SAML 2.0 apps</strong> (Salesforce, Box, Microsoft 365, etc.)</li>
+          <li><strong>EC2 Windows Instances</strong> (RDP via SSO)</li>
+          <li>Custom apps registered via SAML metadata</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Key components</h3>
+        <ul class="clean">
+          <li><strong>Identity Store</strong> — where users/groups live (built-in or synced)</li>
+          <li><strong>Permission Sets</strong> — what access a user/group gets in an account</li>
+          <li><strong>Assignments</strong> — binding of (user/group) + (permission set) + (account/app)</li>
+          <li><strong>Access Portal</strong> — the web UI users log into to access everything</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="ok-box">
+      <span class="icon">💡</span>
+      <p><strong>Relationship with Control Tower:</strong> Control Tower automatically sets up IAM Identity Center as part of the Landing Zone. It is the recommended way to manage human access to multi-account environments — replacing per-account IAM users entirely.</p>
+    </div>
+  </section>
+
+  <!-- 2. IDENTITY PROVIDERS -->
+  <section>
+    <div class="section-header"><span class="section-num">02</span><h2>Identity Providers (IdP)</h2></div>
+
+    <div class="three-col">
+      <div class="idp-card builtin">
+        <h3>Built-in Identity Store</h3>
+        <ul class="clean">
+          <li>Users/groups managed <strong>directly in IAM Identity Center</strong></li>
+          <li>No external dependency</li>
+          <li>Best for AWS-native or small teams</li>
+          <li>Supports MFA natively</li>
+        </ul>
+      </div>
+      <div class="idp-card ad">
+        <h3>AWS Managed Microsoft AD</h3>
+        <ul class="clean">
+          <li>Connect to <strong>on-premises Active Directory</strong> via VPN/Direct Connect</li>
+          <li>2-way trust between on-prem AD and AWS Managed AD</li>
+          <li>Users authenticate with AD credentials</li>
+          <li>Groups synced automatically</li>
+        </ul>
+      </div>
+      <div class="idp-card saml">
+        <h3>External IdP (SAML 2.0)</h3>
+        <ul class="clean">
+          <li>Supports <strong>Okta, Azure AD, OneLogin</strong></li>
+          <li>SAML 2.0 handles <strong>authentication</strong> only</li>
+          <li>Cannot query IdP for users/groups</li>
+          <li>Use <strong>SCIM</strong> to sync users/groups automatically</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="warn-box">
+      <span class="icon">⚠</span>
+      <p><strong>Critical exam trap:</strong> SAML 2.0 alone <strong>cannot provision users/groups</strong> into IAM Identity Center — it only handles the login handshake. Without SCIM, you must manually create matching users/groups. The exam tests this distinction.</p>
+    </div>
+  </section>
+
+  <!-- 3. SCIM -->
+  <section>
+    <div class="section-header"><span class="section-num">03</span><h2>SCIM — Automatic User Provisioning</h2></div>
+
+    <div class="key-box">
+      <div class="label">Exam Key</div>
+      <p><strong>SCIM</strong> (System for Cross-domain Identity Management) automatically syncs user and group identities from an external IdP into IAM Identity Center. It solves the problem that SAML 2.0 alone cannot push user data.</p>
+    </div>
+
+    <div class="code-label">SAML 2.0 + SCIM — how they work together</div>
+    <div class="flow">
+      <span class="flow-node trg">External IdP (Okta/Azure AD)</span>
+      <span class="flow-arrow">──SAML 2.0──▶</span>
+      <span class="flow-node hi">IAM Identity Center</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-node act">Authenticate user ✓</span>
+    </div>
+    <div class="flow" style="margin-top:-6px;">
+      <span class="flow-node trg">External IdP (Okta/Azure AD)</span>
+      <span class="flow-arrow">──SCIM──▶</span>
+      <span class="flow-node hi">IAM Identity Center</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-node act">Sync users &amp; groups ✓</span>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <h3>SCIM details</h3>
+        <ul class="clean">
+          <li>Syncs <strong>create, update, deactivate</strong> of users/groups</li>
+          <li>Must be <strong>supported and enabled</strong> in the external IdP</li>
+          <li>Runs continuously — near real-time sync</li>
+          <li>Okta, Azure AD, OneLogin all support SCIM natively</li>
+          <li>Deprovisioning in IdP → user automatically deactivated in Identity Center</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Without SCIM (SAML only)</h3>
+        <ul class="clean">
+          <li>Must <strong>manually create</strong> every user and group in Identity Center</li>
+          <li>Users/groups must be <strong>identical</strong> to the external IdP</li>
+          <li>No automatic deprovisioning — security risk when employees leave</li>
+          <li>Only viable for small, static user populations</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. PERMISSION SETS -->
+  <section>
+    <div class="section-header"><span class="section-num">04</span><h2>Permission Sets ★ Most Tested</h2></div>
+
+    <div class="key-box">
+      <div class="label">Exam Key</div>
+      <p>A <strong>Permission Set</strong> is a collection of IAM policies (AWS-managed or inline) that defines what a user or group can do in a target AWS account. It is created once and assigned to multiple accounts — IAM Identity Center creates a corresponding IAM role in each target account.</p>
+    </div>
+
+    <!-- Permission Set binding diagram -->
+    <div class="ps-diagram">
+      <div class="ps-box user">
+        <div class="ps-label">User / Group</div>
+        <p>e.g. "DevTeam" group from Okta via SCIM</p>
+      </div>
+      <div class="ps-arrow">+</div>
+      <div class="ps-box pset">
+        <div class="ps-label">Permission Set</div>
+        <p>e.g. "ReadOnlyAccess" (AWS managed policy)</p>
+      </div>
+      <div class="ps-arrow">→</div>
+      <div class="ps-box acct">
+        <div class="ps-label">AWS Account(s)</div>
+        <p>IAM role auto-created in each assigned account</p>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <h3>Permission Set contents</h3>
+        <ul class="clean">
+          <li><strong>AWS Managed Policies</strong> (e.g. <code>AdministratorAccess</code>, <code>ReadOnlyAccess</code>)</li>
+          <li><strong>Customer Managed Policies</strong> (reference by name — must exist in target account)</li>
+          <li><strong>Inline Policy</strong> — JSON defined directly in the permission set</li>
+          <li><strong>Permissions boundary</strong> — optional max permissions cap</li>
+          <li>Session duration configurable (default 1h, max 12h)</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>How it works at login</h3>
+        <ul class="clean">
+          <li>User logs in → sees list of accounts they have access to</li>
+          <li>Selects account + permission set → <strong>gets temporary STS credentials</strong></li>
+          <li>Behind the scenes: Identity Center calls <code>sts:AssumeRole</code> on the auto-created IAM role</li>
+          <li>Role name pattern: <code>AWSReservedSSO_&lt;PermissionSetName&gt;_&lt;hash&gt;</code></li>
+          <li>Users never need long-term IAM credentials</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Multi-account assignment example</h3>
+      <table class="compare-table" style="margin-bottom:0;">
+        <thead><tr><th>Group</th><th>Permission Set</th><th>Account(s)</th><th>Result</th></tr></thead>
+        <tbody>
+          <tr><td>Developers</td><td>PowerUserAccess</td><td>Dev, Test</td><td>Full access except IAM in Dev/Test</td></tr>
+          <tr><td>Developers</td><td>ReadOnlyAccess</td><td>Prod</td><td>Read-only in Prod</td></tr>
+          <tr><td>Ops</td><td>AdministratorAccess</td><td>All accounts</td><td>Full admin everywhere</td></tr>
+          <tr><td>Auditors</td><td>SecurityAudit</td><td>All accounts</td><td>Security read-only org-wide</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 5. ABAC -->
+  <section>
+    <div class="section-header"><span class="section-num">05</span><h2>Attribute-Based Access Control (ABAC)</h2></div>
+
+    <div class="key-box">
+      <div class="label">Exam Key</div>
+      <p>ABAC grants permissions based on <strong>user attributes</strong> (tags on the principal) matching <strong>resource tags</strong>. You define the policy once — access automatically adjusts when attributes change, without updating permission sets.</p>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <div class="code-label">ABAC policy — user can only control EC2s tagged with their project</div>
+        <div class="code-block">{
+  <span class="kw">"Statement"</span>: [
+    {
+      <span class="kw">"Effect"</span>: <span class="str">"Allow"</span>,
+      <span class="kw">"Action"</span>: <span class="str">"ec2:DescribeInstances"</span>,
+      <span class="kw">"Resource"</span>: <span class="str">"*"</span>
+    },
+    {
+      <span class="kw">"Effect"</span>: <span class="str">"Allow"</span>,
+      <span class="kw">"Action"</span>: [<span class="str">"ec2:StartInstances"</span>, <span class="str">"ec2:StopInstances"</span>],
+      <span class="kw">"Resource"</span>: <span class="str">"*"</span>,
+      <span class="kw">"Condition"</span>: {
+        <span class="kw">"StringEquals"</span>: {
+          <span class="cm">// EC2 tag must match user's PrincipalTag</span>
+          <span class="str">"ec2:ResourceTag/AccessProject"</span>:
+            <span class="var">"${aws:PrincipalTag/AccessProject}"</span>
+        }
+      }
+    }
+  ]
+}</div>
+      </div>
+      <div>
+        <div class="card">
+          <h3>ABAC attributes (examples)</h3>
+          <ul class="clean">
+            <li><strong>CostCenter</strong> — user can access resources in their cost center</li>
+            <li><strong>Department</strong> — user can only manage their department's resources</li>
+            <li><strong>Title / Role</strong> — e.g. "Admin" vs "Developer"</li>
+            <li><strong>Locale</strong> — region-based access</li>
+          </ul>
+        </div>
+        <div class="card" style="margin-top:0;">
+          <h3>ABAC vs RBAC — when to use</h3>
+          <ul class="clean">
+            <li><strong>ABAC:</strong> many users/resources, dynamic teams, reduce permission set sprawl</li>
+            <li><strong>RBAC (Permission Sets):</strong> stable teams, coarse-grained access, simpler orgs</li>
+            <li>ABAC requires <strong>consistent tagging discipline</strong> on both users and resources</li>
+            <li>Both can be <strong>combined</strong> — ABAC as a condition inside a Permission Set</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="warn-box">
+      <span class="icon">⚠</span>
+      <p><strong>Exam pattern:</strong> If a scenario says "hundreds of users across many projects and you want to avoid managing hundreds of permission sets" → the answer is <strong>ABAC</strong>. Define once, scale via attribute changes.</p>
+    </div>
+  </section>
+
+  <!-- 6. EXTERNAL IdP / SAML -->
+  <section>
+    <div class="section-header"><span class="section-num">06</span><h2>External IdP &amp; SAML 2.0 Integration</h2></div>
+
+    <div class="code-label">External IdP SSO login flow</div>
+    <div class="flow">
+      <span class="flow-node">User browser</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-node hi">IAM Identity Center portal</span>
+      <span class="flow-arrow">→ SAML AuthnRequest →</span>
+      <span class="flow-node pur">External IdP (Okta)</span>
+      <span class="flow-arrow">→ SAML assertion →</span>
+      <span class="flow-node hi">Identity Center validates</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-node act">Temp credentials issued</span>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <h3>What you configure</h3>
+        <ul class="clean">
+          <li>IdP metadata XML URL or file (uploaded to Identity Center)</li>
+          <li>SP (Service Provider) metadata from Identity Center → uploaded to IdP</li>
+          <li>ACS (Assertion Consumer Service) URL</li>
+          <li>Attribute mappings (e.g. email → username)</li>
+          <li>SCIM endpoint + bearer token (for provisioning)</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>SAML 2.0 limitations to know</h3>
+        <ul class="clean">
+          <li><strong>Cannot query IdP</strong> for user/group lists — SAML is one-way (assertion only)</li>
+          <li>No real-time deprovisioning via SAML — need SCIM for that</li>
+          <li>SAML assertions contain <strong>attributes</strong> that can be mapped to Identity Center attributes (used for ABAC)</li>
+          <li>Session validity tied to SAML assertion lifetime</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. MFA -->
+  <section>
+    <div class="section-header"><span class="section-num">07</span><h2>Multi-Factor Authentication (MFA)</h2></div>
+
+    <div class="mfa-grid">
+      <div class="mfa-card always">
+        <h3>Always-On (Every Sign-in)</h3>
+        <ul class="clean">
+          <li>MFA required on <strong>every single login</strong> regardless of context</li>
+          <li>Highest security posture</li>
+          <li>Best for privileged/admin users</li>
+          <li>May cause friction for high-frequency users</li>
+        </ul>
+      </div>
+      <div class="mfa-card context">
+        <h3>Context-Aware (Adaptive MFA)</h3>
+        <ul class="clean">
+          <li>MFA triggered <strong>only when sign-in context changes</strong></li>
+          <li>Analyzes: device, location, IP, browser fingerprint</li>
+          <li>Trusted context = no MFA prompt (smoother UX)</li>
+          <li>New device / unusual location = MFA required</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Supported MFA methods</h3>
+      <div class="pills">
+        <span class="pill blue">TOTP (Authenticator apps)</span>
+        <span class="pill blue">FIDO2 / WebAuthn (hardware keys, biometrics)</span>
+        <span class="pill amber">SMS (via external IdP only)</span>
+        <span class="pill purple">Built-in authenticator (Touch ID, Face ID)</span>
+      </div>
+    </div>
+
+    <div class="ok-box">
+      <span class="icon">💡</span>
+      <p>When using an <strong>external IdP</strong> (Okta, Azure AD), MFA is typically enforced at the IdP level, not in IAM Identity Center. Identity Center MFA applies to the <strong>built-in identity store</strong> only.</p>
+    </div>
+  </section>
+
+  <!-- 8. APPLICATION ASSIGNMENTS -->
+  <section>
+    <div class="section-header"><span class="section-num">08</span><h2>Application Assignments</h2></div>
+
+    <div class="card">
+      <h3>How to add a SAML 2.0 application</h3>
+      <ul class="clean">
+        <li>Add the application in the Identity Center console (pre-built catalog or custom)</li>
+        <li>Provide the <strong>ACS URL, Entity ID, and start URL</strong> from the application</li>
+        <li>Download Identity Center <strong>metadata / certificates</strong> → upload to the app</li>
+        <li>Assign users/groups to the application using the same Assignment model</li>
+        <li>Optionally map <strong>user attributes</strong> to SAML claims (e.g. email, department)</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>Supported application types</h3>
+      <div class="pills">
+        <span class="pill blue">Salesforce</span>
+        <span class="pill blue">Microsoft 365</span>
+        <span class="pill blue">Box</span>
+        <span class="pill blue">Slack</span>
+        <span class="pill amber">Custom SAML 2.0 apps</span>
+        <span class="pill green">AWS CLI v2 (via SSO profile)</span>
+        <span class="pill green">EC2 Windows (RDP SSO)</span>
+      </div>
+    </div>
+
+    <div class="ok-box">
+      <span class="icon">💡</span>
+      <p><strong>AWS CLI v2 SSO:</strong> Developers run <code>aws sso login --profile my-profile</code> → browser opens Access Portal → selects account/role → temporary credentials cached locally. No long-term keys needed.</p>
+    </div>
+  </section>
+
+  <!-- 9. IAM IDENTITY CENTER vs IAM -->
+  <section>
+    <div class="section-header"><span class="section-num">09</span><h2>IAM Identity Center vs IAM Users</h2></div>
+
+    <p style="color:var(--text-dim);font-size:13px;margin-bottom:14px;">The exam tests when to use Identity Center vs traditional IAM users/roles.</p>
+
+    <table class="compare-table">
+      <thead><tr><th>Dimension</th><th>IAM Identity Center</th><th>IAM Users / Roles</th></tr></thead>
+      <tbody>
+        <tr><td>Scope</td><td>Cross-account, org-wide SSO</td><td>Single account</td></tr>
+        <tr><td>Credentials</td><td>Temporary (STS via SSO)</td><td>Long-term access keys possible</td></tr>
+        <tr><td>Management</td><td>Centralized (one place)</td><td>Per-account (distributed)</td></tr>
+        <tr><td>Human users</td><td>✅ Recommended</td><td>⚠ Discouraged (long-term keys)</td></tr>
+        <tr><td>Machine / apps</td><td>❌ Not designed for this</td><td>✅ IAM Roles for workloads</td></tr>
+        <tr><td>MFA</td><td>Built-in, centrally enforced</td><td>Per-user setup, per-account</td></tr>
+        <tr><td>Audit</td><td>CloudTrail + Identity Center events</td><td>CloudTrail per account</td></tr>
+        <tr><td>External IdP</td><td>✅ SAML 2.0 + SCIM</td><td>Requires custom federation setup</td></tr>
+      </tbody>
+    </table>
+
+    <div class="warn-box">
+      <span class="icon">⚠</span>
+      <p><strong>Exam rule:</strong> Any scenario involving <strong>human users accessing multiple AWS accounts</strong> → use IAM Identity Center. Any scenario involving <strong>applications, services, or automation</strong> → use IAM Roles with instance profiles or task roles.</p>
+    </div>
+  </section>
+
+  <!-- 10. EXAM CHEAT SHEET -->
+  <section>
+    <div class="section-header"><span class="section-num">10</span><h2>Exam Cheat Sheet</h2></div>
+
+    <div class="cheat-grid">
+      <div class="warn-box" style="margin:0;">
+        <span class="icon">⚠</span>
+        <p><strong>SAML 2.0 alone ≠ user provisioning.</strong> Add SCIM to auto-sync users/groups from Okta/Azure AD.</p>
+      </div>
+      <div class="warn-box" style="margin:0;">
+        <span class="icon">⚠</span>
+        <p>IAM Identity Center is <strong>not for machine/service access</strong> — use IAM Roles for that.</p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p><strong>Permission Set</strong> → IAM role auto-created in each assigned account. Users get temp STS creds.</p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p><strong>ABAC</strong> = define policy once, scale access by changing user attributes. No new permission sets needed.</p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p>Context-aware MFA = adaptive (triggers on new device/location). Always-on = every login, no exceptions.</p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p>Control Tower + Identity Center = standard multi-account human access pattern on DOP-C02.</p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p>One Permission Set can be assigned to <strong>many accounts</strong> — one assignment per (user/group + account).</p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p>External IdP MFA: enforced at IdP (Okta/Azure) — Identity Center MFA only applies to built-in store.</p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p><code>aws sso login</code> (CLI v2) → browser → Access Portal → temp creds. <strong>No long-term keys.</strong></p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p>SCIM deprovisioning: user removed in IdP → <strong>automatically deactivated</strong> in Identity Center.</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

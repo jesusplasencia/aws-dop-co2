@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS Firewall Manager — DOP-C02 Study Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --surface2: #1a2235;
+    --border: #1e3a5f;
+    --accent: #f59e0b;
+    --accent2: #38bdf8;
+    --accent3: #4ade80;
+    --danger: #f87171;
+    --purple: #a78bfa;
+    --muted: #64748b;
+    --text: #e2e8f0;
+    --text-dim: #94a3b8;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 14px; line-height: 1.6; }
+  body::before {
+    content: ''; position: fixed; inset: 0;
+    background-image: linear-gradient(rgba(56,189,248,0.03) 1px,transparent 1px), linear-gradient(90deg,rgba(56,189,248,0.03) 1px,transparent 1px);
+    background-size: 40px 40px; pointer-events: none; z-index: 0;
+  }
+  .page { position: relative; z-index: 1; max-width: 960px; margin: 0 auto; padding: 40px 24px 80px; }
+
+  header { border-left: 3px solid var(--accent); padding-left: 20px; margin-bottom: 48px; }
+  .exam-tag { font-family: var(--mono); font-size: 11px; color: var(--accent); letter-spacing: .15em; text-transform: uppercase; margin-bottom: 8px; }
+  h1 { font-size: 32px; font-weight: 700; color: #fff; letter-spacing: -.5px; }
+  h1 span { color: var(--accent2); }
+  .subtitle { color: var(--text-dim); font-size: 13px; margin-top: 8px; font-family: var(--mono); }
+
+  section { margin-bottom: 36px; }
+  .section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  .section-num { font-family: var(--mono); font-size: 11px; color: var(--accent); background: rgba(245,158,11,.1); border: 1px solid rgba(245,158,11,.3); padding: 2px 8px; border-radius: 3px; }
+  h2 { font-size: 16px; font-weight: 700; color: #fff; letter-spacing: .02em; text-transform: uppercase; }
+  h3 { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 10px; text-transform: uppercase; letter-spacing: .05em; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 18px 20px; margin-bottom: 12px; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+
+  .key-box { background: linear-gradient(135deg,rgba(56,189,248,.06),rgba(56,189,248,.02)); border: 1px solid rgba(56,189,248,.25); border-radius: 6px; padding: 16px 20px; margin-bottom: 12px; }
+  .key-box .label { font-family: var(--mono); font-size: 10px; color: var(--accent2); letter-spacing: .12em; text-transform: uppercase; margin-bottom: 6px; }
+
+  .warn-box { background: rgba(248,113,113,.06); border: 1px solid rgba(248,113,113,.25); border-radius: 6px; padding: 12px 16px; margin-bottom: 12px; display: flex; gap: 10px; align-items: flex-start; }
+  .warn-box .icon { color: var(--danger); flex-shrink: 0; margin-top: 1px; }
+  .warn-box p { color: var(--text-dim); font-size: 13px; }
+  .warn-box strong { color: var(--danger); }
+
+  .ok-box { background: rgba(74,222,128,.05); border: 1px solid rgba(74,222,128,.2); border-radius: 6px; padding: 12px 16px; margin-bottom: 12px; display: flex; gap: 10px; align-items: flex-start; }
+  .ok-box .icon { color: var(--accent3); flex-shrink: 0; margin-top: 1px; }
+  .ok-box p { color: var(--text-dim); font-size: 13px; }
+  .ok-box strong { color: var(--accent3); }
+
+  ul.clean { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+  ul.clean li { display: flex; gap: 10px; color: var(--text-dim); font-size: 13px; align-items: flex-start; }
+  ul.clean li::before { content: '→'; color: var(--accent2); font-family: var(--mono); flex-shrink: 0; margin-top: 1px; }
+  ul.clean li strong { color: var(--text); }
+
+  .pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  .pill { font-family: var(--mono); font-size: 11px; padding: 3px 10px; border-radius: 20px; border: 1px solid; }
+  .pill.blue   { color: var(--accent2); border-color: rgba(56,189,248,.3);  background: rgba(56,189,248,.07); }
+  .pill.amber  { color: var(--accent);  border-color: rgba(245,158,11,.3);  background: rgba(245,158,11,.07); }
+  .pill.green  { color: var(--accent3); border-color: rgba(74,222,128,.3);  background: rgba(74,222,128,.07); }
+  .pill.red    { color: var(--danger);  border-color: rgba(248,113,113,.3); background: rgba(248,113,113,.07); }
+  .pill.purple { color: var(--purple);  border-color: rgba(167,139,250,.3); background: rgba(167,139,250,.07); }
+
+  /* Policy type cards */
+  .pt-card { border-radius: 6px; padding: 16px 18px; margin-bottom: 10px; }
+  .pt-card.waf     { background: rgba(245,158,11,.05);  border: 1px solid rgba(245,158,11,.3); }
+  .pt-card.shield  { background: rgba(248,113,113,.05); border: 1px solid rgba(248,113,113,.3); }
+  .pt-card.sg      { background: rgba(56,189,248,.05);  border: 1px solid rgba(56,189,248,.25); }
+  .pt-card.nfw     { background: rgba(74,222,128,.05);  border: 1px solid rgba(74,222,128,.25); }
+  .pt-card.dns     { background: rgba(167,139,250,.05); border: 1px solid rgba(167,139,250,.3); }
+  .pt-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .pt-badge { font-family: var(--mono); font-size: 10px; padding: 2px 8px; border-radius: 3px; text-transform: uppercase; letter-spacing: .08em; }
+  .pt-card.waf    .pt-badge { background: rgba(245,158,11,.15);  color: var(--accent); }
+  .pt-card.shield .pt-badge { background: rgba(248,113,113,.15); color: var(--danger); }
+  .pt-card.sg     .pt-badge { background: rgba(56,189,248,.15);  color: var(--accent2); }
+  .pt-card.nfw    .pt-badge { background: rgba(74,222,128,.12);  color: var(--accent3); }
+  .pt-card.dns    .pt-badge { background: rgba(167,139,250,.15); color: var(--purple); }
+  .pt-title { font-size: 13px; font-weight: 700; color: var(--text); }
+
+  /* Remediation mode row */
+  .rem-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 10px; }
+  .rem-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 8px 10px; }
+  .rem-item .ri-label { font-family: var(--mono); font-size: 10px; color: var(--accent2); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 4px; }
+  .rem-item p { font-size: 11px; color: var(--text-dim); }
+
+  /* Decision table */
+  .compare-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 12px; }
+  .compare-table th { background: var(--surface2); color: var(--accent2); font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; padding: 10px 14px; text-align: left; border: 1px solid var(--border); }
+  .compare-table td { padding: 9px 14px; border: 1px solid var(--border); color: var(--text-dim); vertical-align: top; }
+  .compare-table tr:nth-child(even) td { background: rgba(255,255,255,.02); }
+  .compare-table td:first-child { color: var(--text); font-weight: 600; font-size: 12px; white-space: nowrap; }
+
+  /* Org requirement visual */
+  .req-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap: 10px; margin-bottom: 12px; }
+  .req-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 5px; padding: 12px 14px; }
+  .req-item .ri2-num { font-family: var(--mono); font-size: 18px; font-weight: 700; color: var(--accent); margin-bottom: 4px; }
+  .req-item p { font-size: 12px; color: var(--text-dim); }
+
+  /* Cheat grid */
+  .cheat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  /* NW firewall modes */
+  .nfw-modes { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 10px; }
+  .nfw-mode { border-radius: 5px; padding: 10px 12px; }
+  .nfw-mode.dist { background: rgba(56,189,248,.06);  border: 1px solid rgba(56,189,248,.25); }
+  .nfw-mode.cent { background: rgba(74,222,128,.05);  border: 1px solid rgba(74,222,128,.2); }
+  .nfw-mode.imp  { background: rgba(167,139,250,.05); border: 1px solid rgba(167,139,250,.25); }
+  .nfw-mode .nm-label { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 5px; }
+  .nfw-mode.dist .nm-label { color: var(--accent2); }
+  .nfw-mode.cent .nm-label { color: var(--accent3); }
+  .nfw-mode.imp  .nm-label { color: var(--purple); }
+  .nfw-mode p { font-size: 12px; color: var(--text-dim); }
+
+  @media (max-width: 640px) {
+    .two-col, .three-col, .cheat-grid, .rem-row, .nfw-modes { grid-template-columns: 1fr; }
+    h1 { font-size: 24px; }
+  }
+  .home-btn { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--purple); background: rgba(167,139,250,.1); border: 1px solid rgba(167,139,250,.3); padding: 5px 12px; border-radius: 3px; text-decoration: none; letter-spacing: .5px; transition: all .15s; }
+  .home-btn:hover { background: var(--purple); color: #fff; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <header>
+    <div class="exam-tag">DOP-C02 · Security · Low-Medium Frequency</div>
+    <h1>AWS Firewall <span>Manager</span></h1>
+    <div class="subtitle">Org-wide Security Policies · WAF · Shield · SGs · Network Firewall · DNS Firewall</div>
+    <a href="../index.html" class="home-btn">&#8592; Home</a>
+  </header>
+
+  <!-- 1. CORE CONCEPT -->
+  <section>
+    <div class="section-header"><span class="section-num">01</span><h2>Core Concept</h2></div>
+
+    <div class="key-box">
+      <div class="label">Exam One-liner</div>
+      <p>AWS Firewall Manager is a <strong>centralized security policy management service</strong> that automatically applies firewall rules (WAF, Shield, SGs, Network Firewall, DNS Firewall) across <strong>all accounts in an AWS Organization</strong> — including accounts that join in the future.</p>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <h3>Core value proposition</h3>
+        <ul class="clean">
+          <li>Define a security policy <strong>once</strong> → auto-applied to all current and future accounts</li>
+          <li>Policies created at the <strong>region level</strong> (except Shield Advanced — global)</li>
+          <li><strong>New resources</strong> created in any account get rules applied automatically</li>
+          <li>Centralized <strong>compliance dashboard</strong> — see which accounts are non-compliant</li>
+          <li>Each policy type covers different AWS services and resource types</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Prerequisites (all required)</h3>
+        <ul class="clean">
+          <li><strong>AWS Organizations</strong> with <em>All Features</em> enabled</li>
+          <li>Designate a <strong>Firewall Manager administrator account</strong> (not necessarily management acct)</li>
+          <li><strong>AWS Config enabled</strong> in every member account and region (Firewall Manager uses it for compliance checking)</li>
+          <li>For Shield Advanced: <strong>subscribe to Shield Advanced</strong> in the admin account</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="warn-box">
+      <span class="icon">⚠</span>
+      <p><strong>Config is mandatory.</strong> If AWS Config is not enabled in an account/region, Firewall Manager cannot assess or enforce compliance there. This is a common exam distractor — Config must be pre-enabled.</p>
+    </div>
+  </section>
+
+  <!-- 2. POLICY TYPES -->
+  <section>
+    <div class="section-header"><span class="section-num">02</span><h2>Security Policy Types ★ Most Tested</h2></div>
+
+    <!-- WAF -->
+    <div class="pt-card waf">
+      <div class="pt-header">
+        <span class="pt-badge">Policy Type</span>
+        <span class="pt-title">AWS WAF</span>
+      </div>
+      <ul class="clean">
+        <li>Enforce WAF Web ACLs on <strong>ALBs, API Gateways, CloudFront</strong> across all accounts</li>
+        <li>Choose: apply a common Web ACL, or allow accounts to add their own rules within a managed baseline</li>
+      </ul>
+      <div class="rem-row">
+        <div class="rem-item">
+          <div class="ri-label">Identify Only</div>
+          <p>Create the WebACL in each account — do NOT associate it to any resources. Assessment mode.</p>
+        </div>
+        <div class="rem-item">
+          <div class="ri-label">Auto Remediate</div>
+          <p>Create WebACL AND automatically associate it to all matching existing resources.</p>
+        </div>
+        <div class="rem-item">
+          <div class="ri-label">New Resources</div>
+          <p>Automatically apply WebACL to any new ALB/API GW/CloudFront resource as it is created.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Shield Advanced -->
+    <div class="pt-card shield">
+      <div class="pt-header">
+        <span class="pt-badge">Policy Type</span>
+        <span class="pt-title">AWS Shield Advanced</span>
+      </div>
+      <ul class="clean">
+        <li>Enforce Shield Advanced protection across all accounts on: <strong>ALB, CLB, NLB, Elastic IP, CloudFront</strong></li>
+        <li>Two modes: <strong>view compliance only</strong> (assess impact) or <strong>auto remediate</strong></li>
+        <li>Includes access to <strong>Shield Response Team (SRT)</strong> and cost protection for DDoS-related scaling</li>
+        <li>Auto-creates WAF Web ACLs to respond to active DDoS events (Shield Advanced + WAF integration)</li>
+      </ul>
+    </div>
+
+    <!-- Security Groups -->
+    <div class="pt-card sg">
+      <div class="pt-header">
+        <span class="pt-badge">Policy Type</span>
+        <span class="pt-title">Security Groups — 3 Sub-types</span>
+      </div>
+      <div class="three-col" style="margin-top:10px;margin-bottom:0;">
+        <div class="card" style="margin-bottom:0;background:var(--surface2);">
+          <h3>Common Security Groups</h3>
+          <ul class="clean">
+            <li>Apply a <strong>common baseline SG</strong> to all EC2, ALB, and ENI resources org-wide</li>
+            <li>Enforces that a specific SG is always attached</li>
+          </ul>
+        </div>
+        <div class="card" style="margin-bottom:0;background:var(--surface2);">
+          <h3>Auditing Policy</h3>
+          <ul class="clean">
+            <li>Check that SG rules comply with your defined standards across all accounts</li>
+            <li>Detects overly permissive rules (e.g. 0.0.0.0/0 on port 22)</li>
+          </ul>
+        </div>
+        <div class="card" style="margin-bottom:0;background:var(--surface2);">
+          <h3>Usage Audit Policy</h3>
+          <ul class="clean">
+            <li>Identify <strong>unused or redundant SGs</strong> across the org</li>
+            <li>Optionally <strong>auto-clean up</strong> orphaned SGs</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Network Firewall -->
+    <div class="pt-card nfw">
+      <div class="pt-header">
+        <span class="pt-badge">Policy Type</span>
+        <span class="pt-title">AWS Network Firewall</span>
+      </div>
+      <ul class="clean">
+        <li>Centrally manage <strong>VPC-level stateful/stateless</strong> firewalls across all accounts in the org</li>
+        <li>Provides L3–L7 inspection: IP/port filtering, protocol detection, domain-based filtering, IPS/IDS</li>
+      </ul>
+      <div class="nfw-modes">
+        <div class="nfw-mode dist">
+          <div class="nm-label">Distributed</div>
+          <p>Creates and maintains a firewall endpoint <strong>in each VPC</strong>. Traffic stays local.</p>
+        </div>
+        <div class="nfw-mode cent">
+          <div class="nm-label">Centralized</div>
+          <p>Single firewall endpoint in a <strong>central/inspection VPC</strong>. Traffic routed through it via TGW.</p>
+        </div>
+        <div class="nfw-mode imp">
+          <div class="nm-label">Import Existing</div>
+          <p>Onboard existing Network Firewalls using <strong>Resource Sets</strong>. Manage them via Firewall Manager going forward.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- DNS Firewall -->
+    <div class="pt-card dns">
+      <div class="pt-header">
+        <span class="pt-badge">Policy Type</span>
+        <span class="pt-title">Route 53 Resolver DNS Firewall</span>
+      </div>
+      <ul class="clean">
+        <li>Manage associations between <strong>DNS Firewall Rule Groups and VPCs</strong> across all accounts</li>
+        <li>Block DNS queries to known malicious domains; allow only approved domains (allowlist)</li>
+        <li>Prevents <strong>DNS exfiltration</strong> — data smuggled via DNS queries to attacker-controlled domains</li>
+        <li>Rule groups defined centrally, applied to every VPC in the org automatically</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 3. WAF vs FIREWALL MANAGER vs SHIELD -->
+  <section>
+    <div class="section-header"><span class="section-num">03</span><h2>WAF vs Firewall Manager vs Shield — Decision Guide</h2></div>
+
+    <p style="color:var(--text-dim);font-size:13px;margin-bottom:14px;">These three services are <strong style="color:var(--accent)">always tested together</strong>. Memorize the decision logic.</p>
+
+    <table class="compare-table">
+      <thead><tr><th>Scenario</th><th>Correct Service</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Protect a single ALB from SQLi/XSS</td>
+          <td style="color:var(--accent);">WAF alone</td>
+          <td>Single resource, granular rule control. No org management needed.</td>
+        </tr>
+        <tr>
+          <td>Apply WAF rules to all ALBs across 50 accounts</td>
+          <td style="color:var(--accent2);">Firewall Manager + WAF</td>
+          <td>Multi-account enforcement. Firewall Manager deploys WAF policy org-wide.</td>
+        </tr>
+        <tr>
+          <td>Frequent DDoS attacks on your infrastructure</td>
+          <td style="color:var(--danger);">Shield Advanced</td>
+          <td>DRT access, attack forensics, cost protection, automatic DDoS mitigation rules.</td>
+        </tr>
+        <tr>
+          <td>Enforce Shield Advanced across all accounts in org</td>
+          <td style="color:var(--accent2);">Firewall Manager + Shield Advanced</td>
+          <td>Firewall Manager enforces Shield Advanced policy across every account automatically.</td>
+        </tr>
+        <tr>
+          <td>Basic DDoS protection at no cost</td>
+          <td style="color:var(--accent3);">Shield Standard</td>
+          <td>Free, automatic for all AWS customers. No configuration needed.</td>
+        </tr>
+        <tr>
+          <td>Enforce consistent SG rules across org</td>
+          <td style="color:var(--accent2);">Firewall Manager (SG policy)</td>
+          <td>Common SG or Auditing policy type enforces baseline rules org-wide.</td>
+        </tr>
+        <tr>
+          <td>Inspect VPC-level traffic (L3–L7) org-wide</td>
+          <td style="color:var(--accent2);">Firewall Manager + Network Firewall</td>
+          <td>Network Firewall policy type in Firewall Manager — distributed or centralized mode.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="ok-box">
+      <span class="icon">💡</span>
+      <p><strong>Exam rule:</strong> If the scenario says "single account / single resource" → WAF (or Shield). If it says "all accounts", "organization", "new accounts automatically", or "centrally manage" → <strong>Firewall Manager</strong> is always part of the answer.</p>
+    </div>
+  </section>
+
+  <!-- 4. HOW COMPLIANCE ENFORCEMENT WORKS -->
+  <section>
+    <div class="section-header"><span class="section-num">04</span><h2>Compliance Enforcement &amp; Remediation</h2></div>
+
+    <div class="key-box">
+      <div class="label">Exam Key</div>
+      <p>Every Firewall Manager policy has two dimensions: <strong>scope</strong> (which accounts/resources it applies to) and <strong>remediation mode</strong> (identify only vs auto-remediate). New resources created in any scoped account are <em>automatically</em> brought into compliance.</p>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <h3>Policy scope options</h3>
+        <ul class="clean">
+          <li><strong>All accounts</strong> in the Organization</li>
+          <li><strong>Specific OUs</strong> — apply to Dev OU but not Prod OU</li>
+          <li><strong>Exclude accounts</strong> — all except listed accounts</li>
+          <li>Filter by <strong>resource tags</strong> — e.g. only resources tagged <code>Env: Prod</code></li>
+          <li>Filter by <strong>resource type</strong> — e.g. only ALBs, not API Gateways</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Compliance dashboard</h3>
+        <ul class="clean">
+          <li>Shows compliant/non-compliant status per account per policy</li>
+          <li>Drill into which specific resources are out of compliance</li>
+          <li>Integrates with <strong>AWS Security Hub</strong> for centralized findings</li>
+          <li>Violations reported via <strong>AWS Config</strong> findings</li>
+          <li>Non-compliance does NOT mean the resource is blocked — only flagged (unless auto-remediate is on)</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. SHIELD ADVANCED DEEP DIVE -->
+  <section>
+    <div class="section-header"><span class="section-num">05</span><h2>Shield Advanced — Key Details</h2></div>
+
+    <div class="two-col">
+      <div class="card">
+        <h3>What Shield Advanced adds over Standard</h3>
+        <ul class="clean">
+          <li><strong>Shield Response Team (SRT)</strong> — 24/7 dedicated DDoS experts</li>
+          <li><strong>Advanced reporting</strong> — attack diagnostics, forensics, near real-time metrics</li>
+          <li><strong>Cost protection</strong> — credits for scaling costs incurred during a DDoS</li>
+          <li><strong>Automatic application layer (L7) mitigation</strong> — auto-creates WAF rules during an attack</li>
+          <li><strong>Proactive engagement</strong> — SRT can contact you during active attacks</li>
+          <li><strong>Global Threat Dashboard</strong> — visibility into current attack landscape</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Pricing &amp; scope</h3>
+        <ul class="clean">
+          <li><strong>$3,000 / month</strong> per organization (not per account)</li>
+          <li>Covers: <strong>ALB, CLB, NLB, Elastic IP, CloudFront, Route 53, Global Accelerator</strong></li>
+          <li>Must explicitly <strong>enable protection per resource</strong> or use Firewall Manager to automate</li>
+          <li>1-year commitment required</li>
+          <li>WAF is included at no extra WAF cost for Shield Advanced-protected resources</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="warn-box">
+      <span class="icon">⚠</span>
+      <p><strong>Shield Standard vs Advanced:</strong> Shield Standard is <em>automatic and free</em> for all accounts — it protects against L3/L4 volumetric attacks. Shield Advanced requires opt-in and payment — it adds L7 protection, SRT, cost protection, and reporting.</p>
+    </div>
+  </section>
+
+  <!-- 6. EXAM CHEAT SHEET -->
+  <section>
+    <div class="section-header"><span class="section-num">06</span><h2>Exam Cheat Sheet</h2></div>
+
+    <div class="cheat-grid">
+      <div class="warn-box" style="margin:0;">
+        <span class="icon">⚠</span>
+        <p><strong>Config must be enabled</strong> in every account/region before Firewall Manager can work there.</p>
+      </div>
+      <div class="warn-box" style="margin:0;">
+        <span class="icon">⚠</span>
+        <p><strong>"Single resource" → WAF/Shield directly. "Org-wide / all accounts" → Firewall Manager.</strong></p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p>Policies created at <strong>region level</strong>. Exception: Shield Advanced policy is global in scope.</p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p>New accounts joining org + new resources created → <strong>automatically covered</strong> by Firewall Manager policies.</p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p>WAF policy has 3 remediation modes: <strong>Identify only</strong> / <strong>Auto remediate existing</strong> / <strong>Auto apply to new</strong>.</p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p>SG policy has 3 sub-types: <strong>Common</strong> (enforce baseline) / <strong>Audit</strong> (check rules) / <strong>Usage Audit</strong> (find orphans).</p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p>Network Firewall modes: <strong>Distributed</strong> (per VPC) vs <strong>Centralized</strong> (inspection VPC via TGW).</p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p>Shield Advanced: <strong>$3K/month/org</strong>, SRT access, cost protection, auto L7 WAF rules during attacks.</p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p>DNS Firewall via Firewall Manager: blocks DNS to malicious domains org-wide, prevents <strong>DNS exfiltration</strong>.</p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p>Firewall Manager admin account ≠ management account. Can be a <strong>dedicated security member account</strong>.</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

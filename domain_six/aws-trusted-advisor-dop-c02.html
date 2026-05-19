@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS Trusted Advisor — DOP-C02 Study Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a; --surface: #111827; --surface2: #1a2235; --border: #1e3a5f;
+    --accent: #f59e0b; --accent2: #38bdf8; --accent3: #4ade80;
+    --danger: #f87171; --purple: #a78bfa; --orange: #fb923c;
+    --muted: #64748b; --text: #e2e8f0; --text-dim: #94a3b8;
+    --mono: 'IBM Plex Mono', monospace; --sans: 'IBM Plex Sans', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 14px; line-height: 1.6; }
+  body::before {
+    content: ''; position: fixed; inset: 0;
+    background-image: linear-gradient(rgba(56,189,248,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(56,189,248,.03) 1px,transparent 1px);
+    background-size: 40px 40px; pointer-events: none; z-index: 0;
+  }
+  .page { position: relative; z-index: 1; max-width: 960px; margin: 0 auto; padding: 40px 24px 80px; }
+
+  header { border-left: 3px solid var(--accent); padding-left: 20px; margin-bottom: 48px; }
+  .exam-tag { font-family: var(--mono); font-size: 11px; color: var(--accent); letter-spacing: .15em; text-transform: uppercase; margin-bottom: 8px; }
+  h1 { font-size: 32px; font-weight: 700; color: #fff; letter-spacing: -.5px; }
+  h1 span { color: var(--accent2); }
+  .subtitle { color: var(--text-dim); font-size: 13px; margin-top: 8px; font-family: var(--mono); }
+
+  section { margin-bottom: 36px; }
+  .section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  .section-num { font-family: var(--mono); font-size: 11px; color: var(--accent); background: rgba(245,158,11,.1); border: 1px solid rgba(245,158,11,.3); padding: 2px 8px; border-radius: 3px; }
+  h2 { font-size: 16px; font-weight: 700; color: #fff; letter-spacing: .02em; text-transform: uppercase; }
+  h3 { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 10px; text-transform: uppercase; letter-spacing: .05em; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 18px 20px; margin-bottom: 12px; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+
+  .key-box { background: linear-gradient(135deg,rgba(56,189,248,.06),rgba(56,189,248,.02)); border: 1px solid rgba(56,189,248,.25); border-radius: 6px; padding: 16px 20px; margin-bottom: 12px; }
+  .key-box .label { font-family: var(--mono); font-size: 10px; color: var(--accent2); letter-spacing: .12em; text-transform: uppercase; margin-bottom: 6px; }
+
+  .warn-box { background: rgba(248,113,113,.06); border: 1px solid rgba(248,113,113,.25); border-radius: 6px; padding: 12px 16px; margin-bottom: 12px; display: flex; gap: 10px; align-items: flex-start; }
+  .warn-box .icon { color: var(--danger); flex-shrink: 0; margin-top: 1px; }
+  .warn-box p { color: var(--text-dim); font-size: 13px; }
+  .warn-box strong { color: var(--danger); }
+
+  .ok-box { background: rgba(74,222,128,.05); border: 1px solid rgba(74,222,128,.2); border-radius: 6px; padding: 12px 16px; margin-bottom: 12px; display: flex; gap: 10px; align-items: flex-start; }
+  .ok-box .icon { color: var(--accent3); flex-shrink: 0; margin-top: 1px; }
+  .ok-box p { color: var(--text-dim); font-size: 13px; }
+  .ok-box strong { color: var(--accent3); }
+
+  ul.clean { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+  ul.clean li { display: flex; gap: 10px; color: var(--text-dim); font-size: 13px; align-items: flex-start; }
+  ul.clean li::before { content: '→'; color: var(--accent2); font-family: var(--mono); flex-shrink: 0; margin-top: 1px; }
+  ul.clean li strong { color: var(--text); }
+
+  /* Support tier table */
+  .tier-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 12px; }
+  .tier-table th { background: var(--surface2); color: var(--accent2); font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; padding: 10px 14px; text-align: left; border: 1px solid var(--border); }
+  .tier-table td { padding: 9px 14px; border: 1px solid var(--border); color: var(--text-dim); vertical-align: middle; font-size: 13px; }
+  .tier-table tr:nth-child(even) td { background: rgba(255,255,255,.02); }
+  .tier-table td:first-child { color: var(--text); font-weight: 600; white-space: nowrap; }
+  .tick { color: var(--accent3); font-weight: 700; }
+  .partial { color: var(--accent); font-weight: 600; }
+  .cross { color: var(--danger); font-weight: 700; }
+
+  /* Category cards */
+  .cat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap: 10px; margin-bottom: 12px; }
+  .cat-card { border-radius: 6px; padding: 14px 16px; }
+  .cat-card.cost   { background: rgba(74,222,128,.05);  border: 1px solid rgba(74,222,128,.25); }
+  .cat-card.perf   { background: rgba(56,189,248,.05);  border: 1px solid rgba(56,189,248,.25); }
+  .cat-card.sec    { background: rgba(248,113,113,.05); border: 1px solid rgba(248,113,113,.25); }
+  .cat-card.fault  { background: rgba(245,158,11,.05);  border: 1px solid rgba(245,158,11,.25); }
+  .cat-card.limits { background: rgba(167,139,250,.05); border: 1px solid rgba(167,139,250,.25); }
+  .cat-card.ops    { background: rgba(251,146,60,.05);  border: 1px solid rgba(251,146,60,.25); }
+  .cat-label { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: .1em; margin-bottom: 6px; }
+  .cat-card.cost   .cat-label { color: var(--accent3); }
+  .cat-card.perf   .cat-label { color: var(--accent2); }
+  .cat-card.sec    .cat-label { color: var(--danger); }
+  .cat-card.fault  .cat-label { color: var(--accent); }
+  .cat-card.limits .cat-label { color: var(--purple); }
+  .cat-card.ops    .cat-label { color: var(--orange); }
+  .cat-title { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+
+  /* Check status indicators */
+  .status-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+  .status-item { display: flex; align-items: center; gap: 8px; background: var(--surface2); border: 1px solid var(--border); border-radius: 5px; padding: 8px 14px; font-size: 12px; }
+  .status-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .dot-green  { background: var(--accent3); }
+  .dot-yellow { background: var(--accent); }
+  .dot-red    { background: var(--danger); }
+  .dot-grey   { background: var(--muted); }
+  .dot-blue   { background: var(--accent2); }
+
+  /* Flow */
+  .flow { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; font-size: 12px; margin-bottom: 12px; }
+  .fn { background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 5px 12px; color: var(--text); font-family: var(--mono); font-size: 11px; white-space: nowrap; }
+  .fn.hi  { border-color: rgba(56,189,248,.5);  color: var(--accent2); }
+  .fn.act { border-color: rgba(74,222,128,.4);  color: var(--accent3); }
+  .fn.pur { border-color: rgba(167,139,250,.4); color: var(--purple); }
+  .fn.trg { border-color: rgba(245,158,11,.4);  color: var(--accent); }
+  .fn.red { border-color: rgba(248,113,113,.4); color: var(--danger); }
+  .fa { color: var(--muted); font-size: 14px; }
+
+  /* Compare table */
+  .compare-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 12px; }
+  .compare-table th { background: var(--surface2); color: var(--accent2); font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; padding: 10px 14px; text-align: left; border: 1px solid var(--border); }
+  .compare-table td { padding: 9px 14px; border: 1px solid var(--border); color: var(--text-dim); vertical-align: top; }
+  .compare-table tr:nth-child(even) td { background: rgba(255,255,255,.02); }
+  .compare-table td:first-child { color: var(--text); font-weight: 600; font-size: 12px; white-space: nowrap; }
+
+  /* Cheat grid */
+  .cheat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  .code-block { background: #070c18; border: 1px solid var(--border); border-radius: 6px; padding: 14px 16px; font-family: var(--mono); font-size: 12px; color: #7dd3fc; overflow-x: auto; line-height: 1.7; margin-bottom: 12px; }
+  .code-block .kw  { color: #f472b6; }
+  .code-block .str { color: #86efac; }
+  .code-block .key { color: #fbbf24; }
+  .code-block .cm  { color: #475569; }
+  .code-label { font-family: var(--mono); font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 6px; }
+
+  @media (max-width: 640px) {
+    .two-col, .three-col, .cheat-grid { grid-template-columns: 1fr; }
+    h1 { font-size: 24px; }
+  }
+  .home-btn { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--purple); background: rgba(167,139,250,.1); border: 1px solid rgba(167,139,250,.3); padding: 5px 12px; border-radius: 3px; text-decoration: none; letter-spacing: .5px; transition: all .15s; }
+  .home-btn:hover { background: var(--purple); color: #fff; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <div class="exam-tag">DOP-C02 · Management &amp; Governance · Low-Medium Frequency</div>
+    <h1>AWS Trusted <span>Advisor</span></h1>
+    <div class="subtitle">Account Assessments · Support Tiers · EventBridge · Service Quotas · Support API</div>
+    <a href="../index.html" class="home-btn">&#8592; Home</a>
+  </header>
+
+  <!-- 1. CORE CONCEPT -->
+  <section>
+    <div class="section-header"><span class="section-num">01</span><h2>Core Concept</h2></div>
+
+    <div class="key-box">
+      <div class="label">Exam One-liner</div>
+      <p>Trusted Advisor provides <strong>account-level best practice recommendations</strong> across 6 categories. The number of checks available depends entirely on your <strong>AWS Support plan</strong>. Automation is done via <strong>EventBridge</strong> (check status changes) and the <strong>Support API</strong> (Business/Enterprise only).</p>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <h3>What it assesses</h3>
+        <ul class="clean">
+          <li>Checks your account against <strong>AWS best practices</strong> — not real-time threats</li>
+          <li>Produces checks with status: <strong>OK, Warning, Error, or Not Available</strong></li>
+          <li>Refreshes checks <strong>weekly</strong> automatically (Business/Enterprise: can trigger via API)</li>
+          <li>Covers <strong>500+ checks</strong> total (most require Business/Enterprise Support)</li>
+          <li>Operates at the <strong>account level</strong> — not across Organizations by default</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>What it does NOT do</h3>
+        <ul class="clean">
+          <li><strong>Does not detect threats</strong> — use GuardDuty for that</li>
+          <li><strong>Does not scan for CVEs</strong> — use Inspector for that</li>
+          <li><strong>Does not enforce compliance</strong> — use Config for that</li>
+          <li><strong>Does not auto-remediate</strong> — you act on recommendations manually or via automation</li>
+          <li>Does not work natively across multiple accounts (use Support API + aggregation)</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. SUPPORT TIER ACCESS ★ -->
+  <section>
+    <div class="section-header"><span class="section-num">02</span><h2>Support Plan Access ★ Most Tested</h2></div>
+
+    <div class="warn-box">
+      <span class="icon">⚠</span>
+      <p><strong>Number-one exam trap:</strong> The access level for Trusted Advisor checks is <strong>entirely gated by Support plan</strong>. Basic/Developer get only 7 core checks. Business/Enterprise get all checks + Support API access.</p>
+    </div>
+
+    <table class="tier-table">
+      <thead>
+        <tr>
+          <th>Support Plan</th>
+          <th>Checks Available</th>
+          <th>Support API</th>
+          <th>Programmatic Refresh</th>
+          <th>EventBridge</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Basic / Developer</td>
+          <td><span class="partial">7 core checks only</span> (Security + Service Limits subset)</td>
+          <td><span class="cross">✗</span></td>
+          <td><span class="cross">✗</span></td>
+          <td><span class="partial">Limited</span></td>
+        </tr>
+        <tr>
+          <td>Business</td>
+          <td><span class="tick">✓ All checks (500+)</span></td>
+          <td><span class="tick">✓</span></td>
+          <td><span class="tick">✓ via API</span></td>
+          <td><span class="tick">✓ Full</span></td>
+        </tr>
+        <tr>
+          <td>Enterprise On-Ramp</td>
+          <td><span class="tick">✓ All checks (500+)</span></td>
+          <td><span class="tick">✓</span></td>
+          <td><span class="tick">✓ via API</span></td>
+          <td><span class="tick">✓ Full</span></td>
+        </tr>
+        <tr>
+          <td>Enterprise</td>
+          <td><span class="tick">✓ All checks (500+)</span></td>
+          <td><span class="tick">✓</span></td>
+          <td><span class="tick">✓ via API</span></td>
+          <td><span class="tick">✓ Full</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="card">
+      <h3>7 Core checks (Basic/Developer — free)</h3>
+      <div class="two-col" style="margin-bottom:0;">
+        <ul class="clean">
+          <li><strong>Security</strong> — S3 bucket permissions (public?)</li>
+          <li><strong>Security</strong> — Security Groups — specific ports unrestricted</li>
+          <li><strong>Security</strong> — IAM use (is IAM being used at all?)</li>
+          <li><strong>Security</strong> — MFA on Root Account</li>
+        </ul>
+        <ul class="clean">
+          <li><strong>Security</strong> — EBS public snapshots</li>
+          <li><strong>Security</strong> — RDS public snapshots</li>
+          <li><strong>Service Limits</strong> — Service limits (1 check)</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. SIX CATEGORIES -->
+  <section>
+    <div class="section-header"><span class="section-num">03</span><h2>Six Check Categories</h2></div>
+
+    <div class="cat-grid">
+      <div class="cat-card cost">
+        <div class="cat-label">Cost Optimization</div>
+        <div class="cat-title">Reduce spend</div>
+        <ul class="clean">
+          <li>Idle EC2 instances (low CPU/network utilization)</li>
+          <li>Unassociated Elastic IP addresses</li>
+          <li>Underutilized EBS volumes</li>
+          <li>Reserved Instance optimization recommendations</li>
+          <li>Unattached load balancers</li>
+        </ul>
+      </div>
+      <div class="cat-card perf">
+        <div class="cat-label">Performance</div>
+        <div class="cat-title">Improve responsiveness</div>
+        <ul class="clean">
+          <li>High-utilization EC2 instances</li>
+          <li>CloudFront content delivery optimization</li>
+          <li>EBS throughput and latency checks</li>
+          <li>RDS instance type recommendations</li>
+        </ul>
+      </div>
+      <div class="cat-card sec">
+        <div class="cat-label">Security</div>
+        <div class="cat-title">Close security gaps</div>
+        <ul class="clean">
+          <li>IAM use, MFA on root, password policy</li>
+          <li>S3 bucket public access</li>
+          <li>Security group open ports (0.0.0.0/0)</li>
+          <li>CloudTrail logging enabled</li>
+          <li>Exposed access keys (GitHub, public repos)</li>
+        </ul>
+      </div>
+      <div class="cat-card fault">
+        <div class="cat-label">Fault Tolerance</div>
+        <div class="cat-title">Increase resilience</div>
+        <ul class="clean">
+          <li>EBS snapshots (last snapshot age)</li>
+          <li>EC2 instances across AZs</li>
+          <li>RDS Multi-AZ enabled</li>
+          <li>Auto Scaling group health checks</li>
+          <li>Route 53 failover records</li>
+        </ul>
+      </div>
+      <div class="cat-card limits">
+        <div class="cat-label">Service Limits</div>
+        <div class="cat-title">Prevent throttling</div>
+        <ul class="clean">
+          <li>50+ service quotas monitored</li>
+          <li>Alerts at <strong>80% and 100%</strong> of limit reached</li>
+          <li>Also shows "unable to retrieve data" status</li>
+          <li>Triggers EventBridge for quota automation</li>
+        </ul>
+      </div>
+      <div class="cat-card ops">
+        <div class="cat-label">Operational Excellence</div>
+        <div class="cat-title">Improve operations</div>
+        <ul class="clean">
+          <li>CloudFormation stack status checks</li>
+          <li>IAM Access Analyzer findings</li>
+          <li>AWS well-architected framework alignment</li>
+          <li>CodeBuild project configurations</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. CHECK STATUS -->
+  <section>
+    <div class="section-header"><span class="section-num">04</span><h2>Check Status Colors</h2></div>
+
+    <div class="status-row">
+      <div class="status-item"><div class="status-dot dot-green"></div><span style="color:var(--accent3);font-weight:600;">Green — OK</span><span style="color:var(--text-dim);margin-left:6px;">No action needed</span></div>
+      <div class="status-item"><div class="status-dot dot-yellow"></div><span style="color:var(--accent);font-weight:600;">Yellow — Warning</span><span style="color:var(--text-dim);margin-left:6px;">Investigation recommended</span></div>
+      <div class="status-item"><div class="status-dot dot-red"></div><span style="color:var(--danger);font-weight:600;">Red — Error</span><span style="color:var(--text-dim);margin-left:6px;">Action required</span></div>
+      <div class="status-item"><div class="status-dot dot-grey"></div><span style="color:var(--muted);font-weight:600;">Grey — Not Available</span><span style="color:var(--text-dim);margin-left:6px;">Insufficient data or excluded</span></div>
+      <div class="status-item"><div class="status-dot dot-blue"></div><span style="color:var(--accent2);font-weight:600;">Blue — Excluded</span><span style="color:var(--text-dim);margin-left:6px;">Resource excluded from check</span></div>
+    </div>
+
+    <div class="ok-box">
+      <span class="icon">💡</span>
+      <p>For <strong>Service Limits</strong> specifically, the states are: <strong>Unable to retrieve data</strong> (grey) → <strong>80% reached</strong> (yellow) → <strong>100% reached</strong> (red). These map to EventBridge event thresholds.</p>
+    </div>
+  </section>
+
+  <!-- 5. EVENTBRIDGE INTEGRATION -->
+  <section>
+    <div class="section-header"><span class="section-num">05</span><h2>EventBridge Integration (Monitoring Architecture)</h2></div>
+
+    <div class="key-box">
+      <div class="label">Exam Key</div>
+      <p>Trusted Advisor publishes events to <strong>EventBridge</strong> when check status changes. This is the standard automation pattern — react to check status changes without polling the Support API.</p>
+    </div>
+
+    <div class="code-label">Monitoring architecture — Low Utilization EC2</div>
+    <div class="flow">
+      <span class="fn trg">Trusted Advisor</span>
+      <span class="fa">→</span>
+      <span class="fn hi">Check status change event</span>
+      <span class="fa">→</span>
+      <span class="fn hi">EventBridge Rule</span>
+      <span class="fa">→</span>
+      <span class="fn act">SNS → notify ops team</span>
+    </div>
+    <div class="flow" style="margin-top:-6px;">
+      <span class="fn trg">Trusted Advisor</span>
+      <span class="fa">→</span>
+      <span class="fn hi">Check status change event</span>
+      <span class="fa">→</span>
+      <span class="fn hi">EventBridge Rule</span>
+      <span class="fa">→</span>
+      <span class="fn act">Lambda → auto-remediate</span>
+    </div>
+
+    <div class="code-label" style="margin-top:12px;">Service Quota monitoring architecture</div>
+    <div class="flow">
+      <span class="fn pur">ServiceLimitUsage metric</span>
+      <span class="fa">→</span>
+      <span class="fn trg">Trusted Advisor (80% / 100%)</span>
+      <span class="fa">→</span>
+      <span class="fn hi">EventBridge</span>
+      <span class="fa">→</span>
+      <span class="fn act">Lambda → request quota increase</span>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <h3>EventBridge event payload fields</h3>
+        <ul class="clean">
+          <li><code>source</code>: <strong>"aws.trustedadvisor"</strong></li>
+          <li><code>detail-type</code>: <strong>"Trusted Advisor Check Item Refresh Notification"</strong></li>
+          <li><code>status</code>: <strong>WARN / ERROR / OK / NOT_AVAILABLE</strong></li>
+          <li><code>check-name</code>: e.g. "Low Utilization Amazon EC2 Instances"</li>
+          <li><code>resource_id</code>: ARN of the affected resource</li>
+          <li><code>region</code>: region of the resource</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Service Quotas event fields</h3>
+        <ul class="clean">
+          <li><code>MetricName</code>: <strong>ServiceLimitUsage</strong></li>
+          <li><code>Region</code>: affected region (e.g. us-east-1)</li>
+          <li><code>ServiceName</code>: e.g. EC2</li>
+          <li><code>ServiceLimit</code>: e.g. "EC2 On-Demand Instances"</li>
+          <li>Triggers at: <strong>80%</strong> (yellow), <strong>100%</strong> (red), or unable to retrieve (grey)</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. SUPPORT API -->
+  <section>
+    <div class="section-header"><span class="section-num">06</span><h2>Support API (Business / Enterprise Only)</h2></div>
+
+    <div class="key-box">
+      <div class="label">Exam Key</div>
+      <p>The <strong>AWS Support API</strong> gives programmatic access to Trusted Advisor checks — useful for multi-account dashboards, automated refresh, and exporting check results to external tools.</p>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <h3>Key Support API operations</h3>
+        <ul class="clean">
+          <li><code>DescribeTrustedAdvisorChecks</code> — list all available checks</li>
+          <li><code>DescribeTrustedAdvisorCheckResult</code> — get current status and resources for a check</li>
+          <li><code>RefreshTrustedAdvisorCheck</code> — <strong>trigger an immediate refresh</strong> of a specific check</li>
+          <li><code>DescribeTrustedAdvisorCheckSummaries</code> — aggregated status across checks</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Multi-account aggregation pattern</h3>
+        <ul class="clean">
+          <li>Trusted Advisor is <strong>per-account only</strong> — no native org aggregation</li>
+          <li>Pattern: Lambda calls <code>DescribeTrustedAdvisorCheckResult</code> for each account via cross-account roles</li>
+          <li>Aggregate results to <strong>S3 → Athena</strong> or custom dashboard</li>
+          <li>Schedule via <strong>EventBridge Scheduled Rules</strong> (cron)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="warn-box">
+      <span class="icon">⚠</span>
+      <p><strong>API region requirement:</strong> The Support API endpoint is <strong>us-east-1 only</strong> (<code>support.us-east-1.amazonaws.com</code>). Calls from any region must target us-east-1 — this is a common exam gotcha for multi-region automation scripts.</p>
+    </div>
+  </section>
+
+  <!-- 7. SERVICE QUOTAS vs TRUSTED ADVISOR LIMITS -->
+  <section>
+    <div class="section-header"><span class="section-num">07</span><h2>Trusted Advisor vs Service Quotas Service</h2></div>
+
+    <p style="color:var(--text-dim);font-size:13px;margin-bottom:14px;">Both deal with service limits — the exam tests which to use when.</p>
+
+    <table class="compare-table">
+      <thead><tr><th>Feature</th><th>Trusted Advisor (Limits check)</th><th>Service Quotas Service</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Coverage</td>
+          <td>50+ quotas monitored</td>
+          <td>200+ quotas across all services</td>
+        </tr>
+        <tr>
+          <td>Alerts</td>
+          <td>EventBridge at 80% and 100%</td>
+          <td>CloudWatch alarms on quota usage metrics</td>
+        </tr>
+        <tr>
+          <td>Quota increase</td>
+          <td>Links to Support case — manual</td>
+          <td>Can request increase <strong>programmatically</strong> via API</td>
+        </tr>
+        <tr>
+          <td>Automation</td>
+          <td>EventBridge → Lambda (react to breach)</td>
+          <td>Lambda → <code>RequestServiceQuotaIncrease</code> API (proactive)</td>
+        </tr>
+        <tr>
+          <td>Required support plan</td>
+          <td>Business/Enterprise for full access</td>
+          <td>Available to all (free)</td>
+        </tr>
+        <tr>
+          <td>Best for exam</td>
+          <td>"Alert when approaching limit" → Trusted Advisor + EventBridge</td>
+          <td>"Automatically increase quota" → Service Quotas API</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 8. EXAM CHEAT SHEET -->
+  <section>
+    <div class="section-header"><span class="section-num">08</span><h2>Exam Cheat Sheet</h2></div>
+
+    <div class="cheat-grid">
+      <div class="warn-box" style="margin:0;">
+        <span class="icon">⚠</span>
+        <p><strong>Basic/Developer = only 7 checks.</strong> "All checks" = Business or Enterprise Support required.</p>
+      </div>
+      <div class="warn-box" style="margin:0;">
+        <span class="icon">⚠</span>
+        <p><strong>Support API = us-east-1 only.</strong> Multi-region scripts must explicitly target that endpoint.</p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p>Checks refresh <strong>weekly</strong> automatically. Business/Enterprise can force refresh via <code>RefreshTrustedAdvisorCheck</code> API.</p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p>Automation pattern: Trusted Advisor status change → <strong>EventBridge</strong> → SNS / Lambda. Not polling.</p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p>Service Limits checks: EventBridge triggers at <strong>80% (yellow)</strong> and <strong>100% (red)</strong>. MetricName = <code>ServiceLimitUsage</code>.</p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p>Trusted Advisor is <strong>per-account</strong>. For org-wide reporting, aggregate via Lambda + Support API + cross-account roles.</p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p>"Exposed IAM access key in GitHub" → <strong>Trusted Advisor Security check</strong> (not GuardDuty, not Inspector).</p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p>Trusted Advisor <strong>does not remediate</strong>. Use EventBridge → Lambda to act on findings.</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

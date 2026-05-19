@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS Config — DOP-C02 Study Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --surface2: #1a2235;
+    --border: #1e3a5f;
+    --accent: #f59e0b;
+    --accent2: #38bdf8;
+    --accent3: #4ade80;
+    --danger: #f87171;
+    --muted: #64748b;
+    --text: #e2e8f0;
+    --text-dim: #94a3b8;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* Subtle grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(56,189,248,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(56,189,248,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .page {
+    position: relative;
+    z-index: 1;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  /* Header */
+  header {
+    border-left: 3px solid var(--accent);
+    padding-left: 20px;
+    margin-bottom: 48px;
+    animation: fadeIn 0.5s ease;
+  }
+
+  .exam-tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  h1 {
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: #fff;
+    line-height: 1.1;
+  }
+
+  h1 span { color: var(--accent2); }
+
+  .subtitle {
+    color: var(--text-dim);
+    font-size: 13px;
+    margin-top: 8px;
+    font-family: var(--mono);
+  }
+
+  /* Sections */
+  section {
+    margin-bottom: 36px;
+    animation: fadeIn 0.5s ease;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    background: rgba(245,158,11,0.1);
+    border: 1px solid rgba(245,158,11,0.3);
+    padding: 2px 8px;
+    border-radius: 3px;
+  }
+
+  h2 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+
+  /* Cards */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 18px 20px;
+    margin-bottom: 12px;
+  }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 12px;
+  }
+
+  /* Key concept highlight */
+  .key-box {
+    background: linear-gradient(135deg, rgba(56,189,248,0.06), rgba(56,189,248,0.02));
+    border: 1px solid rgba(56,189,248,0.25);
+    border-radius: 6px;
+    padding: 16px 20px;
+    margin-bottom: 12px;
+  }
+
+  .key-box .label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--accent2);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  /* Warn box */
+  .warn-box {
+    background: rgba(248,113,113,0.06);
+    border: 1px solid rgba(248,113,113,0.25);
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin-bottom: 12px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .warn-box .icon { color: var(--danger); font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+  .warn-box p { color: var(--text-dim); font-size: 13px; }
+  .warn-box strong { color: var(--danger); }
+
+  /* Success box */
+  .ok-box {
+    background: rgba(74,222,128,0.05);
+    border: 1px solid rgba(74,222,128,0.2);
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin-bottom: 12px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .ok-box .icon { color: var(--accent3); font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+  .ok-box p { color: var(--text-dim); font-size: 13px; }
+  .ok-box strong { color: var(--accent3); }
+
+  /* List styles */
+  ul.clean {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  ul.clean li {
+    display: flex;
+    gap: 10px;
+    color: var(--text-dim);
+    font-size: 13px;
+    align-items: flex-start;
+  }
+
+  ul.clean li::before {
+    content: '→';
+    color: var(--accent2);
+    font-family: var(--mono);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  ul.clean li strong { color: var(--text); }
+
+  /* Pill badges */
+  .pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+
+  .pill {
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    border: 1px solid;
+  }
+
+  .pill.blue  { color: var(--accent2); border-color: rgba(56,189,248,0.3); background: rgba(56,189,248,0.07); }
+  .pill.amber { color: var(--accent);  border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.07); }
+  .pill.green { color: var(--accent3); border-color: rgba(74,222,128,0.3); background: rgba(74,222,128,0.07); }
+  .pill.red   { color: var(--danger);  border-color: rgba(248,113,113,0.3); background: rgba(248,113,113,0.07); }
+
+  /* Code block */
+  .code-block {
+    background: #070c18;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px 16px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: #7dd3fc;
+    overflow-x: auto;
+    line-height: 1.7;
+  }
+
+  .code-block .kw  { color: #f472b6; }
+  .code-block .val { color: #a5f3fc; }
+  .code-block .str { color: #86efac; }
+  .code-block .cm  { color: #475569; }
+
+  /* Comparison table */
+  .compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  .compare-table th {
+    background: var(--surface2);
+    color: var(--accent2);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 10px 14px;
+    text-align: left;
+    border: 1px solid var(--border);
+  }
+
+  .compare-table td {
+    padding: 9px 14px;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    vertical-align: top;
+  }
+
+  .compare-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+
+  .compare-table td:first-child {
+    color: var(--text);
+    font-weight: 600;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  /* Pricing row */
+  .pricing-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .price-card {
+    flex: 1;
+    min-width: 180px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px 16px;
+  }
+
+  .price-card .amount {
+    font-family: var(--mono);
+    font-size: 20px;
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .price-card .desc {
+    color: var(--text-dim);
+    font-size: 12px;
+    margin-top: 4px;
+  }
+
+  /* Flow diagram */
+  .flow {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    padding: 14px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 12px;
+  }
+
+  .flow-node {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 5px 12px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  .flow-node.highlight { border-color: rgba(56,189,248,0.5); color: var(--accent2); }
+  .flow-node.action    { border-color: rgba(74,222,128,0.4); color: var(--accent3); }
+  .flow-node.trigger   { border-color: rgba(245,158,11,0.4); color: var(--accent); }
+
+  .flow-arrow { color: var(--muted); font-size: 14px; }
+
+  /* Two-col layout */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  @media (max-width: 640px) {
+    .two-col { grid-template-columns: 1fr; }
+    .card-grid { grid-template-columns: 1fr; }
+    h1 { font-size: 24px; }
+  }
+
+  /* Divider */
+  .divider { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+
+  h3 {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .home-btn { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--purple); background: rgba(167,139,250,.1); border: 1px solid rgba(167,139,250,.3); padding: 5px 12px; border-radius: 3px; text-decoration: none; letter-spacing: .5px; transition: all .15s; }
+  .home-btn:hover { background: var(--purple); color: #fff; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <header>
+    <div class="exam-tag">DOP-C02 · Management &amp; Governance · High-Frequency Topic</div>
+    <h1>AWS <span>Config</span></h1>
+    <div class="subtitle">Audit · Compliance · Configuration History · Remediation</div>
+    <a href="../index.html" class="home-btn">&#8592; Home</a>
+  </header>
+
+  <!-- 1. WHAT IS IT -->
+  <section>
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <h2>Core Concept</h2>
+    </div>
+
+    <div class="key-box">
+      <div class="label">Exam One-liner</div>
+      <p>AWS Config <strong>records</strong> the configuration state of AWS resources over time and <strong>evaluates</strong> them against compliance rules — it does <em>not</em> prevent changes.</p>
+    </div>
+
+    <div class="card-grid">
+      <div class="card">
+        <h3>What it does</h3>
+        <ul class="clean">
+          <li><strong>Records</strong> resource configurations as Configuration Items</li>
+          <li><strong>Tracks</strong> changes over time (timeline view)</li>
+          <li><strong>Evaluates</strong> compliance against rules</li>
+          <li><strong>Correlates</strong> with CloudTrail API calls</li>
+          <li><strong>Aggregates</strong> across regions and accounts</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Questions Config answers</h3>
+        <ul class="clean">
+          <li>Is there unrestricted SSH access to my security groups?</li>
+          <li>Do my S3 buckets have public access?</li>
+          <li>How has my ALB configuration changed over time?</li>
+          <li>Are all EC2 instances tagged correctly?</li>
+          <li>Are EBS volumes encrypted?</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="warn-box">
+      <span class="icon">⚠</span>
+      <p><strong>Key exam trap:</strong> AWS Config rules are <strong>detective</strong>, not preventive. They flag non-compliance <em>after</em> the fact. Use <strong>SCPs</strong> or <strong>IAM</strong> to actually prevent actions.</p>
+    </div>
+
+    <div class="card">
+      <h3>Outputs &amp; Integrations</h3>
+      <div class="pills">
+        <span class="pill blue">S3 (configuration history)</span>
+        <span class="pill blue">Athena (query S3 data)</span>
+        <span class="pill amber">SNS (all events / filtering)</span>
+        <span class="pill amber">EventBridge (non-compliant triggers)</span>
+        <span class="pill green">SSM Automation (remediation)</span>
+        <span class="pill green">Lambda (custom rules)</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. CONFIGURATION RECORDER -->
+  <section>
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <h2>Configuration Recorder</h2>
+    </div>
+
+    <div class="key-box">
+      <div class="label">Exam Key</div>
+      <p>The <strong>Configuration Recorder</strong> is the engine that captures resource state. It must exist before Config can track anything. It is created automatically when you enable Config via Console or CLI.</p>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <h3>Configuration Item (CI)</h3>
+        <ul class="clean">
+          <li>Point-in-time snapshot of a resource</li>
+          <li>Captures: attributes, relationships, config, events</li>
+          <li>Created on every detected change</li>
+          <li>Stored permanently in S3</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Custom Recorder</h3>
+        <ul class="clean">
+          <li>Record <strong>only specific resource types</strong> to reduce cost</li>
+          <li>Useful for large-scale deployments</li>
+          <li>Reduces noise and configuration item volume</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="ok-box">
+      <span class="icon">🔒</span>
+      <p><strong>SCP protection pattern:</strong> Use an SCP to deny <code>config:DeleteConfigurationRecorder</code>, <code>config:StopConfigurationRecorder</code>, and <code>config:DeleteDeliveryChannel</code> — preventing member accounts from disabling Config.</p>
+    </div>
+  </section>
+
+  <!-- 3. RULES -->
+  <section>
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <h2>Config Rules</h2>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <h3>AWS Managed Rules (75+)</h3>
+        <ul class="clean">
+          <li><strong>Pre-built</strong> by AWS, ready to enable</li>
+          <li>Examples: <code>restricted-ssh</code>, <code>s3-bucket-public-read-prohibited</code>, <code>iam-password-policy</code>, <code>access-keys-rotated</code></li>
+          <li>Configurable via input parameters</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Custom Config Rules</h3>
+        <ul class="clean">
+          <li>Backed by a <strong>Lambda function</strong></li>
+          <li>You define the evaluation logic</li>
+          <li>Examples: EBS must be gp2, EC2 must be t2.micro</li>
+          <li>Triggered by: config change, periodic schedule, or on-demand</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Rule Evaluation Triggers</h3>
+      <div class="pills">
+        <span class="pill amber">Configuration Change — triggered when resource changes</span>
+        <span class="pill blue">Periodic — scheduled (e.g. every 24h)</span>
+        <span class="pill green">On-demand — manual evaluation</span>
+      </div>
+    </div>
+
+    <div class="warn-box">
+      <span class="icon">⚠</span>
+      <p><strong>Remember:</strong> Rules evaluate compliance but <strong>do not block or rollback</strong> any action. Combine with <strong>Remediations</strong> to automate response.</p>
+    </div>
+  </section>
+
+  <!-- 4. REMEDIATIONS -->
+  <section>
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <h2>Remediations</h2>
+    </div>
+
+    <div class="key-box">
+      <div class="label">Exam Key</div>
+      <p>Remediations use <strong>SSM Automation Documents</strong> to automatically fix non-compliant resources. You can configure <strong>Remediation Retries</strong> if the resource remains non-compliant after initial auto-remediation.</p>
+    </div>
+
+    <div class="flow">
+      <span class="flow-node">Non-compliant resource</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-node highlight">AWS Config detects</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-node trigger">Triggers Remediation</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-node action">SSM Automation Doc</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-node action">Resource fixed ✓</span>
+    </div>
+
+    <div class="card" style="margin-top:12px;">
+      <h3>Remediation Options</h3>
+      <ul class="clean">
+        <li><strong>AWS-Managed Automation Documents</strong> — pre-built SSM docs (e.g. <code>AWSConfigRemediation-RevokeUnusedIAMUserCredentials</code>)</li>
+        <li><strong>Custom Automation Documents</strong> — invoke a Lambda function for complex logic</li>
+        <li><strong>Remediation Retries</strong> — set a retry count (e.g. 5) if still non-compliant after first attempt</li>
+        <li><strong>Manual vs Auto remediation</strong> — auto runs immediately; manual requires approval</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 5. NOTIFICATIONS -->
+  <section>
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <h2>Notifications</h2>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <h3>EventBridge (preferred)</h3>
+        <ul class="clean">
+          <li>Triggers on <strong>non-compliant</strong> resource events</li>
+          <li>Route to Lambda, SNS, SQS, Step Functions, etc.</li>
+          <li>Granular event filtering</li>
+          <li>Best for automated response pipelines</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>SNS</h3>
+        <ul class="clean">
+          <li>Receives <strong>all events</strong> (config changes + compliance state)</li>
+          <li>Use <strong>SNS Filtering</strong> or filter at the client side</li>
+          <li>Useful for ops team alerting</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. AGGREGATORS -->
+  <section>
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <h2>Aggregators</h2>
+    </div>
+
+    <div class="key-box">
+      <div class="label">Exam Key</div>
+      <p>An <strong>Aggregator</strong> collects Config data from multiple accounts and/or regions into <strong>one central account</strong> for a unified compliance view. With <strong>AWS Organizations</strong>, no individual account authorization is needed.</p>
+    </div>
+
+    <div class="card">
+      <h3>Important details</h3>
+      <ul class="clean">
+        <li>Created in a <strong>dedicated aggregator account</strong> (not necessarily management account)</li>
+        <li>Source accounts must <strong>authorize</strong> the aggregator — unless using AWS Organizations</li>
+        <li>Rules are still <strong>defined and evaluated per-account</strong>, not centrally enforced by the aggregator</li>
+        <li>Deploy rules to all accounts using <strong>CloudFormation StackSets</strong></li>
+        <li>Provides aggregated view of compliant/non-compliant resources across the org</li>
+      </ul>
+    </div>
+
+    <div class="warn-box">
+      <span class="icon">⚠</span>
+      <p><strong>Exam trap:</strong> An Aggregator <em>collects and displays</em> data — it does <strong>not</strong> deploy rules or remediate resources. Rules must exist in each source account independently.</p>
+    </div>
+  </section>
+
+  <!-- 7. CONFORMANCE PACKS -->
+  <section>
+    <div class="section-header">
+      <span class="section-num">07</span>
+      <h2>Conformance Packs</h2>
+    </div>
+
+    <div class="key-box">
+      <div class="label">Exam Key</div>
+      <p>A <strong>Conformance Pack</strong> is a bundle of Config rules + remediation actions deployed as a single YAML template (similar to CloudFormation). Deploy to an account, a region, or across an entire AWS Organization.</p>
+    </div>
+
+    <div class="card">
+      <h3>Features</h3>
+      <ul class="clean">
+        <li>YAML-formatted template — includes rules and remediations together</li>
+        <li>Can include <strong>custom Config Rules</strong> backed by Lambda</li>
+        <li>Accept <strong>input parameters</strong> for flexibility (e.g. min password length, max key age)</li>
+        <li>Deploy via <strong>CodePipeline CI/CD</strong> for GitOps compliance</li>
+        <li>Designate a <strong>Delegated Administrator</strong> to deploy packs to an AWS Organization (can be a member account)</li>
+        <li>Pre-built sample packs available (PCI-DSS, CIS, HIPAA-aligned)</li>
+      </ul>
+    </div>
+
+    <div class="code-block">
+<span class="cm"># Conformance Pack parameter example</span>
+<span class="kw">Parameters</span>:
+  IamPasswordPolicyParamMinimumPasswordLength:
+    <span class="kw">Default</span>: <span class="str">"14"</span>
+  AccessKeysRotatedParamMaxAccessKeyAge:
+    <span class="kw">Default</span>: <span class="str">"90"</span>
+<span class="kw">Resources</span>:
+  IamPasswordPolicy:
+    <span class="kw">Type</span>: <span class="val">AWS::Config::ConfigRule</span>
+    <span class="kw">Properties</span>:
+      <span class="kw">ConfigRuleName</span>: <span class="val">iam-password-policy</span>
+      <span class="kw">Source</span>:
+        <span class="kw">Owner</span>: <span class="val">AWS</span>
+        <span class="kw">SourceIdentifier</span>: <span class="val">IAM_PASSWORD_POLICY</span>
+  AccessKeysRotated:
+    <span class="kw">Type</span>: <span class="val">AWS::Config::ConfigRule</span>
+    <span class="kw">Properties</span>:
+      <span class="kw">ConfigRuleName</span>: <span class="val">access-keys-rotated</span>
+      <span class="kw">Source</span>:
+        <span class="kw">Owner</span>: <span class="val">AWS</span>
+        <span class="kw">SourceIdentifier</span>: <span class="val">ACCESS_KEYS_ROTATED</span>
+    </div>
+  </section>
+
+  <!-- 8. ORG RULES vs CONFORMANCE PACKS -->
+  <section>
+    <div class="section-header">
+      <span class="section-num">08</span>
+      <h2>Organizational Rules vs Conformance Packs</h2>
+    </div>
+
+    <p style="color:var(--text-dim);font-size:13px;margin-bottom:14px;">This comparison is a <strong style="color:var(--accent)">high-probability exam question</strong> — know it cold.</p>
+
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>Feature</th>
+          <th>Organizational Rules</th>
+          <th>Conformance Packs</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Scope</td>
+          <td>AWS Organization</td>
+          <td>AWS Accounts &amp; AWS Organization</td>
+        </tr>
+        <tr>
+          <td>Rules Count</td>
+          <td>One rule per deployment</td>
+          <td>Many rules at once</td>
+        </tr>
+        <tr>
+          <td>Evaluation Type</td>
+          <td>Predefined rules, enforced at Org level</td>
+          <td>Predefined rules, enforced at Account level</td>
+        </tr>
+        <tr>
+          <td>Compliance Level</td>
+          <td>Managed at the Organizational level</td>
+          <td>Managed at the Account level</td>
+        </tr>
+        <tr>
+          <td>Deployment Format</td>
+          <td>Via AWS Organizations console/API</td>
+          <td>YAML template (CloudFormation-style)</td>
+        </tr>
+        <tr>
+          <td>Custom Rules</td>
+          <td>Yes (Lambda)</td>
+          <td>Yes (Lambda)</td>
+        </tr>
+        <tr>
+          <td>Remediation</td>
+          <td>Not included in definition</td>
+          <td>Included in pack template</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 9. PRICING -->
+  <section>
+    <div class="section-header">
+      <span class="section-num">09</span>
+      <h2>Pricing</h2>
+    </div>
+
+    <div class="pricing-row">
+      <div class="price-card">
+        <div class="amount">$0.003</div>
+        <div class="desc">per <strong>Configuration Item</strong> recorded per region</div>
+      </div>
+      <div class="price-card">
+        <div class="amount">$0.001</div>
+        <div class="desc">per <strong>Config Rule evaluation</strong> per region</div>
+      </div>
+    </div>
+
+    <div class="ok-box" style="margin-top:12px;">
+      <span class="icon">💡</span>
+      <p>Use a <strong>Custom Configuration Recorder</strong> to record only specific resource types and reduce costs in large environments.</p>
+    </div>
+  </section>
+
+  <!-- 10. EXAM CHEAT SHEET -->
+  <section>
+    <div class="section-header">
+      <span class="section-num">10</span>
+      <h2>Exam Cheat Sheet</h2>
+    </div>
+
+    <div class="card-grid">
+      <div class="warn-box" style="margin:0;">
+        <span class="icon">✗</span>
+        <p>Config <strong>does NOT prevent</strong> non-compliant actions — use SCP/IAM for prevention</p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p>Aggregators <strong>collect data</strong>, they don't deploy rules or fix resources</p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p><strong>Conformance Pack</strong> = many rules + remediations bundled in one YAML</p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p><strong>EventBridge</strong> for automated response; <strong>SNS</strong> for ops notifications</p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p>Protect Config with <strong>SCP</strong> denying Delete/Stop recorder actions</p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p>Custom rules need a <strong>Lambda function</strong>; can also be in Conformance Packs</p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p>With <strong>AWS Organizations</strong>, no per-account authorization needed for aggregation</p>
+      </div>
+      <div class="warn-box" style="margin:0;">
+        <span class="icon">✗</span>
+        <p>Remediation uses <strong>SSM Automation</strong>, not Lambda directly (Lambda is used inside SSM docs)</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Amazon Inspector — DOP-C02 Study Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a; --surface: #111827; --surface2: #1a2235; --border: #1e3a5f;
+    --accent: #f59e0b; --accent2: #38bdf8; --accent3: #4ade80;
+    --danger: #f87171; --purple: #a78bfa; --orange: #fb923c;
+    --muted: #64748b; --text: #e2e8f0; --text-dim: #94a3b8;
+    --mono: 'IBM Plex Mono', monospace; --sans: 'IBM Plex Sans', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 14px; line-height: 1.6; }
+  body::before {
+    content: ''; position: fixed; inset: 0;
+    background-image: linear-gradient(rgba(56,189,248,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(56,189,248,.03) 1px,transparent 1px);
+    background-size: 40px 40px; pointer-events: none; z-index: 0;
+  }
+  .page { position: relative; z-index: 1; max-width: 960px; margin: 0 auto; padding: 40px 24px 80px; }
+
+  header { border-left: 3px solid var(--accent); padding-left: 20px; margin-bottom: 48px; }
+  .exam-tag { font-family: var(--mono); font-size: 11px; color: var(--accent); letter-spacing: .15em; text-transform: uppercase; margin-bottom: 8px; }
+  h1 { font-size: 32px; font-weight: 700; color: #fff; letter-spacing: -.5px; }
+  h1 span { color: var(--accent2); }
+  .subtitle { color: var(--text-dim); font-size: 13px; margin-top: 8px; font-family: var(--mono); }
+
+  section { margin-bottom: 36px; }
+  .section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  .section-num { font-family: var(--mono); font-size: 11px; color: var(--accent); background: rgba(245,158,11,.1); border: 1px solid rgba(245,158,11,.3); padding: 2px 8px; border-radius: 3px; }
+  h2 { font-size: 16px; font-weight: 700; color: #fff; letter-spacing: .02em; text-transform: uppercase; }
+  h3 { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 10px; text-transform: uppercase; letter-spacing: .05em; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 18px 20px; margin-bottom: 12px; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+
+  .key-box { background: linear-gradient(135deg,rgba(56,189,248,.06),rgba(56,189,248,.02)); border: 1px solid rgba(56,189,248,.25); border-radius: 6px; padding: 16px 20px; margin-bottom: 12px; }
+  .key-box .label { font-family: var(--mono); font-size: 10px; color: var(--accent2); letter-spacing: .12em; text-transform: uppercase; margin-bottom: 6px; }
+
+  .warn-box { background: rgba(248,113,113,.06); border: 1px solid rgba(248,113,113,.25); border-radius: 6px; padding: 12px 16px; margin-bottom: 12px; display: flex; gap: 10px; align-items: flex-start; }
+  .warn-box .icon { color: var(--danger); flex-shrink: 0; margin-top: 1px; }
+  .warn-box p { color: var(--text-dim); font-size: 13px; }
+  .warn-box strong { color: var(--danger); }
+
+  .ok-box { background: rgba(74,222,128,.05); border: 1px solid rgba(74,222,128,.2); border-radius: 6px; padding: 12px 16px; margin-bottom: 12px; display: flex; gap: 10px; align-items: flex-start; }
+  .ok-box .icon { color: var(--accent3); flex-shrink: 0; margin-top: 1px; }
+  .ok-box p { color: var(--text-dim); font-size: 13px; }
+  .ok-box strong { color: var(--accent3); }
+
+  ul.clean { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+  ul.clean li { display: flex; gap: 10px; color: var(--text-dim); font-size: 13px; align-items: flex-start; }
+  ul.clean li::before { content: '→'; color: var(--accent2); font-family: var(--mono); flex-shrink: 0; margin-top: 1px; }
+  ul.clean li strong { color: var(--text); }
+
+  .pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  .pill { font-family: var(--mono); font-size: 11px; padding: 3px 10px; border-radius: 20px; border: 1px solid; }
+  .pill.blue   { color: var(--accent2); border-color: rgba(56,189,248,.3);  background: rgba(56,189,248,.07); }
+  .pill.amber  { color: var(--accent);  border-color: rgba(245,158,11,.3);  background: rgba(245,158,11,.07); }
+  .pill.green  { color: var(--accent3); border-color: rgba(74,222,128,.3);  background: rgba(74,222,128,.07); }
+  .pill.red    { color: var(--danger);  border-color: rgba(248,113,113,.3); background: rgba(248,113,113,.07); }
+  .pill.purple { color: var(--purple);  border-color: rgba(167,139,250,.3); background: rgba(167,139,250,.07); }
+
+  /* Target cards */
+  .tgt-card { border-radius: 6px; padding: 16px 18px; }
+  .tgt-card.ec2    { background: rgba(245,158,11,.05);  border: 1px solid rgba(245,158,11,.3); }
+  .tgt-card.ecr    { background: rgba(56,189,248,.05);  border: 1px solid rgba(56,189,248,.25); }
+  .tgt-card.lambda { background: rgba(167,139,250,.05); border: 1px solid rgba(167,139,250,.3); }
+  .tgt-card h3 { margin-bottom: 8px; }
+  .tgt-card.ec2 h3    { color: var(--accent); }
+  .tgt-card.ecr h3    { color: var(--accent2); }
+  .tgt-card.lambda h3 { color: var(--purple); }
+  .tgt-badge { display: inline-block; font-family: var(--mono); font-size: 10px; padding: 2px 8px; border-radius: 3px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: .08em; }
+  .tgt-card.ec2    .tgt-badge { background: rgba(245,158,11,.15);  color: var(--accent); }
+  .tgt-card.ecr    .tgt-badge { background: rgba(56,189,248,.15);  color: var(--accent2); }
+  .tgt-card.lambda .tgt-badge { background: rgba(167,139,250,.15); color: var(--purple); }
+
+  /* EC2 flow */
+  .flow { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; font-size: 12px; margin-bottom: 12px; }
+  .fn { background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 5px 12px; color: var(--text); font-family: var(--mono); font-size: 11px; white-space: nowrap; }
+  .fn.hi  { border-color: rgba(56,189,248,.5);  color: var(--accent2); }
+  .fn.act { border-color: rgba(74,222,128,.4);  color: var(--accent3); }
+  .fn.pur { border-color: rgba(167,139,250,.4); color: var(--purple); }
+  .fn.trg { border-color: rgba(245,158,11,.4);  color: var(--accent); }
+  .fn.red { border-color: rgba(248,113,113,.4); color: var(--danger); }
+  .fa { color: var(--muted); font-size: 14px; }
+
+  /* Score visual */
+  .score-bar { display: flex; height: 28px; border-radius: 5px; overflow: hidden; margin-bottom: 8px; }
+  .score-seg { display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 11px; font-weight: 600; }
+  .score-seg.info     { background: rgba(56,189,248,.2);  border: 1px solid rgba(56,189,248,.3);  color: var(--accent2); flex: 4; }
+  .score-seg.low      { background: rgba(74,222,128,.2);  border: 1px solid rgba(74,222,128,.3);  color: var(--accent3); flex: 3; }
+  .score-seg.medium   { background: rgba(245,158,11,.2);  border: 1px solid rgba(245,158,11,.3);  color: var(--accent); flex: 4; }
+  .score-seg.high     { background: rgba(251,146,60,.2);  border: 1px solid rgba(251,146,60,.3);  color: var(--orange); flex: 3; }
+  .score-seg.critical { background: rgba(248,113,113,.2); border: 1px solid rgba(248,113,113,.3); color: var(--danger); flex: 3; }
+
+  /* Compare table */
+  .compare-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 12px; }
+  .compare-table th { background: var(--surface2); color: var(--accent2); font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; padding: 10px 14px; text-align: left; border: 1px solid var(--border); }
+  .compare-table td { padding: 9px 14px; border: 1px solid var(--border); color: var(--text-dim); vertical-align: top; }
+  .compare-table tr:nth-child(even) td { background: rgba(255,255,255,.02); }
+  .compare-table td:first-child { color: var(--text); font-weight: 600; font-size: 12px; white-space: nowrap; }
+
+  /* Cheat grid */
+  .cheat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  @media (max-width: 640px) {
+    .two-col, .three-col, .cheat-grid { grid-template-columns: 1fr; }
+    h1 { font-size: 24px; }
+  }
+  .home-btn { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--purple); background: rgba(167,139,250,.1); border: 1px solid rgba(167,139,250,.3); padding: 5px 12px; border-radius: 3px; text-decoration: none; letter-spacing: .5px; transition: all .15s; }
+  .home-btn:hover { background: var(--purple); color: #fff; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <div class="exam-tag">DOP-C02 · Security · Low-Medium Frequency — Know the Scope</div>
+    <h1>Amazon <span>Inspector</span></h1>
+    <div class="subtitle">Vulnerability Scanning · CVE · EC2 · ECR · Lambda · Continuous Assessment</div>
+    <a href="../index.html" class="home-btn">&#8592; Home</a>
+  </header>
+
+  <!-- 1. CORE CONCEPT -->
+  <section>
+    <div class="section-header"><span class="section-num">01</span><h2>Core Concept</h2></div>
+
+    <div class="key-box">
+      <div class="label">Exam One-liner</div>
+      <p>Amazon Inspector runs <strong>automated, continuous vulnerability assessments</strong> on EC2 instances, ECR container images, and Lambda functions — scanning for known CVEs (Common Vulnerabilities and Exposures) and unintended network exposure. It is a <strong>pre-exploit, proactive</strong> tool, not a runtime threat detector.</p>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <h3>What Inspector does</h3>
+        <ul class="clean">
+          <li>Scans for <strong>known software vulnerabilities (CVEs)</strong> in OS packages, application libraries, and code dependencies</li>
+          <li>Checks for <strong>unintended network reachability</strong> — open ports accessible from the internet</li>
+          <li>Runs <strong>continuously</strong> — re-evaluates when new CVEs are published or packages change</li>
+          <li>Assigns a <strong>risk score</strong> to each finding using CVSS + AWS context</li>
+          <li>Sends findings to <strong>Security Hub</strong> and <strong>EventBridge</strong></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>What Inspector does NOT do</h3>
+        <ul class="clean">
+          <li><strong>Does not detect active threats</strong> or suspicious behavior — use GuardDuty for that</li>
+          <li><strong>Does not remediate</strong> — it identifies and reports; you patch via SSM Patch Manager</li>
+          <li><strong>Does not scan S3 objects, RDS, or ECS tasks</strong> directly — only EC2, ECR, Lambda</li>
+          <li><strong>Does not run on demand</strong> by default — it's triggered by resource events and CVE updates</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="warn-box">
+      <span class="icon">⚠</span>
+      <p><strong>Core exam trap:</strong> Inspector finds <em>vulnerabilities</em> (CVEs, open ports) — pre-exploit. GuardDuty finds <em>active threats</em> — runtime detection. If a question says "identify unpatched software" or "scan for CVEs" → <strong>Inspector</strong>. If it says "detect suspicious activity" → <strong>GuardDuty</strong>.</p>
+    </div>
+  </section>
+
+  <!-- 2. SUPPORTED TARGETS -->
+  <section>
+    <div class="section-header"><span class="section-num">02</span><h2>Supported Targets ★ Most Tested</h2></div>
+
+    <div class="key-box">
+      <div class="label">Hard Boundary — Exam Tested</div>
+      <p>Inspector <strong>only</strong> runs on: <strong>EC2 instances</strong>, <strong>ECR container images</strong>, and <strong>Lambda functions</strong>. No other resource types. This boundary is explicitly tested.</p>
+    </div>
+
+    <div class="three-col">
+      <div class="tgt-card ec2">
+        <span class="tgt-badge">EC2 Instances</span>
+        <h3>EC2 Scanning</h3>
+        <ul class="clean">
+          <li>Requires <strong>SSM Agent running</strong> on the instance</li>
+          <li>Instance must be an <strong>SSM Managed Instance</strong> (IAM role or Default Host Mgmt Config)</li>
+          <li>Outbound <strong>port 443</strong> to SSM endpoint required</li>
+          <li>SSM collects OS package inventory → Inspector analyzes against CVE database</li>
+          <li>Also checks <strong>network reachability</strong> — ports exposed to internet</li>
+          <li>Scans triggered on: <strong>agent launch, package installs, CVE database updates</strong></li>
+        </ul>
+      </div>
+      <div class="tgt-card ecr">
+        <span class="tgt-badge">ECR Container Images</span>
+        <h3>ECR Scanning</h3>
+        <ul class="clean">
+          <li>Scans container images <strong>on push</strong> to ECR (no agent needed)</li>
+          <li>Scans OS packages and application libraries inside the image layers</li>
+          <li>Two modes: <strong>Basic scanning</strong> (free, on-push only) vs <strong>Enhanced scanning</strong> (Inspector, continuous)</li>
+          <li>Enhanced scanning re-evaluates when <strong>new CVEs are published</strong> — even for old images</li>
+          <li>Findings visible in both ECR and Inspector consoles</li>
+        </ul>
+      </div>
+      <div class="tgt-card lambda">
+        <span class="tgt-badge">Lambda Functions</span>
+        <h3>Lambda Scanning</h3>
+        <ul class="clean">
+          <li>Scans <strong>function code and package dependencies</strong> (npm, pip, etc.)</li>
+          <li>Triggered on <strong>function deployment</strong> (new version published)</li>
+          <li>Also re-scans when <strong>new CVEs</strong> affect a known dependency</li>
+          <li>No agent required — Inspector pulls function metadata directly</li>
+          <li>Covers: Python, Node.js, Java, .NET runtime dependencies</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. EC2 SETUP -->
+  <section>
+    <div class="section-header"><span class="section-num">03</span><h2>EC2 Setup &amp; Data Flow</h2></div>
+
+    <div class="key-box">
+      <div class="label">Exam Key</div>
+      <p>Inspector <strong>does not install its own agent</strong> on EC2 — it uses the <strong>SSM Agent</strong> already present. The SSM Agent collects package inventory, sends it to Systems Manager, and Inspector analyzes that inventory. No separate Inspector agent exists for EC2.</p>
+    </div>
+
+    <div class="flow">
+      <span class="fn trg">EC2 + SSM Agent + IAM Role</span>
+      <span class="fa">→</span>
+      <span class="fn hi">SSM: collect package inventory</span>
+      <span class="fa">→</span>
+      <span class="fn hi">Systems Manager</span>
+      <span class="fa">→ analyze →</span>
+      <span class="fn act">Amazon Inspector</span>
+      <span class="fa">→</span>
+      <span class="fn red">Findings (CVEs / Network)</span>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <h3>EC2 prerequisites checklist</h3>
+        <ul class="clean">
+          <li><strong>SSM Agent</strong> — installed and running (pre-installed on Amazon Linux 2, Windows Server 2016+)</li>
+          <li><strong>IAM Role</strong> attached — with <code>AmazonSSMManagedInstanceCore</code> policy OR Default Host Management Config enabled</li>
+          <li><strong>Outbound 443</strong> — to <code>ssm.REGION.amazonaws.com</code> (via internet or VPC endpoint)</li>
+          <li>Instance must appear in <strong>AWS Systems Manager → Fleet Manager</strong></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Scan triggers for EC2</h3>
+        <ul class="clean">
+          <li>Initial enablement of Inspector on the account</li>
+          <li>SSM Agent starts on an instance (new launch or restart)</li>
+          <li>Software package installed or removed on the instance</li>
+          <li><strong>New CVE added</strong> to the NVD (National Vulnerability Database)</li>
+          <li>Network configuration change (SG rule modified)</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. FINDINGS & RISK SCORE -->
+  <section>
+    <div class="section-header"><span class="section-num">04</span><h2>Findings &amp; Risk Score</h2></div>
+
+    <div class="key-box">
+      <div class="label">Exam Key</div>
+      <p>Inspector uses an <strong>Amazon Inspector Score</strong> — a contextualized CVSS score adjusted by AWS-specific factors like network reachability and exploit availability. Higher score = higher priority to patch.</p>
+    </div>
+
+    <h3 style="margin-bottom:8px;">Finding Severity Scale (CVSS-based)</h3>
+    <div class="score-bar">
+      <div class="score-seg info">Informational 0</div>
+      <div class="score-seg low">Low 0.1–3.9</div>
+      <div class="score-seg medium">Medium 4.0–6.9</div>
+      <div class="score-seg high">High 7.0–8.9</div>
+      <div class="score-seg critical">Critical 9.0–10</div>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <h3>Finding types</h3>
+        <ul class="clean">
+          <li><strong>Software vulnerability</strong> — CVE in OS packages, libraries, application dependencies</li>
+          <li><strong>Network reachability</strong> — EC2 port reachable from internet (0.0.0.0/0)</li>
+          <li><strong>Code vulnerability</strong> — security issues in Lambda function code (via CodeGuru integration)</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Score contextualization factors</h3>
+        <ul class="clean">
+          <li><strong>Network exposure</strong> — is the port reachable? Increases score</li>
+          <li><strong>Exploit available</strong> — is there a known exploit in the wild? Increases score</li>
+          <li><strong>Package in use</strong> — is the affected package actually loaded?</li>
+          <li>Score differs from raw CVSS — two resources with same CVE can have different Inspector scores</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. INTEGRATIONS -->
+  <section>
+    <div class="section-header"><span class="section-num">05</span><h2>Integrations &amp; Outputs</h2></div>
+
+    <div class="two-col">
+      <div class="card">
+        <h3>Security Hub integration</h3>
+        <ul class="clean">
+          <li>All Inspector findings automatically sent to <strong>AWS Security Hub</strong></li>
+          <li>Normalized to <strong>ASFF (Amazon Security Finding Format)</strong></li>
+          <li>Enables org-wide compliance dashboard with findings from Inspector, GuardDuty, Macie, etc.</li>
+          <li>Security Hub can trigger automations on Inspector findings</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>EventBridge integration</h3>
+        <ul class="clean">
+          <li>Inspector publishes finding events to <strong>EventBridge</strong></li>
+          <li>React to: new finding, finding state change, initial scan complete</li>
+          <li>Pattern: EventBridge → Lambda → open Jira ticket / notify Slack / trigger SSM Patch</li>
+          <li>Rule on <code>Inspector2</code> event source, type <code>Inspector2 Finding</code></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="ok-box">
+      <span class="icon">💡</span>
+      <p><strong>Automated patching pattern:</strong> Inspector finding (Critical CVE) → EventBridge → Lambda → <strong>SSM Run Command / Patch Manager</strong> → patch the affected EC2 instance automatically. This end-to-end pipeline is a common DOP-C02 scenario.</p>
+    </div>
+
+    <div class="card">
+      <h3>Multi-account with AWS Organizations</h3>
+      <ul class="clean">
+        <li>Designate a <strong>Delegated Administrator account</strong> for Inspector</li>
+        <li>Admin can enable/disable Inspector for all member accounts</li>
+        <li>Aggregated findings view across all accounts in one console</li>
+        <li>Member accounts <strong>cannot disable Inspector</strong> once enrolled via Organizations</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 6. INSPECTOR vs RELATED SERVICES -->
+  <section>
+    <div class="section-header"><span class="section-num">06</span><h2>Inspector in the Security Stack</h2></div>
+
+    <table class="compare-table">
+      <thead><tr><th>Service</th><th>Detects</th><th>Trigger</th><th>Key distinction</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Amazon Inspector</td>
+          <td>CVEs, unintended network exposure, dependency vulnerabilities</td>
+          <td>Package change, CVE database update, deploy event</td>
+          <td>Pre-exploit. Finds weaknesses before they are attacked.</td>
+        </tr>
+        <tr>
+          <td>GuardDuty</td>
+          <td>Active threats, anomalous behavior, compromised resources</td>
+          <td>Continuous, real-time ML analysis</td>
+          <td>Runtime. Finds active attacks already happening.</td>
+        </tr>
+        <tr>
+          <td>AWS Macie</td>
+          <td>Sensitive data (PII) in S3 buckets</td>
+          <td>Scheduled or on-demand S3 scan</td>
+          <td>Data classification. Not vulnerability or threat detection.</td>
+        </tr>
+        <tr>
+          <td>Amazon Detective</td>
+          <td>Root cause of security findings</td>
+          <td>Post-finding investigation</td>
+          <td>Forensic investigation only. No detection or blocking.</td>
+        </tr>
+        <tr>
+          <td>SSM Patch Manager</td>
+          <td>Missing OS patches</td>
+          <td>Scheduled or on-demand patching</td>
+          <td>Remediates what Inspector finds. Inspector identifies; Patch Manager fixes.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 7. EXAM CHEAT SHEET -->
+  <section>
+    <div class="section-header"><span class="section-num">07</span><h2>Exam Cheat Sheet</h2></div>
+
+    <div class="cheat-grid">
+      <div class="warn-box" style="margin:0;">
+        <span class="icon">⚠</span>
+        <p>Inspector only covers <strong>EC2, ECR container images, and Lambda.</strong> Not RDS, S3, ECS directly, or EKS nodes.</p>
+      </div>
+      <div class="warn-box" style="margin:0;">
+        <span class="icon">⚠</span>
+        <p>Inspector uses <strong>SSM Agent</strong> for EC2 — there is no separate Inspector agent. SSM must be working first.</p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p>Inspector is <strong>continuous</strong> — re-scans when new CVEs are published, even for unchanged images/instances.</p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p>ECR: <strong>Enhanced scanning</strong> (Inspector) vs Basic scanning. Enhanced = continuous + re-evaluated on new CVEs.</p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p>Findings sent to <strong>Security Hub</strong> (ASFF format) and <strong>EventBridge</strong> for automation pipelines.</p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p>Risk score = <strong>CVSS + network reachability + exploit availability</strong>. Not just raw CVE score.</p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p>Automated response: Inspector finding → EventBridge → Lambda → <strong>SSM Patch Manager</strong> → remediate.</p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p>Multi-account: <strong>Delegated Administrator</strong> account manages Inspector org-wide. Members can't opt out.</p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p>"Unintended network accessibility" = Inspector. "Suspicious runtime behavior" = GuardDuty. Never swap these.</p>
+      </div>
+      <div class="ok-box" style="margin:0;">
+        <span class="icon">✓</span>
+        <p>EC2 requires: <strong>SSM Agent + IAM Role (SSMManagedInstanceCore) + outbound 443 to SSM endpoint.</strong></p>
+      </div>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>
